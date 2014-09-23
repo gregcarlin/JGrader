@@ -12,11 +12,11 @@ public class Application extends Controller {
     }
 
     public static Result student() {
-    	return ok(student.render())
+    	return ok(student.render());
     }
 
     public static Result teacher() {
-    	return ok(teacher.render())
+    	return ok(teacher.render());
     }
 
 
