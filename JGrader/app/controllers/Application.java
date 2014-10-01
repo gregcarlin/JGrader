@@ -13,18 +13,16 @@ public class Application extends Controller {
 
 	// Stores Login Information
 	public static class Login{
+
+		@Required
 		public String email;
 		public String password;
-
-		// Sends back error string if something is wrong
-		public String validate() {
-		    return null;
-		}
 	}	
 
 	// Reads Login form and see if ok
 	public static Result authenticate() {
     	Form<Login> loginForm = form(Login.class).bindFromRequest();
+
     	return ok();
 	}
 
