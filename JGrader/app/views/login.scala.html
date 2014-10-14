@@ -1,4 +1,4 @@
-@(form: Form[Application.Login])
+@()
 
 <!DOCTYPE html>
 <html lang="en">
@@ -30,7 +30,7 @@
     <div class="container">
       <form class="form-signin" role="form" action="/login" method="POST">
   		  <h2 class="form-signin-heading">Sign in</h2>
-      	<input type="email" class="form-control" name="email" placeholder="Email" value="@form("email").value" required autofocus>
+      	<input type="email" class="form-control" name="email" placeholder="Email" required autofocus>
       	<input type="password" class="form-control" name="password" placeholder="Password" required>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
   		</form>

@@ -6,29 +6,22 @@ import play.data.*;
 import static play.data.Form.*;
 import play.data.validation.Constraints.*;
 import views.html.*;
-
+import models.*;
 
 
 public class Application extends Controller {
 
-	// Stores Login Information
-	public static class Login{
-
-		@Required
-		public String email;
-		public String password;
-	}	
-
 	// Reads Login form and see if ok
 	public static Result authenticate() {
-    	Form<Login> loginForm = form(Login.class).bindFromRequest();
+    	Form<LoginForm> loginForm = form(LoginForm.class).bindFromRequest();
+			LoginData data = LoginData.makeLogin(loginForm.get());
 
     	return ok();
 	}
 
 
     public static Result index() {
-        return ok(login.render(form(Login.class)));
+        return ok(login.render());
     }
 
     public static Result student() {
@@ -39,5 +32,5 @@ public class Application extends Controller {
     	return ok(teacher.render());
     }
 
-    
+
 }
