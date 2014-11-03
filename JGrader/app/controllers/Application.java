@@ -7,6 +7,8 @@ import static play.data.Form.*;
 import play.data.validation.Constraints.*;
 import views.html.*;
 import models.*;
+import play.db.*;
+import java.sql.*;
 
 
 public class Application extends Controller {
@@ -15,7 +17,8 @@ public class Application extends Controller {
 	public static Result authenticate() {
     	Form<LoginForm> loginForm = form(LoginForm.class).bindFromRequest();
 		LoginData data = LoginData.makeLogin(loginForm.get());
-        
+        Connection conn = DB.getConnection();
+
     	return ok();
 	}
 
