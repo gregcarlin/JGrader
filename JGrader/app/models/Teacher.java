@@ -17,23 +17,23 @@ public class Teacher {
     this.lname = lname;
   }
 
-  public static Teacher makeLogin(LoginForm form){
-    return new Teacher(form.email,form.password);
-  }
-
   public static Teacher authenticate(String email, String password) {
-    Connection conn = DB.getConnection();
-    PreparedStatement ps = conn.prepareStatement("SELECT * FROM `teachers` WHERE `user` = ? AND `pass` = SHA1(?)");
-    ps.setString(1, email);
-    ps.setString(2, pass);
-    ResultSet rs = ps.executeQuery();
-    if(rs.next()) {
-      int id = rs.getInt('id');
-      String fname = rs.getString('fname');
-      String lname = rs.getString('lname');
-      return new Teacher(id, email, fname, lname);
+    try{
+      Connection conn = DB.getConnection();
+      PreparedStatement ps = conn.prepareStatement("SELECT * FROM `teachers` WHERE `user` = ? AND `pass` = SHA1(?)");
+      ps.setString(1, email);
+      ps.setString(2, password);
+      ResultSet rs = ps.executeQuery();
+      if(rs.next()) {
+        int id = rs.getInt("id");
+        String fname = rs.getString("fname");
+        String lname = rs.getString("lname");
+        return new Teacher(id, email, fname, lname);
+      }
+      return null;
+    } catch (SQLException sqle) {
+      return null;
     }
-    return null;
   }
 
 }

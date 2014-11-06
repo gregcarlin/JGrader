@@ -16,7 +16,7 @@ public class Application extends Controller {
 	// Reads Login form and see if ok
 	public static Result authenticate() {
     	Form<LoginForm> loginForm = form(LoginForm.class).bindFromRequest();
-		Teacher data = Teacher.authenticate(loginForm.email, loginForm.password;
+			Teacher data = Teacher.authenticate(loginForm.get().email, loginForm.get().password);
         if(data == null) {
             return null;
         }
@@ -35,6 +35,5 @@ public class Application extends Controller {
     public static Result teacher() {
     	return ok(teacher.render());
     }
-
 
 }
