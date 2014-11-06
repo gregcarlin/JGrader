@@ -16,7 +16,7 @@ public class Application extends Controller {
 	// Reads Login form and see if ok
 	public static Result authenticate() {
     	Form<LoginForm> loginForm = form(LoginForm.class).bindFromRequest();
-		LoginData data = LoginData.makeLogin(loginForm.get());
+		Teacher data = Teacher.makeLogin(loginForm.get());
         Connection conn = DB.getConnection();
 
     	return ok();
