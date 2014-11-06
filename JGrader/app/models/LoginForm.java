@@ -8,4 +8,12 @@ public class LoginForm {
     public String email;
     @Required
     public String password;
+
+    public String validate() {
+          if(Teacher.authenticate(email, password) == null) {
+              return "Invalid user or password";
+          }
+          return null;
+    }
+
 }
