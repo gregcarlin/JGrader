@@ -3,9 +3,9 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index()
+GET   /                           controllers.Application.index()
 GET		/student					controllers.Application.student()
-GET		/teacher					controllers.Application.teacher()
+GET		/teacher					controllers.Application.authenticate()
 POST	/login						controllers.Application.authenticate()
 
 # Map static resources from the /public folder to the /assets URL path
