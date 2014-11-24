@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>afferos</title>
+  <link rel="stylesheet" media="screen" href="http://bootswatch.com/cosmo/bootstrap.min.css">
+    <link rel="stylesheet" media="screen" href="/stylesheets/main.css">
+    <link rel="stylesheet" media="screen" href="/stylesheets/index.css">
+</head>
+
+<body class="index indexBackground">
+  <div class="firstRelative">
+    <div class="loginHeader">
+      <small style="font-size:87.5px">welcome to</small>
+      <h1 style="font-size:285px; font-family:Neou;">afferos</h1>
+    </div>
+    <div class="loginHeaderBlack">
+      <small style="font-size:50px">spark happiness</small>
+    </div>
+<!-- THE FORM -->
+    <div class="container-fluid">
+      <div class="row">
+        <form class="form-signin col-xs-6" role="form" action="/login" method="POST">
+            <h1 style="color: white;" class="form-signin-heading">Sign in</h1>
+              <p>
+                <input type="email" class="form-control" name="email" placeholder="Email" required autofocus>
+              </p>
+              <p>
+                <input type="password" class="form-control" name="password" placeholder="Password" required>
+              </p>
+              <p>
+                <button class="btn btn-lg btn-primary btn-block" type="submit" style="background-color: #a39ad3; border-color: #a39ad3; color:black">Login</button>
+              </p>
+          </form>
+
+          <form class="form-register col-xs-12" role="form" action="/question" method="GET">
+            <h1 style="color: black;" class="form-register-heading">
+                Register
+            </h1>
+              <p>
+                <button class="btn btn-lg btn-primary btn-block" type="submit" style="background-color: #a39ad3; border-color: #a39ad3; color:black">
+                  Register
+                </button>
+              </p>
+          </form>
+      </div>
+    </div>
+<!-- END OF FORM-->
+  </div>
+
+<div class="secondRelative">
+  <div class="loginBody">
+    <div class="panel panel-default" style="border-color:black">
+      <div class="panel-heading" style="background-color: black; border-color: black">
+        <h1 class="panel-title" style="font-size:40px; color: white; background-color: black">
+          What is Afferos?
+        </h1>
+      </div>
+      <div class="panel panel-body" style="background-color: black; border-color: black">
+        <p style="font-size: 22px; color: white; background-color: black">
+          Afferos is a web application that <b>helps people help people</b>. Often times, people donate to various charities, but don't know how or who their donation helped change another person's life. Afferos allows you to see the change you make in people's lives. Afferos creates a new medium for charity.
+        </p>
+      </div>
+      <div class="panel-heading" style="background-color: black; border-color: black">
+        <h1 class="panel-title" style="font-size:40px; color: white; background-color: black">
+          How does it work?
+        </h1>
+      </div>
+      <div class="panel-body" style="background-color: black; border-color: black">
+        <p style="font-size: 22px; color: white; background-color: black">
+          When you the user register for an account, you are presented with two options: <b>Giver</b> or <b>Patient</b>. Givers are those who collaborate with other givers to buy/create/send a gift over to the Patients. This website is devoted to increase the usablity and facility of giving birthday gifts to cancer patients. Most patients, espeacially those recieving medical care, are often isolated from their friends and family. By helping, you can be a part of a movement to revolutionize the technology of charity.
+        </p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
