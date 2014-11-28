@@ -21,12 +21,22 @@ router.post('/', function(req, res) {
   var pass = req.param('password');
   if(email && pass) {
     connection.query('SELECT * FROM `students` WHERE `user` = ? AND `pass` = ?', [email, pass], function(err, rows) {
-      if(err) throw err; // todo better error handling?
-
-      if(rows.length > 0) {
-        // todo login
+      if(err) {
+        res.render('index', { title: 'Express', error: 'An unknown error has occurred. Please try again later.', email: email });
       } else {
-        res.render('index', { title: 'Express', error: 'Incorrect username or password.', email: email });
+        if(rows.length > 0) {
+          var hash = crypto.randomBytes(20).toString('hex'); // http://stackoverflow.com/a/14869745/720889
+          res.cookie('hash', hash);
+          connection.query('INSERT INTO `sessions` VALUES(?, ?)', [rows[0].id, hash], function(err, rows) {
+            if(err) {
+              res.render('index', { title: 'Express', error: 'An unknown error has occurred. Please try again later.', email: email });
+            } else {
+              // todo redirect to login page
+            }
+          });
+        } else {
+          res.render('index', { title: 'Express', error: 'Incorrect username or password.', email: email });
+        }
       }
     });
   } else {
