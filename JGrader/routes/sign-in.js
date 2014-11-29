@@ -35,7 +35,7 @@ var login = function(db, email, pass, res, finish) {
           }
         });
       } else {
-        finish(false); // incorrect login info
+        finish(); // incorrect login info
       }
     }
   });
