@@ -14,7 +14,7 @@ connection.connect(); // we should probably close this at some point [connection
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('students/studentIndex', { title: 'Express' });
 });
 
 module.exports = router;
