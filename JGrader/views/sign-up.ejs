@@ -37,7 +37,9 @@
       	<input type="password" class="form-control" name="password" placeholder="Password" required>
         <div class="iama">
           I am a...
-          <label><input type="radio" name="role" value="student" required<%- (typeof role == 'undefined' || role == 'student') ? ' checked' : '' %>>Student</label><label><input type="radio" name="role" value="teacher"<%- (typeof role != 'undefined' && role == 'teacher') ? ' checked' : '' %>>Teacher</label>
+          <label><input type="radio" name="role" value="student" required<%- (typeof role == 'undefined' || role == 'student') ? ' checked' : '' %>>Student</label>
+          <label><input type="radio" name="role" value="teacher"<%- (typeof role != 'undefined' && role == 'teacher') ? ' checked' : '' %>>Teacher</label>
+          <label title="Teaching Assistant"><input type="radio" name="role" value="assistant"<%- (typeof role != 'undefined' && role == 'assistant') ? ' checked' : ''%>>T.A.</label>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Create account</button>
   		</form>
