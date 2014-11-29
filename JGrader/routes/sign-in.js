@@ -47,11 +47,11 @@ router.post('/', function(req, res) {
   if(email && pass) {
     login('students', email, pass, res, function(status) {
       if(status) {
-        // todo redirect to student login
+        res.redirect('/student');
       } else {
         login('teachers', email, pass, res, function(status) {
           if(status) {
-            // todo redirect to teacher login
+            res.redirect('/teacher');
           } else {
             res.render('sign-in', { error: 'Incorrect email or password.', email: email});
           }

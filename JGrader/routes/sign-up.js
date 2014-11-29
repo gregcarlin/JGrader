@@ -51,7 +51,7 @@ router.post('/', function(req, res) {
                       if(err) {
                         res.render('sign-up', { error: 'An unknown error has occurred. Please try again later.', fname: fname, lname: lname, email: email, role: role });
                       } else {
-                        // todo redirect to dashboard
+                        res.redirect('/' + role);
                       }
                     });
                   }
