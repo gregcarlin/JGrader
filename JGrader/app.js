@@ -1,11 +1,13 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
+var express      = require('express');
+var path         = require('path');
+var favicon      = require('serve-favicon');
+var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+var bodyParser   = require('body-parser');
 
-var index = require('./routes/index');
+var index   = require('./routes/index');
+var signIn  = require('./routes/sign-in');
+var signUp  = require('./routes/sign-up');
 var teacher = require('./routes/teacher');
 var student = require('./routes/student');
 
@@ -24,6 +26,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
+app.use('/sign-in', signIn);
+app.use('/sign-up', signUp);
 app.use('/teacher', teacher);
 app.use('/student', student);
 
