@@ -1,6 +1,7 @@
 var express = require('express');
 var router  = express.Router();
 var creds   = require('./credentials');
+var crypto  = require('crypto');
 
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
@@ -14,34 +15,51 @@ connection.connect(); // we should probably close this at some point [connection
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Sign In | JGrader' });
 });
+
+// attempts to login to website as teacher or student, calls finish(success/failure) when finished without error
+var login = function(db, email, pass, res, finish) {
+  connection.query("SELECT * FROM `" + db + "` WHERE `user` = ? AND `pass` = AES_ENCRYPT(?, '" + creds.aes_key + "')", [email, pass], function(err, rows) {
+    if(err) {
+      res.render('index', { title: 'Sign In | JGrader', error: 'An unknown error has occurred. Please try again later.', email: email });
+    } else {
+      if(rows.length > 0) {
+        var hash = crypto.randomBytes(20).toString('hex'); // http://stackoverflow.com/a/14869745/720889
+        res.cookie('hash', hash);
+        connection.query('INSERT INTO `sessions-' + db + '` VALUES(?, ?)', [rows[0].id, hash], function(err, rows) {
+          if(err) {
+            res.render('index', { title: 'Sign In | JGrader', error: 'An unknown error has occurred. Please try again later.', email: email });
+          } else {
+            finish(true); // successful login
+          }
+        });
+      } else {
+        finish(false); // incorrect login info
+      }
+    }
+  });
+}
 
 router.post('/', function(req, res) {
   var email = req.param('email');
   var pass = req.param('password');
   if(email && pass) {
-    connection.query('SELECT * FROM `students` WHERE `user` = ? AND `pass` = ?', [email, pass], function(err, rows) {
-      if(err) {
-        res.render('index', { title: 'Express', error: 'An unknown error has occurred. Please try again later.', email: email });
+    login('students', email, pass, res, function(status) {
+      if(status) {
+        // todo redirect to student login
       } else {
-        if(rows.length > 0) {
-          var hash = crypto.randomBytes(20).toString('hex'); // http://stackoverflow.com/a/14869745/720889
-          res.cookie('hash', hash);
-          connection.query('INSERT INTO `sessions` VALUES(?, ?)', [rows[0].id, hash], function(err, rows) {
-            if(err) {
-              res.render('index', { title: 'Express', error: 'An unknown error has occurred. Please try again later.', email: email });
-            } else {
-              // todo redirect to login page
-            }
-          });
-        } else {
-          res.render('index', { title: 'Express', error: 'Incorrect username or password.', email: email });
-        }
+        login('teachers', email, pass, res, function(status) {
+          if(status) {
+            // todo redirect to teacher login
+          } else {
+            res.render('index', { title: 'Sign In | JGrader', error: 'Incorrect email or password.', email: email});
+          }
+        });
       }
     });
   } else {
-    res.render('index', { title: 'Express', error: 'All fields are required.', email: email });
+    res.render('index', { title: 'Sign In | JGrader', error: 'All fields are required.', email: email });
   }
 });
 
