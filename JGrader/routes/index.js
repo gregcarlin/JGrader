@@ -5,6 +5,7 @@ var creds   = require('./credentials');
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : creds.mysql_host,
+  port     : creds.mysql_port,
   database : creds.mysql_db,
   user     : creds.mysql_user,
   password : creds.mysql_pass
