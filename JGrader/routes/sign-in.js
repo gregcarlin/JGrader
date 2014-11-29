@@ -18,20 +18,20 @@ router.get('/', function(req, res) {
   res.render('sign-in', {});
 });
 
-// attempts to login to website as teacher or student, calls finish(success/failure) when finished without error
+// attempts to login to website with given database, calls finish() iff login information is incorrect
 var login = function(db, email, pass, res, finish) {
-  connection.query("SELECT * FROM `" + db + "` WHERE `user` = ? AND `pass` = AES_ENCRYPT(?, '" + creds.aes_key + "')", [email, pass], function(err, rows) {
+  connection.query("SELECT * FROM `" + db + "s` WHERE `user` = ? AND `pass` = AES_ENCRYPT(?, '" + creds.aes_key + "')", [email, pass], function(err, rows) {
     if(err) {
       res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
     } else {
       if(rows.length > 0) {
         var hash = crypto.randomBytes(20).toString('hex'); // http://stackoverflow.com/a/14869745/720889
         res.cookie('hash', hash);
-        connection.query('INSERT INTO `sessions-' + db + '` VALUES(?, ?)', [rows[0].id, hash], function(err, rows) {
+        connection.query('INSERT INTO `sessions-' + db + 's` VALUES(?, ?)', [rows[0].id, hash], function(err, rows) {
           if(err) {
             res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
           } else {
-            finish(true); // successful login
+            res.redirect('/' + db); // successful login
           }
         });
       } else {
@@ -45,18 +45,12 @@ router.post('/', function(req, res) {
   var email = req.param('email');
   var pass = req.param('password');
   if(email && pass) {
-    login('students', email, pass, res, function(status) {
-      if(status) {
-        res.redirect('/student');
-      } else {
-        login('teachers', email, pass, res, function(status) {
-          if(status) {
-            res.redirect('/teacher');
-          } else {
-            res.render('sign-in', { error: 'Incorrect email or password.', email: email});
-          }
+    login('student', email, pass, res, function() {
+      login('teacher', email, pass, res, function() {
+        login('assistant', email, pass, res, function() {
+          res.render('sign-in', { error: 'Incorrect email or password.', email: email});
         });
-      }
+      });
     });
   } else {
     res.render('sign-in', { error: 'All fields are required.', email: email });
