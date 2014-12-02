@@ -1,0 +1,15 @@
+.page-header h1 {
+  margin: 0;
+  display: inline;
+}
+.page-header a {
+  float: right;
+  display: block;
+  width: 32px;
+  height: 32px;
+  background-image: url("../images/plus-32.png");
+}
+
+.page-header a:hover {
+  background-image: url("../images/plus-32-blue.png");
+}
