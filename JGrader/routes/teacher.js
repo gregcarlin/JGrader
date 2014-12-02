@@ -14,10 +14,10 @@ connection.connect(); // we should probably close this at some point [connection
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('teacher/teacherIndex', { title: 'Express' });
 });
 
 router.post('/submitAssignment', function(req,res) {
-  
+
 });
 module.exports = router;
