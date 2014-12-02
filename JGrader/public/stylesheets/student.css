@@ -2,10 +2,19 @@ body {
   padding-bottom: 40px;
   background-color: #eee;
 }
-.student-info {
+
+#icon {
 
 }
 
+#class-id {
+
+}
+.student-info {
+  padding-top: 4%;
+  padding-left: 2.5%;
+}
+
 .assignment-info {
-  
+  padding-left: 2.5%;
 }
