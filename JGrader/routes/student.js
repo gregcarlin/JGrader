@@ -32,7 +32,7 @@ router.get('/assignment', function(req, res) {
 router.get('/section', function(req, res) {
   authenticate(req.cookies.hash, res, function(id) {
     findSections(id, res, function(rows){
-      express().render('student/sectionList.ejs', rows, function(err, html) {
+      express().render('student/sectionList.ejs', { rows: rows }, function(err, html) {
         if(err) {
           console.log(err);
         } else {
