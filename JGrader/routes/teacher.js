@@ -20,8 +20,14 @@ router.get('/', function(req, res) {
 router.get('/createClass', function(req, res){
   res.render('teacher/createClass', { title: 'Express' });
 });
-router.post('/submitClass', function(req,res) {
 
+router.post('/submitClass', function(req,res) {
+  var cname = req.param('cname');
+  if(came){
+    exists(cname, req.cookies.hash, function(){
+      connection.query("INSERT INTO `" + role + "s` VALUES(NULL, ?)");
+    });
+  }
 });
 
 router.post('/submitAssignment', function(req,res) {
@@ -29,14 +35,14 @@ router.post('/submitAssignment', function(req,res) {
 });
 module.exports = router;
 
-// var exists = function(class, id, res, finish) {
-//   connection.query("SELECT `id` FROM `sections` WHERE `name` = ?", [class], function(err, rows) {
-//     if(err) {
-//       res.render('sign-up', { error: 'An unknown error has occurred. Please try again later.', fname: fname, lname: lname, email: email, role: role });
-//     } else if(rows.length > 0) {
-//       res.render('sign-up', { error: 'An account with that email already exists.', fname: fname, lname: lname, email: email, role: role });
-//     } else {
-//       finish();
-//     }
-//   });
-// }
+var exists = function(cname, id, res, finish) {
+  connection.query("SELECT `id` FROM `sections` WHERE `name` = ? AND 'teacher_id' = ?", [cname, id], function(err, rows) {
+    if(err) {
+      res.render('teacher/createClass', { error: 'An unknown error has occurred. Please try again later.'});
+    } else if(rows.length > 0) {
+      res.render('sign-up', { error: 'A class with that name already exists.'});
+    } else {
+      finish();
+    }
+  });
+}
