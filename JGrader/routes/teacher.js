@@ -18,12 +18,14 @@ router.get('/', function(req, res) {
 });
 
 router.get('/section', function(req, res) {
-  express().render('teacher/sectionList.ejs', function(err, html) {
-    if(err) {
-      console.log(err);
-    } else {
-      res.render('teacher/genericDashboard', { page: 0, content: html });
-    }
+  authenticate(req.cookies.hash, res, function(id) {
+    express().render('teacher/sectionList.ejs', function(err, html) {
+      if(err) {
+        console.log(err);
+      } else {
+        res.render('teacher/genericDashboard', { page: 0, content: html });
+      }
+    });
   });
 });
 
@@ -43,7 +45,7 @@ router.get('/section/:id', function(req, res) {
 
 // Creates class/section
 router.post('/section/create', function(req, res) {
-  authenticate(req.cookie.hash, function(id) {
+  authenticate(req.cookie.hash, res, function(id) {
     var name = req.param('name');
     connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?)", [id, name], function(err, rows) {
       if(err) {
@@ -80,9 +82,9 @@ router.get('/student', function(req, res) {
 module.exports = router;
 
 // convert a hash to a user id
-var authenticate = function(hash, finish) {
+var authenticate = function(hash, res, finish) {
   if(hash) {
-    connection.query("SELECT `id` FROM `sessions-teacher` WHERE `hash` = ?", [hash], function(err, rows) {
+    connection.query("SELECT `id` FROM `sessions-teachers` WHERE `hash` = ?", [hash], function(err, rows) {
       if(err || rows.length <= 0) {
         res.redirect('/');
       } else {
