@@ -14,7 +14,7 @@ connection.connect(); // we should probably close this at some point [connection
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.redirect('/assignment');
+  res.redirect('/student/assignment');
 });
 
 router.get('/assignment', function(req, res) {
@@ -41,13 +41,25 @@ router.get('/section', function(req, res) {
   });
 });
 
-router.post('/joinClass', function(req, res) {
+router.get('/section/joinSection', function(req, res) {
+  authenticate(req.cookies.hash, res, function(id) {
+    express().render('student/joinSection.ejs', function(err, html) {
+      if(err) {
+        console.log(err);
+      } else {
+        res.render('student/genericDashboard', { page: 0, content: html });
+      }
+    });
+  });
+});
+
+router.post('/section/joinSection', function(req, res) {
   authenticate(req.cookies.hash, res, function(id) {
     sectionID = req.param('sectionID');
-    if(classID) {
+    if(sectionID) {
       connection.query("INSERT INTO `sections_students` VALUES(?, ?)", [id, sectionID], function(err, rows) {
         // todo: Need to handle errors
-        res.redirect('/');
+        res.redirect('/student/section');
       });
     }
   });
