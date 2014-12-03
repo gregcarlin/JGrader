@@ -14,18 +14,35 @@ connection.connect(); // we should probably close this at some point [connection
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('teacher/teacherIndex', { title: 'Express' });
+  express().render('teacher/teacherIndex.ejs', function(err, html) {
+    if(err) {
+      console.log(err);
+    } else {
+      res.render('teacher/genericDashboard', { content: html });
+    }
+  });
 });
 
-router.get('/createClass', function(req, res){
-  res.render('teacher/createClass', { title: 'Express' });
+router.get('/section/create', function(req, res){
+  express().render('teacher/createClass.ejs', function(err, html) {
+    if(err) {
+      console.log(err);
+    } else {
+      res.render('teacher/createClass', { content: html });
+    }
+  });
 });
-router.post('/submitClass', function(req,res) {
 
+router.post('/section/create', function(req,res) {
+  // todo implement creation of class
 });
 
-router.post('/submitAssignment', function(req,res) {
+router.post('/assignment/create', function(req,res) {
+  res.render('teacher/createAssignment');
+});
 
+router.post('/assignment/create', function(req,res) {
+  // todo implement creation of assignment
 });
 module.exports = router;
 

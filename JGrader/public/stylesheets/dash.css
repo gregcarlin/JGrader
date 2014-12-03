@@ -9,7 +9,15 @@
   height: 32px;
   background-image: url("../images/plus-32.png");
 }
-
 .page-header a:hover {
   background-image: url("../images/plus-32-blue.png");
+}
+.main form {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main form input[type="submit"] {
+  margin-top: 15px;
 }
