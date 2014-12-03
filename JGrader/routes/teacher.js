@@ -43,18 +43,15 @@ router.get('/section/:id', function(req, res) {
 
 // Creates class/section
 router.post('/section/create', function(req, res) {
-  // todo implement creation of class
-  var cname = req.param('cname');
-  findID(req.cookie.hash, function(id) {
-    if(cname){
-      exists(cname, req.cookie.hash, res, function() {
-          connection.query("INSERT INTO 'sections' VALUES(null, ?, ?)", [cname, id], function(err, rows) {
-            if(err) {
-              res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
-            }
-          });
-      });
-    }
+  authenticate(req.cookie.hash, function(id) {
+    var name = req.param('name');
+    connection.query("INSERT INTO 'sections' VALUES(NULL, ?, ?)", [id, name], function(err, rows) {
+      if(err) {
+        res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.' });
+      } else {
+        res.redirect('/teacher/section');
+      }
+    });
   });
 });
 
@@ -82,28 +79,17 @@ router.get('/student', function(req, res) {
 
 module.exports = router;
 
-var exists = function(cname, hash, res, finish) {
-  // Get ID
-  findID(hash, function(id) {
-    connection.query("SELECT `id` FROM `sections` WHERE `name` = ? AND 'teacher_id' = ?", [cname, id], function(err, rows) {
-      if(err) {
-        res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
-      } else if(rows.length > 0) {
-        res.render('sign-up', { error: 'A class with that name already exists.'});
+// convert a hash to a user id
+var authenticate = function(hash, finish) {
+  if(hash) {
+    connection.query("SELECT `id` FROM `sessions-teacher` WHERE `hash` = ?", [hash], function(err, rows) {
+      if(err || rows.length <= 0) {
+        res.redirect('/');
       } else {
-        finish();
+        finish(rows[0].id);
       }
     });
-  });
-}
-
-var findID = function(hash, finish){
-  var id;
-  connection.query("SELECT `id` FROM `sessions` WHERE `hash` = ?", [hash], function(err, rows) {
-    if(err) {
-      res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
-    } else {
-      finish(rows[0].id);
-    }
-  });
+  } else {
+    res.redirect('/');
+  }
 }
