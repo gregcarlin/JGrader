@@ -45,17 +45,17 @@ router.get('/section/:id', function(req, res) {
 router.post('/section/create', function(req, res) {
   // todo implement creation of class
   var cname = req.param('cname');
-  var id = findID(req.cookie.hash);
-
-  if(cname){
-    exists(cname, req.cookie.hash, res, function() {
-        connection.query("INSERT INTO 'sections' VALUES(null, ?, ?)", [cname, id], function(err, rows) {
-          if(err) {
-            res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
-          }
-        });
-    });
-  }
+  findID(req.cookie.hash, function(id) {
+    if(cname){
+      exists(cname, req.cookie.hash, res, function() {
+          connection.query("INSERT INTO 'sections' VALUES(null, ?, ?)", [cname, id], function(err, rows) {
+            if(err) {
+              res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
+            }
+          });
+      });
+    }
+  });
 });
 
 router.get('/assignment', function(req, res) {
