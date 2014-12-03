@@ -14,7 +14,7 @@ connection.connect(); // we should probably close this at some point [connection
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.redirect('/student/assignment');
+  res.redirect('/student/section');
 });
 
 router.get('/assignment', function(req, res) {
@@ -31,12 +31,14 @@ router.get('/assignment', function(req, res) {
 
 router.get('/section', function(req, res) {
   authenticate(req.cookies.hash, res, function(id) {
-    express().render('student/sectionList.ejs', function(err, html) {
-      if(err) {
-        console.log(err);
-      } else {
-        res.render('student/genericDashboard', { page: 0, content: html });
-      }
+    findSections(id, res, function(rows){
+      express().render('student/sectionList.ejs', rows, function(err, html) {
+        if(err) {
+          console.log(err);
+        } else {
+          res.render('student/genericDashboard', { page: 0, content: html });
+        }
+      });
     });
   });
 });
@@ -53,11 +55,12 @@ router.get('/section/joinSection', function(req, res) {
   });
 });
 
+// Joins Class
 router.post('/section/joinSection', function(req, res) {
   authenticate(req.cookies.hash, res, function(id) {
     sectionID = req.param('sectionID');
     if(sectionID) {
-      connection.query("INSERT INTO `sections_students` VALUES(?, ?)", [id, sectionID], function(err, rows) {
+      connection.query("INSERT INTO `enrollment` VALUES(?, ?)", [sectionID, id], function(err, rows) {
         // todo: Need to handle errors
         res.redirect('/student/section');
       });
@@ -79,4 +82,21 @@ var authenticate = function(hash, res, finish) {
   }
 }
 
+var findSections = function(id, res, finish) {
+  if(id){
+    connection.query("SELECT `section_id` FROM `enrollment` WHERE `student_id` = ?", [id], function(err, rows) {
+      if(err || rows.length <= 0) {
+        // express().render('student/sectionList.ejs', function(err, html) {
+        //   if(err) {
+        //     console.log(err);
+        //   } else {
+        //     res.render('student/genericDashboard', { page: 0, content: html });
+        //   }
+        // });
+      } else {
+        finish(rows);
+      }
+    });
+  }
+}
 module.exports = router;
