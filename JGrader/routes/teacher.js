@@ -14,7 +14,7 @@ connection.connect(); // we should probably close this at some point [connection
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  express().render('teacher/teacherIndex.ejs', function(err, html) {
+  express().render('teacher/sectionList.ejs', function(err, html) {
     if(err) {
       console.log(err);
     } else {
@@ -24,7 +24,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/section', function(req, res) {
-  express().render('teacher/teacherIndex.ejs', function(err, html) {
+  express().render('teacher/sectionList.ejs', function(err, html) {
     if(err) {
       console.log(err);
     } else {
@@ -34,13 +34,17 @@ router.get('/section', function(req, res) {
 });
 
 router.get('/section/create', function(req, res) {
-  express().render('teacher/createClass.ejs', function(err, html) {
+  express().render('teacher/sectionCreate.ejs', function(err, html) {
     if(err) {
       console.log(err);
     } else {
       res.render('teacher/genericDashboard', { content: html });
     }
   });
+});
+
+router.get('/section/:id', function(req, res) {
+  // todo design page for specific section. also will this work? <req.params.id> if so do this for assignment and student too
 });
 
 router.post('/section/create', function(req, res) {
@@ -74,7 +78,7 @@ module.exports = router;
 var exists = function(cname, id, res, finish) {
   connection.query("SELECT `id` FROM `sections` WHERE `name` = ? AND 'teacher_id' = ?", [cname, id], function(err, rows) {
     if(err) {
-      res.render('teacher/createClass', { error: 'An unknown error has occurred. Please try again later.'});
+      res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
     } else if(rows.length > 0) {
       res.render('sign-up', { error: 'A class with that name already exists.'});
     } else {
