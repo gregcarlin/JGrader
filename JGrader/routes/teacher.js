@@ -45,7 +45,7 @@ router.get('/section/:id', function(req, res) {
 router.post('/section/create', function(req, res) {
   authenticate(req.cookie.hash, function(id) {
     var name = req.param('name');
-    connection.query("INSERT INTO 'sections' VALUES(NULL, ?, ?)", [id, name], function(err, rows) {
+    connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?)", [id, name], function(err, rows) {
       if(err) {
         res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.' });
       } else {
