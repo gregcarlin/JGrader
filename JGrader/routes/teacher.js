@@ -23,27 +23,52 @@ router.get('/', function(req, res) {
   });
 });
 
-router.get('/section/create', function(req, res){
-  express().render('teacher/createClass.ejs', function(err, html) {
+router.get('/section', function(req, res) {
+  express().render('teacher/teacherIndex.ejs', function(err, html) {
     if(err) {
       console.log(err);
     } else {
-      res.render('teacher/createClass', { content: html });
+      res.render('teacher/genericDashboard', { content: html });
     }
   });
 });
 
-router.post('/section/create', function(req,res) {
+router.get('/section/create', function(req, res) {
+  express().render('teacher/createClass.ejs', function(err, html) {
+    if(err) {
+      console.log(err);
+    } else {
+      res.render('teacher/genericDashboard', { content: html });
+    }
+  });
+});
+
+router.post('/section/create', function(req, res) {
   // todo implement creation of class
 });
 
-router.post('/assignment/create', function(req,res) {
-  res.render('teacher/createAssignment');
+router.get('/assignment', function(req, res) {
+  // todo design assignment list
+});
+
+router.get('/assignment/create', function(req, res) {
+  express().render('teacher/createAssignment.ejs', function(err, html) { // todo design assignment creation page
+    if(err) {
+      console.log(err);
+    } else {
+      res.render('teacher/genericDashboard', { content: html });
+    }
+  });
 });
 
 router.post('/assignment/create', function(req,res) {
   // todo implement creation of assignment
 });
+
+router.get('/student', function(req, res) {
+  // todo design student list
+});
+
 module.exports = router;
 
 var exists = function(cname, id, res, finish) {
