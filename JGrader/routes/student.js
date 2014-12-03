@@ -43,9 +43,12 @@ router.get('/section', function(req, res) {
 
 router.post('/joinClass', function(req, res) {
   authenticate(req.cookies.hash, res, function(id) {
-    classID = req.param('classID');
+    sectionID = req.param('sectionID');
     if(classID) {
-      
+      connection.query("INSERT INTO `sections_students` VALUES(?, ?)", [id, sectionID], function(err, rows) {
+        // todo: Need to handle errors
+        res.redirect('/');
+      });
     }
   });
 });
