@@ -14,7 +14,54 @@ connection.connect(); // we should probably close this at some point [connection
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('students/studentIndex', { title: 'Express' });
+  res.redirect('/assignment');
 });
+
+router.get('/assignment', function(req, res) {
+  authenticate(req.cookies.hash, res, function(id) {
+    express().render('student/assignmentList.ejs', function(err, html) {
+      if(err) {
+        console.log(err);
+      } else {
+        res.render('student/genericDashboard', { page: 0, content: html });
+      }
+    });
+  });
+});
+
+router.get('/section', function(req, res) {
+  authenticate(req.cookies.hash, res, function(id) {
+    express().render('student/sectionList.ejs', function(err, html) {
+      if(err) {
+        console.log(err);
+      } else {
+        res.render('student/genericDashboard', { page: 0, content: html });
+      }
+    });
+  });
+});
+
+router.post('/joinClass', function(req, res) {
+  authenticate(req.cookies.hash, res, function(id) {
+    classID = req.param('classID');
+    if(classID) {
+      
+    }
+  });
+});
+
+var authenticate = function(hash, res, finish) {
+  if(hash) {
+    connection.query("SELECT `id` FROM `sessions-students` WHERE `hash` = ?", [hash], function(err, rows) {
+      if(err || rows.length <= 0) {
+        res.redirect('/');
+      } else {
+        finish(rows[0].id);
+      }
+    });
+  } else {
+    res.redirect('/');
+  }
+}
 
 module.exports = router;
