@@ -14,13 +14,7 @@ connection.connect(); // we should probably close this at some point [connection
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  express().render('teacher/sectionList.ejs', function(err, html) {
-    if(err) {
-      console.log(err);
-    } else {
-      res.render('teacher/genericDashboard', { content: html });
-    }
-  });
+  res.redirect('/teacher/section');
 });
 
 router.get('/section', function(req, res) {
@@ -28,7 +22,7 @@ router.get('/section', function(req, res) {
     if(err) {
       console.log(err);
     } else {
-      res.render('teacher/genericDashboard', { content: html });
+      res.render('teacher/genericDashboard', { page: 0, content: html });
     }
   });
 });
@@ -38,7 +32,7 @@ router.get('/section/create', function(req, res) {
     if(err) {
       console.log(err);
     } else {
-      res.render('teacher/genericDashboard', { content: html });
+      res.render('teacher/genericDashboard', { page: 0, content: html });
     }
   });
 });
@@ -60,7 +54,7 @@ router.get('/assignment/create', function(req, res) {
     if(err) {
       console.log(err);
     } else {
-      res.render('teacher/genericDashboard', { content: html });
+      res.render('teacher/genericDashboard', { page: 1, content: html });
     }
   });
 });
