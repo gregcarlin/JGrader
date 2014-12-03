@@ -44,9 +44,7 @@ router.get('/section/:id', function(req, res) {
 // Creates class/section
 router.post('/section/create', function(req, res) {
   // todo implement creation of class
-  console.log(req.cookie);
   var cname = req.param('cname');
-
   var id = findID(req.cookie.hash);
 
   if(cname){
@@ -86,34 +84,26 @@ module.exports = router;
 
 var exists = function(cname, hash, res, finish) {
   // Get ID
-  var id;
-  connection.query("SELECT `id` FROM `sessions` WHERE `hash` = ?", [hash], function(err, rows) {
-    if(err) {
-      res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
-    } else {
-      id = rows[0].id;
-    }
-  });
-
-  connection.query("SELECT `id` FROM `sections` WHERE `name` = ? AND 'teacher_id' = ?", [cname, id], function(err, rows) {
-    if(err) {
-      res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
-    } else if(rows.length > 0) {
-      res.render('sign-up', { error: 'A class with that name already exists.'});
-    } else {
-      finish();
-    }
+  findID(hash, function(id) {
+    connection.query("SELECT `id` FROM `sections` WHERE `name` = ? AND 'teacher_id' = ?", [cname, id], function(err, rows) {
+      if(err) {
+        res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
+      } else if(rows.length > 0) {
+        res.render('sign-up', { error: 'A class with that name already exists.'});
+      } else {
+        finish();
+      }
+    });
   });
 }
 
-var findID = function(hash){
+var findID = function(hash, finish){
   var id;
   connection.query("SELECT `id` FROM `sessions` WHERE `hash` = ?", [hash], function(err, rows) {
     if(err) {
       res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.'});
     } else {
-      id = rows[0].id;
+      finish(rows[0].id);
     }
   });
-  return id;
 }
