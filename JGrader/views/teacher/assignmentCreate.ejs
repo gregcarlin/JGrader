@@ -1,0 +1,12 @@
+<div class="page-header">
+  <h1>New Assignment</h1>
+</div>
+<form action="/teacher/assignment/create" method="post">
+  <% if(typeof error != 'undefined') { %>
+    <div class="error"><%= error %></div>
+  <% } %>
+  <input type="text" class="form-control" placeholder="Name" name="name" required autofocus <%- typeof name == 'undefined' ? '' : ('value="' + name + '" ') %>/>
+  <textarea class="form-control" placeholder="Description" name="desc"></textarea>
+  <input type="text" class="form-control" name="due" id="due" required></input>
+  <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create" />
+</form>
