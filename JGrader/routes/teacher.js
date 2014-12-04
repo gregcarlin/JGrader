@@ -4,57 +4,69 @@ var creds   = require('./credentials');
 
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
-  host     : creds.mysql_host,
-  port     : creds.mysql_port,
-  database : creds.mysql_db,
-  user     : creds.mysql_user,
-  password : creds.mysql_pass
+  host               : creds.mysql_host,
+  port               : creds.mysql_port,
+  database           : creds.mysql_db,
+  user               : creds.mysql_user,
+  password           : creds.mysql_pass,
+  multipleStatements : true
 });
 connection.connect(); // we should probably close this at some point [connection.end()]
 
-/* GET home page. */
 router.get('/', function(req, res) {
-  res.redirect('/teacher/section');
+  res.redirect('/teacher/section'); // redirect to section list
 });
 
+// list sections
 router.get('/section', function(req, res) {
   authenticate(req.cookies.hash, res, function(id) {
-    express().render('teacher/sectionList.ejs', function(err, html) {
+    connection.query("SELECT * FROM `sections` WHERE `teacher_id` = ?", [id], function(err, rows) {
       if(err) {
-        console.log(err);
+        throw err; // #yolo
       } else {
-        res.render('teacher/genericDashboard', { page: 0, content: html });
+        renderGeneric('teacher/sectionList', { page: 0, rows: rows }, res);
       }
     });
   });
 });
 
 router.get('/section/create', function(req, res) {
-  express().render('teacher/sectionCreate.ejs', function(err, html) {
-    if(err) {
-      console.log(err);
+  renderGeneric('teacher/sectionCreate', { page: 0 }, res);
+});
+
+// Creates class/section
+router.post('/section/create', function(req, res) {
+  authenticate(req.cookies.hash, res, function(id) {
+    var name = req.param('name');
+    if(name.length <= 0) {
+      renderGeneric('teacher/sectionCreate', { page: 0, error: 'Name cannot be blank.', name: name }, res);
     } else {
-      res.render('teacher/genericDashboard', { page: 0, content: html });
+      connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?); SELECT LAST_INSERT_ID()", [id, name], function(err, rows) {
+        if(err || rows.length <= 0) {
+          renderGeneric('teacher/sectionCreate', { page: 0, error: 'An unknown error has occurred. Please try again later.', name: name }, res);
+        } else {
+          res.redirect('/teacher/section/' + rows[1][0]["LAST_INSERT_ID()"]); // redirect teacher to page of newly created section
+        }
+      });
     }
   });
 });
 
 router.get('/section/:id', function(req, res) {
-  // todo design page for specific section. also will this work? <req.params.id> if so do this for assignment and student too
-});
-
-// Creates class/section
-router.post('/section/create', function(req, res) {
-  authenticate(req.cookie.hash, res, function(id) {
-    var name = req.param('name');
-    connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?)", [id, name], function(err, rows) {
-      if(err) {
-        res.render('teacher/sectionCreate', { error: 'An unknown error has occurred. Please try again later.' });
-      } else {
-        res.redirect('/teacher/section');
-      }
+  authenticate(req.cookies.hash, res, function(teacherID) {
+    var sectionID = req.params.id;
+    if(sectionID && sectionID.length > 0) {
+      connection.query("SELECT * FROM `sections` WHERE `id` = ? AND `teacher_id` = ?", [sectionID, teacherID], function(err, rows) {
+        if(err || rows.length <= 0) {
+          renderGeneric('teacher/notFound', { page: 0, type: 'section' }, res);
+        } else {
+          renderGeneric('teacher/section', { page: 0, sectionName: rows[0].name }, res);
+        }
+      });
+    } else {
+      renderGeneric('teacher/notFound', { page: 0, type: 'section' }, res);
+    }
     });
-  });
 });
 
 router.get('/assignment', function(req, res) {
@@ -62,13 +74,7 @@ router.get('/assignment', function(req, res) {
 });
 
 router.get('/assignment/create', function(req, res) {
-  express().render('teacher/createAssignment.ejs', function(err, html) { // todo design assignment creation page
-    if(err) {
-      console.log(err);
-    } else {
-      res.render('teacher/genericDashboard', { page: 1, content: html });
-    }
-  });
+  renderGeneric('teacher/assignmentCreate', { page: 1 }, res);
 });
 
 router.post('/assignment/create', function(req,res) {
@@ -94,4 +100,15 @@ var authenticate = function(hash, res, finish) {
   } else {
     res.redirect('/');
   }
+}
+
+var renderGeneric = function(page, vars, res) {
+  express().render(page + '.ejs', vars, function(err, html) {
+    if(err) {
+      console.log(err);
+    } else {
+      vars.content = html;
+      res.render('teacher/genericDashboard', vars);
+    }
+  });
 }

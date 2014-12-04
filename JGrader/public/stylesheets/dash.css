@@ -17,7 +17,10 @@
   margin-left: auto;
   margin-right: auto;
 }
-
 .main form input[type="submit"] {
   margin-top: 15px;
+}
+.error {
+  color: #D00;
+  margin-bottom: 4px;
 }

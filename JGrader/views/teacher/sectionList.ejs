@@ -1,6 +1,6 @@
 <div class="page-header">
   <h1>Sections</h1>
-  <a href="section/create"></a>
+  <a href="/teacher/section/create"></a>
 </div>
 <div class="table-responsive">
   <table class="table table-striped">
@@ -12,16 +12,19 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td><a href="#">Period 1</a></td>
-        <td>23</td>
-        <td><a href="#">Picture Lab</a></td>
-      </tr>
-      <tr>
-        <td><a href="#">Period 3</a></td>
-        <td>15</td>
-        <td><a href="#">High Low Game</a></td>
-      </tr>
+      <% if(rows.length == 0) { %>
+        <tr>
+          <td colspan="3">You have no sections!</td>
+        </tr>
+      <% } else {
+          for(i in rows) {%>
+            <tr>
+              <td><a href="/teacher/section/<%= rows[i].id %>"><%= rows[i].name %></a></td>
+              <td>23</td>
+              <td><a href="#">Picture Lab</a></td>
+            </tr>
+       <% }
+         } %>
     </tbody>
   </table>
 </div>
