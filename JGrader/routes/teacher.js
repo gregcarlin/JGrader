@@ -30,7 +30,7 @@ router.get('/section/create', function(req, res) {
 router.post('/section/create', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
     var name = req.param('name');
-    if(name.length <= 0) {
+    if(!name || name.length <= 0) {
       renderGenericTeacher('sectionCreate', { page: 0, error: 'Name cannot be blank.', name: name }, res);
     } else {
       connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?); SELECT LAST_INSERT_ID()", [id, name], function(err, rows) {
@@ -77,12 +77,33 @@ router.get('/assignment', function(req, res) {
 
 // page for creating a new assignment
 router.get('/assignment/create', function(req, res) {
-  renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1 }, res);
+  authTeacher(req.cookies.hash, res, function(id) {
+    connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ?", [id], function(err, rows) {
+      if(err) {
+        throw err; // todo better error handling
+      } else if(rows.length <= 0) {
+        renderGenericTeacher('assignmentCreate', { page: 1, error: 'You must create a section before you can create an assignment.', rows: [] }, res);
+      } else {
+        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, rows: rows }, res);
+      }
+    });
+  });
 });
 
 // handles request to create an assignment
 router.post('/assignment/create', function(req,res) {
-  // todo implement creation of assignment
+  authTeacher(req.cookies.hash, res, function(id) {
+    var name = req.param('name');
+    var desc = req.param('desc');
+    var due  = req.param('due');
+    if(!name || name.length <= 0 || !due || due.length <= 0) {
+      renderGenericTeacher('assignmentCreate', { page: 0, error: 'Name and due date must both be filled out.'}, res);
+    } else {
+      connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [], function(err, rows) {
+        // todo finish
+      });
+    }
+  });
 });
 
 router.get('/assignment/:id', function(req, res) {
