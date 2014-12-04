@@ -1,11 +1,12 @@
 require('./common');
 var router = express.Router();
 
+// main teacher page, redirects to section list
 router.get('/', function(req, res) {
   res.redirect('/teacher/section'); // redirect to section list
 });
 
-// list sections
+// page for listing sections
 router.get('/section', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
     connection.query("SELECT `sections`.`name`,`sections`.`id`,COUNT(`enrollment`.`student_id`) AS `count` FROM `sections` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`teacher_id` = ? GROUP BY `sections`.`name`", [id], function(err, rows) {
@@ -18,11 +19,14 @@ router.get('/section', function(req, res) {
   });
 });
 
+// page for creating a new section
 router.get('/section/create', function(req, res) {
-  renderGenericTeacher('sectionCreate', { page: 0 }, res);
+  authTeacher(req.cookies.hash, res, function(id) {
+    renderGenericTeacher('sectionCreate', { page: 0 }, res);
+  });
 });
 
-// Creates class/section
+// handles request to create a section
 router.post('/section/create', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
     var name = req.param('name');
@@ -40,6 +44,7 @@ router.post('/section/create', function(req, res) {
   });
 });
 
+// page providing info on a specific section
 router.get('/section/:id', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
     var sectionID = req.params.id;
@@ -57,20 +62,36 @@ router.get('/section/:id', function(req, res) {
     });
 });
 
+// page that lists assignments
 router.get('/assignment', function(req, res) {
-  // todo design assignment list
+  authTeacher(req.cookies.hash, res, function(id) {
+    connection.query("SELECT `assignments`.`id` AS `aid`,`assignments`.`name` AS `aname`,`sections`.`id` AS `sid`,`sections`.`name` AS `sname` FROM `sections`,`assignments` WHERE `sections`.`id` = `assignments`.`section_id` AND `sections`.`teacher_id` = ? ORDER BY `assignments`.`due` DESC", [id], function(err, rows) {
+      if(err) {
+        throw err; // #yolt
+      } else {
+        renderGenericTeacher('assignmentList', { page: 1, rows: rows }, res);
+      }
+    });
+  });
 });
 
+// page for creating a new assignment
 router.get('/assignment/create', function(req, res) {
-  renderGenericTeacher('assignmentCreate', { page: 1 }, res);
+  renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1 }, res);
 });
 
+// handles request to create an assignment
 router.post('/assignment/create', function(req,res) {
   // todo implement creation of assignment
 });
 
+router.get('/assignment/:id', function(req, res) {
+  // todo assignment page
+});
+
+// todo all student stuff
 router.get('/student', function(req, res) {
-  // todo design student list
+  renderGenericTeacher('studentList', { page: 2 }, res);
 });
 
 module.exports = router;
