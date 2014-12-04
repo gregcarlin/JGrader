@@ -103,7 +103,7 @@ var findSectionID = function(id, res, finish) {
 // Going to implement a for loop with this and findSectionID. Is there a way to do all that using mysql command??
 var findSection = function(id, res, finish) {
   if(id){
-    connection.query("SELECT * FROM `sections` WHERE `id` = ?", [id], function(err, rows) {
+    connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname` FROM `enrollment`,`sections`,`teachers` WHERE `enrollment`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = `teachers`.`id` AND `enrollment`.`student_id` = ?", [id], function(err, rows) {
       if(err || rows.length <= 0) {
       } else {
         finish(rows);
