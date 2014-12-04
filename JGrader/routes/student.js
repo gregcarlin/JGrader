@@ -31,7 +31,7 @@ router.get('/assignment', function(req, res) {
 
 router.get('/section', function(req, res) {
   authenticate(req.cookies.hash, res, function(id) {
-    findSections(id, res, function(rows){
+    findSectionID(id, res, function(rows){
       express().render('student/sectionList.ejs', { rows: rows }, function(err, html) {
         if(err) {
           console.log(err);
@@ -82,7 +82,7 @@ var authenticate = function(hash, res, finish) {
   }
 }
 
-var findSections = function(id, res, finish) {
+var findSectionID = function(id, res, finish) {
   if(id){
     connection.query("SELECT `section_id` FROM `enrollment` WHERE `student_id` = ?", [id], function(err, rows) {
       if(err || rows.length <= 0) {
@@ -98,5 +98,29 @@ var findSections = function(id, res, finish) {
       }
     });
   }
+}
+
+// Going to implement a for loop with this and findSectionID. Is there a way to do all that using mysql command??
+var findSection = function(id, res, finish) {
+  if(id){
+    connection.query("SELECT * FROM `sections` WHERE `id` = ?", [id], function(err, rows) {
+      if(err || rows.length <= 0) {
+      } else {
+        finish(rows);
+      }
+    });
+  }
+}
+
+// Odd this looks very familiar...
+var renderGeneric = function(page, vars, res) {
+  express().render(page + '.ejs', vars, function(err, html) {
+    if(err) {
+      console.log(err);
+    } else {
+      vars.content = html;
+      res.render('student/genericDashboard', vars);
+    }
+  });
 }
 module.exports = router;
