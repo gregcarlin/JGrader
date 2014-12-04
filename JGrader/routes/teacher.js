@@ -20,7 +20,7 @@ router.get('/', function(req, res) {
 // list sections
 router.get('/section', function(req, res) {
   authenticate(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `sections`.`name`,`sections`.`id`,COUNT(`assignments`.`id`) AS `count` FROM `sections` LEFT JOIN `assignments` ON `sections`.`id` = `assignments`.`section_id` WHERE `sections`.`teacher_id` = ? GROUP BY `sections`.`name`", [id], function(err, rows) {
+    connection.query("SELECT `sections`.`name`,`sections`.`id`,COUNT(`enrollment`.`student_id`) AS `count` FROM `sections` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`teacher_id` = ? GROUP BY `sections`.`name`", [id], function(err, rows) {
       if(err) {
         throw err; // #yolo
       } else {
