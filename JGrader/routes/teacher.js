@@ -1,49 +1,41 @@
-var express = require('express');
-var router  = express.Router();
-var creds   = require('./credentials');
+require('./common');
+var router = express.Router();
 
-var mysql      = require('mysql');
-var connection = mysql.createConnection({
-  host               : creds.mysql_host,
-  port               : creds.mysql_port,
-  database           : creds.mysql_db,
-  user               : creds.mysql_user,
-  password           : creds.mysql_pass,
-  multipleStatements : true
-});
-connection.connect(); // we should probably close this at some point [connection.end()]
-
+// main teacher page, redirects to section list
 router.get('/', function(req, res) {
   res.redirect('/teacher/section'); // redirect to section list
 });
 
-// list sections
+// page for listing sections
 router.get('/section', function(req, res) {
-  authenticate(req.cookies.hash, res, function(id) {
+  authTeacher(req.cookies.hash, res, function(id) {
     connection.query("SELECT `sections`.`name`,`sections`.`id`,COUNT(`enrollment`.`student_id`) AS `count` FROM `sections` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`teacher_id` = ? GROUP BY `sections`.`name`", [id], function(err, rows) {
       if(err) {
         throw err; // #yolo
       } else {
-        renderGeneric('teacher/sectionList', { page: 0, rows: rows }, res);
+        renderGenericTeacher('sectionList', { page: 0, rows: rows }, res);
       }
     });
   });
 });
 
+// page for creating a new section
 router.get('/section/create', function(req, res) {
-  renderGeneric('teacher/sectionCreate', { page: 0 }, res);
+  authTeacher(req.cookies.hash, res, function(id) {
+    renderGenericTeacher('sectionCreate', { page: 0 }, res);
+  });
 });
 
-// Creates class/section
+// handles request to create a section
 router.post('/section/create', function(req, res) {
-  authenticate(req.cookies.hash, res, function(id) {
+  authTeacher(req.cookies.hash, res, function(id) {
     var name = req.param('name');
-    if(name.length <= 0) {
-      renderGeneric('teacher/sectionCreate', { page: 0, error: 'Name cannot be blank.', name: name }, res);
+    if(!name || name.length <= 0) {
+      renderGenericTeacher('sectionCreate', { page: 0, error: 'Name cannot be blank.', name: name }, res);
     } else {
       connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?); SELECT LAST_INSERT_ID()", [id, name], function(err, rows) {
         if(err || rows.length <= 0) {
-          renderGeneric('teacher/sectionCreate', { page: 0, error: 'An unknown error has occurred. Please try again later.', name: name }, res);
+          renderGenericTeacher('sectionCreate', { page: 0, error: 'An unknown error has occurred. Please try again later.', name: name }, res);
         } else {
           res.redirect('/teacher/section/' + rows[1][0]["LAST_INSERT_ID()"]); // redirect teacher to page of newly created section
         }
@@ -52,63 +44,75 @@ router.post('/section/create', function(req, res) {
   });
 });
 
+// page providing info on a specific section
 router.get('/section/:id', function(req, res) {
-  authenticate(req.cookies.hash, res, function(teacherID) {
+  authTeacher(req.cookies.hash, res, function(teacherID) {
     var sectionID = req.params.id;
     if(sectionID && sectionID.length > 0) {
       connection.query("SELECT * FROM `sections` WHERE `id` = ? AND `teacher_id` = ?", [sectionID, teacherID], function(err, rows) {
         if(err || rows.length <= 0) {
-          renderGeneric('teacher/notFound', { page: 0, type: 'section' }, res);
+          renderGenericTeacher('notFound', { page: 0, type: 'section' }, res);
         } else {
-          renderGeneric('teacher/section', { page: 0, sectionName: rows[0].name }, res);
+          renderGenericTeacher('section', { page: 0, sectionName: rows[0].name }, res);
         }
       });
     } else {
-      renderGeneric('teacher/notFound', { page: 0, type: 'section' }, res);
+      renderGenericTeacher('notFound', { page: 0, type: 'section' }, res);
     }
     });
 });
 
+// page that lists assignments
 router.get('/assignment', function(req, res) {
-  // todo design assignment list
+  authTeacher(req.cookies.hash, res, function(id) {
+    connection.query("SELECT `assignments`.`id` AS `aid`,`assignments`.`name` AS `aname`,`sections`.`id` AS `sid`,`sections`.`name` AS `sname` FROM `sections`,`assignments` WHERE `sections`.`id` = `assignments`.`section_id` AND `sections`.`teacher_id` = ? ORDER BY `assignments`.`due` DESC", [id], function(err, rows) {
+      if(err) {
+        throw err; // #yolt
+      } else {
+        renderGenericTeacher('assignmentList', { page: 1, rows: rows }, res);
+      }
+    });
+  });
 });
 
+// page for creating a new assignment
 router.get('/assignment/create', function(req, res) {
-  renderGeneric('teacher/assignmentCreate', { page: 1 }, res);
+  authTeacher(req.cookies.hash, res, function(id) {
+    connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ?", [id], function(err, rows) {
+      if(err) {
+        throw err; // todo better error handling
+      } else if(rows.length <= 0) {
+        renderGenericTeacher('assignmentCreate', { page: 1, error: 'You must create a section before you can create an assignment.', rows: [] }, res);
+      } else {
+        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, rows: rows }, res);
+      }
+    });
+  });
 });
 
+// handles request to create an assignment
 router.post('/assignment/create', function(req,res) {
-  // todo implement creation of assignment
+  authTeacher(req.cookies.hash, res, function(id) {
+    var name = req.param('name');
+    var desc = req.param('desc');
+    var due  = req.param('due');
+    if(!name || name.length <= 0 || !due || due.length <= 0) {
+      renderGenericTeacher('assignmentCreate', { page: 0, error: 'Name and due date must both be filled out.'}, res);
+    } else {
+      connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [], function(err, rows) {
+        // todo finish
+      });
+    }
+  });
 });
 
+router.get('/assignment/:id', function(req, res) {
+  // todo assignment page
+});
+
+// todo all student stuff
 router.get('/student', function(req, res) {
-  // todo design student list
+  renderGenericTeacher('studentList', { page: 2 }, res);
 });
 
 module.exports = router;
-
-// convert a hash to a user id
-var authenticate = function(hash, res, finish) {
-  if(hash) {
-    connection.query("SELECT `id` FROM `sessions-teachers` WHERE `hash` = ?", [hash], function(err, rows) {
-      if(err || rows.length <= 0) {
-        res.redirect('/');
-      } else {
-        finish(rows[0].id);
-      }
-    });
-  } else {
-    res.redirect('/');
-  }
-}
-
-var renderGeneric = function(page, vars, res) {
-  express().render(page + '.ejs', vars, function(err, html) {
-    if(err) {
-      console.log(err);
-    } else {
-      vars.content = html;
-      res.render('teacher/genericDashboard', vars);
-    }
-  });
-}

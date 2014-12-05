@@ -1,0 +1,18 @@
+<div class="page-header">
+  <h1>New Assignment</h1>
+</div>
+<form action="/teacher/assignment/create" method="post">
+  <% if(typeof error != 'undefined') { %>
+    <div class="error"><%= error %></div>
+  <% } %>
+  <input type="text" class="form-control" placeholder="Name" name="name" required autofocus <%- typeof name == 'undefined' ? '' : ('value="' + name + '" ') %>/>
+  <textarea class="form-control" placeholder="Description" name="desc"><%- typeof desc == 'undefined' ? '' : desc %></textarea>
+  <input type="text" class="form-control" placeholder="Due Date" name="due" id="due" required <%- typeof due == 'undefined' ? '' : ('value="' + due + '" ') %>/>
+  Give this to the following sections:
+  <ul class="section-list">
+    <% for(i in rows) { %>
+      <li><label><input type="checkbox" name="section-<%= rows[i].id %>" /><%= rows[i].name %></label></li>
+    <% } %>
+  </ul>
+  <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create" />
+</form>

@@ -17,10 +17,26 @@
   margin-left: auto;
   margin-right: auto;
 }
+.main form .form-control {
+  margin-bottom: 10px;
+}
+.main form textarea {
+  resize: vertical;
+}
+.main form label {
+  font-weight: normal;
+}
+.main form label input[type="checkbox"] {
+  margin-right: 5px;
+}
 .main form input[type="submit"] {
   margin-top: 15px;
 }
 .error {
   color: #D00;
   margin-bottom: 4px;
+}
+ul.section-list {
+  list-style-type: none;
+  margin-top: 5px;
 }
