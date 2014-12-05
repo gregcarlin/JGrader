@@ -59,25 +59,6 @@ var authenticate = function(hash, res, finish) {
   }
 }
 
-var findSectionID = function(id, res, finish) {
-  if(id){
-    connection.query("SELECT `section_id` FROM `enrollment` WHERE `student_id` = ?", [id], function(err, rows) {
-      if(err || rows.length <= 0) {
-        // express().render('student/sectionList.ejs', function(err, html) {
-        //   if(err) {
-        //     console.log(err);
-        //   } else {
-        //     res.render('student/genericDashboard', { page: 0, content: html });
-        //   }
-        // });
-      } else {
-        finish(rows);
-      }
-    });
-  }
-}
-
-// Going to implement a for loop with this and findSectionID. Is there a way to do all that using mysql command??
 var findSection = function(id, res, finish) {
   if(id){
     connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname` FROM `enrollment`,`sections`,`teachers` WHERE `enrollment`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = `teachers`.`id` AND `enrollment`.`student_id` = ?", [id], function(err, rows) {
