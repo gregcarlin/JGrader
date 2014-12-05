@@ -12,7 +12,6 @@ router.get('/assignment', function(req, res) {
 });
 
 router.get('/section', function(req, res) {
-
   authenticate(req.cookies.hash, res, function(id) {
     findSection(id, res, function(rows){
       express().render('student/sectionList.ejs', { rows: rows }, function(err, html) {
@@ -22,11 +21,6 @@ router.get('/section', function(req, res) {
           res.render('student/genericDashboard', { page: 0, content: html });
         }
       });
-
-  authStudent(req.cookies.hash, res, function(id) {
-    findSectionID(id, res, function(rows){
-      renderGenericStudent('sectionList', { page: 0, rows: rows });
-
     });
   });
 });
@@ -62,6 +56,8 @@ var authenticate = function(hash, res, finish) {
     });
   } else {
     res.redirect('/');
+  }
+}
 
 var findSectionID = function(id, res, finish) {
   if(id){
@@ -92,5 +88,4 @@ var findSection = function(id, res, finish) {
     });
   }
 }
-
 module.exports = router;
