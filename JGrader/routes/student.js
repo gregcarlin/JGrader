@@ -26,8 +26,23 @@ router.get('/section/joinSection', function(req, res) {
 });
 
 router.get('/section/:id', function(req, res) {
-  authStudent(req.cookies.hash, res, function(id) {
-    renderGenericStudent('joinSection', { page: 0 });
+  authStudent(req.cookies.hash, res, function(studentID) {
+    sectionID = req.params.id;
+      connection.query("SELECT `assignments`.`name`,`assignments`.`description` FROM `assignments` WHERE `section_id` = ?", [sectionID], function(err, rows) {
+        // todo: Need to handle errors
+        if(err) {
+        res.redirect('/student/section');
+      } else {
+        connection.query("SELECT `sections`.`name` FROM `sections` WHERE `id` = ?", [sectionID], function(err, name) {
+          // todo: Need to handle errors
+          if(err) {
+            res.redirect('/student/section');
+          } else {
+            renderGenericStudent('section', { rows: rows, sectionName: name[0].name, page: 0 }, res);
+          }
+        });
+        }
+      });
   });
 });
 

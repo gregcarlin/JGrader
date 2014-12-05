@@ -1,29 +1,33 @@
+<% if (rows.length == 0){ %>
+<h1> Some kind of Error has happened</h1>
+<% } else { %>
 <div class="page-header">
-  <h1> Sections </h1>
-  <a href="section/joinSection"></a>
+  <h1> <%= sectionName %> </h1>
 </div>
 
 <div class="table-responsive">
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>Section</th>
-        <th>Teacher</th>
+        <th>Assignment</th>
+        <th>Description</th>
       </tr>
     </thead>
     <tbody>
     <% if(rows.length == 0) { %>
         <tr>
-          <td colspan="3">You have no sections... Lame</td>
+          <td colspan="3">You have no Assignments... Lucky/td>
         </tr>
       <% } else {
           for(i in rows) {%>
             <tr>
-              <td><a href="/student/section/ <%= rows[i].id %>"><%= rows[i].name %></a></td>
-              <td><%= rows[i].lname + ', ' + rows[i].fname %></td>
+              <td><%= rows[i].name %></a></td>
+              <td><%= rows[i].description%></td>
             </tr>
        <% }
        } %>
     </tbody>
   </table>
 </div>
+
+<% } %>
