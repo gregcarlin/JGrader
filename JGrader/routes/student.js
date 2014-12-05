@@ -12,20 +12,20 @@ router.get('/assignment', function(req, res) {
 });
 
 router.get('/section', function(req, res) {
-  authenticate(req.cookies.hash, res, function(id) {
-    findSection(id, res, function(rows){
-      express().render('student/sectionList.ejs', { rows: rows }, function(err, html) {
-        if(err) {
-          console.log(err);
-        } else {
-          res.render('student/genericDashboard', { page: 0, content: html });
-        }
-      });
+  authStudent(req.cookies.hash, res, function(id) {
+    findSectionInfo(id, res, function(rows){
+      renderGenericStudent('sectionList', { page: 0, rows: rows }, res);
     });
   });
 });
 
 router.get('/section/joinSection', function(req, res) {
+  authStudent(req.cookies.hash, res, function(id) {
+    renderGenericStudent('joinSection', { page: 0 });
+  });
+});
+
+router.get('/section/:id', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     renderGenericStudent('joinSection', { page: 0 });
   });
@@ -44,22 +44,7 @@ router.post('/section/joinSection', function(req, res) {
   });
 });
 
-
-var authenticate = function(hash, res, finish) {
-  if(hash) {
-    connection.query("SELECT `id` FROM `sessions-students` WHERE `hash` = ?", [hash], function(err, rows) {
-      if(err || rows.length <= 0) {
-        res.redirect('/');
-      } else {
-        finish(rows[0].id);
-      }
-    });
-  } else {
-    res.redirect('/');
-  }
-}
-
-var findSection = function(id, res, finish) {
+var findSectionInfo = function(id, res, finish) {
   if(id){
     connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname` FROM `enrollment`,`sections`,`teachers` WHERE `enrollment`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = `teachers`.`id` AND `enrollment`.`student_id` = ?", [id], function(err, rows) {
       if(err || rows.length <= 0) {
