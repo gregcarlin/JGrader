@@ -19,7 +19,7 @@
       <% } else {
           for(i in rows) {%>
             <tr>
-              <td><a href="/student/section/ <%= rows[i].id %>"><%= rows[i].name %></a></td>
+              <td><a href="/student/section/<%= rows[i].id %>"><%= rows[i].name %></a></td>
               <td><%= rows[i].lname + ', ' + rows[i].fname %></td>
             </tr>
        <% }
