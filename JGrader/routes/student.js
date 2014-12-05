@@ -69,4 +69,10 @@ var findSectionInfo = function(id, res, finish) {
     });
   }
 }
+
+router.get('/assignments/:id', function(req, res) {
+  authStudent(req.cookies.hash, res, function(id) {
+    renderGenericStudent('joinSection', { page: 0 });
+  });
+});
 module.exports = router;
