@@ -12,7 +12,7 @@ router.get('/assignment', function(req, res) {
 });
 
 router.get('/section', function(req, res) {
-<<<<<<< HEAD
+
   authenticate(req.cookies.hash, res, function(id) {
     findSection(id, res, function(rows){
       express().render('student/sectionList.ejs', { rows: rows }, function(err, html) {
@@ -22,11 +22,11 @@ router.get('/section', function(req, res) {
           res.render('student/genericDashboard', { page: 0, content: html });
         }
       });
-=======
+
   authStudent(req.cookies.hash, res, function(id) {
     findSectionID(id, res, function(rows){
       renderGenericStudent('sectionList', { page: 0, rows: rows });
->>>>>>> FETCH_HEAD
+
     });
   });
 });
@@ -50,7 +50,7 @@ router.post('/section/joinSection', function(req, res) {
   });
 });
 
-<<<<<<< HEAD
+
 var authenticate = function(hash, res, finish) {
   if(hash) {
     connection.query("SELECT `id` FROM `sessions-students` WHERE `hash` = ?", [hash], function(err, rows) {
@@ -62,7 +62,7 @@ var authenticate = function(hash, res, finish) {
     });
   } else {
     res.redirect('/');
-=======
+
 var findSectionID = function(id, res, finish) {
   if(id){
     connection.query("SELECT `section_id` FROM `enrollment` WHERE `student_id` = ?", [id], function(err, rows) {
@@ -78,7 +78,6 @@ var findSectionID = function(id, res, finish) {
         finish(rows);
       }
     });
->>>>>>> FETCH_HEAD
   }
 }
 
