@@ -2,7 +2,7 @@
 <h1> Some kind of Error has happened</h1>
 <% } else { %>
 <div class="page-header">
-  <h1> <%= sectionName %> </h1>
+  <h1> <%= rows[0].sectionName %> </h1>
 </div>
 
 <div class="table-responsive">
@@ -23,6 +23,7 @@
             <tr>
               <td><%= rows[i].name %></a></td>
               <td><%= rows[i].description%></td>
+              <td><%= rows[i].due%></td>
             </tr>
        <% }
        } %>
