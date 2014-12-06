@@ -1,23 +1,29 @@
+<div class="page-header">
+  <h1> Assignments </h1>
+</div>
+
 <div class="table-responsive">
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Students</th>
-        <th>Last Assignment</th>
+        <th>Assignment</th>
+        <th>Description</th>
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td><a href="#">Period 1</a></td>
-        <td>23</td>
-        <td><a href="#">Picture Lab</a></td>
-      </tr>
-      <tr>
-        <td><a href="#">Period 3</a></td>
-        <td>15</td>
-        <td><a href="#">High Low Game</a></td>
-      </tr>
+    <% if(rows.length == 0) { %>
+        <tr>
+          <td colspan="3">You have no Assignments... Lucky/td>
+        </tr>
+      <% } else {
+          for(i in rows) {%>
+            <tr>
+              <td><%= rows[i].name %></a></td>
+              <td><%= rows[i].description%></td>
+              <td><%= rows[i].due%></td>
+            </tr>
+       <% }
+       } %>
     </tbody>
   </table>
 </div>
