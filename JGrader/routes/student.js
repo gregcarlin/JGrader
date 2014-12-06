@@ -28,19 +28,12 @@ router.get('/section/joinSection', function(req, res) {
 router.get('/section/:id', function(req, res) {
   authStudent(req.cookies.hash, res, function(studentID) {
     sectionID = req.params.id;
-      connection.query("SELECT `assignments`.`name`,`assignments`.`description` FROM `assignments` WHERE `section_id` = ?", [sectionID], function(err, rows) {
+      connection.query("SELECT `assignments`.`name`,`assignments`.`description`,`assignments`.`due`,`sections`.`name` AS `sectionName` FROM `assignments`, `enrollment`,`sections` WHERE `assignments`.`section_id` = `enrollment`.`section_id` AND `enrollment`.`student_id` = ? AND `sections`.`id` = `enrollment`.`section_id` AND `enrollment`.`section_id` = ?", [studentID,sectionID], function(err, rows) {
         // todo: Need to handle errors
         if(err) {
         res.redirect('/student/section');
       } else {
-        connection.query("SELECT `sections`.`name` FROM `sections` WHERE `id` = ?", [sectionID], function(err, name) {
-          // todo: Need to handle errors
-          if(err) {
-            res.redirect('/student/section');
-          } else {
-            renderGenericStudent('section', { rows: rows, sectionName: name[0].name, page: 0 }, res);
-          }
-        });
+            renderGenericStudent('section', { rows: rows, page: 0 }, res);
         }
       });
   });
