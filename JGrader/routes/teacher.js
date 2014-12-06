@@ -99,15 +99,26 @@ router.post('/assignment/create', function(req,res) {
     if(!name || name.length <= 0 || !due || due.length <= 0) {
       renderGenericTeacher('assignmentCreate', { page: 0, error: 'Name and due date must both be filled out.'}, res);
     } else {
-      connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [], function(err, rows) {
+      console.log('sec-param = ' + req.param('section')); // todo figure this out. waiting for a response on SO.
+      /*connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [], function(err, rows) {
         // todo finish
-      });
+      });*/
     }
   });
 });
 
 router.get('/assignment/:id', function(req, res) {
-  // todo assignment page
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    connection.query("SELECT `assignments`.`name`,`assignments`.`description`,`assignments`.`due`,`sections`.`name` AS `sname` FROM `assignments`,`sections` WHERE `assignments`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = ? AND `assignments`.`id` = ?", [teacherID, req.params.id], function(err, rows) {
+      if(err) {
+        throw err; // todo better error handling
+      } else if(rows.length <= 0) {
+        renderGenericTeacher('notFound', { page: 1, type: 'assignment' }, res);
+      } else {
+        renderGenericTeacher('assignment', { page: 1, assignment: rows[0] }, res);
+      }
+    });
+  });
 });
 
 // todo all student stuff

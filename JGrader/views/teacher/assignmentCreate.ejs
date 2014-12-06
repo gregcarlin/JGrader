@@ -11,7 +11,7 @@
   Give this to the following sections:
   <ul class="section-list">
     <% for(i in rows) { %>
-      <li><label><input type="checkbox" name="section-<%= rows[i].id %>" /><%= rows[i].name %></label></li>
+      <li><label><input type="checkbox" name="section[]" value="<%= rows[i].id %>" /><%= rows[i].name %></label></li>
     <% } %>
   </ul>
   <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create" />
