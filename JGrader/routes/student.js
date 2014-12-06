@@ -7,7 +7,7 @@ router.get('/', function(req, res) {
 
 router.get('/assignment', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
-    renderGenericStudent('assignmentList', { page: 0 }, res);
+    renderGenericStudent('assignmentList', { page: 1 }, res);
   });
 });
 
