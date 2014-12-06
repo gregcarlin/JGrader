@@ -7,7 +7,20 @@ router.get('/', function(req, res) {
 
 router.get('/assignment', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
-    renderGenericStudent('assignmentList', { page: 1 }, res);
+    connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due` FROM `sections`, `teachers`, `assignments`,`enrollment` WHERE `enrollment`.`student_id` = ? AND `enrollment`.`section_id` = `assignments`.`section_id` AND `sections`.`id` = `enrollment`.`section_id` AND `sections`.`teacher_id`=`teachers`.`id`", [id], function(err, rows) {
+      // todo: Need to handle errors
+      if(err) {
+        res.redirect('/student/section');
+      } else {
+        renderGenericStudent('assignmentList', { rows: rows, page: 1 }, res);
+      }
+    });
+  });
+});
+
+router.get('/assignments/:id', function(req, res) {
+  authStudent(req.cookies.hash, res, function(id) {
+    renderGenericStudent('joinSection', { page: 0 });
   });
 });
 
@@ -21,7 +34,7 @@ router.get('/section', function(req, res) {
 
 router.get('/section/joinSection', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
-    renderGenericStudent('joinSection', { page: 0 });
+    renderGenericStudent('joinSection', { page: 0 }, res);
   });
 });
 
@@ -63,9 +76,4 @@ var findSectionInfo = function(id, res, finish) {
   }
 }
 
-router.get('/assignments/:id', function(req, res) {
-  authStudent(req.cookies.hash, res, function(id) {
-    renderGenericStudent('joinSection', { page: 0 });
-  });
-});
 module.exports = router;

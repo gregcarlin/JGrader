@@ -1,3 +1,6 @@
+<% if(typeof rows == 'undefined') {%>
+<h1> Some kind of Error has happened </h1>
+<% } else { %>
 <div class="page-header">
   <h1> Assignments </h1>
 </div>
@@ -6,8 +9,11 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>Assignment</th>
+        <th>Assignment Name</th>
         <th>Description</th>
+        <th>Due</th>
+        <th>Class</th>
+        <th>Teacher</th>
       </tr>
     </thead>
     <tbody>
@@ -18,12 +24,15 @@
       <% } else {
           for(i in rows) {%>
             <tr>
-              <td><%= rows[i].name %></a></td>
+              <td><%= rows[i].assignmentName %></a></td>
               <td><%= rows[i].description%></td>
               <td><%= rows[i].due%></td>
+              <td><%= rows[i].name%></td>
+              <td><%= rows[i].lname + ', ' + rows[i].fname%></td>
             </tr>
        <% }
        } %>
     </tbody>
   </table>
 </div>
+<% } %>
