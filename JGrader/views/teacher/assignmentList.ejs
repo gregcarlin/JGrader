@@ -23,7 +23,7 @@
             <tr>
               <td><a href="/teacher/assignment/<%= rows[i].aid %>"><%= rows[i].aname %></a></td>
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
-              <td>Tomorrow</td>
+              <td><%= strftime('%b %d, %l:%M %p', new Date(rows[i].due)) %></td>
               <td>5/23</td>
               <td>3/5</td>
             </tr>
