@@ -1,5 +1,6 @@
 require('./common');
 var router = express.Router();
+var strftime = require('strftime');
 
 // main teacher page, redirects to section list
 router.get('/', function(req, res) {
@@ -65,11 +66,11 @@ router.get('/section/:id', function(req, res) {
 // page that lists assignments
 router.get('/assignment', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `assignments`.`id` AS `aid`,`assignments`.`name` AS `aname`,`sections`.`id` AS `sid`,`sections`.`name` AS `sname` FROM `sections`,`assignments` WHERE `sections`.`id` = `assignments`.`section_id` AND `sections`.`teacher_id` = ? ORDER BY `assignments`.`due` DESC", [id], function(err, rows) {
+    connection.query("SELECT `assignments`.`id` AS `aid`,`assignments`.`name` AS `aname`,`assignments`.`due`,`sections`.`id` AS `sid`,`sections`.`name` AS `sname` FROM `sections`,`assignments` WHERE `sections`.`id` = `assignments`.`section_id` AND `sections`.`teacher_id` = ? ORDER BY `assignments`.`due` DESC", [id], function(err, rows) {
       if(err) {
         throw err; // #yolt
       } else {
-        renderGenericTeacher('assignmentList', { page: 1, rows: rows }, res);
+        renderGenericTeacher('assignmentList', { page: 1, rows: rows, strftime: strftime }, res);
       }
     });
   });
