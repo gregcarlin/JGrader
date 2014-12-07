@@ -23,7 +23,7 @@ router.get('/assignment/:id', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     var assignmentID = req.params.id;
     if(id) {
-      connection.query("SELECT `assignments`.`name`,`assignments`.`description`,`assignments`.`due` FROM `enrollment`,`assignments`,`sections` WHERE `enrollment`.`section_id` = `sections`.`id` AND `sections`.`id` = `assignments`.`section_id` AND `enrollment`.`student_id` = ? AND `assignments`.`id` = ?", [id, assignmentID], function(err, rows) {
+      connection.query("SELECT `assignments`.`id`,`assignments`.`name`,`assignments`.`description`,`assignments`.`due` FROM `enrollment`,`assignments`,`sections` WHERE `enrollment`.`section_id` = `sections`.`id` AND `sections`.`id` = `assignments`.`section_id` AND `enrollment`.`student_id` = ? AND `assignments`.`id` = ?", [id, assignmentID], function(err, rows) {
         // todo: Need to handle errors
         if(err) {
           res.redirect('/student/assignment');
@@ -38,7 +38,7 @@ router.get('/assignment/:id', function(req, res) {
 
 router.post('/assignment/:id/submit', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
-    renderGenericStudent('joinSection', { page: 1 });
+    console.log(req.files);
   });
 });
 

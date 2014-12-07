@@ -28,6 +28,11 @@
        <% } %>
     </tbody>
   </table>
+  <form action="/student/assignment/<%= rows[0].id %>/submit" method="post" enctype="multipart/form-data">
+      <!-- todo support errors -->
+      <input type="file" name="fileUpload" required autofocus />
+      <input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit Assignment" />
+  </form>
 </div>
 
 <% } %>

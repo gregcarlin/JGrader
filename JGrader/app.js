@@ -4,6 +4,7 @@ var favicon      = require('serve-favicon');
 var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
+var multer  = require('multer')
 
 var index   = require('./routes/index');
 var signIn  = require('./routes/sign-in');
@@ -22,6 +23,7 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(multer({dest:'./uploads/'}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
