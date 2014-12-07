@@ -91,21 +91,43 @@ router.get('/assignment/create', function(req, res) {
 });
 
 // handles request to create an assignment
-router.post('/assignment/create', function(req,res) {
+router.post('/assignment/create', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
     var name = req.param('name');
     var desc = req.param('desc');
     var due  = req.param('due');
+    var secs = req.param('section');
     if(!name || name.length <= 0 || !due || due.length <= 0) {
-      renderGenericTeacher('assignmentCreate', { page: 0, error: 'Name and due date must both be filled out.'}, res);
+      renderGenericTeacher('assignmentCreate', { page: 1, error: 'Name and due date must both be filled out.'}, res);
+    } else if(secs.length <= 0) {
+      renderGenericTeacher('assignmentCreate', { page: 1, error: 'You must select at least one section.'}, res);
     } else {
-      console.log('sec-param = ' + req.param('section')); // todo figure this out. waiting for a response on SO.
-      /*connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [], function(err, rows) {
-        // todo finish
-      });*/
+      for(i in secs) {
+        createAssignment(id, secs[i], res, name, desc, due);
+      }
+      res.redirect('/teacher/assignment');
     }
   });
 });
+
+var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
+  // verify that teacher owns this section
+  connection.query("SELECT (SELECT `teacher_id` FROM `sections` WHERE `id` = ?) = ? AS `result`", [sectionID, teacherID], function(err, rows) {
+    if(err) {
+      throw err; // todo better error handling
+    } else if(!rows[0].result) {
+      renderGenericTeacher('assignmentCreate', { page: 1, error: 'An unexpected error has occurred.'}, res);
+    } else {
+      if(!desc || desc.length <= 0) desc = null;
+      connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [sectionID, name, desc, due], function(err, rows) {
+        if(err) {
+          renderGenericTeacher('assignmentCreate', { page: 1, error: 'Invalid due date.'}, res); // probably an invalid due date. i think.
+        }
+        // nothing to do here
+      });
+    }
+  });
+}
 
 router.get('/assignment/:id', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
