@@ -138,7 +138,7 @@ router.get('/assignment/:id', function(req, res) {
       } else if(rows.length <= 0) {
         renderGenericTeacher('notFound', { page: 1, type: 'assignment' }, res);
       } else {
-        renderGenericTeacher('assignment', { page: 1, assignment: rows[0] }, res);
+        renderGenericTeacher('assignment', { page: 1, assignment: rows[0], strftime: strftime }, res);
       }
     });
   });

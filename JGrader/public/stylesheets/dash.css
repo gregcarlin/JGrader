@@ -2,9 +2,18 @@
   margin: 0;
   display: inline;
 }
-.page-header a {
+.page-header h2 {
+  font-size: 24px;
+}
+.sub-header {
+  font-size: 28px;
+}
+.page-header .right {
   float: right;
   display: block;
+  margin: 0;
+}
+.page-header a {
   width: 32px;
   height: 32px;
   background-image: url("../images/plus-32.png");
