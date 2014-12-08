@@ -27,7 +27,11 @@
           for(i in results) {%>
             <tr>
               <td><a href="/teacher/student/<%= results[i].id %>"><%= results[i].fname + ' ' + results[i].lname %></a></td>
-              <td>Never</td>
+              <%
+                var submitted = new Date(results[i].submitted);
+                var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
+              %>
+              <td><%= results[i].submitted ? submittedStr : 'Never' %></td>
               <td>Not Graded</td>
             </tr>
        <% }

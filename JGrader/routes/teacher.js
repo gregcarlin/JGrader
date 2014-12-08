@@ -138,8 +138,7 @@ router.get('/assignment/:id', function(req, res) {
       } else if(rows.length <= 0) {
         renderGenericTeacher('notFound', { page: 1, type: 'assignment' }, res);
       } else {
-        // todo finish this query
-        connection.query("SELECT `students`.`id`,`students`.`fname`,`students`.`lname`,`submissions`.`submitted` FROM `enrollment`,`students` LEFT JOIN `submissions` ON `submissions`.`student_id` = `students`.`id` WHERE `enrollment`.`student_id` = `students`.`id` AND `enrollment`.`section_id` = ?", [rows[0].sid], function(err, results) {
+        connection.query("SELECT `students`.`id`,`students`.`fname`,`students`.`lname`,`submissions`.`submitted` FROM `enrollment`,`students` LEFT JOIN `submissions` ON `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ? WHERE `enrollment`.`student_id` = `students`.`id` AND `enrollment`.`section_id` = ?", [req.params.id, rows[0].sid], function(err, results) {
           renderGenericTeacher('assignment', { page: 1, assignment: rows[0], strftime: strftime, results: results }, res);
         });
       }
