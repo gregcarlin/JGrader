@@ -10,7 +10,7 @@ router.get('/', function(req, res) {
 // page for listing sections
 router.get('/section', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `sections`.`name`,`sections`.`id`,COUNT(`enrollment`.`student_id`) AS `count`,`assignments`.`name` AS `aname`,`assignments`.`id` AS `aid` FROM `sections` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` LEFT JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` AND `assignments`.`due` = (SELECT MIN(`due`) FROM `assignments` WHERE `section_id` = `sections`.`id` AND `due` > NOW()) WHERE `sections`.`teacher_id` = ? GROUP BY `sections`.`name`", [id], function(err, rows) {
+    connection.query("SELECT `sections`.`name`,`sections`.`id`,COUNT(`enrollment`.`student_id`) AS `count`,`assignments`.`name` AS `aname`,`assignments`.`id` AS `aid` FROM `sections` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` LEFT JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` AND `assignments`.`due` = (SELECT MIN(`due`) FROM `assignments` WHERE `section_id` = `sections`.`id` AND `due` > NOW()) WHERE `sections`.`teacher_id` = ? GROUP BY `sections`.`id` ORDER BY `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
         throw err; // #yolo
       } else {
@@ -66,7 +66,7 @@ router.get('/section/:id', function(req, res) {
 // page that lists assignments
 router.get('/assignment', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `assignments`.`id` AS `aid`,`assignments`.`name` AS `aname`,`assignments`.`due`,`sections`.`id` AS `sid`,`sections`.`name` AS `sname` FROM `sections`,`assignments` WHERE `sections`.`id` = `assignments`.`section_id` AND `sections`.`teacher_id` = ? ORDER BY `assignments`.`due` DESC", [id], function(err, rows) {
+    connection.query("SELECT `assignments`.`id` AS `aid`,`assignments`.`name` AS `aname`,`assignments`.`due`,`sections`.`id` AS `sid`,`sections`.`name` AS `sname`,COUNT(`enrollment`.`student_id`) AS `total` FROM `assignments` JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`teacher_id` = ? GROUP BY `assignments`.`id` ORDER BY `assignments`.`due` DESC, `assignments`.`name` ASC, `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
         throw err; // #yolt
       } else {
