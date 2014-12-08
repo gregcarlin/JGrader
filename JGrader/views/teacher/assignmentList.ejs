@@ -1,6 +1,6 @@
 <div class="page-header">
   <h1>Assignments</h1>
-  <a href="/teacher/assignment/create"></a>
+  <a href="/teacher/assignment/create" class="right plus-button"></a>
 </div>
 <div class="table-responsive">
   <table class="table table-striped">
@@ -16,14 +16,18 @@
     <tbody>
       <% if(rows.length == 0) { %>
         <tr>
-          <td colspan="3">You have not posted any assignments.</td>
+          <td colspan="5">You have not posted any assignments.</td>
         </tr>
       <% } else {
           for(i in rows) {%>
             <tr>
               <td><a href="/teacher/assignment/<%= rows[i].aid %>"><%= rows[i].aname %></a></td>
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
-              <td><%= strftime('%b %d, %l:%M %p', new Date(rows[i].due)) %></td>
+              <%
+                var due = new Date(rows[i].due);
+                var dueStr = strftime(due.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', due);
+              %>
+              <td title="<%= strftime('%b %d %Y, %l:%M %p', due) %>"><%= dueStr %></td>
               <td>5/23</td>
               <td>3/5</td>
             </tr>

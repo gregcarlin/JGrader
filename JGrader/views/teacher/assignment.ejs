@@ -1,6 +1,37 @@
 <div class="page-header">
-  <h1><%= assignment.name %> | <a class="sub-header"><%= assignment.sname %></a></h1>
-  <h2 class="right">Due <%= strftime('%b %o', new Date(assignment.due)) %></h2>
+  <h1><%= assignment.name %> | <a href="/teacher/section/<%= assignment.sid %>" class="sub-header"><%= assignment.sname %></a></h1>
+  <%
+    var due = new Date(assignment.due);
+    var sameYear = due.getYear() == new Date(Date.now()).getYear();
+  %>
+  <h2 class="right" title="<%= strftime('%b %o %Y @ %l:%M %p', due) %>">Due <%= strftime(sameYear ? '%b %o' : '%b %o, %Y', due) %></h2>
 </div>
-Description: <%= assignment.description %><br />
-Assigned to: <%= assignment.sname %>
+<div class="description">
+  <%= assignment.description ? assignment.description : '' %>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Submitted</th>
+        <th>Grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if(results.length == 0) { %>
+        <tr>
+          <td colspan="3">There are no students in this section.</td>
+        </tr>
+      <% } else {
+          for(i in results) {%>
+            <tr>
+              <td><a href="/teacher/student/<%= results[i].id %>"><%= results[i].fname + ' ' + results[i].lname %></a></td>
+              <td>Never</td>
+              <td>Not Graded</td>
+            </tr>
+       <% }
+         } %>
+    </tbody>
+  </table>
+</div>
