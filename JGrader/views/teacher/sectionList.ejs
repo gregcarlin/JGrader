@@ -8,7 +8,7 @@
       <tr>
         <th>Name</th>
         <th>Students</th>
-        <th>Last Assignment</th>
+        <th>Current Assignment</th>
       </tr>
     </thead>
     <tbody>
@@ -21,7 +21,7 @@
             <tr>
               <td><a href="/teacher/section/<%= rows[i].id %>"><%= rows[i].name %></a></td>
               <td><%= rows[i].count %></td>
-              <td><a href="#">Picture Lab</a></td>
+              <td><%- rows[i].aname ? '<a href="/teacher/assignment/' + rows[i].aid + '">' + rows[i].aname + '</a>' : 'None' %></td>
             </tr>
        <% }
          } %>
