@@ -66,7 +66,22 @@ router.get('/section/:id', function(req, res) {
 // page that lists assignments
 router.get('/assignment', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `assignments`.`id` AS `aid`,`assignments`.`name` AS `aname`,`assignments`.`due`,`sections`.`id` AS `sid`,`sections`.`name` AS `sname`,COUNT(`enrollment`.`student_id`) AS `total` FROM `assignments` JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`teacher_id` = ? GROUP BY `assignments`.`id` ORDER BY `assignments`.`due` DESC, `assignments`.`name` ASC, `sections`.`name` ASC", [id], function(err, rows) {
+    connection.query("SELECT \
+                        `assignments`.`id` AS `aid`,\
+                        `assignments`.`name` AS `aname`,\
+                        `assignments`.`due`,\
+                        `sections`.`id` AS `sid`,\
+                        `sections`.`name` AS `sname`,\
+                        COUNT(`enrollment`.`student_id`) AS `total`\
+                      FROM `assignments` \
+                      JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
+                      LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
+                      WHERE `sections`.`teacher_id` = ? \
+                      GROUP BY `assignments`.`id` \
+                      ORDER BY \
+                        `assignments`.`due` DESC, \
+                        `assignments`.`name` ASC, \
+                        `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
         throw err; // #yolt
       } else {
