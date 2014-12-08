@@ -13,6 +13,16 @@ router.get('/', function(req, res) {
   });
 });
 
+router.get('/log-out', function(req, res) {
+  var hash = req.cookies.hash;
+  res.clearCookie('hash');
+  // todo only delete from where we need to?
+  connection.query("DELETE FROM `sessions-teachers` WHERE `hash` = ?", [hash]);
+  connection.query("DELETE FROM `sessions-students` WHERE `hash` = ?", [hash]);
+  connection.query("DELETE FROM `sessions-assistants` WHERE `hash` = ?", [hash]);
+  res.redirect('/');
+});
+
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, db, finish) {
   logIn(hash, db + 's', function(id) {
