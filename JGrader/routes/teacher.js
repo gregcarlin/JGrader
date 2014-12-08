@@ -10,7 +10,7 @@ router.get('/', function(req, res) {
 // page for listing sections
 router.get('/section', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `sections`.`name`,`sections`.`id`,COUNT(`enrollment`.`student_id`) AS `count` FROM `sections` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`teacher_id` = ? GROUP BY `sections`.`name`", [id], function(err, rows) {
+    connection.query("SELECT `sections`.`name`,`sections`.`id`,COUNT(`enrollment`.`student_id`) AS `count`,`assignments`.`name` AS `aname`,`assignments`.`id` AS `aid` FROM `sections` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` LEFT JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` AND `assignments`.`due` = (SELECT MIN(`due`) FROM `assignments` WHERE `section_id` = `sections`.`id` AND `due` > NOW()) WHERE `sections`.`teacher_id` = ? GROUP BY `sections`.`name`", [id], function(err, rows) {
       if(err) {
         throw err; // #yolo
       } else {
