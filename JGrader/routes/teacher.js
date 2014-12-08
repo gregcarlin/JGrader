@@ -132,13 +132,16 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
 
 router.get('/assignment/:id', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
-    connection.query("SELECT `assignments`.`name`,`assignments`.`description`,`assignments`.`due`,`sections`.`name` AS `sname` FROM `assignments`,`sections` WHERE `assignments`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = ? AND `assignments`.`id` = ?", [teacherID, req.params.id], function(err, rows) {
+    connection.query("SELECT `assignments`.`name`,`assignments`.`description`,`assignments`.`due`,`sections`.`name` AS `sname`,`sections`.`id` AS `sid` FROM `assignments`,`sections` WHERE `assignments`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = ? AND `assignments`.`id` = ?", [teacherID, req.params.id], function(err, rows) {
       if(err) {
         throw err; // todo better error handling
       } else if(rows.length <= 0) {
         renderGenericTeacher('notFound', { page: 1, type: 'assignment' }, res);
       } else {
-        renderGenericTeacher('assignment', { page: 1, assignment: rows[0], strftime: strftime }, res);
+        // todo finish this query
+        connection.query("SELECT `students`.`id`,`students`.`fname`,`students`.`lname`,`submissions`.`submitted` FROM `enrollment`,`students` LEFT JOIN `submissions` ON `submissions`.`student_id` = `students`.`id` WHERE `enrollment`.`student_id` = `students`.`id` AND `enrollment`.`section_id` = ?", [rows[0].sid], function(err, results) {
+          renderGenericTeacher('assignment', { page: 1, assignment: rows[0], strftime: strftime, results: results }, res);
+        });
       }
     });
   });

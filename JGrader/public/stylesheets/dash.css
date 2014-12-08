@@ -13,12 +13,12 @@
   display: block;
   margin: 0;
 }
-.page-header a {
+.page-header .plus-button {
   width: 32px;
   height: 32px;
   background-image: url("../images/plus-32.png");
 }
-.page-header a:hover {
+.page-header .plus-button:hover {
   background-image: url("../images/plus-32-blue.png");
 }
 .main form {
@@ -48,4 +48,9 @@
 ul.section-list {
   list-style-type: none;
   margin-top: 5px;
+}
+.description {
+  font-size: 18px;
+  margin-left: 2px;
+  margin-bottom: 10px;
 }
