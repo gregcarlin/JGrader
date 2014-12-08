@@ -32,19 +32,30 @@ renderGenericStudent = function(page, vars, res) {
   renderGeneric('student/' + page, vars, 'student', res);
 }
 
-// convert a hash to a user id
-var authenticate = function(hash, res, db, finish) {
+// convert a hash to a user id. calls finish(id) when done. id is null if log in fails (due to error or incorrect data).
+logIn = function(hash, db, finish) {
   if(hash) {
     connection.query("SELECT `id` FROM `sessions-" + db + "` WHERE `hash` = ?", [hash], function(err, rows) {
       if(err || rows.length <= 0) {
-        res.redirect('/');
+        finish(null);
       } else {
         finish(rows[0].id);
       }
     });
   } else {
-    res.redirect('/');
+    finish(null);
   }
+}
+
+// attempt to authenticate user. calls finish(id) if id is found, otherwise redirects user to landing page.
+var authenticate = function(hash, res, db, finish) {
+  logIn(hash, db, function(id) {
+    if(id) {
+      finish(id);
+    } else {
+      res.redirect('/');
+    }
+  });
 }
 
 authTeacher = function(hash, res, finish) {
@@ -53,6 +64,10 @@ authTeacher = function(hash, res, finish) {
 
 authStudent = function(hash, res, finish) {
   authenticate(hash, res, 'students', finish);
+}
+
+authTA = function(hash, res, finish) {
+  authenticate(hash, res, 'assistants', finish);
 }
 
 // modules.exports not required because everything is global
