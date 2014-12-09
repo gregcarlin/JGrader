@@ -10,7 +10,20 @@ router.get('/', function(req, res) {
 // page for listing sections
 router.get('/section', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `sections`.`name`,`sections`.`id`,COUNT(`enrollment`.`student_id`) AS `count`,`assignments`.`name` AS `aname`,`assignments`.`id` AS `aid` FROM `sections` LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` LEFT JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` AND `assignments`.`due` = (SELECT MIN(`due`) FROM `assignments` WHERE `section_id` = `sections`.`id` AND `due` > NOW()) WHERE `sections`.`teacher_id` = ? GROUP BY `sections`.`id` ORDER BY `sections`.`name` ASC", [id], function(err, rows) {
+    connection.query("SELECT \
+                        `sections`.`name`,\
+                        `sections`.`id`,\
+                        COUNT(`enrollment`.`student_id`) AS `count`,\
+                        `assignments`.`name` AS `aname`,\
+                        `assignments`.`id` AS `aid`\
+                      FROM `sections` \
+                      LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
+                      LEFT JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` \
+                      AND `assignments`.`due` = \
+                        (SELECT MIN(`due`) FROM `assignments` WHERE `section_id` = `sections`.`id` AND `due` > NOW()) \
+                      WHERE `sections`.`teacher_id` = ? \
+                      GROUP BY `sections`.`id` \
+                      ORDER BY `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
         throw err; // #yolo
       } else {
@@ -150,13 +163,34 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
 
 router.get('/assignment/:id', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
-    connection.query("SELECT `assignments`.`name`,`assignments`.`description`,`assignments`.`due`,`sections`.`name` AS `sname`,`sections`.`id` AS `sid` FROM `assignments`,`sections` WHERE `assignments`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = ? AND `assignments`.`id` = ?", [teacherID, req.params.id], function(err, rows) {
+    connection.query("SELECT \
+                        `assignments`.`name`,\
+                        `assignments`.`description`,\
+                        `assignments`.`due`,\
+                        `sections`.`name` AS `sname`,\
+                        `sections`.`id` AS `sid` \
+                      FROM `assignments`,`sections` \
+                      WHERE \
+                        `assignments`.`section_id` = `sections`.`id` AND \
+                        `sections`.`teacher_id` = ? AND \
+                        `assignments`.`id` = ?", [teacherID, req.params.id], function(err, rows) {
       if(err) {
         throw err; // todo better error handling
       } else if(rows.length <= 0) {
         renderGenericTeacher('notFound', { page: 1, type: 'assignment' }, res);
       } else {
-        connection.query("SELECT `students`.`id`,`students`.`fname`,`students`.`lname`,`submissions`.`submitted` FROM `enrollment`,`students` LEFT JOIN `submissions` ON `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ? WHERE `enrollment`.`student_id` = `students`.`id` AND `enrollment`.`section_id` = ?", [req.params.id, rows[0].sid], function(err, results) {
+        connection.query("SELECT \
+                            `students`.`id`,\
+                            `students`.`fname`,\
+                            `students`.`lname`,\
+                            `submissions`.`submitted` \
+                          FROM `enrollment`,`students` \
+                          LEFT JOIN \
+                            `submissions` ON `submissions`.`student_id` = `students`.`id` AND \
+                            `submissions`.`assignment_id` = ? \
+                          WHERE \
+                            `enrollment`.`student_id` = `students`.`id` AND \
+                            `enrollment`.`section_id` = ?", [req.params.id, rows[0].sid], function(err, results) {
           renderGenericTeacher('assignment', { page: 1, assignment: rows[0], strftime: strftime, results: results }, res);
         });
       }
