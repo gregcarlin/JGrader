@@ -28,8 +28,8 @@
                 var dueStr = strftime(due.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', due);
               %>
               <td title="<%= strftime('%b %d %Y, %l:%M %p', due) %>"><%= dueStr %></td>
-              <td>5 of <%= rows[i].total %></td>
-              <td>3 of 5</td>
+              <td><%= rows[i].complete %> of <%= rows[i].total %></td>
+              <td><%= rows[i].graded %> of <%= rows[i].complete %></td>
             </tr>
        <% }
          } %>

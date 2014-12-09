@@ -72,10 +72,13 @@ router.get('/assignment', function(req, res) {
                         `assignments`.`due`,\
                         `sections`.`id` AS `sid`,\
                         `sections`.`name` AS `sname`,\
-                        COUNT(`enrollment`.`student_id`) AS `total`\
+                        COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
+                        COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
+                        COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
                       FROM `assignments` \
                       JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
                       LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
+                      LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
                       WHERE `sections`.`teacher_id` = ? \
                       GROUP BY `assignments`.`id` \
                       ORDER BY \
