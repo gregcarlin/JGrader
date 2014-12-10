@@ -27,7 +27,9 @@ router.get('/section', function(req, res) {
       if(err) {
         throw err; // #yolo
       } else {
-        renderGenericTeacher('sectionList', { page: 0, rows: rows }, res);
+        getInfoTeacher(id, function(fname, lname) {
+          renderGenericTeacher('sectionList', { page: 0, title: fname + ' ' + lname + "'s Sections", rows: rows }, res);
+        });
       }
     });
   });
