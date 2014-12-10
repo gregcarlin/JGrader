@@ -70,4 +70,27 @@ authTA = function(hash, res, finish) {
   authenticate(hash, res, 'assistants', finish);
 }
 
-// modules.exports not required because everything is global
+// retrieves the first and last names of a user
+var getInfo = function(id, db, finish) {
+  connection.query("SELECT `fname`,`lname` FROM `" + db + "` WHERE `id` = ?", [id], function(err, rows) {
+    if(err) {
+      finish(null, null);
+    } else {
+      finish(rows[0].fname, rows[0].lname);
+    }
+  });
+}
+
+getInfoTeacher = function(id, finish) {
+  getInfo(id, 'teachers', finish);
+}
+
+getInfoStudent = function(id, finish) {
+  getInfo(id, 'students', finish);
+}
+
+getInfoTA = function(id, finish) {
+  getInfo(id, 'assistants', finish);
+}
+
+// modules.exports not required because everything needed is global
