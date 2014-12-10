@@ -27,9 +27,7 @@ router.get('/section', function(req, res) {
       if(err) {
         throw err; // #yolo
       } else {
-        getInfoTeacher(id, function(fname, lname) {
-          renderGenericTeacher('sectionList', { page: 0, title: fname + ' ' + lname + "'s Sections", rows: rows }, res);
-        });
+        renderGenericTeacher('sectionList', { page: 0, title: 'Your Sections', rows: rows }, res);
       }
     });
   });
@@ -38,7 +36,7 @@ router.get('/section', function(req, res) {
 // page for creating a new section
 router.get('/section/create', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
-    renderGenericTeacher('sectionCreate', { page: 0 }, res);
+    renderGenericTeacher('sectionCreate', { page: 0, title: 'Create a Section' }, res);
   });
 });
 
@@ -47,11 +45,11 @@ router.post('/section/create', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
     var name = req.param('name');
     if(!name || name.length <= 0) {
-      renderGenericTeacher('sectionCreate', { page: 0, error: 'Name cannot be blank.', name: name }, res);
+      renderGenericTeacher('sectionCreate', { page: 0, title: 'Create a Section', error: 'Name cannot be blank.', name: name }, res);
     } else {
       connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?); SELECT LAST_INSERT_ID()", [id, name], function(err, rows) {
         if(err || rows.length <= 0) {
-          renderGenericTeacher('sectionCreate', { page: 0, error: 'An unknown error has occurred. Please try again later.', name: name }, res);
+          renderGenericTeacher('sectionCreate', { page: 0, title: 'Create a Section', error: 'An unknown error has occurred. Please try again later.', name: name }, res);
         } else {
           res.redirect('/teacher/section/' + rows[1][0]["LAST_INSERT_ID()"]); // redirect teacher to page of newly created section
         }
@@ -67,13 +65,13 @@ router.get('/section/:id', function(req, res) {
     if(sectionID && sectionID.length > 0) {
       connection.query("SELECT * FROM `sections` WHERE `id` = ? AND `teacher_id` = ?", [sectionID, teacherID], function(err, rows) {
         if(err || rows.length <= 0) {
-          renderGenericTeacher('notFound', { page: 0, type: 'section' }, res);
+          renderGenericTeacher('notFound', { page: 0, title: 'Section Not Found', type: 'section' }, res);
         } else {
-          renderGenericTeacher('section', { page: 0, sectionName: rows[0].name }, res);
+          renderGenericTeacher('section', { page: 0, title: rows[0].name, sectionName: rows[0].name }, res);
         }
       });
     } else {
-      renderGenericTeacher('notFound', { page: 0, type: 'section' }, res);
+      renderGenericTeacher('notFound', { page: 0, title: 'Section Not Found', type: 'section' }, res);
     }
     });
 });
@@ -103,7 +101,7 @@ router.get('/assignment', function(req, res) {
       if(err) {
         throw err; // #yolt
       } else {
-        renderGenericTeacher('assignmentList', { page: 1, rows: rows, strftime: strftime }, res);
+        renderGenericTeacher('assignmentList', { page: 1, title: 'Your Assignments', rows: rows, strftime: strftime }, res);
       }
     });
   });
@@ -116,9 +114,9 @@ router.get('/assignment/create', function(req, res) {
       if(err) {
         throw err; // todo better error handling
       } else if(rows.length <= 0) {
-        renderGenericTeacher('assignmentCreate', { page: 1, error: 'You must create a section before you can create an assignment.', rows: [] }, res);
+        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', error: 'You must create a section before you can create an assignment.', rows: [] }, res);
       } else {
-        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, rows: rows }, res);
+        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', rows: rows }, res);
       }
     });
   });
@@ -132,9 +130,9 @@ router.post('/assignment/create', function(req, res) {
     var due  = req.param('due');
     var secs = req.param('section');
     if(!name || name.length <= 0 || !due || due.length <= 0) {
-      renderGenericTeacher('assignmentCreate', { page: 1, error: 'Name and due date must both be filled out.'}, res);
+      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'Name and due date must both be filled out.'}, res);
     } else if(secs.length <= 0) {
-      renderGenericTeacher('assignmentCreate', { page: 1, error: 'You must select at least one section.'}, res);
+      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'You must select at least one section.'}, res);
     } else {
       for(i in secs) {
         createAssignment(id, secs[i], res, name, desc, due);
@@ -150,12 +148,12 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
     if(err) {
       throw err; // todo better error handling
     } else if(!rows[0].result) {
-      renderGenericTeacher('assignmentCreate', { page: 1, error: 'An unexpected error has occurred.'}, res);
+      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'An unexpected error has occurred.'}, res);
     } else {
       if(!desc || desc.length <= 0) desc = null;
       connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [sectionID, name, desc, due], function(err, rows) {
         if(err) {
-          renderGenericTeacher('assignmentCreate', { page: 1, error: 'Invalid due date.'}, res); // probably an invalid due date. i think.
+          renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'Invalid due date.'}, res); // probably an invalid due date. i think.
         }
         // nothing to do here
       });
@@ -179,7 +177,7 @@ router.get('/assignment/:id', function(req, res) {
       if(err) {
         throw err; // todo better error handling
       } else if(rows.length <= 0) {
-        renderGenericTeacher('notFound', { page: 1, type: 'assignment' }, res);
+        renderGenericTeacher('notFound', { page: 1, title: 'Assignment Not Found', type: 'assignment' }, res);
       } else {
         connection.query("SELECT \
                             `students`.`id`,\
@@ -193,7 +191,7 @@ router.get('/assignment/:id', function(req, res) {
                           WHERE \
                             `enrollment`.`student_id` = `students`.`id` AND \
                             `enrollment`.`section_id` = ?", [req.params.id, rows[0].sid], function(err, results) {
-          renderGenericTeacher('assignment', { page: 1, assignment: rows[0], strftime: strftime, results: results }, res);
+          renderGenericTeacher('assignment', { page: 1, title: rows[0].name, assignment: rows[0], strftime: strftime, results: results }, res);
         });
       }
     });
@@ -202,7 +200,7 @@ router.get('/assignment/:id', function(req, res) {
 
 // todo all student stuff
 router.get('/student', function(req, res) {
-  renderGenericTeacher('studentList', { page: 2 }, res);
+  renderGenericTeacher('studentList', { page: 2, title: 'Your Students' }, res);
 });
 
 module.exports = router;
