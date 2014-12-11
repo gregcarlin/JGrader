@@ -2,6 +2,7 @@ require('./common');
 var router = express.Router();
 var multer  = require('multer');
 var fs = require('fs');
+var moment = require('moment');
 
 router.get('/', function(req, res) {
   res.redirect('/student/section');
@@ -40,14 +41,12 @@ router.get('/assignment/:id', function(req, res) {
 router.post('/assignment/:id/submit', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     var assignmentID = req.params.id;
-    for(file in req.files){
-
-      fs.readFile(file.path, function(err,data){
-        if(data){
-          connection.query("INSERT INTO `submissions` VALUES(NULL,?,?,?)",[assignmentID,id,data],function(err,rows){
-          });
-        }
-      });
+    for(file in req.files) {
+      if(req.files[file].buffer){
+        var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
+        connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id,timestamp], function(err, rows) {
+        });
+      }
     }
   });
 });
