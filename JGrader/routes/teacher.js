@@ -207,16 +207,29 @@ router.get('/submission/:id', function(req, res) {
                         `submissions`.`assignment_id`,\
                         `submissions`.`submitted`,\
                         `submissions`.`grade`,\
-                        `files`.`name`,\
-                        `files`.`contents`,\
+                        `students`.`id`,\
                         `students`.`fname`,\
-                        `students`.`lname` \
-                      FROM `submissions`,`files`,`students` \
+                        `students`.`lname`,\
+                        `assignments`.`id` AS `aid`,\
+                        `assignments`.`name` \
+                      FROM `submissions`,`students`,`assignments` \
                       WHERE \
-                        `submissions`.`id` = `files`.`submission_id` AND \
                         `students`.`id` = `submissions`.`student_id` AND \
-                        `submissions`.`id` = ?", [req.params.id], function(err, results) {
-      renderGenericTeacher('submission', { page: 1, title: results }, res);      
+                        `assignments`.`id` = `submissions`.`assignment_id` AND \
+                        `submissions`.`id` = ?", [req.params.id], function(err, subData) {
+      if(err) {
+        throw err; // todo improve
+      } else if(subData.length <= 0) {
+        renderGenericTeacher('notFound', { page: 1, title: 'Submission Not Found', type: 'submission' }, res);
+      } else {
+        connection.query("SELECT `id`,`name`,`contents` FROM `files` WHERE `submission_id` = ?", [req.params.id], function(err, fileData) {
+          if(err) {
+            throw err; // todo improve
+          } else {
+            renderGenericTeacher('submission', { page: 1, title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData, strftime: strftime }, res);
+          }
+        });
+      }
     });
   });
 });

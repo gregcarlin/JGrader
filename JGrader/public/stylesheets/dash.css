@@ -54,3 +54,8 @@ ul.section-list {
   margin-left: 2px;
   margin-bottom: 10px;
 }
+.description dt {
+  float: left;
+  clear: left;
+  margin-right: 5px;
+}
