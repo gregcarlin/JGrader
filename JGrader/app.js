@@ -23,7 +23,7 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(multer({dest:'./uploads/'}));
+app.use(multer({inMemory: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
