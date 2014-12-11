@@ -164,6 +164,7 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
 router.get('/assignment/:id', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
     connection.query("SELECT \
+                        `assignments`.`id` AS `aid`,\
                         `assignments`.`name`,\
                         `assignments`.`description`,\
                         `assignments`.`due`,\
@@ -183,6 +184,7 @@ router.get('/assignment/:id', function(req, res) {
                             `students`.`id`,\
                             `students`.`fname`,\
                             `students`.`lname`,\
+                            `submissions`.`id` AS `subID`,\
                             `submissions`.`submitted` \
                           FROM `enrollment`,`students` \
                           LEFT JOIN \
@@ -194,6 +196,27 @@ router.get('/assignment/:id', function(req, res) {
           renderGenericTeacher('assignment', { page: 1, title: rows[0].name, assignment: rows[0], strftime: strftime, results: results }, res);
         });
       }
+    });
+  });
+});
+
+router.get('/submission/:id', function(req, res) {
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    // todo security to ensure this teacher owns this assignment
+    connection.query("SELECT \
+                        `submissions`.`assignment_id`,\
+                        `submissions`.`submitted`,\
+                        `submissions`.`grade`,\
+                        `files`.`name`,\
+                        `files`.`contents`,\
+                        `students`.`fname`,\
+                        `students`.`lname` \
+                      FROM `submissions`,`files`,`students` \
+                      WHERE \
+                        `submissions`.`id` = `files`.`submission_id` AND \
+                        `students`.`id` = `submissions`.`student_id` AND \
+                        `submissions`.`id` = ?", [req.params.id], function(err, results) {
+      renderGenericTeacher('submission', { page: 1, title: results }, res);      
     });
   });
 });
