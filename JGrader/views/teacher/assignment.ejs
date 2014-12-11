@@ -31,7 +31,7 @@
                 var submitted = new Date(results[i].submitted);
                 var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
               %>
-              <td><%= results[i].submitted ? submittedStr : 'Never' %></td>
+              <td><%- results[i].submitted ? ('<a href="/teacher/submission/' + results[i].subID + '">' + submittedStr + '</a>') : 'Never' %></td>
               <td>Not Graded</td>
             </tr>
        <% }
