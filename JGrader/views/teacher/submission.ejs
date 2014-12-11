@@ -21,6 +21,6 @@
 </div>
 <div class="tab-content">
   <% for (i in fileData) { %>
-    <div role="tabpanel" class="tab-pane<%= i == 0 ? ' active' : '' %>" id="<%= fileData[i].shortName %>"><%= fileData[i].contents %></div>
+    <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>"><pre><%= fileData[i].contents %></pre></div>
   <% } %>
 </div>
