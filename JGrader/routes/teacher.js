@@ -226,7 +226,7 @@ router.get('/submission/:id', function(req, res) {
           if(err) {
             throw err; // todo improve
           } else {
-            renderGenericTeacher('submission', { js: ['prettify'], css: ['prettify'], onload: 'prettyPrint()', page: 1, title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData, strftime: strftime }, res);
+            renderGenericTeacher('submission', { js: ['prettify', 'submission'], css: ['prettify'], onload: 'prettyPrint()', page: 1, title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData, strftime: strftime }, res);
           }
         });
       }
