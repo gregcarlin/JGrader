@@ -42,20 +42,34 @@ router.post('/assignment/:id/submit', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     var assignmentID = req.params.id;
     if(req.files){
-      var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
-      connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id,timestamp], function(err, rows) {
-        if(err){
-          // Need error support
-          res.redirect('/student/assignment');
-        }
-        for(file in req.files) {
-          if(req.files[file].buffer){
-            connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [id,req.params.id], function(err, rows) {
-              connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, rows[0].fname,req.files[file].buffer.toString()], function(err, rows) {
+      connection.query("SELECT `submissions`.`id` FROM `submissions` WHERE `submissions`.`student_id` = ? AND `submissions`.`assignment_id`", [id, req.params.id], function(err, rows) {
+        if(rows){
+          var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
+          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id,timestamp], function(err, rows) {
+            if(err){
+              // Need error support
+              res.redirect('/student/assignment');
+            }
+            for(file in req.files) {
+              if(req.files[file].buffer){
+                connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [id,req.params.id], function(err, rows) {
+                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, rows[0].fname,req.files[file].buffer.toString()], function(err, rows) {
 
-              });
-            });
-          }
+                  });
+                });
+              }
+            }
+          });
+        } else {
+            for(file in req.files) {
+              if(req.files[file].buffer){
+                connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [id,req.params.id], function(err, rows) {
+                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, rows[0].fname,req.files[file].buffer.toString()], function(err, rows) {
+
+                  });
+                });
+              }
+            }
         }
       });
     }
