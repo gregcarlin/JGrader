@@ -70,3 +70,27 @@ ul.section-list {
   border-color: rgb(204, 204, 204) !important;
   border-bottom-color: #f5f5f5 !important;
 }
+#execute {
+  float: right;
+  font-size: 26px;
+}
+#execute span:hover {
+  cursor: pointer;
+}
+#input-expand {
+  clear: right;
+}
+#input-expand:hover {
+  cursor: pointer;
+}
+.put-text {
+  resize: vertical;
+  font-family: "Courier New", Courier, monospace;
+  height: 200px !important;
+}
+#input-text {
+  display: none;
+}
+#output-tag {
+  display: block;
+}
