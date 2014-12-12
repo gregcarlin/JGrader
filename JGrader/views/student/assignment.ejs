@@ -28,7 +28,7 @@
       </tbody>
     </table>
 
-    <form action="/student/assignment/<%= rows[0].id %>/submit" method="post" enctype="multipart/form-data" class="dropzone" id="my-dropzone">
+    <form action="/student/assignment/<%= rows[0].id %>/submit" method="post" enctype="multipart/form-data" class="dropzone" id="drop">
           <input type="file" name="fileUpload" id="file-selection" required autofocus multiple/>
           <h4>Or drag and drop files below</h4>
           <div class="upload-drop-zone" id="drop-zone">
@@ -80,7 +80,7 @@
 
     <script type="text/javascript" data-main="/javascripts/studentSubmit" src="/javascripts/require.js"></script>
 -->
-
+    <script type="text/javascript" src="/javascripts/studentSubmit.js"></script>
     <% } %>
 </div>
 <% } %>
