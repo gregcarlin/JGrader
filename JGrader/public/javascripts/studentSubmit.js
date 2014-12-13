@@ -1,84 +1,49 @@
-// + function($) {
-//   'use strict';
-//
-//   // UPLOAD CLASS DEFINITION
-//   // ======================
-//
-//   var dropZone = document.getElementById('drop-zone');
-//   var uploadForm = document.getElementById('js-upload-form');
-//
-//   var startUpload = function(files) {
-//     console.log(files)
-//   }
-//
-//   uploadForm.addEventListener('submit', function(e) {
-//     var uploadFiles = document.getElementById('js-upload-files').files;
-//     e.preventDefault()
-//
-//     startUpload(uploadFiles)
-//   })
-//
-//   dropZone.ondrop = function(e) {
-//     e.preventDefault();
-//     this.className = 'upload-drop-zone';
-//
-//     startUpload(e.dataTransfer.files)
-//   }
-//
-//   dropZone.ondragover = function() {
-//     this.className = 'upload-drop-zone drop';
-//     return false;
-//   }
-//
-//   dropZone.ondragleave = function() {
-//     this.className = 'upload-drop-zone';
-//     return false;
-//   }
-//
-// }(jQuery);
+// Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+var previewNode = document.querySelector("#template");
+previewNode.id = "";
+var previewTemplate = previewNode.parentNode.innerHTML;
+previewNode.parentNode.removeChild(previewNode);
+console.log(document.URL + '/submit');
 
-//
-// require(['html5Upload'], function (html5Upload) {
-//   'use strict';
-//   html5Upload.initialize({
-//     // URL that handles uploaded files
-//     uploadUrl: '/assignment/:id/submit',
-//
-//     // HTML element on which files should be dropped (optional)
-//     dropContainer: document.getElementById('drop-zone'),
-//
-//     // HTML file input element that allows to select files (optional)
-//     inputField: document.getElementById('file-selection'),
-//
-//     // Key for the file data (optional, default: 'file')
-//     key: 'File',
-//
-//     // Additional data submitted with file (optional)
-//     //data: { ProjectId: 1, ProjectName: 'Demo' },
-//
-//     // Maximum number of simultaneous uploads
-//     // Other uploads will be added to uploads queue (optional)
-//     maxSimultaneousUploads: 2,
-//
-//     // Callback for each dropped or selected file
-//     // It receives one argument, add callbacks
-//     // by passing events map object: file.on({ ... })
-//     onFileAdded: function (file) {
-//
-//       var fileModel = new models.FileViewModel(file);
-//       uploadsModel.uploads.push(fileModel);
-//
-//       file.on({
-//         // Called after received response from the server
-//         onCompleted: function (response) {
-//           fileModel.uploadCompleted(true);
-//         },
-//         // Called during upload progress, first parameter
-//         // is decimal value from 0 to 100.
-//         onProgress: function (progress, fileSize, uploadedBytes) {
-//           fileModel.uploadProgress(parseInt(progress, 10));
-//         }
-//       });
-//     }
-//   });
-// });
+var myDropzone = new Dropzone(document.querySelector(".tester"), {
+  url: (document.URL + '/submit'), // Set the url
+  thumbnailWidth: 80,
+  thumbnailHeight: 80,
+  parallelUploads: 20,
+  previewTemplate: previewTemplate,
+  autoQueue: false, // Make sure the files aren't queued until manually added
+  previewsContainer: "#previews", // Define the container to display the previews
+  clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+});
+
+myDropzone.on("addedfile", function(file) {
+  // Hookup the start button
+  file.previewElement.querySelector(".start").onclick = function() { myDropzone.enqueueFile(file); };
+});
+
+// Update the total progress bar
+myDropzone.on("totaluploadprogress", function(progress) {
+  document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
+});
+
+myDropzone.on("sending", function(file) {
+  // Show the total progress bar when upload starts
+  document.querySelector("#total-progress").style.opacity = "1";
+  // And disable the start button
+  file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
+});
+
+// Hide the total progress bar when nothing's uploading anymore
+myDropzone.on("queuecomplete", function(progress) {
+  document.querySelector("#total-progress").style.opacity = "0";
+});
+
+// Setup the buttons for all transfers
+// The "add files" button doesn't need to be setup because the config
+// `clickable` has already been specified.
+document.querySelector("#actions .start").onclick = function() {
+  myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
+};
+document.querySelector("#actions .cancel").onclick = function() {
+  myDropzone.removeAllFiles(true);
+};

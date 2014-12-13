@@ -27,7 +27,7 @@
               </tr>
       </tbody>
     </table>
-
+  <!--
     <form action="/student/assignment/<%= rows[0].id %>/submit" method="post" enctype="multipart/form-data" class="dropzone" id="drop">
           <input type="file" name="fileUpload" id="file-selection" required autofocus multiple/>
           <h4>Or drag and drop files below</h4>
@@ -35,51 +35,61 @@
               Just drag and drop files here
           </div>
           <input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit Assignment" />
-    </form>
+    </form> -->
 
-    <!-- <div class="container">
-      <div class="panel panel-default">
-        <div class="panel-heading"><strong>Upload Files</strong> <small>Bootstrap files upload</small></div>
-        <div class="panel-body">
+    <div class="col-lg-7 tester" id="actions">
+        <!-- The fileinput-button span is used to style the file input field as button -->
+        <span class="btn btn-success fileinput-button dz-clickable">
+            <i class="glyphicon glyphicon-plus"></i>
+            <span>Add files...</span>
+        </span>
+        <button type="submit" class="btn btn-primary start">
+            <i class="glyphicon glyphicon-upload"></i>
+            <span>Start upload</span>
+        </button>
+        <button type="reset" class="btn btn-warning cancel">
+            <i class="glyphicon glyphicon-ban-circle"></i>
+            <span>Cancel upload</span>
+        </button>
+    </div>
 
-          <!-- Standar Form
-          <h4>Select files from your computer</h4>
-          <form action="" method="post" enctype="multipart/form-data" id="js-upload-form">
-            <div class="form-inline">
-              <div class="form-group">
-                <input type="file" name="files[]" id="js-upload-files" multiple>
+  <!-- HTML heavily inspired by http://blueimp.github.io/jQuery-File-Upload/ -->
+      <div class="table table-striped" class="files" id="previews">
+
+        <div id="template" class="file-row">
+          <!-- This is used as the file preview template -->
+          <div>
+              <span class="preview"><img data-dz-thumbnail /></span>
+          </div>
+          <div>
+              <p class="name" data-dz-name></p>
+              <strong class="error text-danger" data-dz-errormessage></strong>
+          </div>
+          <div>
+              <p class="size" data-dz-size></p>
+              <div class="progress progress-striped active" role="progressbar" id="total-progress"aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
               </div>
-              <button type="submit" class="btn btn-sm btn-primary" id="js-upload-submit">Upload files</button>
-            </div>
-          </form>
-
-          <!-- Drop Zone
-          <h4>Or drag and drop files below</h4>
-          <div class="upload-drop-zone" id="drop-zone">
-            Just drag and drop files here
           </div>
-
-          <!-- Progress Bar
-          <div class="progress">
-            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-              <span class="sr-only">60% Complete</span>
-            </div>
-          </div>
-
-          <!-- Upload Finished
-          <div class="js-upload-finished">
-            <h3>Processed files</h3>
-            <div class="list-group">
-              <a href="#" class="list-group-item list-group-item-success"><span class="badge alert-success pull-right">Success</span>image-01.jpg</a>
-              <a href="#" class="list-group-item list-group-item-success"><span class="badge alert-success pull-right">Success</span>image-02.jpg</a>
-            </div>
+          <div>
+            <button class="btn btn-primary start">
+                <i class="glyphicon glyphicon-upload"></i>
+                <span>Start</span>
+            </button>
+            <button data-dz-remove class="btn btn-warning cancel">
+                <i class="glyphicon glyphicon-ban-circle"></i>
+                <span>Cancel</span>
+            </button>
+            <button data-dz-remove class="btn btn-danger delete">
+              <i class="glyphicon glyphicon-trash"></i>
+              <span>Delete</span>
+            </button>
           </div>
         </div>
-      </div>
-    </div> <!-- /container
 
-    <script type="text/javascript" data-main="/javascripts/studentSubmit" src="/javascripts/require.js"></script>
--->
+      </div>
+
+    <script src="/javascripts/dropzone.js"></script>
     <script type="text/javascript" src="/javascripts/studentSubmit.js"></script>
     <% } %>
 </div>
