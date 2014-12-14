@@ -1,3 +1,10 @@
+.glyph-button {
+  color: #000;
+}
+.glyph-button:hover {
+  color: #428bca;
+  cursor: pointer;
+}
 .page-header h1 {
   margin: 0;
   display: inline;
@@ -14,11 +21,7 @@
   margin: 0;
 }
 .page-header .plus-button {
-  color: #000;
   font-size: 22pt;
-}
-.page-header .plus-button:hover {
-  color: #428bca;
 }
 .main form {
   width: 50%;
@@ -73,9 +76,6 @@ ul.section-list {
   float: right;
   font-size: 26px;
 }
-#execute span:hover {
-  cursor: pointer;
-}
 #input-expand {
   clear: right;
 }
@@ -92,4 +92,12 @@ ul.section-list {
 }
 #output-tag {
   display: block;
+}
+#edit-grade {
+  margin-left: 4px;
+  font-size: 12pt;
+}
+#edit {
+  display: none;
+  width: 75px;
 }
