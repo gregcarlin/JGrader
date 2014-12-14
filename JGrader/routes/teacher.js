@@ -67,7 +67,27 @@ router.get('/section/:id', function(req, res) {
         if(err || rows.length <= 0) {
           renderGenericTeacher('notFound', { page: 0, title: 'Section Not Found', type: 'section' }, res);
         } else {
-          renderGenericTeacher('section', { page: 0, title: rows[0].name, sectionName: rows[0].name }, res);
+          connection.query("SELECT \
+                              `assignments`.`id` AS `aid`,\
+                              `assignments`.`name` AS `aname`,\
+                              `assignments`.`due`,\
+                              COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
+                              COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
+                              COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
+                            FROM `assignments` \
+                            LEFT JOIN `enrollment` ON `enrollment`.`section_id` = ? \
+                            LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                            WHERE `assignments`.`section_id` = ? \
+                            GROUP BY `assignments`.`id` \
+                            ORDER BY \
+                              `assignments`.`due` DESC, \
+                              `assignments`.`name` ASC", [sectionID, sectionID], function(err, results) {
+            if(err) {
+              throw err; // todo better error handling
+            } else {
+              renderGenericTeacher('section', { page: 0, title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, rows: results, strftime: strftime }, res);
+            }
+          });
         }
       });
     } else {
@@ -107,20 +127,25 @@ router.get('/assignment', function(req, res) {
   });
 });
 
-// page for creating a new assignment
-router.get('/assignment/create', function(req, res) {
+var assignmentCreate = function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ?", [id], function(err, rows) {
+    connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [id], function(err, rows) {
       if(err) {
         throw err; // todo better error handling
       } else if(rows.length <= 0) {
-        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', error: 'You must create a section before you can create an assignment.', rows: [] }, res);
+        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', error: 'You must create a section before you can create an assignment.', rows: [], preselect: req.params.preselect }, res);
       } else {
-        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', rows: rows }, res);
+        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', rows: rows, preselect: req.params.preselect }, res);
       }
     });
   });
-});
+}
+
+// page for creating a new assignment
+router.get('/assignment/create', assignmentCreate);
+
+// same as above but one section is already checked
+router.get('/assignment/create/:preselect', assignmentCreate);
 
 // handles request to create an assignment
 router.post('/assignment/create', function(req, res) {

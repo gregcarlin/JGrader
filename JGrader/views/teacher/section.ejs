@@ -1,4 +1,36 @@
 <div class="page-header">
   <h1><%= sectionName %>'s Assignments</h1>
+  <a href="/teacher/assignment/create/<%= sectionID %>" class="right plus-button glyph-button"><span class="glyphicon glyphicon-plus-sign"></span></a>
 </div>
-todo: info
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Due</th>
+        <th>Completed</th>
+        <th>Graded</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if(rows.length == 0) { %>
+        <tr>
+          <td colspan="5">You have not posted any assignments.</td>
+        </tr>
+      <% } else {
+          for(i in rows) {%>
+            <tr>
+              <td><a href="/teacher/assignment/<%= rows[i].aid %>"><%= rows[i].aname %></a></td>
+              <%
+                var due = new Date(rows[i].due);
+                var dueStr = strftime(due.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', due);
+              %>
+              <td title="<%= strftime('%b %d %Y, %l:%M %p', due) %>"><%= dueStr %></td>
+              <td><%= rows[i].complete %> of <%= rows[i].total %></td>
+              <td><%= rows[i].graded %> of <%= rows[i].complete %></td>
+            </tr>
+       <% }
+         } %>
+    </tbody>
+  </table>
+</div>
