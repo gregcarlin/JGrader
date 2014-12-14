@@ -234,6 +234,23 @@ router.get('/submission/:id', function(req, res) {
   });
 });
 
+router.post('/submission/:id/updategrade/:grade', function(req, res) {
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    // todo security to ensure this teacher owns this assignment
+    if(isNaN(req.params.grade)) {
+      res.send('1');
+    } else {
+      connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
+        if(err) {
+          res.send('-1');
+        } else {
+          res.send('0');
+        }
+      });
+    }
+  });
+});
+
 // todo all student stuff
 router.get('/student', function(req, res) {
   renderGenericTeacher('studentList', { page: 2, title: 'Your Students' }, res);
