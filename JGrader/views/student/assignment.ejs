@@ -27,6 +27,7 @@
               </tr>
       </tbody>
     </table>
+  </div>
   <!--
     <form action="/student/assignment/<%= rows[0].id %>/submit" method="post" enctype="multipart/form-data" class="dropzone" id="drop">
           <input type="file" name="fileUpload" id="file-selection" required autofocus multiple/>
@@ -53,44 +54,45 @@
         </button>
     </div>
 
-  <!-- HTML heavily inspired by http://blueimp.github.io/jQuery-File-Upload/ -->
-      <div class="table table-striped" class="files" id="previews">
+    <!-- HTML heavily inspired by http://blueimp.github.io/jQuery-File-Upload/ -->
+    <div class="col-md-7 table table-striped" class="files" id="previews">
 
-        <div id="template" class="file-row">
-          <!-- This is used as the file preview template -->
-          <div>
-              <span class="preview"><img data-dz-thumbnail /></span>
-          </div>
-          <div>
-              <p class="name" data-dz-name></p>
-              <strong class="error text-danger" data-dz-errormessage></strong>
-          </div>
-          <div>
-              <p class="size" data-dz-size></p>
-              <div class="progress progress-striped active" role="progressbar" id="total-progress"aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
-              </div>
-          </div>
-          <div>
-            <button class="btn btn-primary start">
-                <i class="glyphicon glyphicon-upload"></i>
-                <span>Start</span>
-            </button>
-            <button data-dz-remove class="btn btn-warning cancel">
-                <i class="glyphicon glyphicon-ban-circle"></i>
-                <span>Cancel</span>
-            </button>
-            <button data-dz-remove class="btn btn-danger delete">
-              <i class="glyphicon glyphicon-trash"></i>
-              <span>Delete</span>
-            </button>
-          </div>
+      <div id="template" class="file-row">
+        <!-- This is used as the file preview template -->
+        <div>
+            <span class="preview"><img data-dz-thumbnail /></span>
+        </div>
+        <div>
+            <p class="name" data-dz-name></p>
+            <strong class="error text-danger" data-dz-errormessage></strong>
+        </div>
+        <div>
+            <p class="size" data-dz-size></p>
+            <div class="progress progress-striped active" role="progressbar" id="total-progress"aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+            </div>
         </div>
 
+        <div>
+          <button class="btn btn-primary start">
+            <i class="glyphicon glyphicon-upload"></i>
+            <span>Start</span>
+          </button>
+          <button data-dz-remove class="btn btn-warning cancel">
+              <i class="glyphicon glyphicon-ban-circle"></i>
+              <span>Cancel</span>
+          </button>
+          <button data-dz-remove class="btn btn-danger delete">
+            <i class="glyphicon glyphicon-trash"></i>
+            <span>Delete</span>
+          </button>
+        </div>
       </div>
+
+    </div>
 
     <script src="/javascripts/dropzone.js"></script>
     <script type="text/javascript" src="/javascripts/studentSubmit.js"></script>
     <% } %>
-</div>
+
 <% } %>
