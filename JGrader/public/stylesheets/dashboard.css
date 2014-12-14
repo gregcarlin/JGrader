@@ -103,8 +103,3 @@ body {
   display: inline-block;
   border-radius: 50%;
 }
-
-#total-progress {
-  opacity: 0;
-  transition: opacity 0.3s linear;
-}
