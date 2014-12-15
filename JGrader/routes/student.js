@@ -62,7 +62,7 @@ router.post('/assignment/:id/submit', function(req, res) {
           });
         } else {
           console.log(req.files);
-          submitFiles(0, req.files, function(err) {
+          submitFiles(0,req.files, function(err) {
             if(err){
               // Need error support
               res.redirect('/student/assignment');
@@ -129,7 +129,7 @@ var findSectionInfo = function(id, res, finish) {
 }
 
 var submitFiles = function(i, files, finish) {
-  console.log('start \n' + i + '\n' + files[0]);
+  console.log('start \n' + i + '\n' + files);
   if(i < files.length) {
       connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [id,req.params.id], function(err, rows) {
         console.log('select');
