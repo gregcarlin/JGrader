@@ -4,11 +4,6 @@ body {
   background-color: #eee;
 }
 
-.error {
-  color: #D00;
-  margin-bottom: 4px;
-}
-
 .form-signin {
   max-width: 330px;
   padding: 15px;

@@ -25,7 +25,8 @@ router.get('/section', function(req, res) {
                       GROUP BY `sections`.`id` \
                       ORDER BY `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
-        throw err; // #yolo
+        renderGenericTeacher('sectionList', { page: 0, title: 'Your Sections', rows: [], error: 'An unexpected error has occurred.' }, res);
+        if(debug) throw err;
       } else {
         renderGenericTeacher('sectionList', { page: 0, title: 'Your Sections', rows: rows }, res);
       }
@@ -83,7 +84,8 @@ router.get('/section/:id', function(req, res) {
                               `assignments`.`due` DESC, \
                               `assignments`.`name` ASC", [sectionID, sectionID], function(err, results) {
             if(err) {
-              throw err; // todo better error handling
+              renderGenericTeacher('notFound', { page: 0, title: 'Error getting section', type: 'section' }, res);
+              if(debug) throw err;
             } else {
               renderGenericTeacher('section', { page: 0, title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, rows: results, strftime: strftime }, res);
             }
@@ -119,7 +121,8 @@ router.get('/assignment', function(req, res) {
                         `assignments`.`name` ASC, \
                         `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
-        throw err; // #yolt
+        renderGenericTeacher('assignmentList', { page: 1, title: 'Your Assignments', rows: [], strftime: strftime, error: 'An unexpected error has occurred.' }, res);
+        if(debug) throw err;
       } else {
         renderGenericTeacher('assignmentList', { page: 1, title: 'Your Assignments', rows: rows, strftime: strftime }, res);
       }
@@ -131,7 +134,8 @@ var assignmentCreate = function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
     connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [id], function(err, rows) {
       if(err) {
-        throw err; // todo better error handling
+        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', error: 'An unexpected error has occurred.', rows: [] }, res);
+        if(debug) throw err;
       } else if(rows.length <= 0) {
         renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', error: 'You must create a section before you can create an assignment.', rows: [], preselect: req.params.preselect }, res);
       } else {
@@ -155,9 +159,9 @@ router.post('/assignment/create', function(req, res) {
     var due  = req.param('due');
     var secs = req.param('section');
     if(!name || name.length <= 0 || !due || due.length <= 0) {
-      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'Name and due date must both be filled out.'}, res);
-    } else if(secs.length <= 0) {
-      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'You must select at least one section.'}, res);
+      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'Name and due date must both be filled out.', name: name, desc: desc, due: due}, res);
+    } else if(!secs || secs.length <= 0) {
+      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'You must select at least one section.', name: name, desc: desc, due: due}, res);
     } else {
       for(i in secs) {
         createAssignment(id, secs[i], res, name, desc, due);
@@ -171,14 +175,15 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
   // verify that teacher owns this section
   connection.query("SELECT (SELECT `teacher_id` FROM `sections` WHERE `id` = ?) = ? AS `result`", [sectionID, teacherID], function(err, rows) {
     if(err) {
-      throw err; // todo better error handling
+      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'An unexpected error has occurred.', name: name, desc: desc, due: due }, res);
+      if(debug) throw err;
     } else if(!rows[0].result) {
-      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'An unexpected error has occurred.'}, res);
+      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'An unexpected error has occurred.', name: name, desc: desc, due: due }, res);
     } else {
       if(!desc || desc.length <= 0) desc = null;
       connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [sectionID, name, desc, due], function(err, rows) {
         if(err) {
-          renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'Invalid due date.'}, res); // probably an invalid due date. i think.
+          renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'Invalid due date.', name: name, desc: desc, due: due}, res); // probably an invalid due date. i think.
         }
         // nothing to do here
       });
@@ -201,7 +206,8 @@ router.get('/assignment/:id', function(req, res) {
                         `sections`.`teacher_id` = ? AND \
                         `assignments`.`id` = ?", [teacherID, req.params.id], function(err, rows) {
       if(err) {
-        throw err; // todo better error handling
+        renderGenericTeacher('notFound', { page: 1, title: 'Error Getting Assignment', type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+        if(debug) throw err;
       } else if(rows.length <= 0) {
         renderGenericTeacher('notFound', { page: 1, title: 'Assignment Not Found', type: 'assignment' }, res);
       } else {
@@ -243,7 +249,8 @@ router.get('/submission/:id', function(req, res) {
                         `assignments`.`id` = `submissions`.`assignment_id` AND \
                         `submissions`.`id` = ?", [req.params.id], function(err, subData) {
       if(err) {
-        throw err; // todo improve
+        renderGenericTeacher('notFound', { page: 1, title: 'Submission Not Found', type: 'submission', error: 'An unexpected error has occurred.' }, res);
+        if(debug) throw err;
       } else if(subData.length <= 0) {
         renderGenericTeacher('notFound', { page: 1, title: 'Submission Not Found', type: 'submission' }, res);
       } else {
