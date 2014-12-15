@@ -51,7 +51,7 @@ router.post('/assignment/:id/submit', function(req, res) {
               // Need error support
               res.redirect('/student/assignment');
             }
-            submitFiles(0, req.files, function(err) {
+            submitFiles(0, req.files, id, assignmentID, function(err) {
               if(err){
                 // Need error support
                 res.redirect('/student/assignment');
@@ -62,7 +62,9 @@ router.post('/assignment/:id/submit', function(req, res) {
           });
         } else {
           console.log(req.files);
-          submitFiles(0,req.files, function(err) {
+          var files = req.files;
+          console.log(files);
+          submitFiles(0, files, id, assignmentID, function(err) {
             if(err){
               // Need error support
               res.redirect('/student/assignment');
@@ -128,26 +130,24 @@ var findSectionInfo = function(id, res, finish) {
   }
 }
 
-var submitFiles = function(i, files, finish) {
-  console.log('start \n' + i + '\n' + files);
-  if(i < files.length) {
-      connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [id,req.params.id], function(err, rows) {
-        console.log('select');
+var submitFiles = function(i, files, student_id, assignment_id, finish) {
+  if(files) {
+      connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [student_id, assignment_id], function(err, rows) {
         if(err){
           finish(err);
         } else {
-          console.log('insert');
-          connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, rows[0].fname,req.files[i].buffer.toString()], function(err, rows) {
-            if(err){
-              return finish(err);
-            } else {
-              submitFiles(i+1, files, finish);
-            }
-          });
+          for(file in files){
+            connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, rows[0].fname, files[file].buffer.toString()], function(err, rows) {
+              if(err){
+                return finish(err);
+              }
+            });
+          }
+          finish(null);
         }
       });
   } else {
-    finish();
+    finish(err);
   }
 }
 
