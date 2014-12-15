@@ -41,6 +41,7 @@ router.get('/assignment/:id', function(req, res) {
 router.post('/assignment/:id/submit', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     var assignmentID = req.params.id;
+    //console.log(req.files);
     if(req.files){
       connection.query("SELECT `submissions`.`id` FROM `submissions` WHERE `submissions`.`student_id` = ? AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
         if(rows.length==0){
@@ -50,26 +51,25 @@ router.post('/assignment/:id/submit', function(req, res) {
               // Need error support
               res.redirect('/student/assignment');
             }
-            for(file in req.files) {
-              if(req.files[file].buffer){
-                connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [id,req.params.id], function(err, rows) {
-                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, rows[0].fname,req.files[file].buffer.toString()], function(err, rows) {
-                    res.send(req.body);
-                  });
-                });
+            submitFiles(0, req.files, function(err) {
+              if(err){
+                // Need error support
+                res.redirect('/student/assignment');
+              } else {
+                res.send(req.body);
               }
-            }
+            });
           });
         } else {
-            for(file in req.files) {
-              if(req.files[file].buffer){
-                connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [id,req.params.id], function(err, rows) {
-                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, rows[0].fname,req.files[file].buffer.toString()], function(err, rows) {
-                    res.send(req.body);
-                  });
-                });
-              }
+          console.log(req.files);
+          submitFiles(0, req.files, function(err) {
+            if(err){
+              // Need error support
+              res.redirect('/student/assignment');
+            } else {
+              res.send(req.body);
             }
+          });
         }
       });
     }
@@ -125,6 +125,29 @@ var findSectionInfo = function(id, res, finish) {
         finish(rows);
       }
     });
+  }
+}
+
+var submitFiles = function(i, files, finish) {
+  console.log('start \n' + i + '\n' + files[0]);
+  if(i < files.length) {
+      connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [id,req.params.id], function(err, rows) {
+        console.log('select');
+        if(err){
+          finish(err);
+        } else {
+          console.log('insert');
+          connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, rows[0].fname,req.files[i].buffer.toString()], function(err, rows) {
+            if(err){
+              return finish(err);
+            } else {
+              submitFiles(i+1, files, finish);
+            }
+          });
+        }
+      });
+  } else {
+    finish();
   }
 }
 
