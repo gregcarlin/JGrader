@@ -13,6 +13,9 @@ connection = mysql.createConnection({
 });
 connection.connect(); // we should probably close this at some point [connection.end()]
 
+// todo set to false before release
+debug = true;
+
 var renderGeneric = function(page, vars, group, res) {
   express().render(page + '.ejs', vars, function(err, html) {
     if(err) {
