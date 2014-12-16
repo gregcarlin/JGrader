@@ -36,7 +36,7 @@ myDropzone.on("sending", function(file) {
 
 // Hide the total progress bar when nothing's uploading anymore
 myDropzone.on("queuecomplete", function(progress) {
-  document.querySelector("#total-progress").style.opacity = "0";
+  $(".progress").css("opacity", "0");
 });
 
 // Setup the buttons for all transfers
@@ -45,6 +45,7 @@ myDropzone.on("queuecomplete", function(progress) {
 document.querySelector("#actions .start").onclick = function() {
   myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
 };
+
 document.querySelector("#actions .cancel").onclick = function() {
   myDropzone.removeAllFiles(true);
 };
