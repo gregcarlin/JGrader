@@ -19,7 +19,7 @@ var myDropzone = new Dropzone(document.querySelector(".tester"), {
 
 myDropzone.on("addedfile", function(file) {
   // Hookup the start button
-  file.previewElement.querySelector(".start").onclick = function() { myDropzone.enqueueFile(file); };
+  // file.previewElement.querySelector(".start").onclick = function() { myDropzone.enqueueFile(file); };
 });
 
 // Update the total progress bar

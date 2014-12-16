@@ -28,15 +28,6 @@
       </tbody>
     </table>
   </div>
-  <!--
-    <form action="/student/assignment/<%= rows[0].id %>/submit" method="post" enctype="multipart/form-data" class="dropzone" id="drop">
-          <input type="file" name="fileUpload" id="file-selection" required autofocus multiple/>
-          <h4>Or drag and drop files below</h4>
-          <div class="upload-drop-zone" id="drop-zone">
-              Just drag and drop files here
-          </div>
-          <input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit Assignment" />
-    </form> -->
 
     <div class="col-lg-7 tester" id="actions">
         <!-- The fileinput-button span is used to style the file input field as button -->
@@ -74,18 +65,23 @@
         </div>
 
         <div>
-          <button class="btn btn-primary start">
-            <i class="glyphicon glyphicon-upload"></i>
-            <span>Start</span>
-          </button>
+          <!-- No Individual Start option
+            <button class="btn btn-primary start">
+              <i class="glyphicon glyphicon-upload"></i>
+              <span>Start</span>
+            </button>
+          -->
           <button data-dz-remove class="btn btn-warning cancel">
               <i class="glyphicon glyphicon-ban-circle"></i>
               <span>Cancel</span>
           </button>
-          <button data-dz-remove class="btn btn-danger delete">
-            <i class="glyphicon glyphicon-trash"></i>
-            <span>Delete</span>
-          </button>
+
+          <!-- Feature for delete needs to be implemented on an assignment basis
+            <button data-dz-remove class="btn btn-danger delete">
+              <i class="glyphicon glyphicon-trash"></i>
+              <span>Delete</span>
+            </button>
+          -->
         </div>
       </div>
 
