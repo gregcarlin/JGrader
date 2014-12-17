@@ -25,10 +25,10 @@ router.get('/section', function(req, res) {
                       GROUP BY `sections`.`id` \
                       ORDER BY `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
-        renderGenericTeacher('sectionList', { page: 0, title: 'Your Sections', rows: [], error: 'An unexpected error has occurred.' }, res);
+        renderGenericTeacher('sectionList', { js:['tooltip'], page: 0, title: 'Your Sections', rows: [], error: 'An unexpected error has occurred.' }, res);
         if(debug) throw err;
       } else {
-        renderGenericTeacher('sectionList', { page: 0, title: 'Your Sections', rows: rows }, res);
+        renderGenericTeacher('sectionList', { js:['tooltip'], page: 0, title: 'Your Sections', rows: rows }, res);
       }
     });
   });
@@ -87,7 +87,7 @@ router.get('/section/:id', function(req, res) {
               renderGenericTeacher('notFound', { page: 0, title: 'Error getting section', type: 'section' }, res);
               if(debug) throw err;
             } else {
-              renderGenericTeacher('section', { page: 0, title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, rows: results, strftime: strftime }, res);
+              renderGenericTeacher('section', { js: ['tooltip'], page: 0, title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, rows: results, strftime: strftime }, res);
             }
           });
         }
@@ -121,10 +121,10 @@ router.get('/assignment', function(req, res) {
                         `assignments`.`name` ASC, \
                         `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
-        renderGenericTeacher('assignmentList', { page: 1, title: 'Your Assignments', rows: [], strftime: strftime, error: 'An unexpected error has occurred.' }, res);
+        renderGenericTeacher('assignmentList', { js:['tooltip'], page: 1, title: 'Your Assignments', rows: [], strftime: strftime, error: 'An unexpected error has occurred.' }, res);
         if(debug) throw err;
       } else {
-        renderGenericTeacher('assignmentList', { page: 1, title: 'Your Assignments', rows: rows, strftime: strftime }, res);
+        renderGenericTeacher('assignmentList', { js:['tooltip'], page: 1, title: 'Your Assignments', rows: rows, strftime: strftime }, res);
       }
     });
   });
