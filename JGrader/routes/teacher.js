@@ -285,7 +285,24 @@ router.post('/submission/:id/updategrade/:grade', function(req, res) {
 
 // todo all student stuff
 router.get('/student', function(req, res) {
-  renderGenericTeacher('studentList', { page: 2, title: 'Your Students' }, res);
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    connection.query("SELECT \
+                      `students`.`id`,\
+                      `students`.`fname`,\
+                      `students`.`lname`,\
+                      `sections`.`id` AS `sid`,\
+                      `sections`.`name` AS `sname` \
+                    FROM \
+                      `students`,\
+                      `enrollment`,\
+                      `sections` \
+                    WHERE \
+                      `sections`.`teacher_id` = ? AND \
+                      `enrollment`.`section_id` = `sections`.`id` AND \
+                      `enrollment`.`student_id` = `students`.`id`", [teacherID], function(err, rows) {
+      renderGenericTeacher('studentList', { page: 2, title: 'Your Students', rows: rows }, res);
+    });
+  });
 });
 
 module.exports = router;
