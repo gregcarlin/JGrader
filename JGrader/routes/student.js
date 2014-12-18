@@ -21,6 +21,7 @@ router.get('/assignment', function(req, res) {
   });
 });
 
+// Gets the assignment information based on id
 router.get('/assignment/:id', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     var assignmentID = req.params.id;
@@ -38,6 +39,7 @@ router.get('/assignment/:id', function(req, res) {
   });
 });
 
+// Submits the file into the mysql database
 router.post('/assignment/:id/submit', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     var assignmentID = req.params.id;
@@ -75,6 +77,15 @@ router.post('/assignment/:id/submit', function(req, res) {
         }
       });
     }
+  });
+});
+
+// Gets all users submitted files
+router.get('/assignment/:id/submits', function(req, res) {
+  authStudent(req.cookies.hash, res, function(id) {
+    connection.query("SELECT ''.'' FROM '' ",[],function(err, rows){
+
+    });
   });
 });
 
@@ -132,12 +143,12 @@ var findSectionInfo = function(id, res, finish) {
 
 var submitFiles = function(i, files, student_id, assignment_id, finish) {
   if(files) {
-      connection.query("SELECT `submissions`.`id`, `students`.`fname` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [student_id, assignment_id], function(err, rows) {
+      connection.query("SELECT `submissions`.`id` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [student_id, assignment_id], function(err, rows) {
         if(err){
           finish(err);
         } else {
           for(file in files){
-            connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, rows[0].fname, files[file].buffer.toString()], function(err, rows) {
+            connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, files[file].originalname, files[file].buffer.toString()], function(err, rows) {
               if(err){
                 return finish(err);
               }
