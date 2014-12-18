@@ -31,7 +31,7 @@ myDropzone.on("sending", function(file) {
   // Show the total progress bar when upload starts
   document.querySelector("#total-progress").style.opacity = "1";
   // And disable the start button
-  file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
+  //file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
 });
 
 // Hide the total progress bar when nothing's uploading anymore
