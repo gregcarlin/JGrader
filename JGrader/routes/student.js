@@ -26,7 +26,12 @@ router.get('/assignment/:id', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     var assignmentID = req.params.id;
     if(id) {
-      connection.query("SELECT `assignments`.`id`,`assignments`.`name`,`assignments`.`description`,`assignments`.`due` FROM `enrollment`,`assignments`,`sections` WHERE `enrollment`.`section_id` = `sections`.`id` AND `sections`.`id` = `assignments`.`section_id` AND `enrollment`.`student_id` = ? AND `assignments`.`id` = ?", [id, assignmentID], function(err, rows) {
+      connection.query("SELECT `assignments`.`id`, `assignments`.`name`, `assignments`.`description`,`assignments`.`due` \
+                        FROM `enrollment`,`assignments`,`sections` \
+                        WHERE `enrollment`.`section_id` = `sections`.`id` \
+                        AND `sections`.`id` = `assignments`.`section_id` \
+                        AND `enrollment`.`student_id` = ? \
+                        AND `assignments`.`id` = ?", [id, assignmentID], function(err, rows) {
         // todo: Need to handle errors
         if(err) {
           res.redirect('/student/assignment');
@@ -45,7 +50,10 @@ router.post('/assignment/:id/submit', function(req, res) {
     var assignmentID = req.params.id;
     //console.log(req.files);
     if(req.files){
-      connection.query("SELECT `submissions`.`id` FROM `submissions` WHERE `submissions`.`student_id` = ? AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
+      connection.query("SELECT `submissions`.`id` \
+                        FROM `submissions` \
+                        WHERE `submissions`.`student_id` = ? \
+                        AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
         if(rows.length==0){
           var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
           connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id,timestamp], function(err, rows) {
@@ -63,11 +71,8 @@ router.post('/assignment/:id/submit', function(req, res) {
             });
           });
         } else {
-          console.log(req.files);
-          var files = req.files;
-          console.log(files);
           submitFiles(0, files, id, assignmentID, function(err) {
-            if(err){
+            if(err) {
               // Need error support
               res.redirect('/student/assignment');
             } else {
@@ -83,8 +88,17 @@ router.post('/assignment/:id/submit', function(req, res) {
 // Gets all users submitted files
 router.get('/assignment/:id/submits', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
-    connection.query("SELECT ''.'' FROM '' ",[],function(err, rows){
-
+    connection.query("SELECT `files`.`name`, `files`.`contents` \
+                      FROM `files`, `students`, `assignments`, `submissions` \
+                      WHERE `submissions`.`assignment_id` = `assignments`.`id` \
+                      AND `submissions`.`student_id` = `students`.`id` \
+                      AND `files`.`submission_id`= `submissions`.`id` \
+                      AND  `students`.`id` = ? AND `assignments`.`id` = ?",[id, req.params.id],function(err, rows){
+      if(err) {
+        res.redirect('/student/assignment');
+      } else {
+        renderGenericStudent('assignment', { rows: rows, page: 1 }, res);
+      }
     });
   });
 });
@@ -109,9 +123,9 @@ router.get('/section/:id', function(req, res) {
       connection.query("SELECT `assignments`.`id`,`assignments`.`name`,`assignments`.`description`,`assignments`.`due`,`sections`.`name` AS `sectionName` FROM `assignments`, `enrollment`,`sections` WHERE `assignments`.`section_id` = `enrollment`.`section_id` AND `enrollment`.`student_id` = ? AND `sections`.`id` = `enrollment`.`section_id` AND `enrollment`.`section_id` = ?", [studentID,sectionID], function(err, rows) {
         // todo: Need to handle errors
         if(err) {
-        res.redirect('/student/section');
+          res.redirect('/student/section');
       } else {
-            renderGenericStudent('section', { rows: rows, page: 0 }, res);
+          renderGenericStudent('section', { rows: rows, page: 0 }, res);
         }
       });
   });
