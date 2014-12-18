@@ -1,0 +1,31 @@
+<div class="page-header">
+  <h1>Students</h1>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Section</th>
+        <th>Current Average</th>
+        <th>Last Assignment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if(rows.length == 0) { %>
+        <tr>
+          <td colspan="4">You have no students!</td>
+        </tr>
+      <% } else {
+          for(i in rows) {%>
+            <tr>
+              <td><a href="/teacher/student/<%= rows[i].id %>"><%= rows[i].fname + ' ' + rows[i].lname %></a></td>
+              <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
+              <td>A++</td>
+              <td>TODO</td>
+            </tr>
+       <% }
+         } %>
+    </tbody>
+  </table>
+</div>
