@@ -2,6 +2,60 @@ require('./common');
 var router = express.Router();
 var strftime = require('strftime');
 
+var render = function(page, options, res) {
+  switch(page) {
+    case 'notFound':
+      // page must be set already
+      options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
+      break;
+    case 'sectionList':
+      options.page = 0;
+      options.title = 'Your Sections';
+      options.js = ['tooltip'];
+      break;
+    case 'sectionCreate':
+      options.page = 0;
+      options.title = 'Create a Section';
+      break;
+    case 'section':
+      options.page = 0;
+      // title must be set already
+      options.js = ['tooltip'];
+      options.strftime = strftime;
+      break;
+    case 'assignmentList':
+      options.page = 1;
+      options.title = 'Your Assignments';
+      options.js = ['tooltip'];
+      options.strftime = strftime;
+      break;
+    case 'assignmentCreate':
+      options.page = 1;
+      options.title = 'Create an Assignment';
+      options.js = ['jquery.datetimepicker', 'datepicker'];
+      options.css = ['jquery.datetimepicker'];
+      break;
+    case 'assignment':
+      options.page = 1;
+      // title must be set already
+      options.strftime = strftime;
+      break;
+    case 'submission':
+      options.page = 1;
+      // title must be set already
+      options.js = ['prettify', 'submission'];
+      options.css = ['prettify'];
+      options.onload = 'prettyPrint()';
+      options.strftime = strftime;
+      break;
+    case 'studentList':
+      options.page = 2;
+      options.title = 'Your Students';
+      break;
+  }
+  renderGenericTeacher(page, options, res);
+}
+
 // main teacher page, redirects to section list
 router.get('/', function(req, res) {
   res.redirect('/teacher/section'); // redirect to section list
@@ -25,10 +79,10 @@ router.get('/section', function(req, res) {
                       GROUP BY `sections`.`id` \
                       ORDER BY `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
-        renderGenericTeacher('sectionList', { js:['tooltip'], page: 0, title: 'Your Sections', rows: [], error: 'An unexpected error has occurred.' }, res);
+        render('sectionList', {rows: [], error: 'An unexpected error has occurred.'}, res);
         if(debug) throw err;
       } else {
-        renderGenericTeacher('sectionList', { js:['tooltip'], page: 0, title: 'Your Sections', rows: rows }, res);
+        render('sectionList', {rows: rows}, res);
       }
     });
   });
@@ -37,7 +91,7 @@ router.get('/section', function(req, res) {
 // page for creating a new section
 router.get('/section/create', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
-    renderGenericTeacher('sectionCreate', { page: 0, title: 'Create a Section' }, res);
+    render('sectionCreate', {}, res);
   });
 });
 
@@ -46,11 +100,11 @@ router.post('/section/create', function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
     var name = req.param('name');
     if(!name || name.length <= 0) {
-      renderGenericTeacher('sectionCreate', { page: 0, title: 'Create a Section', error: 'Name cannot be blank.', name: name }, res);
+      render('sectionCreate', {error: 'Name cannot be blank.', name: name}, res);
     } else {
       connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?); SELECT LAST_INSERT_ID()", [id, name], function(err, rows) {
         if(err || rows.length <= 0) {
-          renderGenericTeacher('sectionCreate', { page: 0, title: 'Create a Section', error: 'An unknown error has occurred. Please try again later.', name: name }, res);
+          render('sectionCreate', {error: 'An unknown error has occurred. Please try again later.', name: name}, res);
         } else {
           res.redirect('/teacher/section/' + rows[1][0]["LAST_INSERT_ID()"]); // redirect teacher to page of newly created section
         }
@@ -66,7 +120,7 @@ router.get('/section/:id', function(req, res) {
     if(sectionID && sectionID.length > 0) {
       connection.query("SELECT * FROM `sections` WHERE `id` = ? AND `teacher_id` = ?", [sectionID, teacherID], function(err, rows) {
         if(err || rows.length <= 0) {
-          renderGenericTeacher('notFound', { page: 0, title: 'Section Not Found', type: 'section' }, res);
+          render('notFound', {type: 'section'}, res);
         } else {
           connection.query("SELECT \
                               `assignments`.`id` AS `aid`,\
@@ -84,16 +138,16 @@ router.get('/section/:id', function(req, res) {
                               `assignments`.`due` DESC, \
                               `assignments`.`name` ASC", [sectionID, sectionID], function(err, results) {
             if(err) {
-              renderGenericTeacher('notFound', { page: 0, title: 'Error getting section', type: 'section' }, res);
+              render('notFound', {error: 'Error getting section', type: 'section'}, res);
               if(debug) throw err;
             } else {
-              renderGenericTeacher('section', { js: ['tooltip'], page: 0, title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, rows: results, strftime: strftime }, res);
+              render('section', {title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, rows: results}, res);
             }
           });
         }
       });
     } else {
-      renderGenericTeacher('notFound', { page: 0, title: 'Section Not Found', type: 'section' }, res);
+      render('notFound', {type: 'section'}, res);
     }
     });
 });
@@ -121,10 +175,10 @@ router.get('/assignment', function(req, res) {
                         `assignments`.`name` ASC, \
                         `sections`.`name` ASC", [id], function(err, rows) {
       if(err) {
-        renderGenericTeacher('assignmentList', { js:['tooltip'], page: 1, title: 'Your Assignments', rows: [], strftime: strftime, error: 'An unexpected error has occurred.' }, res);
+        render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
         if(debug) throw err;
       } else {
-        renderGenericTeacher('assignmentList', { js:['tooltip'], page: 1, title: 'Your Assignments', rows: rows, strftime: strftime }, res);
+        render('assignmentList', {rows: rows}, res);
       }
     });
   });
@@ -134,12 +188,12 @@ var assignmentCreate = function(req, res) {
   authTeacher(req.cookies.hash, res, function(id) {
     connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [id], function(err, rows) {
       if(err) {
-        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', error: 'An unexpected error has occurred.', rows: [] }, res);
+        render('assignmentCreate', {error: 'An unexpected error has occurred.', rows: []}, res);
         if(debug) throw err;
       } else if(rows.length <= 0) {
-        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', error: 'You must create a section before you can create an assignment.', rows: [], preselect: req.params.preselect }, res);
+        render('assignmentCreate', {error: 'You must create a section before you can create an assignment.', rows: [], preselect: req.params.preselect}, res);
       } else {
-        renderGenericTeacher('assignmentCreate', { js: ['jquery.datetimepicker', 'datepicker'], css: ['jquery.datetimepicker'], page: 1, title: 'Create an Assignment', rows: rows, preselect: req.params.preselect }, res);
+        render('assignmentCreate', {rows: rows, preselect: req.params.preselect}, res);
       }
     });
   });
@@ -159,9 +213,9 @@ router.post('/assignment/create', function(req, res) {
     var due  = req.param('due');
     var secs = req.param('section');
     if(!name || name.length <= 0 || !due || due.length <= 0) {
-      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'Name and due date must both be filled out.', name: name, desc: desc, due: due}, res);
+      render('assignmentCreate', {error: 'Name and due date must both be filled out.', name: name, desc: desc, due: due}, res);
     } else if(!secs || secs.length <= 0) {
-      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'You must select at least one section.', name: name, desc: desc, due: due}, res);
+      render('assignmentCreate', {error: 'You must select at least one section.', name: name, desc: desc, due: due}, res);
     } else {
       for(i in secs) {
         createAssignment(id, secs[i], res, name, desc, due);
@@ -175,15 +229,15 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
   // verify that teacher owns this section
   connection.query("SELECT (SELECT `teacher_id` FROM `sections` WHERE `id` = ?) = ? AS `result`", [sectionID, teacherID], function(err, rows) {
     if(err) {
-      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'An unexpected error has occurred.', name: name, desc: desc, due: due }, res);
+      render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due }, res);
       if(debug) throw err;
     } else if(!rows[0].result) {
-      renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'An unexpected error has occurred.', name: name, desc: desc, due: due }, res);
+      render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due }, res);
     } else {
       if(!desc || desc.length <= 0) desc = null;
       connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [sectionID, name, desc, due], function(err, rows) {
         if(err) {
-          renderGenericTeacher('assignmentCreate', { page: 1, title: 'Create an Assignment', error: 'Invalid due date.', name: name, desc: desc, due: due}, res); // probably an invalid due date. i think.
+          render('assignmentCreate', {error: 'Invalid due date.', name: name, desc: desc, due: due}, res); // probably an invalid due date. i think.
         }
         // nothing to do here
       });
@@ -206,10 +260,10 @@ router.get('/assignment/:id', function(req, res) {
                         `sections`.`teacher_id` = ? AND \
                         `assignments`.`id` = ?", [teacherID, req.params.id], function(err, rows) {
       if(err) {
-        renderGenericTeacher('notFound', { page: 1, title: 'Error Getting Assignment', type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+        render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
         if(debug) throw err;
       } else if(rows.length <= 0) {
-        renderGenericTeacher('notFound', { page: 1, title: 'Assignment Not Found', type: 'assignment' }, res);
+        render('notFound', {page: 1, type: 'assignment'}, res);
       } else {
         connection.query("SELECT \
                             `students`.`id`,\
@@ -224,7 +278,7 @@ router.get('/assignment/:id', function(req, res) {
                           WHERE \
                             `enrollment`.`student_id` = `students`.`id` AND \
                             `enrollment`.`section_id` = ?", [req.params.id, rows[0].sid], function(err, results) {
-          renderGenericTeacher('assignment', { page: 1, title: rows[0].name, assignment: rows[0], strftime: strftime, results: results }, res);
+          render('assignment', {title: rows[0].name, assignment: rows[0], results: results}, res);
         });
       }
     });
@@ -249,16 +303,16 @@ router.get('/submission/:id', function(req, res) {
                         `assignments`.`id` = `submissions`.`assignment_id` AND \
                         `submissions`.`id` = ?", [req.params.id], function(err, subData) {
       if(err) {
-        renderGenericTeacher('notFound', { page: 1, title: 'Submission Not Found', type: 'submission', error: 'An unexpected error has occurred.' }, res);
+        render('notFound', {type: 'submission', error: 'An unexpected error has occurred.'}, res);
         if(debug) throw err;
       } else if(subData.length <= 0) {
-        renderGenericTeacher('notFound', { page: 1, title: 'Submission Not Found', type: 'submission' }, res);
+        render('notFound', {type: 'submission'}, res);
       } else {
         connection.query("SELECT `id`,`name`,`contents` FROM `files` WHERE `submission_id` = ?", [req.params.id], function(err, fileData) {
           if(err) {
             throw err; // todo improve
           } else {
-            renderGenericTeacher('submission', { js: ['prettify', 'submission'], css: ['prettify'], onload: 'prettyPrint()', page: 1, title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData, strftime: strftime }, res);
+            render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData}, res);
           }
         });
       }
@@ -300,7 +354,7 @@ router.get('/student', function(req, res) {
                       `sections`.`teacher_id` = ? AND \
                       `enrollment`.`section_id` = `sections`.`id` AND \
                       `enrollment`.`student_id` = `students`.`id`", [teacherID], function(err, rows) {
-      renderGenericTeacher('studentList', { page: 2, title: 'Your Students', rows: rows }, res);
+      render('studentList', {rows: rows}, res);
     });
   });
 });
