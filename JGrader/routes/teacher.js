@@ -120,7 +120,7 @@ router.get('/section/:id', function(req, res) {
     if(sectionID && sectionID.length > 0) {
       connection.query("SELECT * FROM `sections` WHERE `id` = ? AND `teacher_id` = ?", [sectionID, teacherID], function(err, rows) {
         if(err || rows.length <= 0) {
-          render('notFound', {type: 'section'}, res);
+          render('notFound', {page: 0, type: 'section'}, res);
         } else {
           connection.query("SELECT \
                               `assignments`.`id` AS `aid`,\
@@ -138,7 +138,7 @@ router.get('/section/:id', function(req, res) {
                               `assignments`.`due` DESC, \
                               `assignments`.`name` ASC", [sectionID, sectionID], function(err, results) {
             if(err) {
-              render('notFound', {error: 'Error getting section', type: 'section'}, res);
+              render('notFound', {page: 0, error: 'Error getting section', type: 'section'}, res);
               if(debug) throw err;
             } else {
               render('section', {title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, rows: results}, res);
@@ -147,7 +147,7 @@ router.get('/section/:id', function(req, res) {
         }
       });
     } else {
-      render('notFound', {type: 'section'}, res);
+      render('notFound', {page: 0, type: 'section'}, res);
     }
     });
 });
@@ -287,7 +287,6 @@ router.get('/assignment/:id', function(req, res) {
 
 router.get('/submission/:id', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
-    // todo security to ensure this teacher owns this assignment
     connection.query("SELECT \
                         `submissions`.`assignment_id`,\
                         `submissions`.`submitted`,\
@@ -297,16 +296,18 @@ router.get('/submission/:id', function(req, res) {
                         `students`.`lname`,\
                         `assignments`.`id` AS `aid`,\
                         `assignments`.`name` \
-                      FROM `submissions`,`students`,`assignments` \
+                      FROM `submissions`,`students`,`assignments`,`sections` \
                       WHERE \
                         `students`.`id` = `submissions`.`student_id` AND \
                         `assignments`.`id` = `submissions`.`assignment_id` AND \
-                        `submissions`.`id` = ?", [req.params.id], function(err, subData) {
+                        `submissions`.`id` = ? AND \
+                        `assignments`.`section_id` = `sections`.`id` AND \
+                        `sections`.`teacher_id` = ?", [req.params.id, teacherID], function(err, subData) {
       if(err) {
-        render('notFound', {type: 'submission', error: 'An unexpected error has occurred.'}, res);
+        render('notFound', {page: 1, type: 'submission', error: 'An unexpected error has occurred.'}, res);
         if(debug) throw err;
       } else if(subData.length <= 0) {
-        render('notFound', {type: 'submission'}, res);
+        render('notFound', {page: 1, type: 'submission'}, res);
       } else {
         connection.query("SELECT `id`,`name`,`contents` FROM `files` WHERE `submission_id` = ?", [req.params.id], function(err, fileData) {
           if(err) {
@@ -323,18 +324,22 @@ router.get('/submission/:id', function(req, res) {
 
 router.post('/submission/:id/updategrade/:grade', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
-    // todo security to ensure this teacher owns this assignment
-    if(isNaN(req.params.grade)) {
-      res.send('1');
-    } else {
-      connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
-        if(err) {
-          res.send('-1');
-        } else {
-          res.send('0');
-        }
-      });
-    }
+    // security to ensure this teacher owns this submission
+    connection.query("SELECT `submissions`.`id` FROM `submissions`,`assignments`,`sections` WHERE `submissions`.`assignment_id` = `assignments`.`id` AND `assignments`.`section_id` = `sections`.`id` AND `submissions`.`id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, teacherID], function(err, rows) {
+      if(isNaN(req.params.grade)) {
+        res.send('1');
+      } else if(rows.length <= 0) {
+        res.send('2');
+      } else {
+        connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
+          if(err) {
+            res.send('-1');
+          } else {
+            res.send('0');
+          }
+        });
+      }
+    });
   });
 });
 
