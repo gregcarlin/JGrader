@@ -3,7 +3,7 @@
   <a href="/teacher/assignment/create" class="right plus-button glyph-button" data-toggle="tooltip" data-placement="bottom" title="New Assignment"><span class="glyphicon glyphicon-plus-sign"></span></a>
 </div>
 <div class="table-responsive">
-  <table class="table table-striped">
+  <table class="table table-striped table-linked">
     <thead>
       <tr>
         <th>Name</th>
@@ -20,8 +20,8 @@
         </tr>
       <% } else {
           for(i in rows) {%>
-            <tr>
-              <td><a href="/teacher/assignment/<%= rows[i].aid %>"><%= rows[i].aname %></a></td>
+            <tr onclick="document.location = '/teacher/assignment/<%= rows[i].aid %>'">
+              <td><%= rows[i].aname %></td>
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
               <%
                 var due = new Date(rows[i].due);

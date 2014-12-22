@@ -97,3 +97,7 @@ ul.section-list {
   display: none;
   width: 75px;
 }
+.table-linked tr[onclick]:hover td {
+  cursor: pointer;
+  background-color: #f2f2f2 !important;
+}
