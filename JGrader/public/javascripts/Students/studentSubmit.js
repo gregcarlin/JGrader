@@ -3,7 +3,6 @@ var previewNode = document.querySelector("#template");
 previewNode.id = "";
 var previewTemplate = previewNode.parentNode.innerHTML;
 previewNode.parentNode.removeChild(previewNode);
-console.log(document.URL + '/submit');
 
 var myDropzone = new Dropzone(document.querySelector(".tester"), {
   url: (document.URL + '/submit'), // Set the url
@@ -49,3 +48,11 @@ document.querySelector("#actions .start").onclick = function() {
 document.querySelector("#actions .cancel").onclick = function() {
   myDropzone.removeAllFiles(true);
 };
+
+$.getJSON( "files", function( resp ) {
+
+  //Log each key in the response data
+  $.each( resp, function( key, value ) {
+    console.log( key + " : " + value );
+  });
+});

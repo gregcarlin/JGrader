@@ -4,10 +4,12 @@ var multer  = require('multer');
 var fs = require('fs');
 var moment = require('moment');
 
+// No page so redirect to view the sections
 router.get('/', function(req, res) {
   res.redirect('/student/section');
 });
 
+// The page that lists the assignments
 router.get('/assignment', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`, `assignments`.`id` FROM `sections`, `teachers`, `assignments`,`enrollment` WHERE `enrollment`.`student_id` = ? AND `enrollment`.`section_id` = `assignments`.`section_id` AND `sections`.`id` = `enrollment`.`section_id` AND `sections`.`teacher_id`=`teachers`.`id`", [id], function(err, rows) {
@@ -71,7 +73,7 @@ router.post('/assignment/:id/submit', function(req, res) {
             });
           });
         } else {
-          submitFiles(0, files, id, assignmentID, function(err) {
+          submitFiles(0, req.files, id, assignmentID, function(err) {
             if(err) {
               // Need error support
               res.redirect('/student/assignment');
@@ -86,7 +88,7 @@ router.post('/assignment/:id/submit', function(req, res) {
 });
 
 // Gets all users submitted files
-router.get('/assignment/:id/submits', function(req, res) {
+router.get('/assignment/:id/files', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     connection.query("SELECT `files`.`name`, `files`.`contents` \
                       FROM `files`, `students`, `assignments`, `submissions` \
@@ -97,12 +99,14 @@ router.get('/assignment/:id/submits', function(req, res) {
       if(err) {
         res.redirect('/student/assignment');
       } else {
-        renderGenericStudent('assignment', { rows: rows, page: 1 }, res);
+        // Sends a json object for frontend
+        res.redirect('/student/assignment');
       }
     });
   });
 });
 
+// Lists all of the current sections (classes)
 router.get('/section', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     findSectionInfo(id, res, function(rows){
@@ -111,12 +115,14 @@ router.get('/section', function(req, res) {
   });
 });
 
+// Asks user for class password
 router.get('/section/joinSection', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     renderGenericStudent('joinSection', { page: 0 }, res);
   });
 });
 
+// Gets information for specific class
 router.get('/section/:id', function(req, res) {
   authStudent(req.cookies.hash, res, function(studentID) {
     sectionID = req.params.id;

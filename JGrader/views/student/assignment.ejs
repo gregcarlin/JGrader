@@ -1,4 +1,4 @@
-<% if (typeof rows == 'undefined'){ %>
+<% if (typeof rows == 'undefined') { %>
 <!-- Need to implement a way of getting section name not related to rows-->
 <h1> Some kind of Error has happened</h1>
 <% } else { %>
@@ -6,13 +6,12 @@
   <h1> <%= rows[0].name %> </h1>
 </div>
 
+<% if(rows.length == 0) { %>
+    <h1>Some Error has occured/td>
+<% } else { %>
+
 <div class="table-responsive">
   <table class="table table-striped">
-    <% if(rows.length == 0) { %>
-        <tr>
-          <td colspan="3">Some Error has occured/td>
-        </tr>
-    <% } else { %>
       <thead>
         <tr>
           <th>Description</th>
@@ -27,8 +26,9 @@
               </tr>
       </tbody>
     </table>
-  </div>
+</div>
 
+<% if (typeof filles == 'undefined') { %>
     <div class="col-lg-7 tester" id="actions">
         <!-- The fileinput-button span is used to style the file input field as button -->
         <span class="btn btn-success fileinput-button dz-clickable">
@@ -87,8 +87,9 @@
 
     </div>
 
-    <script src="/javascripts/dropzone.js"></script>
-    <script type="text/javascript" src="/javascripts/studentSubmit.js"></script>
+    <script src="/javascripts/Students/dropzone.js"></script>
+    <script type="text/javascript" src="/javascripts/Students/studentSubmit.js"></script>
+    <% } %>
     <% } %>
 
 <% } %>
