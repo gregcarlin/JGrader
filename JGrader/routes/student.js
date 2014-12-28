@@ -34,15 +34,29 @@ router.get('/assignment/:id', function(req, res) {
                         AND `sections`.`id` = `assignments`.`section_id` \
                         AND `enrollment`.`student_id` = ? \
                         AND `assignments`.`id` = ?", [id, assignmentID], function(err, rows) {
-        // todo: Need to handle errors
-        if(err) {
-          res.redirect('/student/assignment');
-        } else {
-          renderGenericStudent('assignment', { rows: rows, page: 1 }, res);
-        }
-      });
+
+      // todo: Need to handle errors
+      if(err) {
+        res.redirect('/student/assignment');
+      } else {
+        connection.query("SELECT `files`.`name`, `files`.`contents` \
+                          FROM `files`, `students`, `assignments`, `submissions` \
+                          WHERE `submissions`.`assignment_id` = `assignments`.`id` \
+                          AND `submissions`.`student_id` = `students`.`id` \
+                          AND `files`.`submission_id`= `submissions`.`id` \
+                          AND  `students`.`id` = ? AND `assignments`.`id` = ?",[id, req.params.id],function(err, fileData){
+          if(err) {
+            res.redirect('/student/assignment');
+          } else if(fileData.length == 0) {
+            renderGenericStudent('assignment', { rows: rows, page: 1 }, res);
+          } else {
+            // Sends file data
+            renderGenericStudent('assignment', { rows: rows, fileData: fileData, page: 1 }, res);
+          }
+        });
+      }
+    });
     }
-    renderGenericStudent('assignment', { page: 1 });
   });
 });
 

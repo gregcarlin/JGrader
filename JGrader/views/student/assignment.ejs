@@ -28,7 +28,7 @@
     </table>
 </div>
 
-<% if (typeof filles == 'undefined') { %>
+<% if (typeof fileData == 'undefined') { %>
     <div class="col-lg-7 tester" id="actions">
         <!-- The fileinput-button span is used to style the file input field as button -->
         <span class="btn btn-success fileinput-button dz-clickable">
@@ -89,7 +89,25 @@
 
     <script src="/javascripts/Students/dropzone.js"></script>
     <script type="text/javascript" src="/javascripts/Students/studentSubmit.js"></script>
+    <% } else { %>
+      <!-- If student has submitted files needs resubmit -->
+      <div role="tabpanel">
+        <ul class="nav nav-tabs" role="tablist">
+          <% for(i in fileData) { %>
+            <% fileData[i].shortName = fileData[i].name.substring(0, fileData[i].name.length - 5); %>
+            <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab"><%= fileData[i].name %></a></li>
+            <% } %>
+          </ul>
+        </div>
+        <div class="tab-content">
+          <% for (i in fileData) { %>
+            <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>">
+              <pre><code class="prettyprint language-java"><%= fileData[i].contents %></code></pre>
+            </div>
+            <% } %>
+        </div>
+        <script src="/javascripts/prettify.js"></script>
     <% } %>
-    <% } %>
+  <% } %>
 
 <% } %>
