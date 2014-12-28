@@ -11,7 +11,12 @@ connection = mysql.createConnection({
   password : creds.mysql_pass,
   multipleStatements: true
 });
-connection.connect(); // we should probably close this at some point [connection.end()]
+connection.connect();
+
+process.on('SIGINT', function() { // on ^C
+  connection.end(); // close mysql connection
+  process.exit(); // also do normal exit stuff
+});
 
 // todo set to false before release
 debug = true;
