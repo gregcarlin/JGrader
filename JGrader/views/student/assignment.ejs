@@ -3,6 +3,7 @@
 <h1> Some kind of Error has happened</h1>
 <% } else { %>
 <div class="page-header">
+  <% console.log(rows) %>
   <h1> <%= rows[0].name %> </h1>
 </div>
 
@@ -87,8 +88,6 @@
 
     </div>
 
-    <script src="/javascripts/Students/dropzone.js"></script>
-    <script type="text/javascript" src="/javascripts/Students/studentSubmit.js"></script>
 <% } else { %>
     <!-- If student has submitted files needs resubmit -->
     <div role="tabpanel">
@@ -106,7 +105,6 @@
           </div>
           <% } %>
       </div>
-      <script src="/javascripts/prettify.js"></script>
   <% } %>
   <% } %>
 
