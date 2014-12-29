@@ -4,6 +4,30 @@ var multer  = require('multer');
 var fs = require('fs');
 var moment = require('moment');
 
+var render = function(page, options, res) {
+  switch(page) {
+    case 'notFound':
+      break;
+    case 'assignmentList':
+      options.title = 'Assignments';
+      options.page = 1;
+      break;
+    case 'assignment':
+      options.page = 1;
+      break;
+    case 'sectionList':
+      options.page = 0;
+      break;
+    case 'section':
+      options.page = 0;
+      break;
+    case 'joinSection':
+      options.page = 0;
+      break;
+  }
+  renderGenericStudent(page, options, res);
+}
+
 // No page so redirect to view the sections
 router.get('/', function(req, res) {
   res.redirect('/student/section');
@@ -12,12 +36,17 @@ router.get('/', function(req, res) {
 // The page that lists the assignments
 router.get('/assignment', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`, `assignments`.`id` FROM `sections`, `teachers`, `assignments`,`enrollment` WHERE `enrollment`.`student_id` = ? AND `enrollment`.`section_id` = `assignments`.`section_id` AND `sections`.`id` = `enrollment`.`section_id` AND `sections`.`teacher_id`=`teachers`.`id`", [id], function(err, rows) {
+    connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`, `assignments`.`id` \
+                      FROM `sections`, `teachers`, `assignments`,`enrollment` \
+                      WHERE `enrollment`.`student_id` = ? \
+                      AND `enrollment`.`section_id` = `assignments`.`section_id` \
+                      AND `sections`.`id` = `enrollment`.`section_id` \
+                      AND `sections`.`teacher_id`=`teachers`.`id`", [id], function(err, rows) {
       // todo: Need to handle errors
       if(err) {
         res.redirect('/student/section');
       } else {
-        renderGenericStudent('assignmentList', { rows: rows, page: 1 }, res);
+        render('assignmentList', { rows: rows}, res);
       }
     });
   });
@@ -48,10 +77,10 @@ router.get('/assignment/:id', function(req, res) {
           if(err) {
             res.redirect('/student/assignment');
           } else if(fileData.length == 0) {
-            renderGenericStudent('assignment', { rows: rows, page: 1 }, res);
+            render('assignment', { rows: rows, js: ['dropzone', 'studentSubmit'] }, res);
           } else {
             // Sends file data
-            renderGenericStudent('assignment', { rows: rows, fileData: fileData, page: 1 }, res);
+            render('assignment', { rows: rows, fileData: fileData, js: ['prettify'] }, res);
           }
         });
       }
@@ -101,7 +130,7 @@ router.post('/assignment/:id/submit', function(req, res) {
   });
 });
 
-// Gets all users submitted files
+// Gets all users submitted files CURENTLY NOT USED EVER BUT SOMEDAY MAYBE
 router.get('/assignment/:id/files', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     connection.query("SELECT `files`.`name`, `files`.`contents` \
@@ -124,7 +153,7 @@ router.get('/assignment/:id/files', function(req, res) {
 router.get('/section', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     findSectionInfo(id, res, function(rows){
-      renderGenericStudent('sectionList', { page: 0, rows: rows }, res);
+      render('sectionList', { rows: rows }, res);
     });
   });
 });
@@ -132,7 +161,7 @@ router.get('/section', function(req, res) {
 // Asks user for class password
 router.get('/section/joinSection', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
-    renderGenericStudent('joinSection', { page: 0 }, res);
+    render('joinSection', {  }, res);
   });
 });
 
@@ -150,7 +179,7 @@ router.get('/section/:id', function(req, res) {
         if(err) {
           res.redirect('/student/section');
       } else {
-          renderGenericStudent('section', { rows: rows, page: 0 }, res);
+          render('section', { rows: rows }, res);
         }
       });
   });
