@@ -44,7 +44,7 @@ router.get('/assignment/:id', function(req, res) {
                           WHERE `submissions`.`assignment_id` = `assignments`.`id` \
                           AND `submissions`.`student_id` = `students`.`id` \
                           AND `files`.`submission_id`= `submissions`.`id` \
-                          AND  `students`.`id` = ? AND `assignments`.`id` = ?",[id, req.params.id],function(err, fileData){
+                          AND  `students`.`id` = ? AND `assignments`.`id` = ?",[id, assignmentID],function(err, fileData){
           if(err) {
             res.redirect('/student/assignment');
           } else if(fileData.length == 0) {
