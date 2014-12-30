@@ -193,6 +193,7 @@ var findSectionInfo = function(id, res, finish) {
   }
 }
 
+// Compiles and submits the information to the database
 var submitFiles = function(i, files, student_id, assignment_id, finish) {
   if(files) {
       connection.query("SELECT `submissions`.`id` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [student_id, assignment_id], function(err, rows) {
