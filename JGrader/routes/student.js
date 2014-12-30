@@ -3,6 +3,9 @@ var router = express.Router();
 var multer  = require('multer');
 var fs = require('fs');
 var moment = require('moment');
+var sys = require('sys');
+var exec = require('child_process').exec;
+var child;
 
 var render = function(page, options, res) {
   switch(page) {
@@ -101,7 +104,7 @@ router.post('/assignment/:id/submit', function(req, res) {
                         AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
         if(rows.length==0){
           var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
-          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id,timestamp], function(err, rows) {
+          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id, timestamp], function(err, rows) {
             if(err){
               // Need error support
               res.redirect('/student/assignment');
@@ -196,14 +199,31 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
         if(err){
           finish(err);
         } else {
-          for(file in files){
-            connection.query("INSERT INTO `files` VALUES(NULL,?,?,?)", [rows[0].id, files[file].originalname, files[file].buffer.toString()], function(err, rows) {
-              if(err){
-                return finish(err);
-              }
-            });
+          // List of file paths to compile
+          var compileFiles = "";
+          for(file in files) {
+            compileFiles = compileFiles + files[file].path + " ";
           }
-          finish(null);
+          child = exec("javac " + compileFiles, function (error, stdout, stderr) {
+            for(file in files) {
+              var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
+              fs.readFile(files[file].path, function(err, javaData) {
+                fs.readFile(compilePath, function (err, classData) {
+                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
+                    if(err){
+                      finish(err);
+                    }
+                    fs.unlink(files[file].path, function() {
+                      fs.unlink(compilePath, function() {
+
+                      });
+                    });
+                  });
+                });
+              });
+            }
+            finish(null);
+          });
         }
       });
   } else {
