@@ -130,25 +130,6 @@ router.post('/assignment/:id/submit', function(req, res) {
   });
 });
 
-// Gets all users submitted files CURENTLY NOT USED EVER BUT SOMEDAY MAYBE
-router.get('/assignment/:id/files', function(req, res) {
-  authStudent(req.cookies.hash, res, function(id) {
-    connection.query("SELECT `files`.`name`, `files`.`contents` \
-                      FROM `files`, `students`, `assignments`, `submissions` \
-                      WHERE `submissions`.`assignment_id` = `assignments`.`id` \
-                      AND `submissions`.`student_id` = `students`.`id` \
-                      AND `files`.`submission_id`= `submissions`.`id` \
-                      AND  `students`.`id` = ? AND `assignments`.`id` = ?",[id, req.params.id],function(err, rows){
-      if(err) {
-        res.redirect('/student/assignment');
-      } else {
-        // Sends a json object for frontend
-        res.redirect('/student/assignment');
-      }
-    });
-  });
-});
-
 // Lists all of the current sections (classes)
 router.get('/section', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
