@@ -101,3 +101,7 @@ ul.section-list {
   cursor: pointer;
   background-color: #f2f2f2 !important;
 }
+.settings .name input {
+  display: inline-block;
+  width: 49%;
+}

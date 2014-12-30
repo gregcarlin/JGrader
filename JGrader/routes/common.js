@@ -101,4 +101,9 @@ getInfoTA = function(id, finish) {
   getInfo(id, 'assistants', finish);
 }
 
+// checks to see if a parameter is set and its length is greater than 0
+isSet = function(param) {
+  return param && param.length > 0;
+}
+
 // modules.exports not required because everything needed is global

@@ -1,0 +1,19 @@
+<div class="page-header">
+  <h1>Settings</h1>
+</div>
+<% if(typeof msg != 'undefined') { %>
+  <div class="alert alert-success">
+    <%= msg %>
+  </div>
+<% } %>
+<form class="settings" method="post" action="#">
+  <div class="name">
+    <input type="text" name="fname" class="form-control" value="<%= fname %>" placeholder="First Name" />
+    <input type="text" name="lname" class="form-control" value="<%= lname %>" placeholder="Last Name" />
+  </div>
+  <div>
+    <input type="password" name="oldpass" class="form-control" placeholder="Old Password" />
+    <input type="password" name="newpass" class="form-control" placeholder="New Password" />
+  </div>
+  <input type="submit" class="btn btn-primary btn-block" value="Save" />
+</form>
