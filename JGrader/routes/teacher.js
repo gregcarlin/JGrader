@@ -295,12 +295,12 @@ router.post('/assignment/:id/updatedesc/:desc', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
     connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.desc, req.params.id, teacherID], function(err, rows) {
       if(err) {
-        res.send('-1'); // unknown error
+        res.json({code: -1}); // unknown error
         if(debug) throw err;
       } else if(rows.affectedRows <= 0) {
-        res.send('2'); // invalid permissions
+        res.json({code: 2}); // invalid permissions
       } else {
-        res.send('0'); // success
+        res.json({code: 0, newValue: req.params.desc}); // success
       }
     });
   });
@@ -308,7 +308,16 @@ router.post('/assignment/:id/updatedesc/:desc', function(req, res) {
 
 router.post('/assignment/:id/updatedue/:due', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
-    // todo
+    connection.query("UPDATE `assignments` SET `due` = ? WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.due, req.params.id, teacherID], function(err, rows) {
+      if(err) {
+        res.json({code: -1}); // unknown error
+        if(debug) throw err;
+      } else if(rows.affectedRows <= 0) {
+        res.json({code: 2}); // invalid permissions
+      } else {
+        res.json({code: 0, newValue: req.params.due});
+      }
+    });
   });
 });
 
@@ -354,15 +363,15 @@ router.post('/submission/:id/updategrade/:grade', function(req, res) {
     // security to ensure this teacher owns this submission
     connection.query("SELECT `submissions`.`id` FROM `submissions`,`assignments`,`sections` WHERE `submissions`.`assignment_id` = `assignments`.`id` AND `assignments`.`section_id` = `sections`.`id` AND `submissions`.`id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, teacherID], function(err, rows) {
       if(isNaN(req.params.grade)) {
-        res.send('1'); // invalid input
+        res.json({code: 1}); // invalid input
       } else if(rows.length <= 0) {
-        res.send('2'); // invalid permissions
+        res.json({code: 2}); // invalid permissions
       } else {
         connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
           if(err) {
-            res.send('-1'); // unknown error
+            res.json({code: -1}); // unknown error
           } else {
-            res.send('0'); // success
+            res.json({code: 0, newValue: req.params.grade}); // success
           }
         });
       }
