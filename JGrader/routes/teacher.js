@@ -32,13 +32,14 @@ var render = function(page, options, res) {
     case 'assignmentCreate':
       options.page = 1;
       options.title = 'Create an Assignment';
-      options.js = ['jquery.datetimepicker', 'datepicker'];
+      options.js = ['teacher/jquery.datetimepicker', 'teacher/datepicker'];
       options.css = ['jquery.datetimepicker'];
       break;
     case 'assignment':
       options.page = 1;
       // title must be set already
-      options.js = ['tooltip', 'teacher/edit'];
+      options.js = ['tooltip', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker'];
+      options.css = ['jquery.datetimepicker'];
       options.strftime = strftime;
       break;
     case 'submission':
@@ -291,6 +292,21 @@ router.get('/assignment/:id', function(req, res) {
 });
 
 router.post('/assignment/:id/updatedesc/:desc', function(req, res) {
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.desc, req.params.id, teacherID], function(err, rows) {
+      if(err) {
+        res.send('-1'); // unknown error
+        if(debug) throw err;
+      } else if(rows.affectedRows <= 0) {
+        res.send('2'); // invalid permissions
+      } else {
+        res.send('0'); // success
+      }
+    });
+  });
+});
+
+router.post('/assignment/:id/updatedue/:due', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
     // todo
   });
