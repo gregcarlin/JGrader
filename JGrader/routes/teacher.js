@@ -43,7 +43,7 @@ var render = function(page, options, res) {
     case 'submission':
       options.page = 1;
       // title must be set already
-      options.js = ['prettify', 'submission'];
+      options.js = ['prettify', 'submission', 'tooltip'];
       options.css = ['prettify'];
       options.onload = 'prettyPrint()';
       options.strftime = strftime;
@@ -233,10 +233,10 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
   // verify that teacher owns this section
   connection.query("SELECT (SELECT `teacher_id` FROM `sections` WHERE `id` = ?) = ? AS `result`", [sectionID, teacherID], function(err, rows) {
     if(err) {
-      render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due }, res);
+      render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
       if(debug) throw err;
     } else if(!rows[0].result) {
-      render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due }, res);
+      render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
     } else {
       if(!desc || desc.length <= 0) desc = null;
       connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [sectionID, name, desc, due], function(err, rows) {
@@ -331,16 +331,46 @@ router.post('/submission/:id/updategrade/:grade', function(req, res) {
     // security to ensure this teacher owns this submission
     connection.query("SELECT `submissions`.`id` FROM `submissions`,`assignments`,`sections` WHERE `submissions`.`assignment_id` = `assignments`.`id` AND `assignments`.`section_id` = `sections`.`id` AND `submissions`.`id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, teacherID], function(err, rows) {
       if(isNaN(req.params.grade)) {
-        res.send('1');
+        res.send('1'); // invalid input
       } else if(rows.length <= 0) {
-        res.send('2');
+        res.send('2'); // invalid permissions
       } else {
         connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
           if(err) {
-            res.send('-1');
+            res.send('-1'); // unknown error
           } else {
-            res.send('0');
+            res.send('0'); // success
           }
+        });
+      }
+    });
+  });
+});
+
+router.post('/submission/:id/run/:fileName', function(req, res) {
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    // security to ensure this teacher owns this submission and file
+    connection.query("SELECT `files`.`id`,`files`.`name`,`files`.`compiled` FROM `submissions`,`assignments`,`sections`,`files` WHERE `submissions`.`assignment_id` = `assignments`.`id` AND `assignments`.`section_id` = `sections`.`id` AND `submissions`.`id` = ? AND `sections`.`teacher_id` = ? AND `files`.`submission_id` = `submissions`.`id`", [req.params.id, teacherID], function(err, rows) {
+      if(rows.length <= 0) {
+        res.json({code: 2}); // invalid permissions
+      } else {
+        fs.mkdir('temp/', function(err) {
+          if(err.code != 'EEXIST') throw err;
+
+          for(i in rows) {
+            var name = rows[i].name;
+            rows[i].className = name.substring(0, name.length - 4) + 'class';
+            // note: working directory seems to be one with app.js in it
+            fs.writeFileSync('temp/' + rows[i].className, rows[i].compiled);
+          }
+
+          // todo ensure a valid fileName
+          exec('cd temp/ && java ' + req.param('fileName'), function(error, stdout, stderr) {
+            for(i in rows) {
+              fs.unlinkSync('temp/' + rows[i].className);
+            }
+            res.json({code: 0, out: stdout, err: stderr});
+          });
         });
       }
     });
