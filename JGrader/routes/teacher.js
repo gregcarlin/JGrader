@@ -377,7 +377,8 @@ router.post('/submission/:id/run/:fileIndex', function(req, res) {
 
           var fileIndex = req.param('fileIndex');
           if(fileIndex < rows.length) {
-            child = exec('cd temp/ && java ' + rows[req.param('fileIndex')].className, function(error, stdout, stderr) {
+            // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
+            child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.param('fileIndex')].className, function(error, stdout, stderr) {
               for(i in rows) {
                 fs.unlinkSync('temp/' + rows[i].className + '.class');
               }
