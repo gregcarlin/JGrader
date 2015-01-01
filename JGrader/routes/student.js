@@ -1,10 +1,7 @@
 require('./common');
 var router = express.Router();
 var multer  = require('multer');
-var fs = require('fs');
 var moment = require('moment');
-var sys = require('sys');
-var exec = require('child_process').exec;
 var child;
 
 var render = function(page, options, res) {
@@ -205,6 +202,7 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
           for(file in files) {
             compileFiles = compileFiles + files[file].path + " ";
           }
+          // todo make sure file names aren't something like "&& rm -rf /"
           child = exec("javac " + compileFiles, function (error, stdout, stderr) {
             for(file in files) {
               var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";

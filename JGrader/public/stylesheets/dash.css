@@ -105,3 +105,6 @@ ul.section-list {
   display: inline-block;
   width: 49%;
 }
+.stderr {
+  color: #D00;
+}

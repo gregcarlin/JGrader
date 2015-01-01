@@ -41,3 +41,18 @@ $('#edit').blur(function() {
 $('#edit').keyup(function(event) {
   if(event.which == 13) $('#edit').blur();
 });
+
+$('#execute').click(function() {
+  var fileID = $('.tab-content .active').attr('id');
+  var url = document.URL;
+  if(url.charAt(url.length-1) != '/') url += '/';
+  // todo support inputs
+  $.post(url + 'run/' + fileID, '', function(data, textStatus, jqXHR) {
+    console.log(data);
+    if(data.code == 0) {
+      $('#output-text').html(data.out + '\n\n<span class="stderr">' + data.err + '</span>');
+    } else {
+      alert('An error has occurred, please reload the page and try again.');
+    }
+  });
+});

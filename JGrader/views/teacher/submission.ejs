@@ -17,7 +17,7 @@
       <% fileData[i].shortName = fileData[i].name.substring(0, fileData[i].name.length - 5); %>
       <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab"><%= fileData[i].name %></a></li>
     <% } %>
-    <li role="presentation" id="execute"><span class="glyphicon glyphicon-play-circle glyph-button" title="Run code"></span></li>
+    <li role="presentation" id="execute"><span class="glyphicon glyphicon-play-circle glyph-button" data-toggle="tooltip" data-placement="top" title="Run"></span></li>
   </ul>
 </div>
 <div class="tab-content">
@@ -32,5 +32,5 @@
   <span class="glyphicon glyphicon-expand" id="input-expand"></span>
   <textarea class="form-control put-text" id="input-text"></textarea>
   <span id="output-tag">Output</span>
-  <textarea class="form-control put-text" id="output-text" readonly></textarea>
+  <pre class="form-control put-text" id="output-text" readonly></pre>
 </div>
