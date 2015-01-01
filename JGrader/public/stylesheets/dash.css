@@ -116,3 +116,12 @@ ul.section-list {
 .stderr {
   color: #D00;
 }
+#sec-edit + .glyphicon {
+  font-size: 8pt;
+  margin-left: 0;
+  margin-right: -5px;
+}
+.help {
+  margin-left: 4px;
+  font-size: 10pt;
+}
