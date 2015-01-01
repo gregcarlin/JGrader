@@ -20,7 +20,7 @@ var render = function(page, options, res) {
     case 'section':
       options.page = 0;
       // title must be set already
-      options.js = ['tooltip'];
+      options.js = ['tooltip', 'teacher/edit'];
       options.strftime = strftime;
       break;
     case 'assignmentList':
@@ -108,7 +108,7 @@ router.post('/section/create', function(req, res) {
     if(!name || name.length <= 0) {
       render('sectionCreate', {error: 'Name cannot be blank.', name: name}, res);
     } else {
-      connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?); SELECT LAST_INSERT_ID()", [id, name], function(err, rows) {
+      connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, LEFT(UUID(), 5)); SELECT LAST_INSERT_ID()", [id, name], function(err, rows) {
         if(err || rows.length <= 0) {
           render('sectionCreate', {error: 'An unknown error has occurred. Please try again later.', name: name}, res);
         } else {
@@ -147,7 +147,7 @@ router.get('/section/:id', function(req, res) {
               render('notFound', {page: 0, error: 'Error getting section', type: 'section'}, res);
               if(debug) throw err;
             } else {
-              render('section', {title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, rows: results}, res);
+              render('section', {title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, sectionCode: rows[0].code, rows: results}, res);
             }
           });
         }
@@ -156,6 +156,21 @@ router.get('/section/:id', function(req, res) {
       render('notFound', {page: 0, type: 'section'}, res);
     }
     });
+});
+
+router.post('/section/:id/updatename/:name', function(req, res) {
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    connection.query("UPDATE `sections` SET `name` = ? WHERE `id` = ? AND `teacher_id` = ?", [req.params.name, req.params.id, teacherID], function(err, rows) {
+      if(err) {
+        res.json({code: -1}); // unknown error
+        if(debug) throw err;
+      } else if(rows.affectedRows <= 0) {
+        res.json({code: 2}); // no permission
+      } else {
+        res.json({code: 0, newValue: req.params.name});
+      }
+    });
+  });
 });
 
 // page that lists assignments
