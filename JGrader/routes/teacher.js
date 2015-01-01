@@ -38,12 +38,13 @@ var render = function(page, options, res) {
     case 'assignment':
       options.page = 1;
       // title must be set already
+      options.js = ['tooltip', 'teacher/edit'];
       options.strftime = strftime;
       break;
     case 'submission':
       options.page = 1;
       // title must be set already
-      options.js = ['prettify', 'teacher/submission', 'tooltip'];
+      options.js = ['prettify', 'teacher/submission', 'tooltip', 'teacher/edit'];
       options.css = ['prettify'];
       options.onload = 'prettyPrint()';
       options.strftime = strftime;
@@ -286,6 +287,12 @@ router.get('/assignment/:id', function(req, res) {
         });
       }
     });
+  });
+});
+
+router.post('/assignment/:id/updatedesc/:desc', function(req, res) {
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    // todo
   });
 });
 
