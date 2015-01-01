@@ -43,7 +43,7 @@ var render = function(page, options, res) {
     case 'submission':
       options.page = 1;
       // title must be set already
-      options.js = ['prettify', 'submission', 'tooltip'];
+      options.js = ['prettify', 'teacher/submission', 'tooltip'];
       options.css = ['prettify'];
       options.onload = 'prettyPrint()';
       options.strftime = strftime;
