@@ -89,13 +89,13 @@ ul.section-list {
 #output-tag {
   display: block;
 }
-#edit-grade {
-  margin-left: 4px;
-  font-size: 12pt;
-}
-#edit {
+.edit input {
   display: none;
   width: 75px;
+}
+.edit + .glyphicon {
+  margin-left: 4px;
+  font-size: 12pt;
 }
 .table-linked tr[onclick]:hover td {
   cursor: pointer;

@@ -7,7 +7,7 @@
   <h2 class="right" title="<%= strftime('%b %o %Y @ %l:%M %p', due) %>">Due <%= strftime(sameYear ? '%b %o' : '%b %o, %Y', due) %></h2>
 </div>
 <div class="description">
-  <%= assignment.description ? assignment.description : '' %>
+  <span class="edit" key="updatedesc"><span><%= assignment.description ? assignment.description : '' %></span><input type="text" class="form-control" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="right" title="Edit"></span>
 </div>
 <div class="table-responsive">
   <table class="table table-striped table-linked">
