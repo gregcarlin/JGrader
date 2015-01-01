@@ -313,7 +313,7 @@ router.get('/submission/:id', function(req, res) {
       } else if(subData.length <= 0) {
         render('notFound', {page: 1, type: 'submission'}, res);
       } else {
-        connection.query("SELECT `id`,`name`,`contents` FROM `files` WHERE `submission_id` = ?", [req.params.id], function(err, fileData) {
+        connection.query("SELECT `id`,`name`,`contents` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
           if(err) {
             render('submission', {title: subData[0].fname + ' ' + subData[0].lname = "'s submission to " + subData[0].name, subData: subData[0], fileData: [], error: 'Unable to retrieve file data.'}, res);
             if(debug) throw err;
@@ -347,10 +347,21 @@ router.post('/submission/:id/updategrade/:grade', function(req, res) {
   });
 });
 
-router.post('/submission/:id/run/:fileName', function(req, res) {
+router.post('/submission/:id/run/:fileIndex', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
     // security to ensure this teacher owns this submission and file
-    connection.query("SELECT `files`.`id`,`files`.`name`,`files`.`compiled` FROM `submissions`,`assignments`,`sections`,`files` WHERE `submissions`.`assignment_id` = `assignments`.`id` AND `assignments`.`section_id` = `sections`.`id` AND `submissions`.`id` = ? AND `sections`.`teacher_id` = ? AND `files`.`submission_id` = `submissions`.`id`", [req.params.id, teacherID], function(err, rows) {
+    connection.query("SELECT \
+                      `files`.`id`,\
+                      `files`.`name`,\
+                      `files`.`compiled` \
+                    FROM `submissions`,`assignments`,`sections`,`files` \
+                    WHERE \
+                      `submissions`.`assignment_id` = `assignments`.`id` AND \
+                      `assignments`.`section_id` = `sections`.`id` AND \
+                      `submissions`.`id` = ? AND \
+                      `sections`.`teacher_id` = ? AND \
+                      `files`.`submission_id` = `submissions`.`id` \
+                    ORDER BY `files`.`id`", [req.params.id, teacherID], function(err, rows) {
       if(rows.length <= 0) {
         res.json({code: 2}); // invalid permissions
       } else {
@@ -359,18 +370,24 @@ router.post('/submission/:id/run/:fileName', function(req, res) {
 
           for(i in rows) {
             var name = rows[i].name;
-            rows[i].className = name.substring(0, name.length - 4) + 'class';
+            rows[i].className = name.substring(0, name.length - 5);
             // note: working directory seems to be one with app.js in it
-            fs.writeFileSync('temp/' + rows[i].className, rows[i].compiled);
+            fs.writeFileSync('temp/' + rows[i].className + '.class', rows[i].compiled);
           }
 
-          // todo ensure a valid fileName
-          exec('cd temp/ && java ' + req.param('fileName'), function(error, stdout, stderr) {
-            for(i in rows) {
-              fs.unlinkSync('temp/' + rows[i].className);
-            }
-            res.json({code: 0, out: stdout, err: stderr});
-          });
+          var fileIndex = req.param('fileIndex');
+          if(fileIndex < rows.length) {
+            child = exec('cd temp/ && java ' + rows[req.param('fileIndex')].className, function(error, stdout, stderr) {
+              for(i in rows) {
+                fs.unlinkSync('temp/' + rows[i].className + '.class');
+              }
+              res.json({code: 0, out: stdout, err: stderr});
+            });
+            child.stdin.write(req.body.stdin);
+            child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
+          } else {
+            res.json({code: 1}); // invalid input
+          }
         });
       }
     });
