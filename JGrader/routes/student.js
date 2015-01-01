@@ -77,7 +77,7 @@ router.get('/assignment/:id', function(req, res) {
           if(err) {
             res.redirect('/student/assignment');
           } else if(fileData.length == 0) {
-            render('assignment', { rows: rows, js: ['dropzone', 'studentSubmit'] }, res);
+            render('assignment', { rows: rows, js: ['student/dropzone', 'student/studentSubmit'] }, res);
           } else {
             // Sends file data
             render('assignment', { rows: rows, fileData: fileData, js: ['prettify'] }, res);
