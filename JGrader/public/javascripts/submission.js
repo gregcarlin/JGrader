@@ -43,12 +43,11 @@ $('#edit').keyup(function(event) {
 });
 
 $('#execute').click(function() {
+  $('#output-text').html('<span class="glyphicon glyphicon-refresh"></span>'); // todo make this spin so it actually looks like a loading thing
   var fileID = $('.tab-content .active').attr('id');
   var url = document.URL;
   if(url.charAt(url.length-1) != '/') url += '/';
-  // todo support inputs
-  $.post(url + 'run/' + fileID, '', function(data, textStatus, jqXHR) {
-    console.log(data);
+  $.post(url + 'run/' + fileID, {stdin: $('#input-text').val()}, function(data, textStatus, jqXHR) {
     if(data.code == 0) {
       $('#output-text').html(data.out + '\n\n<span class="stderr">' + data.err + '</span>');
     } else {
