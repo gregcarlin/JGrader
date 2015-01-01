@@ -13,6 +13,7 @@ $('.edit').each(function(index, element) {
     if(text != 'Not graded.') {
       input.val(text);
     }
+    input.width(span.width());
     input.show();
     input.focus();
   });
