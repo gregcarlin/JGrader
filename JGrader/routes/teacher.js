@@ -54,6 +54,11 @@ var render = function(page, options, res) {
       options.page = 2;
       options.title = 'Your Students';
       break;
+    case 'student':
+      options.page = 2;
+      // title must be set already
+      options.strftime = strftime;
+      break;
     case 'settings':
       options.page = -1;
       options.title = 'Settings';
@@ -442,7 +447,6 @@ router.post('/submission/:id/run/:fileIndex', function(req, res) {
   });
 });
 
-// todo all student stuff
 router.get('/student', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
     connection.query("SELECT \
@@ -460,6 +464,29 @@ router.get('/student', function(req, res) {
                       `enrollment`.`section_id` = `sections`.`id` AND \
                       `enrollment`.`student_id` = `students`.`id`", [teacherID], function(err, rows) {
       render('studentList', {rows: rows}, res);
+    });
+  });
+});
+
+router.get('/student/:id', function(req, res) {
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    connection.query("SELECT `students`.`fname`,`students`.`lname` FROM `students` WHERE `id` = ? AND SECTIONS_WITH_STUDENT(?, `students`.`id`) > 0", [req.params.id, teacherID], function(err, result) {
+      if(err) {
+        render('notFound', {page: 2, type: 'student', error: 'An unexpected error has occurred.'}, res);
+        if(debug) throw err;
+      } else if(result.length <= 0) {
+        render('notFound', {page: 2, type: 'student'}, res);
+      } else {
+        connection.query("SELECT `submissions`.`id`,`submissions`.`grade`,`submissions`.`submitted`,`assignments`.`name`,`sections`.`name` AS `sname`,`sections`.`id` AS `sid` FROM `sections`,(`assignments` LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = ?) WHERE `sections`.`id` = `assignments`.`section_id` AND `sections`.`teacher_id` = ?", [req.params.id, teacherID], function(err, rows) {
+          if(err) {
+            render('notFound', {page: 2, type: 'student', error: 'An unexpected error has occurred.'}, res);
+            if(debug) throw err;
+          } else {
+            var name = result[0].fname + ' ' + result[0].lname;
+            render('student', {title: name, name: name, rows: rows}, res);
+          }
+        });
+      }
     });
   });
 });
