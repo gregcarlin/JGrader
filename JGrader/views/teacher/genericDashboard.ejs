@@ -16,6 +16,7 @@
     <!-- Custom styles for this template -->
     <link href="/stylesheets/dashboard.css" rel="stylesheet">
     <link href="/stylesheets/dash.css" rel="stylesheet">
+
     <% if(typeof css != 'undefined') {
         for(i in css) { %>
           <link href="/stylesheets/<%= css[i] %>.css" rel="stylesheet">
@@ -77,6 +78,7 @@
     <script src="/javascripts/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="/javascripts/ie10-viewport-bug-workaround.js"></script>
+    
     <% if(typeof js != 'undefined') {
         for(i in js) { %>
           <script src="/javascripts/<%= js[i] %>.js"></script>

@@ -12,15 +12,14 @@
 
     <!-- Bootstrap core CSS -->
     <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
-    <link href="/stylesheets/bootstrap-theme.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="/stylesheets/dashboard.css" rel="stylesheet">
     <link href="/stylesheets/dash.css" rel="stylesheet">
 
     <% if(typeof css != 'undefined') {
-      for(i in css) { %>
-        <link href="/stylesheets/<%= css[i] %>.css" rel="stylesheet">
+        for(i in css) { %>
+          <link href="/stylesheets/<%= css[i] %>.css" rel="stylesheet">
         <% }
       } %>
 
@@ -32,7 +31,6 @@
   </head>
 
   <body>
-    <script src="/javascripts/jquery-2.1.1.min.js"></script>
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container-fluid">
@@ -64,6 +62,9 @@
           </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <% if(typeof error != 'undefined') { %>
+          <div class="alert alert-danger" role="alert"><%= error %></div>
+          <% } %>
           <%- content %>
         </div>
       </div>
@@ -72,15 +73,14 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-
     <script src="/javascripts/jquery-2.1.1.min.js"></script>
     <script src="/javascripts/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="/javascripts/ie10-viewport-bug-workaround.js"></script>
 
     <% if(typeof js != 'undefined') {
-      for(i in js) { %>
-        <script src="/javascripts/<%= js[i] %>.js"></script>
+        for(i in js) { %>
+          <script src="/javascripts/<%= js[i] %>.js"></script>
         <% }
       } %>
   </body>
