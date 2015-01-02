@@ -1,8 +1,5 @@
-<% if(typeof rows == 'undefined') {%>
-<h1> Some kind of Error has happened </h1>
-<% } else { %>
 <div class="page-header">
-  <h1> Assignments </h1>
+  <h1>Assignments</h1>
 </div>
 
 <div class="table-responsive">
@@ -19,7 +16,7 @@
     <tbody>
     <% if(rows.length == 0) { %>
         <tr>
-          <td colspan="3">You have no Assignments... Lucky/td>
+          <td colspan="3">You have no Assignments... Lucky</td>
         </tr>
       <% } else {
           for(i in rows) {%>
@@ -35,4 +32,3 @@
     </tbody>
   </table>
 </div>
-<% } %>
