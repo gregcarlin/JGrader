@@ -9,20 +9,22 @@ var render = function(page, options, res) {
     case 'notFound':
       break;
     case 'assignmentList':
-      options.title = 'Assignments';
       options.page = 1;
+      options.title = 'Assignments';
       break;
     case 'assignment':
       options.page = 1;
       break;
     case 'sectionList':
       options.page = 0;
+      options.js = ['tooltip'];
       break;
     case 'section':
       options.page = 0;
       break;
     case 'joinSection':
       options.page = 0;
+      options.title = 'Join a Section';
       break;
   }
   renderGenericStudent(page, options, res);
@@ -149,32 +151,47 @@ router.get('/section/joinSection', function(req, res) {
 // Gets information for specific class
 router.get('/section/:id', function(req, res) {
   authStudent(req.cookies.hash, res, function(studentID) {
-    sectionID = req.params.id;
-      connection.query("SELECT `assignments`.`id`,`assignments`.`name`,`assignments`.`description`,`assignments`.`due`,`sections`.`name` AS `sectionName` \
+    var sectionID = req.params.id;
+    connection.query("SELECT `assignments`.`id`,`assignments`.`name`,`assignments`.`description`,`assignments`.`due`,`sections`.`name` AS `sectionName` \
                         FROM `assignments`, `enrollment`,`sections` \
                         WHERE `assignments`.`section_id` = `enrollment`.`section_id` \
                         AND `enrollment`.`student_id` = ? \
                         AND `sections`.`id` = `enrollment`.`section_id` \
                         AND `enrollment`.`section_id` = ?", [studentID,sectionID], function(err, rows) {
-        // todo: Need to handle errors
-        if(err) {
-          res.redirect('/student/section');
+      // todo: Need to handle errors
+      if(err) {
+        res.redirect('/student/section');
       } else {
-          render('section', { rows: rows }, res);
-        }
-      });
+        render('section', { rows: rows }, res);
+      }
+    });
   });
 });
 
 // Joins Class
 router.post('/section/joinSection', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
-    sectionID = req.param('sectionID');
-    if(sectionID) {
-      connection.query("INSERT INTO `enrollment` VALUES(?, ?)", [sectionID, id], function(err, rows) {
-        // todo: Need to handle errors
-        res.redirect('/student/section');
+    var sectionID = req.param('sectionID');
+    if(isSet(sectionID)) {
+      connection.query("SELECT `id` FROM `sections` WHERE `code` = ?", [sectionID], function(err, rows) {
+        if(err) {
+          render('joinSection', {error: 'An unknown error has occurred.'}, res);
+          if(debug) throw err;
+        } else if(rows.length <= 0) {
+          render('joinSection', {error: 'That is not a valid section code.'}, res);
+        } else {
+          connection.query("INSERT INTO `enrollment` VALUES(?, ?)", [rows[0].id, id], function(err, result) {
+            if(err) {
+              render('joinSection', {error: 'An unknown error has occurred.'}, res);
+              if(debug) throw err;
+            } else {
+              res.redirect('/student/section/' + rows[0].id);
+            }
+          });
+        }
       });
+    } else {
+      render('joinSection', {error: 'You must enter a section code.'}, res);
     }
   });
 });
