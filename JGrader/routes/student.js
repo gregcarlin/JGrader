@@ -156,17 +156,21 @@ router.get('/section/joinSection', function(req, res) {
 router.get('/section/:id', function(req, res) {
   authStudent(req.cookies.hash, res, function(studentID) {
     var sectionID = req.params.id;
-    connection.query("SELECT `assignments`.`id`,`assignments`.`name`,`assignments`.`description`,`assignments`.`due`,`sections`.`name` AS `sectionName` \
-                        FROM `assignments`, `enrollment`,`sections` \
-                        WHERE `assignments`.`section_id` = `enrollment`.`section_id` \
-                        AND `enrollment`.`student_id` = ? \
-                        AND `sections`.`id` = `enrollment`.`section_id` \
-                        AND `enrollment`.`section_id` = ?", [studentID, sectionID], function(err, rows) {
+    connection.query("SELECT `sections`.`name` FROM `sections`,`enrollment` WHERE `sections`.`id` = ? AND `sections`.`id` = `enrollment`.`section_id` AND `enrollment`.`student_id` = ?", [sectionID, studentID], function(err, result) {
       if(err) {
         render('notFound', {page: 0, type: 'section', error: 'An unexpected error has occurred.'}, res);
         if(debug) throw err;
+      } else if(result.length <= 0) {
+        render('notFound', {page: 0, type: 'section'}, res);
       } else {
-        render('section', { rows: rows }, res);
+        connection.query("SELECT `id`,`name`,`description`,`due` FROM `assignments` WHERE `section_id` = ?", [sectionID], function(err, rows) {
+          if(err) {
+            render('notFound', {page: 0, type: 'section', error: 'An unexpected error has occurred.'}, res);
+            if(debug) throw err;
+          } else {
+            render('section', {name: result[0].name, rows: rows}, res);
+          }
+        });
       }
     });
   });
