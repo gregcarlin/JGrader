@@ -1,0 +1,39 @@
+<div class="page-header">
+  <h1><%= name %></h1>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped table-linked">
+    <thead>
+      <tr>
+        <th>Assignment</th>
+        <th>Section</th>
+        <th>Submitted</th>
+        <th>Grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if(rows.length == 0) { %>
+        <tr>
+          <td colspan="4">This student has no assigned work.</td>
+        </tr>
+      <% } else {
+          for(i in rows) {%>
+            <% if(rows[i].id) { %>
+              <tr onclick="document.location = '/teacher/submission/<%= rows[i].id %>'">
+            <% } else { %>
+              <tr>
+            <% } %>
+              <td><%= rows[i].name %></td>
+              <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
+              <%
+                var submitted = new Date(rows[i].submitted);
+                var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
+              %>
+              <td><%= rows[i].submitted ? submittedStr : 'Not submitted' %></td>
+              <td><%= rows[i].grade ? rows[i].grade : 'Not graded' %></td>
+            </tr>
+       <% }
+         } %>
+    </tbody>
+  </table>
+</div>
