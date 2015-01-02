@@ -104,7 +104,7 @@ router.post('/assignment/:id/submit', function(req, res) {
                         FROM `submissions` \
                         WHERE `submissions`.`student_id` = ? \
                         AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
-        if(rows.length == 0){
+        if(rows.length == 0) {
           var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
           connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id, timestamp], function(err, rows) {
             if(err) {
@@ -127,7 +127,7 @@ router.post('/assignment/:id/submit', function(req, res) {
               render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
               if(debug) throw err;
             } else {
-              res.send(req.body);
+              res.redirect('/student/assignment/' + req.params.id);
             }
           });
         }
@@ -135,6 +135,40 @@ router.post('/assignment/:id/submit', function(req, res) {
     }
   });
 });
+
+router.get('/assignment/:id/resubmit', function(req,res) {
+  authStudent(req.cookies.hash, res, function(id) {
+    connection.query("SELECT `submissions`.`id` \
+                      FROM `submissions` \
+                      WHERE `submissions`.`student_id` = ? \
+                      AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
+      if(err) {
+        res.redirect('/student/assignment');
+      } else if (rows.length == 0) {
+        // User has not submitted so cannot resubmit
+        res.redirect('/student/assignment');
+      } else {
+        // Means user has already submitted and is able to resubmit
+        connection.query("DELETE FROM `files` WHERE `files`.`submissions_id` = ?", [rows[0].id], function(err, rows) {
+          if(err) {
+            res.redirect('/student/assignment');
+          } else {
+            connection.query("DELETE FROM `submissions` \
+                              WHERE `submissions`.`assignment_id` = ? \
+                              AND `submissions`.`student_id` = ?", [req.params.id, id], function(err, rows) {
+              if(err) {
+                res.redirect('/student/assignment');
+              } else {
+                res.redirect('/student/assignment/' + req.params.id);
+              }
+            });
+          }
+        });
+    }
+  });
+});
+});
+
 
 // Lists all of the current sections (classes)
 router.get('/section', function(req, res) {
