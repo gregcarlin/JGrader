@@ -86,7 +86,7 @@ router.get('/assignment/:id', function(req, res) {
               render('assignment', { rows: rows, js: ['student/dropzone', 'student/studentSubmit'] }, res);
             } else {
               // Sends file data
-              render('assignment', { rows: rows, fileData: fileData, js: ['prettify'] }, res);
+              render('assignment', { rows: rows, fileData: fileData, js: ['prettify', 'student/studentSubmitted'] }, res);
             }
           });
         }
@@ -99,7 +99,8 @@ router.get('/assignment/:id', function(req, res) {
 router.post('/assignment/:id/submit', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     var assignmentID = req.params.id;
-    if(req.files){
+    if(req.files) {
+      
       connection.query("SELECT `submissions`.`id` \
                         FROM `submissions` \
                         WHERE `submissions`.`student_id` = ? \
@@ -149,8 +150,9 @@ router.get('/assignment/:id/resubmit', function(req,res) {
         res.redirect('/student/assignment');
       } else {
         // Means user has already submitted and is able to resubmit
-        connection.query("DELETE FROM `files` WHERE `files`.`submissions_id` = ?", [rows[0].id], function(err, rows) {
+        connection.query("DELETE FROM `files` WHERE `files`.`submission_id` = ?", [rows[0].id], function(err, rows) {
           if(err) {
+            console.log("mysql error");
             res.redirect('/student/assignment');
           } else {
             connection.query("DELETE FROM `submissions` \
