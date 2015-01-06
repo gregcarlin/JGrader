@@ -2,6 +2,7 @@ require('./common');
 var router = express.Router();
 var multer  = require('multer');
 var moment = require('moment');
+var alphanumericAndPeriod = /^[a-zA-Z0-9.]+$/;
 
 var render = function(page, options, res) {
   switch(page) {
@@ -100,39 +101,50 @@ router.post('/assignment/:id/submit', function(req, res) {
   authStudent(req.cookies.hash, res, function(id) {
     var assignmentID = req.params.id;
     if(req.files) {
-      
-      connection.query("SELECT `submissions`.`id` \
-                        FROM `submissions` \
-                        WHERE `submissions`.`student_id` = ? \
-                        AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
-        if(rows.length == 0) {
-          var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
-          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id, timestamp], function(err, rows) {
-            if(err) {
-              render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-              if(debug) throw err;
-            } else {
-              submitFiles(0, req.files, id, assignmentID, function(err) {
-                if(err){
-                  render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-                  if(debug) throw err;
-                } else {
-                  res.send(req.body);
-                }
-              });
-            }
-          });
-        } else {
-          submitFiles(0, req.files, id, assignmentID, function(err) {
-            if(err) {
-              render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-              if(debug) throw err;
-            } else {
-              res.redirect('/student/assignment/' + req.params.id);
-            }
-          });
+      // Sanatize file name a-z A-Z 0-9 and .
+      var isSanitize = true;
+      for(file in req.files) {
+        if(req.files[file].originalname.search(alphanumericAndPeriod) == -1) {
+          isSanitize = false;
         }
-      });
+      }
+      if(isSanitize) {
+        connection.query("SELECT `submissions`.`id` \
+                          FROM `submissions` \
+                          WHERE `submissions`.`student_id` = ? \
+                          AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
+          if(rows.length == 0) {
+            var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
+            connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id, timestamp], function(err, rows) {
+              if(err) {
+                render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+                if(debug) throw err;
+              } else {
+                submitFiles(0, req.files, id, assignmentID, function(err) {
+                  if(err){
+                    render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+                    if(debug) throw err;
+                  } else {
+                    res.send(req.body);
+                  }
+                });
+              }
+            });
+          } else {
+            submitFiles(0, req.files, id, assignmentID, function(err) {
+              if(err) {
+                render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+                if(debug) throw err;
+              } else {
+                res.redirect('/student/assignment/' + req.params.id);
+              }
+            });
+          }
+        });
+      } else {
+        // Will implement frontend sanitization to make it more friendly, no need for error response
+        res.redirect('/student/assignment/');
+      }
     }
   });
 });
