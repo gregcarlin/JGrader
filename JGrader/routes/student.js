@@ -103,44 +103,55 @@ router.post('/assignment/:id/submit', function(req, res) {
     if(req.files) {
       // Sanatize file name a-z A-Z 0-9 and .
       var isSanitize = true;
+      var noNameSame = true;
+      var stringArray = new Array();
       for(file in req.files) {
         if(req.files[file].originalname.search(alphanumericAndPeriod) == -1) {
           isSanitize = false;
         }
+        if(stringArray.indexOf(req.files[file].originalname != -1)){
+          noNameSame = false;
+        }
+        stringArray.push(req.files[file].originalname);
       }
       if(isSanitize) {
-        connection.query("SELECT `submissions`.`id` \
-                          FROM `submissions` \
-                          WHERE `submissions`.`student_id` = ? \
-                          AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
-          if(rows.length == 0) {
-            var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
-            connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id, timestamp], function(err, rows) {
-              if(err) {
-                render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-                if(debug) throw err;
-              } else {
-                submitFiles(0, req.files, id, assignmentID, function(err) {
-                  if(err){
-                    render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-                    if(debug) throw err;
-                  } else {
-                    res.send(req.body);
-                  }
-                });
-              }
-            });
-          } else {
-            submitFiles(0, req.files, id, assignmentID, function(err) {
-              if(err) {
-                render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-                if(debug) throw err;
-              } else {
-                res.redirect('/student/assignment/' + req.params.id);
-              }
-            });
-          }
-        });
+        if(noNameSame){
+          connection.query("SELECT `submissions`.`id` \
+                            FROM `submissions` \
+                            WHERE `submissions`.`student_id` = ? \
+                            AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
+            if(rows.length == 0) {
+              var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
+              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id, timestamp], function(err, rows) {
+                if(err) {
+                  render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+                  if(debug) throw err;
+                } else {
+                  submitFiles(0, req.files, id, assignmentID, function(err) {
+                    if(err){
+                      render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+                      if(debug) throw err;
+                    } else {
+                      res.send(req.body);
+                    }
+                  });
+                }
+              });
+            } else {
+              submitFiles(0, req.files, id, assignmentID, function(err) {
+                if(err) {
+                  render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+                  if(debug) throw err;
+                } else {
+                  res.redirect('/student/assignment/' + req.params.id);
+                }
+              });
+            }
+          });
+        } else {
+          // Will implement frontend name Same error to make it more friendly, no need for error response
+          res.redirect('/student/assignment/');
+        }
       } else {
         // Will implement frontend sanitization to make it more friendly, no need for error response
         res.redirect('/student/assignment/');
