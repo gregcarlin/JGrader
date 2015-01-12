@@ -31,7 +31,7 @@ $('.edit').each(function(index, element) {
     if(text.length > 0) {
       var url = document.URL;
       if(url.charAt(url.length-1) != '/') url += '/';
-      $.post(url + par.attr('key') + '/' + text.replace(new RegExp('/', 'g'), '-'), '', function(data, textStatus, jqXHR) {
+      $.post(url + par.attr('data-key') + '/' + text.replace(new RegExp('/', 'g'), '-'), '', function(data, textStatus, jqXHR) {
         var code = data.code;
         if(code == 0) {
           // success, update text
