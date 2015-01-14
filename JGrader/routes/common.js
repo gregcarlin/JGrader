@@ -17,13 +17,25 @@ connection = mysql.createConnection({
 });
 connection.connect();
 
+// todo set to false before release
+debug = true;
+
+// sends a query to MySQL to prevent disconnection
+// note: this seems to only start when the first page is loaded, but that shouldn't be too much of an issue
+var interval = setInterval(function() {
+  connection.query("SELECT `id` FROM `teachers` LIMIT 1", function(err, rows) {
+    if(err) {
+      console.log(err);
+      if(debug) throw err;
+    }
+  });
+}, 1000 * 60 * 5); // every 5 minutes
+
 process.on('SIGINT', function() { // on ^C
+  clearInterval(interval); // stop sending queries to mysql
   connection.end(); // close mysql connection
   process.exit(); // also do normal exit stuff
 });
-
-// todo set to false before release
-debug = true;
 
 var renderGeneric = function(page, vars, group, res) {
   express().render(page + '.ejs', vars, function(err, html) {
