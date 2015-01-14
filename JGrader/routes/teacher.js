@@ -430,11 +430,15 @@ router.post('/submission/:id/run/:fileIndex', function(req, res) {
           var fileIndex = req.param('fileIndex');
           if(fileIndex < rows.length) {
             // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
-            child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.param('fileIndex')].className, function(error, stdout, stderr) {
+            child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.param('fileIndex')].className, {timeout: 10000 /* 10 seconds */}, function(error, stdout, stderr) {
               for(i in rows) {
                 fs.unlinkSync('temp/' + rows[i].className + '.class');
               }
-              res.json({code: 0, out: stdout, err: stderr});
+              if(error && error.killed) { // if timeout
+                res.json({code: 0, out: '', err: 'Code took too long to execute! There may be an infinite loop somewhere.'});
+              } else {
+                res.json({code: 0, out: stdout, err: stderr});
+              }
             });
             child.stdin.write(req.body.stdin);
             child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
