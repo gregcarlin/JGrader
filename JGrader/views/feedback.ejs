@@ -34,14 +34,13 @@
         <input type="text" class="form-control" name="fname" placeholder="First Name" required autofocus<%- typeof fname == 'undefined' ? '' : ' value="'+fname+'"' %>>
         <input type="text" class="form-control" name="lname" placeholder="Last Name" required<%- typeof lname == 'undefined' ? '' : ' value="'+lname+'"' %>>
       	<input type="email" class="form-control" name="email" placeholder="Email" required<%- typeof email == 'undefined' ? '' : ' value="'+email+'"' %>>
-      	<input type="password" class="form-control" name="password" placeholder="Password" required>
+        <textarea class="form-control" rows="4" name="feedback" placeholder="Feedback"></textarea>
         <div class="iama">
-          I am a...
-          <label><input type="radio" name="role" value="student" required<%- (typeof role == 'undefined' || role == 'student') ? ' checked' : '' %>>Student</label>
-          <label><input type="radio" name="role" value="teacher"<%- (typeof role != 'undefined' && role == 'teacher') ? ' checked' : '' %>>Teacher</label>
-          <label title="Teaching Assistant"><input type="radio" name="role" value="assistant"<%- (typeof role != 'undefined' && role == 'assistant') ? ' checked' : ''%>>T.A.</label>
+          Type of Feedback:
+          <label><input type="radio" name="type" value="bug" required<%- (typeof role == 'undefined' || role == 'bug') ? ' checked' : '' %>>Bug</label>
+          <label><input type="radio" name="type" value="enhancment"<%- (typeof role != 'undefined' && role == 'enhancment') ? ' checked' : '' %>>Enhancment</label>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Create account</button>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Submit Feedback</button>
   		</form>
     </div> <!-- /container -->
 
