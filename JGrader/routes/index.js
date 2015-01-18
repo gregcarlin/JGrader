@@ -25,10 +25,11 @@ router.get('/log-out', function(req, res) {
 
 router.get('/feedback', function(req, res) {
   // todo feedback page
+  res.render('feedback');
 });
 
 router.post('/feedback', function(req, res) {
-  // todo feedback submission
+  res.redirect('/');
 });
 
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
