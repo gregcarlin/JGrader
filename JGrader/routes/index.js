@@ -29,6 +29,7 @@ router.get('/feedback', function(req, res) {
 });
 
 router.post('/feedback', function(req, res) {
+  // todo record feedback
   res.redirect('/');
 });
 
