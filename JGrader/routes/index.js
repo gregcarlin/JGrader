@@ -24,7 +24,6 @@ router.get('/log-out', function(req, res) {
 });
 
 router.get('/feedback', function(req, res) {
-  // todo feedback page
   res.render('feedback');
 });
 
