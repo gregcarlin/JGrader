@@ -67,3 +67,16 @@ body {
   position: relative;
   top: -1px;
 }
+
+.form-signin textarea {
+  resize: vertical;
+  margin-bottom: 15px;
+}
+
+.form-signin .iama label {
+  float: left;
+}
+
+.form-signin .iama label:nth-child(even) {
+  clear: left;
+}

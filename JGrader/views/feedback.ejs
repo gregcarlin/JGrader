@@ -31,16 +31,15 @@
         <% if(typeof error != 'undefined') { %>
           <div class="error"><%= error %></div>
         <% } %>
-        <input type="text" class="form-control" name="fname" placeholder="First Name" required autofocus<%- typeof fname == 'undefined' ? '' : ' value="'+fname+'"' %>>
-        <input type="text" class="form-control" name="lname" placeholder="Last Name" required<%- typeof lname == 'undefined' ? '' : ' value="'+lname+'"' %>>
-      	<input type="email" class="form-control" name="email" placeholder="Email" required<%- typeof email == 'undefined' ? '' : ' value="'+email+'"' %>>
-        <textarea class="form-control" rows="4" name="feedback" placeholder="Feedback"></textarea>
         <div class="iama">
-          Type of Feedback:
-          <label><input type="radio" name="type" value="bug" required<%- (typeof role == 'undefined' || role == 'bug') ? ' checked' : '' %>>Bug</label>
-          <label><input type="radio" name="type" value="enhancment"<%- (typeof role != 'undefined' && role == 'enhancment') ? ' checked' : '' %>>Enhancment</label>
+          <label>What are you reporting?</label>
+          <label><input type="radio" name="type" value="question" required>Question</label>
+          <label><input type="radio" name="type" value="comment">Comment</label>
+          <label><input type="radio" name="type" value="complaint">Complaint</label>
+          <label><input type="radio" name="type" value="other">Other</label>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Submit Feedback</button>
+        <textarea class="form-control" rows="4" name="feedback" placeholder="What would you like to tell us?" required></textarea>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
   		</form>
     </div> <!-- /container -->
 
