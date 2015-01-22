@@ -2,7 +2,7 @@ require('./common');
 var router = express.Router();
 var multer  = require('multer');
 var moment = require('moment');
-var alphanumericAndPeriod = /^[a-zA-Z0-9.]+$/;
+var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
 
 var render = function(page, options, res) {
   switch(page) {
@@ -106,7 +106,7 @@ router.post('/assignment/:id/submit', function(req, res) {
       var noNameSame = true;
       var stringArray = new Array();
       for(file in req.files) {
-        if(req.files[file].originalname.search(alphanumericAndPeriod) == -1) {
+        if(!alphanumericAndPeriod.test(req.files[file].originalname)) {
           isSanitize = false;
         }
         if(stringArray.indexOf(req.files[file].originalname != -1)){
