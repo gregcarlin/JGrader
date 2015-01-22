@@ -129,7 +129,7 @@ router.post('/assignment/:id/submit', function(req, res) {
                 } else {
                   submitFiles(0, req.files, id, assignmentID, function(err) {
                     if(err){
-                      render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+                      render('notFound', {page: 1, type: 'assignment', error: 'Compilation has failed'}, res);
                       if(debug) throw err;
                     } else {
                       res.send(req.body);
@@ -140,7 +140,7 @@ router.post('/assignment/:id/submit', function(req, res) {
             } else {
               submitFiles(0, req.files, id, assignmentID, function(err) {
                 if(err) {
-                  render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+                  render('notFound', {page: 1, type: 'assignment', error: 'Compilation has failed'}, res);
                   if(debug) throw err;
                 } else {
                   res.redirect('/student/assignment/' + req.params.id);
@@ -290,22 +290,26 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
           }
           // todo make sure file names aren't something like "&& rm -rf /"
           exec("javac " + compileFiles, function (error, stdout, stderr) {
-            for(file in files) {
-              var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
-              fs.readFile(files[file].path, function(err, javaData) {
-                fs.readFile(compilePath, function (err, classData) {
-                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
-                    if(err){
-                      finish(err);
-                    }
-                    fs.unlink(files[file].path, function() {
-                      fs.unlink(compilePath, function() {
+            if(stderr){
+              finish(stderr);
+            } else {
+              for(file in files) {
+                var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
+                fs.readFile(files[file].path, function(err, javaData) {
+                  fs.readFile(compilePath, function (err, classData) {
+                    connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
+                      if(err){
+                        finish(err);
+                      }
+                      fs.unlink(files[file].path, function() {
+                        fs.unlink(compilePath, function() {
 
+                        });
                       });
                     });
                   });
                 });
-              });
+              }
             }
             finish(null);
           });
