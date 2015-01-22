@@ -122,4 +122,29 @@ isSet = function(param) {
   return param && param.length > 0;
 }
 
+// finds out which database hash is logged into. 
+// note: may be an issue if hash appears in more than one sessions table. 
+// calls finish(id, name of db) when done, finish(null, null) if db not found.
+getDatabase = function(hash, finish) {
+  logIn(hash, 'students', function(id) {
+    if(id) {
+      finish(id, 'students');
+    } else {
+      logIn(hash, 'teachers', function(id) {
+        if(id) {
+          finish(id, 'teachers');
+        } else {
+          logIn(hash, 'assistants', function(id) {
+            if(id) {
+              finish(id, 'assistants');
+            } else {
+              finish(null, null);
+            }
+          });
+        }
+      });
+    }
+  });
+}
+
 // modules.exports not required because everything needed is global
