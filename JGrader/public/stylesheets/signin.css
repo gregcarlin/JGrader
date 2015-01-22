@@ -73,10 +73,10 @@ body {
   margin-bottom: 15px;
 }
 
-.form-signin .iama label {
+.form-signin .report-type label {
   float: left;
 }
 
-.form-signin .iama label:nth-child(even) {
+.form-signin .report-type label:nth-child(even) {
   clear: left;
 }

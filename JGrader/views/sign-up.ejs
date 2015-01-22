@@ -29,7 +29,7 @@
       <form class="form-signin" role="form" action="/sign-up" method="POST">
   		  <h2 class="form-signin-heading">Sign up</h2>
         <% if(typeof error != 'undefined') { %>
-          <div class="error"><%= error %></div>
+          <div class="alert alert-danger" role="alert"><%= error %></div>
         <% } %>
         <input type="text" class="form-control" name="fname" placeholder="First Name" required autofocus<%- typeof fname == 'undefined' ? '' : ' value="'+fname+'"' %>>
         <input type="text" class="form-control" name="lname" placeholder="Last Name" required<%- typeof lname == 'undefined' ? '' : ' value="'+lname+'"' %>>
