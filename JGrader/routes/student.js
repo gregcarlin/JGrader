@@ -29,6 +29,10 @@ var render = function(page, options, res) {
       options.page = 0;
       options.title = 'Join a Section';
       break;
+    case 'settings':
+      options.page = -1;
+      options.title = 'Settings';
+      break;
   }
   renderGenericStudent(page, options, res);
 }
@@ -319,5 +323,59 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
     finish(err);
   }
 }
+
+// settings page
+router.get('/settings', function(req, res) {
+  authStudent(req.cookies.hash, res, function(studentID) {
+    connection.query("SELECT `fname`,`lname` FROM `students` WHERE `id` = ?", [studentID], function(err, rows) {
+      if(err) {
+        render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
+        if(debug) throw err;
+      } else {
+        render('settings', {fname: rows[0].fname, lname: rows[0].lname}, res);
+      }
+    });
+  });
+});
+
+router.post('/settings', function(req, res) {
+  authStudent(req.cookies.hash, res, function(studentID) {
+    var fname = req.param('fname');
+    var lname = req.param('lname');
+    if(isSet(fname) && isSet(lname)) {
+      var oldPass = req.param('oldpass');
+      var newPass = req.param('newpass');
+      if(isSet(oldPass) || isSet(newPass)) {
+        if(isSet(oldPass) && isSet(newPass)) {
+          connection.query("UPDATE `students` SET `fname` = ?, `lname` = ?, `pass` = AES_ENCRYPT(?, ?) WHERE `id` = ? AND `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, studentID, oldPass, creds.aes_key], function(err, rows) {
+            if(err) {
+              render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
+              if(debug) throw err;
+            } else if(rows.affectedRows <= 0) {
+              render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
+            } else {
+              render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
+            }
+          });
+        } else {
+          render('settings', {fname: fname, lname: lname, error: 'All fields are required to change your password.'}, res);
+        }
+      } else {
+        connection.query("UPDATE `students` SET `fname` = ?, `lname` = ? WHERE `id` = ?", [fname, lname, studentID], function(err) {
+          if(err) {
+            render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
+            if(debug) throw err;
+          } else {
+            render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
+          }
+        });
+      }
+    } else {
+      if(!fname) fname = '';
+      if(!lname) lname = '';
+      render('settings', {fname: fname, lname: lname, error: 'You must set a valid name.'});
+    }
+  });
+});
 
 module.exports = router;
