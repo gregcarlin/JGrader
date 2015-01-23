@@ -9,7 +9,7 @@
   <dt>Submitted:</dt>
     <dd><%= submittedStr %></dd>
   <dt>Grade:</dt>
-    <dd><span class="edit" data-key="updategrade"><span><%= subData.grade ? subData.grade : 'Not graded.' %></span><input type="text" class="form-control" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
+    <dd><span class="edit" data-key="updategrade" data-default="Not graded."><span><%= subData.grade ? subData.grade : '' %></span><input type="text" class="form-control" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
 </dl>
 <div role="tabpanel">
   <ul class="nav nav-tabs" role="tablist">
