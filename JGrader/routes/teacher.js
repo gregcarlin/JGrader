@@ -311,16 +311,37 @@ router.get('/assignment/:id', function(req, res) {
   });
 });
 
+// update description
 router.post('/assignment/:id/updatedesc/:desc', function(req, res) {
   authTeacher(req.cookies.hash, res, function(teacherID) {
-    connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.desc, req.params.id, teacherID], function(err, rows) {
+    if(req.params.desc.startsWith('<em>')) {
+      res.json({code: 1}); // invalid input
+    } else {
+      connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.desc, req.params.id, teacherID], function(err, rows) {
+        if(err) {
+          res.json({code: -1}); // unknown error
+          if(debug) throw err;
+        } else if(rows.affectedRows <= 0) {
+          res.json({code: 2}); // invalid permissions
+        } else {
+          res.json({code: 0, newValue: req.params.desc}); // success
+        }
+      });
+    }
+  });
+});
+
+// update description to nothing
+router.post('/assignment/:id/updatedesc', function(req, res) {
+  authTeacher(req.cookies.hash, res, function(teacherID) {
+    connection.query("UPDATE `assignments` SET `description` = NULL WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.id, teacherID], function(err, rows) {
       if(err) {
         res.json({code: -1}); // unknown error
         if(debug) throw err;
       } else if(rows.affectedRows <= 0) {
         res.json({code: 2}); // invalid permissions
       } else {
-        res.json({code: 0, newValue: req.params.desc}); // success
+        res.json({code: 0, newValue: ''}); // success
       }
     });
   });

@@ -147,4 +147,11 @@ getDatabase = function(hash, finish) {
   });
 }
 
+// http://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string
+if (typeof String.prototype.startsWith != 'function') {
+  String.prototype.startsWith = function (str){
+    return this.slice(0, str.length) == str;
+  };
+}
+
 // modules.exports not required because everything needed is global
