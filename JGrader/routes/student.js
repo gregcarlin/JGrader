@@ -109,17 +109,19 @@ router.post('/assignment/:id/submit', function(req, res) {
       var isSanitize = true;
       var noNameSame = true;
       var stringArray = new Array();
+      // Checks if any files are the same or have weird names
       for(file in req.files) {
         if(!alphanumericAndPeriod.test(req.files[file].originalname)) {
           isSanitize = false;
         }
-        if(stringArray.indexOf(req.files[file].originalname != -1)){
+        if(stringArray.indexOf(req.files[file].originalname) != -1){
           noNameSame = false;
         }
         stringArray.push(req.files[file].originalname);
       }
       if(isSanitize) {
-        if(noNameSame){
+        if(noNameSame) {
+          // Checks if already submission
           connection.query("SELECT `submissions`.`id` \
                             FROM `submissions` \
                             WHERE `submissions`.`student_id` = ? \
@@ -136,12 +138,14 @@ router.post('/assignment/:id/submit', function(req, res) {
                       render('notFound', {page: 1, type: 'assignment', error: 'Compilation has failed'}, res);
                       if(debug) throw err;
                     } else {
-                      res.send(req.body);
+                      res.send("success");
                     }
                   });
                 }
               });
             } else {
+              // Submission is already added
+              // Todo: block submission or something
               submitFiles(0, req.files, id, assignmentID, function(err) {
                 if(err) {
                   render('notFound', {page: 1, type: 'assignment', error: 'Compilation has failed'}, res);
@@ -188,7 +192,7 @@ router.get('/assignment/:id/resubmit', function(req,res) {
               if(err) {
                 res.redirect('/student/assignment');
               } else {
-                res.redirect('/student/assignment/' + req.params.id);
+                res.redirect('/student/assignment/');
               }
             });
           }
@@ -282,8 +286,13 @@ var findSectionInfo = function(id, res, finish) {
 
 // Compiles and submits the information to the database
 var submitFiles = function(i, files, student_id, assignment_id, finish) {
+  // Makes sure safe upload
   if(files) {
-      connection.query("SELECT `submissions`.`id` FROM `students`,`submissions` WHERE `students`.`id` = ?  AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [student_id, assignment_id], function(err, rows) {
+      // Gets submission created in the POST method
+      connection.query("SELECT `submissions`.`id` \
+                        FROM `students`,`submissions` \
+                        WHERE `students`.`id` = ?  \
+                        AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [student_id, assignment_id], function(err, rows) {
         if(err){
           finish(err);
         } else {
@@ -292,9 +301,15 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
           for(file in files) {
             compileFiles = compileFiles + files[file].path + " ";
           }
-          // todo make sure file names aren't something like "&& rm -rf /"
+
+          // Compiles the java
           exec("javac " + compileFiles, function (error, stdout, stderr) {
             if(stderr){
+              for(file in files){
+                fs.unlink(files[file.path], function() {
+
+                });
+              }
               finish(stderr);
             } else {
               for(file in files) {
@@ -305,6 +320,7 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
                       if(err){
                         finish(err);
                       }
+                      // Deletes files after submit
                       fs.unlink(files[file].path, function() {
                         fs.unlink(compilePath, function() {
 
