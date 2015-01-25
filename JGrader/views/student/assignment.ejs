@@ -21,7 +21,12 @@
       </thead>
       <tbody>
               <tr>
-                <td><%= rows[0].description%></td>
+                <td>
+                <% if (typeof rows[0].description == 'undefined') { %>
+                    N/A <% } else { %>
+                      <%= rows[0].description%>
+                <%}%>
+                </td>
                 <td><%= rows[0].due%></td>
               </tr>
       </tbody>
