@@ -1,3 +1,8 @@
+<% for(i in rows) {
+    if (typeof rows[i].description === 'object') {
+      rows[i].description = "N/A"; 
+    }
+  }%>
 <div class="page-header">
   <h1>Assignments</h1>
 </div>

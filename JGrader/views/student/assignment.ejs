@@ -1,7 +1,10 @@
 <% if (typeof rows == 'undefined') { %>
 <!-- Need to implement a way of getting section name not related to rows-->
 <h1> Some kind of Error has happened</h1>
-<% } else { %>
+<% } else {
+    if (typeof rows[0].description  === 'object') {
+      rows[0].description = "N/A";
+    }%>
 <div class="page-header">
   <h1> <%= rows[0].name %> </h1>
 </div>
@@ -21,13 +24,8 @@
       </thead>
       <tbody>
               <tr>
-                <td>
-                <% if (typeof rows[0].description == 'undefined') { %>
-                    N/A <% } else { %>
-                      <%= rows[0].description%>
-                <%}%>
-                </td>
-                <td><%= rows[0].due%></td>
+                <td><%= rows[0].description %></td>
+                <td><%= rows[0].due %></td>
               </tr>
       </tbody>
     </table>
