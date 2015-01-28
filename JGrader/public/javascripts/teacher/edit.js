@@ -23,6 +23,9 @@ $('.edit').each(function(index, element) {
     span.hide();
     var text = span.html();
     if(text != 'Not graded.' && !text.startsWith('<em>')) {
+      if(other.is('[data-convert-to-edit]')) { // if it has function for converting data to editable format
+        text = window[other.attr('data-convert-to-edit')](text);
+      }
       input.val(text);
     }
     input.width(span.width());
@@ -47,6 +50,9 @@ $('.edit').each(function(index, element) {
         var code = data.code;
         if(code == 0) {
           // success, update text
+          if(par.is('[data-convert-to-read]')) { // if it has function for converting data to readable format
+            data.newValue = window[par.attr('data-convert-to-read')](data.newValue);
+          }
           span.html(data.newValue.length > 0 ? data.newValue : '<em>' + par.attr('data-default') + '</em>');
         } else if(code == 1) {
           alert('That is not a valid value.');
