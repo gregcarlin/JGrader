@@ -7,32 +7,20 @@ fs   = require('fs'); // for file IO
 exec = require('child_process').exec; // for running bash commands
 
 mysql      = require('mysql');
-connection = mysql.createConnection({
-  host     : creds.mysql_host,
-  port     : creds.mysql_port,
-  database : creds.mysql_db,
-  user     : creds.mysql_user,
-  password : creds.mysql_pass,
-  multipleStatements: true
+connection = mysql.createPool({
+  connectionLimit    : 10,
+  host               : creds.mysql_host,
+  port               : creds.mysql_port,
+  database           : creds.mysql_db,
+  user               : creds.mysql_user,
+  password           : creds.mysql_pass,
+  multipleStatements : true
 });
-connection.connect();
 
 // todo set to false before release
 debug = true;
 
-// sends a query to MySQL to prevent disconnection
-// note: this seems to only start when the first page is loaded, but that shouldn't be too much of an issue
-var interval = setInterval(function() {
-  connection.query("SELECT `id` FROM `teachers` LIMIT 1", function(err, rows) {
-    if(err) {
-      console.log(err);
-      if(debug) throw err;
-    }
-  });
-}, 1000 * 60 * 5); // every 5 minutes
-
 process.on('SIGINT', function() { // on ^C
-  clearInterval(interval); // stop sending queries to mysql
   connection.end(); // close mysql connection
   process.exit(); // also do normal exit stuff
 });
