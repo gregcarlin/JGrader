@@ -38,7 +38,7 @@ var render = function(page, options, res) {
     case 'assignment':
       options.page = 1;
       // title must be set already
-      options.js = ['tooltip', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker'];
+      options.js = ['tooltip', 'strftime-min', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker'];
       options.css = ['jquery.datetimepicker'];
       options.strftime = strftime;
       break;
