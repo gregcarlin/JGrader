@@ -2,9 +2,8 @@
   <h1><%= assignment.name %> | <a href="/teacher/section/<%= assignment.sid %>" class="sub-header"><%= assignment.sname %></a></h1>
   <%
     var due = new Date(assignment.due);
-    var sameYear = due.getYear() == new Date(Date.now()).getYear();
   %>
-  <h2 class="right" id="dueh2" title="<%= strftime('%b %o %Y @ %l:%M %p', due) %>">Due <span class="edit" data-key="updatedue" data-convert-to-edit="makeEditable" data-convert-to-read="makeReadable"><span><%= strftime(sameYear ? '%b %o' : '%b %o, %Y', due) %></span><input type="text" class="form-control" id="due" value="<%= strftime('%Y%m%dT%H%M', due) %>" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="right" title="Edit"></span></h2>
+  <h2 class="right" id="dueh2" title="<%= strftime('%b %o %Y @ %l:%M %p', due) %>">Due <span class="edit" data-key="updatedue" data-convert-to-edit="makeEditable" data-convert-to-read="makeReadable"><span><%= strftime('%b %o, %Y at %H:%M', due) %></span><input type="text" class="form-control" id="due" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="right" title="Edit"></span></h2>
 </div>
 <div class="description">
   <span class="edit" data-key="updatedesc" data-default="No Description"><span><%= assignment.description ? assignment.description : '' %></span><input type="text" class="form-control" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="right" title="Edit"></span>

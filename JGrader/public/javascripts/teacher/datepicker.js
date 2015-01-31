@@ -1,29 +1,16 @@
-$('#due').datetimepicker();
+$(document).ready(function() {
+  $('#due').datetimepicker();
+});
 
 var makeEditable = function(text) {
-  text = text.replace('st','').replace('nd','').replace('rd','').replace('th','');
-  if(text.indexOf(', 20') < 0) text += ', 2015';
+  text = text.replace('st','').replace('nd','').replace('rd','').replace('th','').replace('at','');
   var date = new Date(Date.parse(text));
-  return date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+  return strftime('%Y/%m/%d %H:%M', date);
 }
 
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 var makeReadable = function(text) {
   var date = new Date(Date.parse(text));
-  var formatted = months[date.getMonth()] + ' ' + date.getDate();
-  switch(date.getDate()) {
-    case 1:
-      formatted += 'st'; break;
-    case 2:
-      formatted += 'nd'; break;
-    case 3:
-      formatted += 'rd'; break;
-    default:
-      formatted += 'th'; break;
-  }
-  if(date.getYear() != new Date(Date.now()).getYear()) { // if date is not in current year
-    formatted += ', ' + date.getFullYear();
-  }
-  return formatted;
+  return strftime('%b %o, %Y at %H:%M', date);
 }
