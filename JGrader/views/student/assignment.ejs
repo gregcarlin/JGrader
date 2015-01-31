@@ -40,11 +40,7 @@
         </span>
         <button type="submit" class="btn btn-primary start">
             <i class="glyphicon glyphicon-upload"></i>
-            <span>Start upload</span>
-        </button>
-        <button type="reset" class="btn btn-warning cancel">
-            <i class="glyphicon glyphicon-ban-circle"></i>
-            <span>Cancel upload</span>
+            <span>Submit</span>
         </button>
     </div>
 
@@ -92,7 +88,7 @@
 
 <% } else { %>
     <!-- If student has submitted files needs resubmit -->
-    <a href="resubmit/" class="btn btn-md btn-primary" id="resubmit" value="Resubmit"></a>
+
 
     <div role="tabpanel">
       <ul class="nav nav-tabs" role="tablist">
@@ -110,7 +106,9 @@
           </div>
         <% } %>
     </div>
-
+    <div class"row">
+      <a class="btn btn-primary start" href="resubmit/" role="button"  id="resubmit" value="Resubmit">Resubmit</a>
+    </div>
 
   <% } %>
   <% } %>
