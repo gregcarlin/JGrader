@@ -11,7 +11,8 @@ var render = function(page, options, res) {
     case 'sectionList':
       options.page = 0;
       options.title = 'Your Sections';
-      options.js = ['tooltip'];
+      options.js = ['tooltip', 'teacher/sectionList'];
+      options.precontent = ['teacher/confirmDelete'];
       break;
     case 'sectionCreate':
       options.page = 0;
