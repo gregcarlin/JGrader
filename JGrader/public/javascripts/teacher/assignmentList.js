@@ -1,6 +1,6 @@
 var confirmDelete = function(id) {
   $('.modal .btn-danger').click(function() {
-    document.location = '/teacher/section/' + id + '/delete';
+    document.location = '/teacher/assignment/' + id + '/delete';
   });
 
   $('.modal').modal({}); // show modal

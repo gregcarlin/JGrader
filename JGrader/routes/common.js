@@ -4,7 +4,6 @@ creds   = require('./credentials');
 
 // used in compiling and executing code
 fs   = require('fs'); // for file IO
-path = require('path');
 exec = require('child_process').exec; // for running bash commands
 
 mysql      = require('mysql');
@@ -31,13 +30,6 @@ var renderGeneric = function(page, vars, group, res) {
     if(err) {
       console.log(err);
     } else {
-      if(vars.precontent) {
-        var pc = vars.precontent;
-        vars.precontent = [];
-        for(i in pc) {
-          vars.precontent.push(fs.readFileSync(path.join(__dirname, '../views/' + pc[i] + '.html')));
-        }
-      }
       vars.content = html;
       res.render(group + '/genericDashboard', vars);
     }
