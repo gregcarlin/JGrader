@@ -12,7 +12,6 @@ var render = function(page, options, res) {
       options.page = 0;
       options.title = 'Your Sections';
       options.js = ['tooltip', 'teacher/sectionList'];
-      options.precontent = ['teacher/confirmDelete'];
       break;
     case 'sectionCreate':
       options.page = 0;
@@ -27,7 +26,7 @@ var render = function(page, options, res) {
     case 'assignmentList':
       options.page = 1;
       options.title = 'Your Assignments';
-      options.js = ['tooltip'];
+      options.js = ['tooltip', 'teacher/assignmentList'];
       options.strftime = strftime;
       break;
     case 'assignmentCreate':
@@ -178,9 +177,18 @@ router.post('/section/:id/updatename/:name', function(req, res) {
   });
 });
 
-// POST request for deleting a section
-router.post('/section/:id/delete', function(req, res) {
-  // todo
+// request for deleting a section
+router.get('/section/:id/delete', function(req, res) {
+  connection.query('DELETE FROM `sections` WHERE `id` = ? AND `teacher_id` = ? LIMIT 1', [req.params.id, req.user.id], function(err, rows) {
+    if(err) {
+      render('notFound', {page: 0, error: 'Unable to delete section. Please go back and try again.'}, res);
+      if(debug) throw err;
+    } else if(rows.affectedRows <= 0) {
+      render('notFound', {page: 0, error: 'You are not allowed to delete that section.'}, res);
+    } else {
+      res.redirect('/teacher/section');
+    }
+  });
 });
 
 // page that lists assignments
@@ -349,6 +357,19 @@ router.post('/assignment/:id/updatedue/:due', function(req, res) {
       res.json({code: 2}); // invalid permissions
     } else {
       res.json({code: 0, newValue: req.params.due});
+    }
+  });
+});
+
+router.get('/assignment/:id/delete', function(req, res) {
+  connection.query('DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1', [req.params.id, req.user.id], function(err, rows) {
+    if(err) {
+      render('notFound', {page: 0, error: 'Unable to delete assignment. Please go back and try again.'}, res);
+      if(debug) throw err;
+    } else if(rows.affectedRows <= 0) {
+      render('notFound', {page: 0, error: 'You are not allowed to delete that assignment.'}, res);
+    } else {
+      res.redirect('/teacher/assignment');
     }
   });
 });
