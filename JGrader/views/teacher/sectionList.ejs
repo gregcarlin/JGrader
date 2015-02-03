@@ -9,6 +9,7 @@
         <th>Name</th>
         <th>Students</th>
         <th>Current Assignment</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -18,10 +19,11 @@
         </tr>
       <% } else {
           for(i in rows) {%>
-            <tr onclick="document.location = '/teacher/section/<%= rows[i].id %>'">
+            <tr onclick="/*document.location = '/teacher/section/<%= rows[i].id %>'*/">
               <td><%= rows[i].name %></td>
               <td><%= rows[i].count %></td>
               <td><%- rows[i].aname ? '<a href="/teacher/assignment/' + rows[i].aid + '">' + rows[i].aname + '</a>' : 'None' %></td>
+              <td><span class="glyphicon glyphicon-trash glyph-button" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="test(event)"></span></td>
             </tr>
        <% }
          } %>
