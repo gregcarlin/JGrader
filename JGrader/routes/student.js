@@ -1,7 +1,5 @@
 require('./common');
 var router = express.Router();
-var multer  = require('multer');
-var moment = require('moment');
 var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
 
 var render = function(page, options, res) {
@@ -127,8 +125,7 @@ router.post('/assignment/:id/submit', function(req, res) {
                             WHERE `submissions`.`student_id` = ? \
                             AND `submissions`.`assignment_id` = ?", [id, req.params.id], function(err, rows) {
             if(rows.length == 0) {
-              var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
-              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, ?, NULL)", [req.params.id, id, timestamp], function(err, rows) {
+              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, id], function(err, rows) {
                 if(err) {
                   render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
                   if(debug) throw err;
