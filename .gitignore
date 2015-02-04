@@ -31,3 +31,5 @@ node_modules
 
 credentials.js
 
+bin/www
+
