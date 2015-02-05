@@ -60,4 +60,10 @@ var tryRedirect = function(hash, res, db, finish) {
   });
 }
 
+router.post('/git-update', function(req, res) {
+  exec('git pull', {}, function(error, stdout, stderr) {
+    res.json({stdout: stdout, stderr: stderr});
+  });
+});
+
 module.exports = router;
