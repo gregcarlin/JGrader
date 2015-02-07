@@ -2,4 +2,36 @@
 body {
   padding-top: 50px;
   padding-bottom: 20px;
+  font: 14px "Avenir Next";
+}
+
+ul {
+   list-style-type: none;
+}
+
+.navigation-bar {
+  width: 100%;
+  background-color: #fff;
+  border-bottom-color: #fff;
+}
+
+.navigation-bar ul {
+  height: auto;
+  padding: 8px 0px;
+  margin: 0px;
+}
+
+.navigation-bar li {
+  display: inline;
+  padding: 20px;
+}
+
+.title {
+  float: left;
+  width: 10%;
+}
+
+.right {
+  width: 30%;
+  float: right;
 }
