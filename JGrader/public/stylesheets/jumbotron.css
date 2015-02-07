@@ -1,37 +1,66 @@
-/* Move down content because we have a fixed navbar that is 50px tall */
+/* Global Styles */
 body {
-  padding-top: 50px;
-  padding-bottom: 20px;
   font: 14px "Avenir Next";
+}
+
+a {
+  color: #000;
+}
+
+a:hover {
+  color: #000;
+  text-decoration: none;
 }
 
 ul {
    list-style-type: none;
 }
 
+/* Navigation bar styles */
 .navigation-bar {
-  width: 100%;
   background-color: #fff;
   border-bottom-color: #fff;
+  height: 67px;
 }
 
 .navigation-bar ul {
   height: auto;
-  padding: 8px 0px;
-  margin: 0px;
+  margin-top: 10px;
 }
 
 .navigation-bar li {
   display: inline;
-  padding: 20px;
+  padding-left: 30px;
+  padding-right: 30px;
+  height: 67px;
+  color: #fff;
 }
 
-.title {
+.left {
+  font-size: 33px;
   float: left;
-  width: 10%;
+  height:
 }
 
 .right {
-  width: 30%;
   float: right;
+  font-size: 20px;
+  padding-right: 5%;
+}
+
+.right li a {
+  color: #fff;
+}
+
+#home {
+  background: #97C3FA;
+  height: 100px;
+}
+
+#learn {
+  background: #97C3FA;
+}
+
+#sign-in {
+  background: #97C3FA;
 }
