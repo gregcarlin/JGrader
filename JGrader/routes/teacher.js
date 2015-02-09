@@ -80,6 +80,20 @@ router.use(function(req, res, next) {
   });
 });
 
+router.use(function(req, res, next) {
+  var ua = req.useragent;
+  ua.isiOS = ua.isiPad || ua.isiPod || ua.isiPhone;
+  ua.majorVersion = parseInt(ua.Version.substring(0, ua.Version.indexOf('.')));
+
+  var nosupport = ua.isOpera && (ua.isAndroid || ua.isiOS);
+  nosupport = nosupport || (ua.isSafari && ua.isWindows);
+  nosupport = nosupport || (isNaN(ua.majorVersion) || (ua.isIE && ua.majorVersion <= 8));
+
+  res.locals.nosupport = nosupport;
+
+  next();
+});
+
 // main teacher page, redirects to section list
 router.get('/', function(req, res) {
   res.redirect('/teacher/section'); // redirect to section list

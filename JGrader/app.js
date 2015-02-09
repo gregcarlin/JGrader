@@ -5,6 +5,7 @@ var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
 var multer       = require('multer');
+var useragent    = require('express-useragent');
 
 var index   = require('./routes/index');
 var signIn  = require('./routes/sign-in');
@@ -38,6 +39,7 @@ app.use(multer({
 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(useragent.express());
 
 app.use('/', index);
 app.use('/sign-in', signIn);
