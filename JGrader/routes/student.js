@@ -31,6 +31,11 @@ var render = function(page, options, res) {
       options.page = -1;
       options.title = 'Settings';
       break;
+    case 'feedback':
+      options.page = -1;
+      options.title = 'Feedback';
+      options.css = ['feedback'];
+      break;
   }
   renderGenericStudent(page, options, res);
 }
@@ -375,8 +380,27 @@ router.post('/settings', function(req, res) {
   } else {
     if(!fname) fname = '';
     if(!lname) lname = '';
-    render('settings', {fname: fname, lname: lname, error: 'You must set a valid name.'});
+    render('settings', {fname: fname, lname: lname, error: 'You must set a valid name.'}, res);
   }
+});
+
+router.get('/feedback', function(req, res) {
+  render('feedback', {}, res);
+});
+
+router.post('/feedback', function(req, res) {
+  var type = req.param('type');
+  if(!type || (type != 'question' && type != 'comment' && type != 'complaint' && type != 'other')) {
+    type = 'other';
+  }
+  connection.query("SELECT `user`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.user.id], function(err, result) {
+    if(err && debug) throw err;
+
+    connection.query("INSERT INTO `feedback` VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)", [result[0].user, result[0].fname, result[0].lname, req.headers['user-agent'], type, req.param('feedback')], function(err) {
+      if(err && debug) throw err;
+      render('feedback', {success: 'Thank you for your feedback!'}, res);
+    });
+  });
 });
 
 module.exports = router;

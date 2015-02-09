@@ -1,0 +1,76 @@
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+  margin-bottom: 10px;
+}
+
+.form-signin .checkbox {
+  font-weight: normal;
+}
+
+.form-signin .form-control {
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+
+.form-signin input {
+  border-radius: 0;
+  margin-bottom: -1px;
+}
+
+.form-signin input:first-of-type {
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.form-signin .iama {
+  margin-left: 1px;
+}
+
+.form-signin label {
+  font-weight: normal;
+  position: relative;
+  top: 1px;
+  margin-left: 5px;
+  margin-right: 3px;
+  margin-bottom: 10px;
+}
+
+.form-signin label input {
+  margin-right: 5px;
+  position: relative;
+  top: -1px;
+}
+
+.form-signin textarea {
+  resize: vertical;
+  margin-bottom: 15px;
+}
+
+.form-signin .report-type label {
+  float: left;
+}
+
+.form-signin .report-type label:nth-child(even) {
+  clear: left;
+}

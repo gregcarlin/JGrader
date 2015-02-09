@@ -23,32 +23,6 @@ router.get('/log-out', function(req, res) {
   res.redirect('/');
 });
 
-router.get('/feedback', function(req, res) {
-  // we don't actually need to authenticate here, if someone's not logged in they can see the form but they'll get an error trying to submit it
-  res.render('feedback');
-});
-
-router.post('/feedback', function(req, res) {
-  var type = req.param('type');
-  if(!type || (type != 'question' && type != 'comment' && type != 'complaint' && type != 'other')) {
-    type = 'other';
-  }
-  getDatabase(req.cookies.hash, function(id, db) {
-    if(id) {
-      connection.query("SELECT `user`,`fname`,`lname` FROM `" + db + "` WHERE `id` = ?", [id], function(err, result) {
-        if(err && debug) throw err;
-
-        connection.query("INSERT INTO `feedback` VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)", [result[0].user, result[0].fname, result[0].lname, db.substring(0, db.length - 1), req.headers['user-agent'], type, req.param('feedback')], function(err) {
-          if(err && debug) throw err;
-          res.render('feedback', {success: 'Thank you for your feedback!'});
-        });
-      });
-    } else {
-      res.render('feedback', {error: 'You must be logged in to submit feedback.'});
-    }
-  });
-});
-
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, db, finish) {
   logIn(hash, db + 's', function(id) {
