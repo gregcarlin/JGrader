@@ -11,3 +11,6 @@ Planned features:
 * Autograding - automatically run test cases, and assign grades based on those test cases
 * Commenting - teachers and TAs can comment on students' code, helping them improve
 * Anti-Plagiarism - check submitted code against what has already been submitted and what is available online, and catch plagiarizers
+
+*Redesign coming very soon!*
+<img src="http://i.imgur.com/A20Qu0s.png" />
