@@ -16,6 +16,11 @@ form {
 a {
   text-decoration: none;
 }
+form {
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
 .page-container {
   margin-top: 97px;
   height: calc(100% - 97px);
@@ -129,6 +134,25 @@ a {
   display: table-cell;
   vertical-align: middle;
   font-size: 26px;
+}
+#home .right label {
+  display: block;
+  text-align: left;
+  width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#home .right label:first-child {
+  margin-bottom: 10%;
+}
+#home .right input {
+  width: 100%;
+  border-radius: 3px;
+  height: 41px;
+  border: none;
+}
+#home .right input[type="submit"] {
+  display: none;
 }
 #home .right a {
   font-size: 30px;
