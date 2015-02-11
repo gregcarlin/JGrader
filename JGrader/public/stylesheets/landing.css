@@ -10,8 +10,15 @@ body {
   color: #FFF;
   min-width: 1237px;
 }
+form {
+  height: 100%;
+}
 a {
   text-decoration: none;
+}
+.page-container {
+  margin-top: 97px;
+  height: calc(100% - 97px);
 }
 
 /* setting up columns */
@@ -35,6 +42,7 @@ a {
   line-height: 97px;
   position: fixed;
   min-width: 1237px;
+  top: 0;
 }
 .nav .left {
   font-size: 48px;
@@ -84,14 +92,11 @@ a {
 #home {
   background: url('/images/home.jpg') no-repeat center center;
   background-size: cover;
-  /*padding-top: 97px;*/
-  /*margin-top: 97px;*/
 }
 #home .table-wrapper {
   display: table;
   height: 100%;
   width: 100%;
-  /*margin-top: 97px;*/
 }
 #home .table-wrapper > * {
   vertical-align: middle;
@@ -109,20 +114,21 @@ a {
 #home .right {
   background-color: rgba(1,1,1,0.5);
 }
+#home .right form {
+  /*display: inline !important;
+  border: none !important;
+  background: none !important;*/
+}
 #home .right h2 {
   font-size: 48px;
 }
 #home .right .table-wrapper li {
   display: table-row;
 }
-#home .right .table-wrapper li span {
+#home .right .table-wrapper li div {
   display: table-cell;
   vertical-align: middle;
   font-size: 26px;
-}
-#home .right form {
-  display: inline;
-  width: 10px;
 }
 #home .right a {
   font-size: 30px;
@@ -143,4 +149,34 @@ a {
 /* stuff for learn 'page' */
 #learn {
   background: linear-gradient(#FF8989, #484A6C);
+  font-weight: 100;
+  font-size: 24px;
+  padding: 38px;
+  box-sizing: border-box;
+  text-align: justify;
+}
+#learn h2 {
+  font-size: 95px;
+  margin-bottom: 40px;
+}
+#learn h2 span {
+  font-size: 125px;
+}
+#learn .info-body > div > div {
+  width: 45%;
+  margin-bottom: 40px;
+  line-height: 1.33;
+}
+#learn .col-left {
+  float: left;
+}
+#learn .col-right {
+  float: right;
+}
+#learn .info-body .row-mid > div {
+  width: 33%;
+}
+#learn .col-mid {
+  display: inline-block;
+  text-align: center;
 }
