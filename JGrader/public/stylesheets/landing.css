@@ -56,7 +56,8 @@ form {
   background-color: #FAFAFA;
   position: absolute;
 }
-.nav .left span {
+.nav .left a {
+  color: #727272;
   margin-left: 41px;
   font-weight: 100;
 }
@@ -74,18 +75,32 @@ form {
   color: #FFF;
 }
 .nav .right a:hover {
-  color: #F00; /* TODO set hover stuff */
+  color: #e5e5e5; /* TODO set hover stuff */
 }
 
 /* links in nav bar */
 #link-home {
   background-color: #97C3FA;
 }
+
+#link-home:hover {
+  background-color: #8fb9ed;
+}
+
 #link-learn {
   background-color: #FFA1A1;
 }
+
+#link-learn:hover {
+  background-color: #f49a9a;
+}
+
 #link-sign-in {
   background-color: #A8F59F;
+}
+
+#link-sign-in:hover {
+  background-color: #a3ed9a;
 }
 
 /* general 'page' stuff */
