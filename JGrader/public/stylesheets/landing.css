@@ -176,7 +176,6 @@ em {
 }
 #home .right input[type="submit"] {
   padding: 2px 8px;
-  /*box-sizing: content-box;*/
 }
 #home .right .button {
   font-size: 30px;
