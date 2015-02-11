@@ -1,0 +1,242 @@
+/* used for landing page (index.ejs) only */
+
+/* global stuff */
+html {
+  height: 100%;
+}
+body {
+  font-family: 'Avenir Next';
+  height: 100%;
+  color: #FFF;
+  min-width: 1237px;
+}
+form {
+  height: 100%;
+}
+a {
+  text-decoration: none;
+}
+form {
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+em {
+  font-style: italic;
+}
+.page-container {
+  margin-top: 97px;
+  height: calc(100% - 97px);
+}
+
+/* setting up columns */
+.column {
+  display: inline-block;
+}
+.left {
+  width: 65%;
+  min-width: 742px;
+}
+.right {
+  width: 35%;
+  float: right;
+  min-width: 337px;
+}
+
+/* styling the nav bar */
+.nav {
+  height: 97px;
+  vertical-align: middle;
+  line-height: 97px;
+  position: fixed;
+  min-width: 1237px;
+  width: 100%;
+  top: 0;
+}
+.nav .left {
+  font-size: 48px;
+  color: #727272;
+  background-color: #FAFAFA;
+  position: absolute;
+}
+.nav .left a {
+  color: #727272;
+  margin-left: 41px;
+  font-weight: 100;
+}
+.nav .right {
+  right: 0;
+  font-size: 36px;
+  text-align: center;
+  display: table;
+  table-layout: fixed;
+  position: absolute;
+}
+.nav .right a {
+  display: table-cell;
+  text-align: center;
+  color: #FFF;
+}
+.nav .right a:hover {
+  color: #EEE;
+}
+
+/* links in nav bar */
+#link-home {
+  background-color: #97C3FA;
+}
+
+#link-home:hover {
+  background-color: #8fb9ed;
+}
+
+#link-learn {
+  background-color: #FFA1A1;
+}
+
+#link-learn:hover {
+  background-color: #f49a9a;
+}
+
+#link-sign-in {
+  background-color: #A8F59F;
+}
+
+#link-sign-in:hover {
+  background-color: #a3ed9a;
+}
+
+/* general 'page' stuff */
+.page {
+  width: 100%;
+  height: 100%;
+}
+.page .column {
+  height: 100%;
+}
+
+/* stuff for home 'page' */
+#home {
+  background: url('/images/home.jpg') no-repeat center center;
+  background-size: cover;
+}
+#home .table-wrapper {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+#home .table-wrapper > * {
+  vertical-align: middle;
+  text-align: center;
+}
+#home .left .table-wrapper > span {
+  display: table-cell;
+  font-size: 175px;
+  font-weight: 100;
+}
+#home .left .table-wrapper > span > span {
+  font-weight: 500;
+  font-style: italic;
+}
+#home .right {
+  background-color: rgba(1,1,1,0.5);
+}
+#home .right h2 {
+  font-size: 48px;
+}
+#home .right .table-wrapper li {
+  display: table-row;
+}
+#home .right .table-wrapper li div {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 26px;
+}
+#home .right label {
+  display: block;
+  text-align: left;
+  width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#home .right label:first-child {
+  margin-bottom: 10%;
+}
+#home .right input {
+  width: 100%;
+  border-radius: 3px;
+  height: 41px;
+  border: none;
+  padding-left: 15px;
+  padding-right: 15px;
+  box-sizing: border-box;
+  font-family: 'Avenir Next';
+  font-size: 16px;
+  margin-top: 4px;
+}
+#home .right input[type="submit"] {
+  display: none;
+}
+#home .right a {
+  font-size: 30px;
+  border-radius: 8px;
+  width: 60%;
+  background-color: #BCDAFF;
+  border-style: none;
+  display: inline-block;
+  font-weight: 100;
+  color: #000;
+  padding: 14px 8px;
+}
+#home .right a:hover {
+  background-color: #A1BADA;
+}
+
+/* stuff for learn 'page' */
+#learn {
+  background: linear-gradient(#FF8989, #484A6C);
+  font-weight: 100;
+  font-size: 24px;
+  padding: 38px;
+  box-sizing: border-box;
+  text-align: justify;
+  min-height: 1009px;
+}
+#learn h2 {
+  font-size: 95px;
+  margin-bottom: 40px;
+}
+#learn h2 span {
+  font-size: 125px;
+}
+#learn h3 {
+  font-weight: 400;
+  font-size: 34px;
+}
+#learn .col-right h3 {
+  text-align: right;
+}
+#learn .info-body .col {
+  width: 45%;
+  margin-top: 20px;
+  line-height: 1.33;
+}
+#learn .info-body .row:first-child .col {
+  margin-top: 0;
+}
+#learn .row {
+  display: inline-block;
+}
+#learn .col-left {
+  float: left;
+}
+#learn .col-right {
+  float: right;
+}
+#learn .info-body .row-mid > div {
+  width: 33%;
+}
+#learn .col-mid {
+  display: inline-block;
+  text-align: center;
+}
