@@ -14,3 +14,4 @@ Planned features:
 
 *Redesign coming very soon!*
 <img src="http://i.imgur.com/A20Qu0s.png" />
+<img src="http://i.imgur.com/IBsSYU5.png" />
