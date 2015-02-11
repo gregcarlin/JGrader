@@ -21,6 +21,9 @@ form {
   padding: 0;
   display: inline;
 }
+em {
+  font-style: italic;
+}
 .page-container {
   margin-top: 97px;
   height: calc(100% - 97px);
@@ -197,7 +200,7 @@ form {
   padding: 38px;
   box-sizing: border-box;
   text-align: justify;
-  min-height: 982px;
+  min-height: 1009px;
 }
 #learn h2 {
   font-size: 95px;
@@ -206,9 +209,16 @@ form {
 #learn h2 span {
   font-size: 125px;
 }
+#learn h3 {
+  font-weight: 400;
+  font-size: 34px;
+}
+#learn .col-right h3 {
+  text-align: right;
+}
 #learn .info-body .col {
   width: 45%;
-  margin-top: 40px;
+  margin-top: 20px;
   line-height: 1.33;
 }
 #learn .info-body .row:first-child .col {
