@@ -1,0 +1,146 @@
+/* used for landing page (index.ejs) only */
+
+/* global stuff */
+html {
+  height: 100%;
+}
+body {
+  font-family: 'Avenir Next';
+  height: 100%;
+  color: #FFF;
+  min-width: 1237px;
+}
+a {
+  text-decoration: none;
+}
+
+/* setting up columns */
+.column {
+  display: inline-block;
+}
+.left {
+  width: 60%;
+  min-width: 742px;
+}
+.right {
+  width: 40%;
+  float: right;
+  min-width: 337px;
+}
+
+/* styling the nav bar */
+.nav {
+  height: 97px;
+  vertical-align: middle;
+  line-height: 97px;
+  position: fixed;
+  min-width: 1237px;
+}
+.nav .left {
+  font-size: 48px;
+  color: #727272;
+  background-color: #FAFAFA;
+}
+.nav .left span {
+  margin-left: 41px;
+  font-weight: 100;
+}
+.nav .right {
+  font-size: 36px;
+  text-align: center;
+  display: table;
+  table-layout: fixed;
+}
+.nav .right a {
+  display: table-cell;
+  text-align: center;
+  color: #FFF;
+}
+.nav .right a:hover {
+  color: #F00; /* TODO set hover stuff */
+}
+
+/* links in nav bar */
+#link-home {
+  background-color: #97C3FA;
+}
+#link-learn {
+  background-color: #FFA1A1;
+}
+#link-sign-in {
+  background-color: #A8F59F;
+}
+
+/* general 'page' stuff */
+.page {
+  width: 100%;
+  height: 100%;
+}
+.page .column {
+  height: 100%;
+}
+
+/* stuff for home 'page' */
+#home {
+  background: url('/images/home.jpg') no-repeat center center;
+  background-size: cover;
+  /*padding-top: 97px;*/
+  /*margin-top: 97px;*/
+}
+#home .table-wrapper {
+  display: table;
+  height: 100%;
+  width: 100%;
+  /*margin-top: 97px;*/
+}
+#home .table-wrapper > * {
+  vertical-align: middle;
+  text-align: center;
+}
+#home .left .table-wrapper > span {
+  display: table-cell;
+  font-size: 175px;
+  font-weight: 100;
+}
+#home .left .table-wrapper > span > span {
+  font-weight: 500;
+  font-style: italic;
+}
+#home .right {
+  background-color: rgba(1,1,1,0.5);
+}
+#home .right h2 {
+  font-size: 48px;
+}
+#home .right .table-wrapper li {
+  display: table-row;
+}
+#home .right .table-wrapper li span {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 26px;
+}
+#home .right form {
+  display: inline;
+  width: 10px;
+}
+#home .right a {
+  font-size: 30px;
+  border-radius: 8px;
+  width: 60%;
+  background-color: #BCDAFF;
+  border-style: none;
+  display: inline-block;
+  font-weight: 100;
+  color: #000;
+  padding: 8px;
+}
+#home .right a:hover {
+  /* TODO set hover stuff */
+  color: #F00;
+}
+
+/* stuff for learn 'page' */
+#learn {
+  background: linear-gradient(#FF8989, #484A6C);
+}
