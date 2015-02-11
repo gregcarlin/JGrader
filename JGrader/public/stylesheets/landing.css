@@ -47,22 +47,26 @@ form {
   line-height: 97px;
   position: fixed;
   min-width: 1237px;
+  width: 100%;
   top: 0;
 }
 .nav .left {
   font-size: 48px;
   color: #727272;
   background-color: #FAFAFA;
+  position: absolute;
 }
 .nav .left span {
   margin-left: 41px;
   font-weight: 100;
 }
 .nav .right {
+  right: 0;
   font-size: 36px;
   text-align: center;
   display: table;
   table-layout: fixed;
+  position: absolute;
 }
 .nav .right a {
   display: table-cell;
