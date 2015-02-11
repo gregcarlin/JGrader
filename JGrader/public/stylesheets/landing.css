@@ -31,11 +31,11 @@ form {
   display: inline-block;
 }
 .left {
-  width: 60%;
+  width: 65%;
   min-width: 742px;
 }
 .right {
-  width: 40%;
+  width: 35%;
   float: right;
   min-width: 337px;
 }
@@ -75,7 +75,7 @@ form {
   color: #FFF;
 }
 .nav .right a:hover {
-  color: #e5e5e5; /* TODO set hover stuff */
+  color: #EEE;
 }
 
 /* links in nav bar */
@@ -186,8 +186,7 @@ form {
   padding: 14px 8px;
 }
 #home .right a:hover {
-  /* TODO set hover stuff */
-  color: #F00;
+  background-color: #A1BADA;
 }
 
 /* stuff for learn 'page' */
@@ -224,9 +223,6 @@ form {
 #learn .col-right {
   float: right;
 }
-/*#learn .info-body .row-mid {
-  min-height: 273px;
-}*/
 #learn .info-body .row-mid > div {
   width: 33%;
 }
