@@ -73,7 +73,7 @@ router.get('/assignment', function(req, res) {
 // Gets the assignment information based on id
 router.get('/assignment/:id', function(req, res) {
   var assignmentID = req.params.id;
-  if(id) {
+  if(assignmentID) {
     connection.query("SELECT `assignments`.`id`, `assignments`.`name`, `assignments`.`description`,`assignments`.`due` \
                       FROM `enrollment`,`assignments`,`sections` \
                       WHERE `enrollment`.`section_id` = `sections`.`id` \
