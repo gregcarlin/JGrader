@@ -25,7 +25,7 @@ em {
   font-style: italic;
 }
 .page-container {
-  margin-top: 97px;
+  margin-top: 75px;
   height: calc(100% - 97px);
 }
 
@@ -34,25 +34,26 @@ em {
   display: inline-block;
 }
 .left {
-  width: 65%;
+  width: 70%;
   min-width: 742px;
 }
 .right {
-  width: 35%;
+  width: 30%;
   float: right;
   min-width: 337px;
 }
 
 /* styling the nav bar */
 .nav {
-  height: 97px;
+  height: 75px;
   vertical-align: middle;
-  line-height: 97px;
+  line-height: 75px;
   position: fixed;
   min-width: 1237px;
   width: 100%;
   top: 0;
 }
+
 .nav .left {
   font-size: 48px;
   color: #727272;
