@@ -99,7 +99,7 @@ router.get('/assignment/:id', function(req, res) {
             render('assignment', { rows: rows, js: ['student/dropzone', 'student/studentSubmit'] }, res);
           } else {
             // Sends file data
-            render('assignment', { rows: rows, fileData: fileData, js: ['prettify', 'student/studentSubmitted'] }, res);
+            render('assignment', { rows: rows, fileData: fileData, js: ['prettify', 'student/studentSubmitted'], css: ['prettify'], onload: ['prettyPrint()']}, res);
           }
         });
       }
