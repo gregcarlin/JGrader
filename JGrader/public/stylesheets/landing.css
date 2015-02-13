@@ -204,6 +204,7 @@ em {
   box-sizing: border-box;
   text-align: justify;
   height: auto;
+  min-height: 100%;
 }
 #learn h2 {
   font-size: 95px;
