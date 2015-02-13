@@ -52,6 +52,7 @@ em {
   min-width: 1237px;
   width: 100%;
   top: 0;
+  box-shadow: 0 0 100px 5px #000;
 }
 
 .nav .left {
