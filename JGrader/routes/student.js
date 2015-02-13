@@ -186,7 +186,6 @@ router.get('/assignment/:id/resubmit', function(req,res) {
       // Means user has already submitted and is able to resubmit
       connection.query("DELETE FROM `files` WHERE `files`.`submission_id` = ?", [rows[0].id], function(err, rows) {
         if(err) {
-          console.log("mysql error");
           res.redirect('/student/assignment');
         } else {
           connection.query("DELETE FROM `submissions` \
@@ -299,9 +298,22 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
           // Compiles the java
           exec("javac " + compileFiles, function (error, stdout, stderr) {
             if(stderr){
-              for(file in files){
-                fs.unlink(files[file].path, function() {
+              for(file in files) {
+                var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
+                fs.readFile(files[file].path, function(err, javaData) {
+                  fs.readFile(compilePath, function (err, classData) {
+                    connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
+                      if(err){
+                        finish(err);
+                      }
+                      // Deletes files after submit
+                      fs.unlink(files[file].path, function() {
+                        fs.unlink(compilePath, function() {
 
+                        });
+                      });
+                    });
+                  });
                 });
               }
               finish(stderr);
