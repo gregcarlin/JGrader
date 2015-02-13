@@ -300,7 +300,7 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
           exec("javac " + compileFiles, function (error, stdout, stderr) {
             if(stderr){
               for(file in files){
-                fs.unlink(files[file.path], function() {
+                fs.unlink(files[file].path], function() {
 
                 });
               }
