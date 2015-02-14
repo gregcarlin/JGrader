@@ -138,10 +138,13 @@ router.post('/assignment/:id/submit', function(req, res) {
                 render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
                 if(debug) throw err;
               } else {
-                submitFiles(0, req.files, req.user.id, assignmentID, function(err) {
-                  if(err){
+                submitFiles(0, req.files, req.user.id, assignmentID, function(err, stderr) {
+                  if(err) {
                     render('notFound', {page: 1, type: 'assignment', error: 'Compilation has failed'}, res);
                     if(debug) throw err;
+                  } if(stderr) {
+                    console.log(stderr);
+                    res.send("stderr");
                   } else {
                     res.send("success");
                   }
@@ -316,7 +319,7 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
                   });
                 });
               }
-              finish(stderr);
+              finish(null, stderr);
             } else {
               for(file in files) {
                 var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
