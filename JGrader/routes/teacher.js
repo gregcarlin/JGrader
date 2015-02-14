@@ -511,17 +511,15 @@ router.get('/student', function(req, res) {
                     `students`.`fname`,\
                     `students`.`lname`,\
                     `sections`.`id` AS `sid`,\
-                    `sections`.`name` AS `sname`,\
-                    COUNT(`submissions`.`id`) \
+                    `sections`.`name` AS `sname` \
                   FROM \
-                    (`students` LEFT JOIN `submissions` ON `students`.`id` = `submissions`.`student_id`),\
+                    `students`,\
                     `enrollment`,\
                     `sections` \
                   WHERE \
                     `sections`.`teacher_id` = ? AND \
                     `enrollment`.`section_id` = `sections`.`id` AND \
-                    `enrollment`.`student_id` = `students`.`id` \
-                  GROUP BY `submissions`.`id`", [req.user.id], function(err, rows) {
+                    `enrollment`.`student_id` = `students`.`id`", [req.user.id], function(err, rows) {
     render('studentList', {rows: rows}, res);
   });
 });
