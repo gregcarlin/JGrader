@@ -1,3 +1,6 @@
+// Created by Brian Singer and Greg Carlin in 2015.
+// Copyright (c) 2014 Training. All rights reserved.
+
 var express      = require('express');
 var path         = require('path');
 var favicon      = require('serve-favicon');
