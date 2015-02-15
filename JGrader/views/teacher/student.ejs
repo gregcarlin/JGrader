@@ -18,12 +18,8 @@
         </tr>
       <% } else {
           for(i in rows) {%>
-            <% if(rows[i].id) { %>
-              <tr onclick="document.location = '/teacher/submission/<%= rows[i].id %>'">
-            <% } else { %>
-              <tr>
-            <% } %>
-              <td><%= rows[i].name %></td>
+            <tr>
+              <td><%- rows[i].id ? '<a href="/teacher/submission/' + rows[i].id + '">' + rows[i].name + '</a>' : rows[i].name %></td>
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
               <%
                 var submitted = new Date(rows[i].submitted);
