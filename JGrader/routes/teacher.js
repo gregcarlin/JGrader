@@ -539,7 +539,7 @@ router.get('/student', function(req, res) {
                               `assignments`.`section_id` \
                             FROM \
                               (`submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id`) \
-                            WHERE TEACHER_OWNS_ASSIGNMENT(3,`assignment_id`) \
+                            WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) \
                             GROUP BY `student_id`,`section_id`) \
                           AS `temp2` \
                           ON `students`.`id` = `temp2`.`student_id` AND `sections`.`id` = `temp2`.`section_id` \
