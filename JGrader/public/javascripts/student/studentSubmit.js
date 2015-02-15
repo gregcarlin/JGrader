@@ -1,3 +1,6 @@
+// Created by Brian Singer and Greg Carlin in 2015.
+// Copyright (c) 2014 Training. All rights reserved.
+
 // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
 var previewNode = document.querySelector("#template");
 previewNode.id = "";

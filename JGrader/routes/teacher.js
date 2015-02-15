@@ -1,3 +1,6 @@
+// Created by Brian Singer and Greg Carlin in 2015.
+// Copyright (c) 2014 Training. All rights reserved.
+
 require('./common');
 var router = express.Router();
 var strftime = require('strftime');

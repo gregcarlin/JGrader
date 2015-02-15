@@ -1,3 +1,6 @@
+// Created by Brian Singer and Greg Carlin in 2015.
+// Copyright (c) 2014 Training. All rights reserved.
+
 express = require('express');
 creds   = require('./credentials');
 // router must be required separately otherwise routers will interfere with each other
@@ -119,8 +122,8 @@ isSet = function(param) {
   return param && param.length > 0;
 }
 
-// finds out which database hash is logged into. 
-// note: may be an issue if hash appears in more than one sessions table. 
+// finds out which database hash is logged into.
+// note: may be an issue if hash appears in more than one sessions table.
 // calls finish(id, name of db) when done, finish(null, null) if db not found.
 getDatabase = function(hash, finish) {
   logIn(hash, 'students', function(id) {
