@@ -22,10 +22,15 @@
               <td><%- rows[i].id ? '<a href="/teacher/submission/' + rows[i].id + '">' + rows[i].name + '</a>' : rows[i].name %></td>
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
               <%
-                var submitted = new Date(rows[i].submitted);
-                var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
+                if(rows[i].submitted) {
+                  var submitted = new Date(rows[i].submitted);
+                  var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
+                  if(rows[i].submitted > rows[i].due) {
+                    submittedStr += ' <span class="glyphicon glyphicon-time" data-toggle="tooltip" data-placement="right" title="Late"></span>';
+                  }
+                }
               %>
-              <td><%= rows[i].submitted ? submittedStr : 'Not submitted' %></td>
+              <td><%- rows[i].submitted ? submittedStr : 'Not submitted' %></td>
               <td><%= rows[i].grade ? rows[i].grade : 'Not graded' %></td>
             </tr>
        <% }
