@@ -527,7 +527,7 @@ router.get('/student', function(req, res) {
                             `assignments`.`section_id` \
                           FROM \
                             `submissions` \
-                            LEFT JOIN `assignments` ON `assignments`.`id` = `assignment_id` WHERE TEACHER_OWNS_ASSIGNMENT(3,`assignment_id`) GROUP BY `student_id`,`assignments`.`section_id`) \
+                            LEFT JOIN `assignments` ON `assignments`.`id` = `assignment_id` WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) GROUP BY `student_id`,`assignments`.`section_id`) \
                           AS `temp` ON `students`.`id` = `temp`.`student_id` AND `sections`.`id` = `temp`.`section_id` \
                         LEFT JOIN `assignments` ON `assignments`.`id` = `temp`.`assignment_id` \
                       WHERE \
