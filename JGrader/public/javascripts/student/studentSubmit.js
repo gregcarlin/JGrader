@@ -24,6 +24,7 @@ myDropzone.on("addedfile", function(file) {
 myDropzone.on("success", function(file, response) {
   // Refresh Page after upload
   window.location.href = document.URL;
+  localStorage.setItem("response", response);
 });
 
 // Update the total progress bar

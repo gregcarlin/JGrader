@@ -1,0 +1,54 @@
+<% if (typeof rows == 'undefined') { %>
+<!-- Need to implement a way of getting section name not related to rows-->
+<h1> Some kind of Error has happened</h1>
+<% } else {
+    if (typeof rows[0].description  === 'object') {
+      rows[0].description = "N/A";
+    }%>
+<div class="page-header">
+  <h1> <%= rows[0].name %> </h1>
+</div>
+
+<% if(rows.length == 0) { %>
+    <h1>Some Error has occured/td>
+<% } else { %>
+
+<div class="table-responsive">
+  <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Due</th>
+          <th>Done</th>
+        </tr>
+      </thead>
+      <tbody>
+              <tr>
+                <td><%= rows[0].description %></td>
+                <td><%= rows[0].due %></td>
+              </tr>
+      </tbody>
+    </table>
+</div>
+
+<!-- If student has submitted files needs resubmit -->
+<div role="tabpanel">
+  <ul class="nav nav-tabs" role="tablist">
+    <% for(i in fileData) { %>
+      <% fileData[i].shortName = i; %>
+      <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab"><%= fileData[i].name %></a></li>
+      <% } %>
+  </ul>
+</div>
+<div class="tab-content">
+    <% for (i in fileData) { %>
+      <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>">
+        <pre><code class="prettyprint language-java"><%= fileData[i].contents %></code></pre>
+      </div>
+    <% } %>
+</div>
+<div class"row">
+  <a class="btn btn-primary start" href="resubmit/" role="button"  id="resubmit" value="Resubmit">Resubmit</a>
+</div>
+<% }
+} %>
