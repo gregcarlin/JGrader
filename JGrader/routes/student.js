@@ -361,7 +361,10 @@ router.get('/settings', function(req, res) {
   });
 });
 
+// This sections recieves the post method from a students setting page. It parses what they wanted to change and changes it
+// in the MySql Database
 router.post('/settings', function(req, res) {
+  // Takes in the users name and last name
   var fname = req.param('fname');
   var lname = req.param('lname');
   if(isSet(fname) && isSet(lname)) {

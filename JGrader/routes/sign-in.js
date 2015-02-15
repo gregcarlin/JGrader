@@ -23,6 +23,7 @@ var login = function(db, email, pass, res, finish) {
   connection.query("SELECT * FROM `" + db + "s` WHERE `user` = ? AND `pass` = AES_ENCRYPT(?, '" + creds.aes_key + "')", [email, pass], function(err, rows) {
     if(err) {
       res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
+      console.log(err); // To see whats wrong on server
     } else {
       if(rows.length > 0) {
         var hash = crypto.randomBytes(20).toString('hex'); // http://stackoverflow.com/a/14869745/720889
