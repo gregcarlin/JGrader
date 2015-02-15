@@ -18,11 +18,11 @@
         </tr>
       <% } else {
           for(i in rows) {%>
-            <tr onclick="document.location = '/teacher/student/<%= rows[i].id %>'">
-              <td><%= rows[i].fname + ' ' + rows[i].lname %></td>
+            <tr>
+              <td><a href="/teacher/student/<%= rows[i].id %>"><%= rows[i].fname + ' ' + rows[i].lname %></a></td>
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
               <td>A++</td>
-              <td>TODO</td>
+              <td><%- rows[i].aname ? ('<a href="/teacher/submission/' + rows[i].subid + '">' + rows[i].aname + '</a>') : 'None' %></td>
             </tr>
        <% }
          } %>
