@@ -518,12 +518,12 @@ router.get('/student', function(req, res) {
                         `sections`,\
                         `enrollment`,\
                         `students` \
-                        LEFT JOIN (SELECT `assignment_id`,`student_id`,`id`,MAX(`submitted`) FROM `submissions` GROUP BY `student_id`) AS `temp` ON `students`.`id` = `temp`.`student_id` \
+                        LEFT JOIN (SELECT `assignment_id`,`student_id`,`id`,MAX(`submitted`) FROM `submissions` WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) GROUP BY `student_id`) AS `temp` ON `students`.`id` = `temp`.`student_id` \
                         LEFT JOIN `assignments` ON `assignments`.`id` = `temp`.`assignment_id` \
                       WHERE \
                         `sections`.`teacher_id` = ? AND \
                         `enrollment`.`section_id` = `sections`.`id` AND \
-                        `enrollment`.`student_id` = `students`.`id`", [req.user.id], function(err, rows) {
+                        `enrollment`.`student_id` = `students`.`id`", [req.user.id, req.user.id], function(err, rows) {
     render('studentList', {rows: rows}, res);
   });
 });
