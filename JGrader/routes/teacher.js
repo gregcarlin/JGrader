@@ -57,6 +57,7 @@ var render = function(page, options, res) {
     case 'student':
       options.page = 2;
       // title must be set already
+      options.js = ['tooltip'];
       options.strftime = strftime;
       break;
     case 'settings':
@@ -402,7 +403,8 @@ router.get('/submission/:id', function(req, res) {
                       `students`.`fname`,\
                       `students`.`lname`,\
                       `assignments`.`id` AS `aid`,\
-                      `assignments`.`name` \
+                      `assignments`.`name`,\
+                      `assignments`.`due` \
                     FROM `submissions`,`students`,`assignments`,`sections` \
                     WHERE \
                       `students`.`id` = `submissions`.`student_id` AND \
@@ -513,25 +515,38 @@ router.get('/student', function(req, res) {
                       `sections`.`id` AS `sid`,\
                       `sections`.`name` AS `sname`,\
                       `assignments`.`name` AS `aname`,\
-                      `temp`.`id` AS `subid` \
+                      `temp`.`id` AS `subid`,\
+                      `temp2`.`avg` \
                       FROM \
                         `students` \
                         JOIN `enrollment` ON `enrollment`.`student_id` = `students`.`id` \
                         JOIN `sections` ON `sections`.`id` = `enrollment`.`section_id` \
                         LEFT JOIN \
                           (SELECT \
-                            `assignment_id`,\
-                            `student_id`,\
-                            `submissions`.`id`,\
-                            MAX(`submitted`),\
-                            `assignments`.`section_id` \
-                          FROM \
-                            `submissions` \
-                            LEFT JOIN `assignments` ON `assignments`.`id` = `assignment_id` WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) GROUP BY `student_id`,`assignments`.`section_id`) \
+                              `assignment_id`,\
+                              `student_id`,\
+                              `submissions`.`id`,\
+                              MAX(`submitted`),\
+                              `assignments`.`section_id` \
+                            FROM \
+                              `submissions` \
+                              LEFT JOIN `assignments` ON `assignments`.`id` = `assignment_id` WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) GROUP BY `student_id`,`assignments`.`section_id`) \
                           AS `temp` ON `students`.`id` = `temp`.`student_id` AND `sections`.`id` = `temp`.`section_id` \
                         LEFT JOIN `assignments` ON `assignments`.`id` = `temp`.`assignment_id` \
+                        LEFT JOIN \
+                          (SELECT \
+                              `submissions`.`id`,\
+                              `submissions`.`student_id`,\
+                              AVG(`submissions`.`grade`) AS `avg`,\
+                              `assignments`.`section_id` \
+                            FROM \
+                              (`submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id`) \
+                            WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) \
+                            GROUP BY `student_id`,`section_id`) \
+                          AS `temp2` \
+                          ON `students`.`id` = `temp2`.`student_id` AND `sections`.`id` = `temp2`.`section_id` \
                       WHERE \
-                        `sections`.`teacher_id` = ?", [req.user.id, req.user.id], function(err, rows) {
+                        `sections`.`teacher_id` = ?", [req.user.id, req.user.id, req.user.id], function(err, rows) {
     render('studentList', {rows: rows}, res);
   });
 });
@@ -549,6 +564,7 @@ router.get('/student/:id', function(req, res) {
                           `submissions`.`grade`,\
                           `submissions`.`submitted`,\
                           `assignments`.`name`,\
+                          `assignments`.`due`,\
                           `sections`.`name` AS `sname`,\
                           `sections`.`id` AS `sid` \
                         FROM `sections`,(`assignments` LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = ?) \

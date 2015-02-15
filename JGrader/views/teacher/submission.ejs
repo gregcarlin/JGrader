@@ -5,9 +5,12 @@
   <%
     var submitted = new Date(subData.submitted);
     var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
+    if(subData.submitted > subData.due) {
+      submittedStr += ' <span class="glyphicon glyphicon-time" data-toggle="tooltip" data-placement="right" title="Late"></span>';
+    }
   %>
   <dt>Submitted:</dt>
-    <dd><%= submittedStr %></dd>
+    <dd><%- submittedStr %></dd>
   <dt>Grade:</dt>
     <dd><span class="edit" data-key="updategrade" data-default="Not graded."><span><%= subData.grade ? subData.grade : '' %></span><input type="text" class="form-control" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
 </dl>
