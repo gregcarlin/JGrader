@@ -14,6 +14,9 @@ var render = function(page, options, res) {
       options.page = 1;
       // title should already be set
       break;
+    case 'assignmentComplete':
+      options.page =1;
+      break;
     case 'sectionList':
       options.page = 0;
       options.title = 'Your Sections';
@@ -99,7 +102,7 @@ router.get('/assignment/:id', function(req, res) {
             render('assignment', { rows: rows, js: ['student/dropzone', 'student/studentSubmit'] }, res);
           } else {
             // Sends file data
-            render('assignment', { rows: rows, fileData: fileData, js: ['prettify', 'student/studentSubmitted'], css: ['prettify'], onload: ['prettyPrint()']}, res);
+            render('assignmentComplete', { rows: rows, fileData: fileData, js: ['prettify', 'student/studentSubmitted'], css: ['prettify'], onload: ['prettyPrint()']}, res);
           }
         });
       }
@@ -144,7 +147,7 @@ router.post('/assignment/:id/submit', function(req, res) {
                     if(debug) throw err;
                   } if(stderr) {
                     console.log(stderr);
-                    res.send("stderr");
+                    res.send(stderr);
                   } else {
                     res.send("success");
                   }
