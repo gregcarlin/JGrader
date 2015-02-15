@@ -8,7 +8,7 @@
         <th>Name</th>
         <th>Section</th>
         <th>Current Average</th>
-        <th>Last Assignment</th>
+        <th>Last Submitted Assignment</th>
       </tr>
     </thead>
     <tbody>
@@ -21,7 +21,7 @@
             <tr>
               <td><a href="/teacher/student/<%= rows[i].id %>"><%= rows[i].fname + ' ' + rows[i].lname %></a></td>
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
-              <td>A++</td>
+              <td><%= rows[i].avg ? (rows[i].avg + '%') : 'None' %></td>
               <td><%- rows[i].aname ? ('<a href="/teacher/submission/' + rows[i].subid + '">' + rows[i].aname + '</a>') : 'None' %></td>
             </tr>
        <% }
