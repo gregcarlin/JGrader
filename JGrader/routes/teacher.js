@@ -515,15 +515,23 @@ router.get('/student', function(req, res) {
                       `assignments`.`name` AS `aname`,\
                       `temp`.`id` AS `subid` \
                       FROM \
-                        `sections`,\
-                        `enrollment`,\
                         `students` \
-                        LEFT JOIN (SELECT `assignment_id`,`student_id`,`id`,MAX(`submitted`) FROM `submissions` WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) GROUP BY `student_id`) AS `temp` ON `students`.`id` = `temp`.`student_id` \
+                        JOIN `enrollment` ON `enrollment`.`student_id` = `students`.`id` \
+                        JOIN `sections` ON `sections`.`id` = `enrollment`.`section_id` \
+                        LEFT JOIN \
+                          (SELECT \
+                            `assignment_id`,\
+                            `student_id`,\
+                            `submissions`.`id`,\
+                            MAX(`submitted`),\
+                            `assignments`.`section_id` \
+                          FROM \
+                            `submissions` \
+                            LEFT JOIN `assignments` ON `assignments`.`id` = `assignment_id` WHERE TEACHER_OWNS_ASSIGNMENT(3,`assignment_id`) GROUP BY `student_id`,`assignments`.`section_id`) \
+                          AS `temp` ON `students`.`id` = `temp`.`student_id` AND `sections`.`id` = `temp`.`section_id` \
                         LEFT JOIN `assignments` ON `assignments`.`id` = `temp`.`assignment_id` \
                       WHERE \
-                        `sections`.`teacher_id` = ? AND \
-                        `enrollment`.`section_id` = `sections`.`id` AND \
-                        `enrollment`.`student_id` = `students`.`id`", [req.user.id, req.user.id], function(err, rows) {
+                        `sections`.`teacher_id` = ?", [req.user.id, req.user.id], function(err, rows) {
     render('studentList', {rows: rows}, res);
   });
 });
