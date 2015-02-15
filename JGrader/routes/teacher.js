@@ -57,6 +57,7 @@ var render = function(page, options, res) {
     case 'student':
       options.page = 2;
       // title must be set already
+      options.js = ['tooltip'];
       options.strftime = strftime;
       break;
     case 'settings':
@@ -402,7 +403,8 @@ router.get('/submission/:id', function(req, res) {
                       `students`.`fname`,\
                       `students`.`lname`,\
                       `assignments`.`id` AS `aid`,\
-                      `assignments`.`name` \
+                      `assignments`.`name`,\
+                      `assignments`.`due` \
                     FROM `submissions`,`students`,`assignments`,`sections` \
                     WHERE \
                       `students`.`id` = `submissions`.`student_id` AND \
@@ -562,6 +564,7 @@ router.get('/student/:id', function(req, res) {
                           `submissions`.`grade`,\
                           `submissions`.`submitted`,\
                           `assignments`.`name`,\
+                          `assignments`.`due`,\
                           `sections`.`name` AS `sname`,\
                           `sections`.`id` AS `sid` \
                         FROM `sections`,(`assignments` LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = ?) \
