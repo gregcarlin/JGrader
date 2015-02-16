@@ -10,6 +10,7 @@
 </div>
 <div class="description">
   <span class="edit" data-key="updatedesc" data-default="No Description"><span><%= assignment.description ? assignment.description : '' %></span><input type="text" class="form-control" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="right" title="Edit"></span>
+  <a href="#" class="right"><span class="fa fa-table" data-toggle="tooltip" data-placement="left" title="Export"></span></a>
 </div>
 <div class="table-responsive">
   <table class="table table-striped table-linked">
@@ -23,7 +24,7 @@
     <tbody>
       <% if(results.length == 0) { %>
         <tr>
-          <td colspan="3">There are no students in this section.</td>
+          <td colspan="3">There are no students in this class.</td>
         </tr>
       <% } else {
           for(i in results) {
