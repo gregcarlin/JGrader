@@ -27,13 +27,9 @@
           <td colspan="3">There are no students in this class.</td>
         </tr>
       <% } else {
-          for(i in results) {
-            if(results[i].submitted) { %>
-              <tr onclick="document.location = '/teacher/submission/<%= results[i].subID %>'">
-            <% } else { %>
-              <tr>
-            <% } %>
-              <td><%= results[i].fname + ' ' + results[i].lname %></td>
+          for(i in results) { %>
+            <tr>
+              <td><%- results[i].submitted ? ('<a href="/teacher/submission/' + results[i].subID + '">' + results[i].fname + ' ' + results[i].lname + '</a>') : (results[i].fname + ' ' + results[i].lname) %></td>
               <%
                 var submitted = new Date(results[i].submitted);
                 var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
