@@ -19,6 +19,7 @@ var render = function(page, options, res) {
       options.page = 1;
       // title should already be set
       options.js = ['student/dropzone', 'student/studentSubmit'];
+      options.css = ['student/submit'];
       break;
     case 'assignmentComplete':
       options.page = 1;
