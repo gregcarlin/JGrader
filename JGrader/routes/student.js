@@ -8,6 +8,8 @@ var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
 var render = function(page, options, res) {
   switch(page) {
     case 'notFound':
+      // page must be set already
+      options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
       break;
     case 'assignmentList':
       options.page = 1;
@@ -16,9 +18,14 @@ var render = function(page, options, res) {
     case 'assignment':
       options.page = 1;
       // title should already be set
+      options.js = ['student/dropzone', 'student/studentSubmit'];
       break;
     case 'assignmentComplete':
-      options.page =1;
+      options.page = 1;
+      // title should already be set
+      options.js = ['prettify', 'student/studentSubmitted'];
+      options.css = ['prettify'];
+      options.onload = 'prettyPrint()';
       break;
     case 'sectionList':
       options.page = 0;
@@ -102,10 +109,10 @@ router.get('/assignment/:id', function(req, res) {
             render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
             if(debug) throw err;
           } else if(fileData.length == 0) {
-            render('assignment', { rows: rows, js: ['student/dropzone', 'student/studentSubmit'] }, res);
+            render('assignment', {title: rows[0].name, rows: rows}, res);
           } else {
             // Sends file data
-            render('assignmentComplete', { rows: rows, fileData: fileData, js: ['prettify', 'student/studentSubmitted'], css: ['prettify'], onload: ['prettyPrint()']}, res);
+            render('assignmentComplete', {title: rows[0].name, rows: rows, fileData: fileData}, res);
           }
         });
       }
