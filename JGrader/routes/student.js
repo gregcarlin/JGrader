@@ -102,7 +102,7 @@ router.get('/assignment/:id', function(req, res) {
             render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
             if(debug) throw err;
           } else if(fileData.length == 0) {
-            render('assignment', { rows: rows, js: ['student/dropzone', 'student/studentSubmit'] }, res);
+            render('assignment', { rows: rows, css: ['student/submit'], js: ['student/dropzone', 'student/studentSubmit'] }, res);
           } else {
             // Sends file data
             render('assignmentComplete', { rows: rows, fileData: fileData, js: ['prettify', 'student/studentSubmitted'], css: ['prettify', 'font-awesome.min'], onload: ['prettyPrint()']}, res);
@@ -201,9 +201,9 @@ router.get('/assignment/:id/resubmit', function(req,res) {
                             WHERE `submissions`.`assignment_id` = ? \
                             AND `submissions`.`student_id` = ?", [req.params.id, req.user.id], function(err, rows) {
             if(err) {
-              res.redirect('/student/assignment');
-            } else {
               res.redirect('/student/assignment/');
+            } else {
+              res.redirect('/student/assignment/' + req.params.id);
             }
           });
         }
