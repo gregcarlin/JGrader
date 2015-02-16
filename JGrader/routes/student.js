@@ -105,7 +105,7 @@ router.get('/assignment/:id', function(req, res) {
             render('assignment', { rows: rows, js: ['student/dropzone', 'student/studentSubmit'] }, res);
           } else {
             // Sends file data
-            render('assignmentComplete', { rows: rows, fileData: fileData, js: ['prettify', 'student/studentSubmitted'], css: ['prettify'], onload: ['prettyPrint()']}, res);
+            render('assignmentComplete', { rows: rows, fileData: fileData, js: ['prettify', 'student/studentSubmitted'], css: ['prettify', 'font-awesome.min'], onload: ['prettyPrint()']}, res);
           }
         });
       }
