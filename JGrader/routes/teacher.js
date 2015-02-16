@@ -42,7 +42,7 @@ var render = function(page, options, res) {
       options.page = 1;
       // title must be set already
       options.js = ['tooltip', 'strftime-min', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker'];
-      options.css = ['jquery.datetimepicker'];
+      options.css = ['jquery.datetimepicker', 'font-awesome.min'];
       options.strftime = strftime;
       break;
     case 'submission':
@@ -61,6 +61,7 @@ var render = function(page, options, res) {
       options.page = 2;
       // title must be set already
       options.js = ['tooltip'];
+      options.css = ['font-awesome.min'];
       options.strftime = strftime;
       break;
     case 'settings':

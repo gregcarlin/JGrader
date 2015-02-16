@@ -18,13 +18,22 @@
 .sub-header {
   font-size: 28px;
 }
-.page-header .right {
+.right {
   float: right;
   display: block;
   margin: 0;
 }
 .page-header .plus-button {
   font-size: 22pt;
+}
+.page-header .fa {
+  font-size: 22pt;
+}
+a .fa {
+  color: #000;
+}
+a:hover .fa {
+  color: #428bca;
 }
 #dueh2 {
   position: relative;
