@@ -35,14 +35,19 @@
 </div>
 <div class="col-lg-7 tester" id="actions">
     <!-- The fileinput-button span is used to style the file input field as button -->
-    <span class="btn btn-success fileinput-button dz-clickable">
-        <i class="glyphicon glyphicon-plus"></i>
-        <span>Add files...</span>
-    </span>
-    <button type="submit" class="btn btn-primary start">
-        <i class="glyphicon glyphicon-upload"></i>
-        <span>Submit</span>
-    </button>
+    <div class="buttons">
+      <span class="btn btn-success fileinput-button dz-clickable">
+          <i class="glyphicon glyphicon-plus"></i>
+          <span>Add files...</span>
+      </span>
+      <button type="submit" class="btn btn-primary start">
+          <i class="glyphicon glyphicon-upload"></i>
+          <span>Submit</span>
+      </button>
+    </div>
+    <div class="row drag-zone">
+        <div class="message">Drag files here. </div>
+    </div>
 </div>
 
 <!-- HTML heavily inspired by http://blueimp.github.io/jQuery-File-Upload/ -->
