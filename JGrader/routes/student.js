@@ -24,7 +24,7 @@ var render = function(page, options, res) {
       options.page = 1;
       // title should already be set
       options.js = ['prettify', 'student/studentSubmitted'];
-      options.css = ['prettify'];
+      options.css = ['prettify', 'font-awesome.min'];
       options.onload = 'prettyPrint()';
       break;
     case 'sectionList':
@@ -208,9 +208,9 @@ router.get('/assignment/:id/resubmit', function(req,res) {
                             WHERE `submissions`.`assignment_id` = ? \
                             AND `submissions`.`student_id` = ?", [req.params.id, req.user.id], function(err, rows) {
             if(err) {
-              res.redirect('/student/assignment');
-            } else {
               res.redirect('/student/assignment/');
+            } else {
+              res.redirect('/student/assignment/' + req.params.id);
             }
           });
         }
