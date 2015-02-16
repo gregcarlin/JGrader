@@ -1,5 +1,5 @@
 // Created by Brian Singer and Greg Carlin in 2015.
-// Copyright (c) 2014 Training. All rights reserved.
+// Copyright (c) 2015 JGrader. All rights reserved.
 
 // http://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string
 if (typeof String.prototype.startsWith != 'function') {
