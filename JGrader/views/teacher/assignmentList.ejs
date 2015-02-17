@@ -37,7 +37,7 @@
               <td title="<%= strftime('%b %d %Y, %l:%M %p', due) %>"><%= dueStr %></td>
               <td><%= rows[i].complete %> of <%= rows[i].total %></td>
               <td><%= rows[i].graded %> of <%= rows[i].complete %></td>
-              <td><span class="glyphicon glyphicon-trash glyph-button" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="confirmDelete(<%= rows[i].aid %>)"></span></td>
+              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="confirmDelete(<%= rows[i].aid %>)"></span></td>
             </tr>
        <% }
          } %>

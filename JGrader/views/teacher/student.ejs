@@ -30,7 +30,7 @@
                   var submitted = new Date(rows[i].submitted);
                   var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
                   if(rows[i].submitted > rows[i].due) {
-                    submittedStr += ' <span class="glyphicon glyphicon-time" data-toggle="tooltip" data-placement="right" title="Late"></span>';
+                    submittedStr += ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="right" title="Late"></span>';
                   }
                 }
               %>

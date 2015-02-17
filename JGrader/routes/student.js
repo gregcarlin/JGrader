@@ -19,7 +19,7 @@ var render = function(page, options, res) {
       options.page = 1;
       // title should already be set
       options.js = ['student/dropzone', 'student/studentSubmit'];
-      options.css = ['student/submit'];
+      options.css = ['student/submit', 'font-awesome.min'];
       break;
     case 'assignmentComplete':
       options.page = 1;
@@ -32,6 +32,7 @@ var render = function(page, options, res) {
       options.page = 0;
       options.title = 'Your Sections';
       options.js = ['tooltip'];
+      options.css = ['font-awesome.min'];
       break;
     case 'section':
       options.page = 0;
