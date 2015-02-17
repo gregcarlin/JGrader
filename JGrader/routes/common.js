@@ -20,9 +20,6 @@ connection = mysql.createPool({
   multipleStatements : true
 });
 
-// todo set to false before release
-debug = true;
-
 process.on('SIGINT', function() { // on ^C
   connection.end(function(err) { // close mysql connection
     process.exit(); // also do normal exit stuff

@@ -127,7 +127,7 @@ router.get('/section', function(req, res) {
                     ORDER BY `sections`.`name` ASC", [req.user.id], function(err, rows) {
     if(err) {
       render('sectionList', {rows: [], error: 'An unexpected error has occurred.'}, res);
-      if(debug) throw err;
+      throw err;
     } else {
       render('sectionList', {rows: rows}, res);
     }
@@ -180,7 +180,7 @@ router.get('/section/:id', function(req, res) {
                             `assignments`.`name` ASC", [sectionID, sectionID], function(err, results) {
           if(err) {
             render('notFound', {page: 0, error: 'Error getting section', type: 'section'}, res);
-            if(debug) throw err;
+            throw err;
           } else {
             render('section', {title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, sectionCode: rows[0].code, rows: results}, res);
           }
@@ -197,7 +197,7 @@ router.post('/section/:id/updatename/:name', function(req, res) {
   connection.query("UPDATE `sections` SET `name` = ? WHERE `id` = ? AND `teacher_id` = ?", [req.params.name, req.params.id, req.user.id], function(err, rows) {
     if(err) {
       res.json({code: -1}); // unknown error
-      if(debug) throw err;
+      throw err;
     } else if(rows.affectedRows <= 0) {
       res.json({code: 2}); // no permission
     } else {
@@ -211,7 +211,7 @@ router.get('/section/:id/delete', function(req, res) {
   connection.query('DELETE FROM `sections` WHERE `id` = ? AND `teacher_id` = ? LIMIT 1', [req.params.id, req.user.id], function(err, rows) {
     if(err) {
       render('notFound', {page: 0, error: 'Unable to delete section. Please go back and try again.'}, res);
-      if(debug) throw err;
+      throw err;
     } else if(rows.affectedRows <= 0) {
       render('notFound', {page: 0, error: 'You are not allowed to delete that section.'}, res);
     } else {
@@ -243,7 +243,7 @@ router.get('/assignment', function(req, res) {
                       `sections`.`name` ASC", [req.user.id], function(err, rows) {
     if(err) {
       render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
-      if(debug) throw err;
+      throw err;
     } else {
       render('assignmentList', {rows: rows}, res);
     }
@@ -284,7 +284,7 @@ var assignmentCreate = function(req, res) {
   connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [req.user.id], function(err, rows) {
     if(err) {
       render('assignmentCreate', {error: 'An unexpected error has occurred.', rows: []}, res);
-      if(debug) throw err;
+      throw err;
     } else if(rows.length <= 0) {
       render('assignmentCreate', {error: 'You must create a section before you can create an assignment.', rows: [], preselect: req.params.preselect}, res);
     } else {
@@ -322,7 +322,7 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
   connection.query("SELECT (SELECT `teacher_id` FROM `sections` WHERE `id` = ?) = ? AS `result`", [sectionID, teacherID], function(err, rows) {
     if(err) {
       render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
-      if(debug) throw err;
+      throw err;
     } else if(!rows[0].result) {
       render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
     } else {
@@ -377,7 +377,7 @@ router.get('/assignment/:id', function(req, res) {
                       `assignments`.`id` = ?", [req.user.id, req.params.id], function(err, rows) {
     if(err) {
       render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-      if(debug) throw err;
+      throw err;
     } else if(rows.length <= 0) {
       render('notFound', {page: 1, type: 'assignment'}, res);
     } else {
@@ -408,7 +408,7 @@ router.post('/assignment/:id/updatedesc/:desc', function(req, res) {
     connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.desc, req.params.id, req.user.id], function(err, rows) {
       if(err) {
         res.json({code: -1}); // unknown error
-        if(debug) throw err;
+        throw err;
       } else if(rows.affectedRows <= 0) {
         res.json({code: 2}); // invalid permissions
       } else {
@@ -423,7 +423,7 @@ router.post('/assignment/:id/updatedesc', function(req, res) {
   connection.query("UPDATE `assignments` SET `description` = NULL WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.id, req.user.id], function(err, rows) {
     if(err) {
       res.json({code: -1}); // unknown error
-      if(debug) throw err;
+      throw err;
     } else if(rows.affectedRows <= 0) {
       res.json({code: 2}); // invalid permissions
     } else {
@@ -436,7 +436,7 @@ router.post('/assignment/:id/updatedue/:due', function(req, res) {
   connection.query("UPDATE `assignments` SET `due` = ? WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.due, req.params.id, req.user.id], function(err, rows) {
     if(err) {
       res.json({code: -1}); // unknown error
-      if(debug) throw err;
+      throw err;
     } else if(rows.affectedRows <= 0) {
       res.json({code: 2}); // invalid permissions
     } else {
@@ -449,7 +449,7 @@ router.get('/assignment/:id/delete', function(req, res) {
   connection.query('DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1', [req.params.id, req.user.id], function(err, rows) {
     if(err) {
       render('notFound', {page: 0, error: 'Unable to delete assignment. Please go back and try again.'}, res);
-      if(debug) throw err;
+      throw err;
     } else if(rows.affectedRows <= 0) {
       render('notFound', {page: 0, error: 'You are not allowed to delete that assignment.'}, res);
     } else {
@@ -478,14 +478,14 @@ router.get('/submission/:id', function(req, res) {
                       `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, subData) {
     if(err) {
       render('notFound', {page: 1, type: 'submission', error: 'An unexpected error has occurred.'}, res);
-      if(debug) throw err;
+      throw err;
     } else if(subData.length <= 0) {
       render('notFound', {page: 1, type: 'submission'}, res);
     } else {
       connection.query("SELECT `id`,`name`,`contents` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
         if(err) {
           render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: [], error: 'Unable to retrieve file data.'}, res);
-          if(debug) throw err;
+          throw err;
         } else {
           render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData}, res);
         }
@@ -673,7 +673,7 @@ router.get('/student/:id', function(req, res) {
   connection.query("SELECT `students`.`fname`,`students`.`lname` FROM `students` WHERE `id` = ? AND SECTIONS_WITH_STUDENT(?, `students`.`id`) > 0", [req.params.id, req.user.id], function(err, result) {
     if(err) {
       render('notFound', {page: 2, type: 'student', error: 'An unexpected error has occurred.'}, res);
-      if(debug) throw err;
+      throw err;
     } else if(result.length <= 0) {
       render('notFound', {page: 2, type: 'student'}, res);
     } else {
@@ -693,7 +693,7 @@ router.get('/student/:id', function(req, res) {
                         WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
         if(err) {
           render('notFound', {page: 2, type: 'student', error: 'An unexpected error has occurred.'}, res);
-          if(debug) throw err;
+          throw err;
         } else {
           var name = result[0].fname + ' ' + result[0].lname;
           render('student', {title: name, name: name, rows: rows, id: req.params.id}, res);
@@ -708,7 +708,7 @@ router.get('/settings', function(req, res) {
   connection.query("SELECT `fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, rows) {
     if(err) {
       render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
-      if(debug) throw err;
+      throw err;
     } else {
       render('settings', {fname: rows[0].fname, lname: rows[0].lname}, res);
     }
@@ -726,7 +726,7 @@ router.post('/settings', function(req, res) {
         connection.query("UPDATE `teachers` SET `fname` = ?, `lname` = ?, `pass` = AES_ENCRYPT(?, ?) WHERE `id` = ? AND `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, req.user.id, oldPass, creds.aes_key], function(err, rows) {
           if(err) {
             render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
-            if(debug) throw err;
+            throw err;
           } else if(rows.affectedRows <= 0) {
             render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
           } else {
@@ -740,7 +740,7 @@ router.post('/settings', function(req, res) {
       connection.query("UPDATE `teachers` SET `fname` = ?, `lname` = ? WHERE `id` = ?", [fname, lname, req.user.id], function(err) {
         if(err) {
           render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
-          if(debug) throw err;
+          throw err;
         } else {
           render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
         }
@@ -763,10 +763,10 @@ router.post('/feedback', function(req, res) {
     type = 'other';
   }
   connection.query("SELECT `user`,`fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, result) {
-    if(err && debug) throw err;
+    if(err) throw err;
 
     connection.query("INSERT INTO `feedback` VALUES(NULL, ?, ?, ?, 'teacher', ?, ?, ?)", [result[0].user, result[0].fname, result[0].lname, req.headers['user-agent'], type, req.param('feedback')], function(err) {
-      if(err && debug) throw err;
+      if(err) throw err;
       render('feedback', {success: 'Thank you for your feedback!'}, res);
     });
   });

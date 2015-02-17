@@ -78,7 +78,7 @@ router.get('/assignment', function(req, res) {
                     AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id], function(err, rows) {
     if(err) {
       render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
-      if(debug) throw err;
+      throw err;
     } else {
       render('assignmentList', {rows: rows}, res);
     }
@@ -97,7 +97,7 @@ router.get('/assignment/:id', function(req, res) {
                       AND `assignments`.`id` = ?", [req.user.id, assignmentID], function(err, rows) {
       if(err) {
         render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-        if(debug) throw err;
+        throw err;
       } else if(rows.length <= 0) {
         render('notFound', {page: 1, type: 'assignment'}, res);
       } else {
@@ -109,7 +109,7 @@ router.get('/assignment/:id', function(req, res) {
                           AND  `students`.`id` = ? AND `assignments`.`id` = ?", [req.user.id, assignmentID], function(err, fileData){
           if(err) {
             render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-            if(debug) throw err;
+            throw err;
           } else if(fileData.length == 0) {
             render('assignment', {title: rows[0].name, rows: rows}, res);
           } else {
@@ -151,12 +151,12 @@ router.post('/assignment/:id/submit', function(req, res) {
             connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, rows) {
               if(err) {
                 render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
-                if(debug) throw err;
+                throw err;
               } else {
                 submitFiles(0, req.files, req.user.id, assignmentID, function(err, stderr) {
                   if(err) {
                     render('notFound', {page: 1, type: 'assignment', error: 'Compilation has failed'}, res);
-                    if(debug) throw err;
+                    throw err;
                   } if(stderr) {
                     console.log(stderr);
                     res.send(stderr);
@@ -172,7 +172,7 @@ router.post('/assignment/:id/submit', function(req, res) {
             submitFiles(0, req.files, req.user.id, assignmentID, function(err) {
               if(err) {
                 render('notFound', {page: 1, type: 'assignment', error: 'Compilation has failed'}, res);
-                if(debug) throw err;
+                throw err;
               } else {
                 res.redirect('/student/assignment/' + req.params.id);
               }
@@ -240,14 +240,14 @@ router.get('/section/:id', function(req, res) {
   connection.query("SELECT `sections`.`name` FROM `sections`,`enrollment` WHERE `sections`.`id` = ? AND `sections`.`id` = `enrollment`.`section_id` AND `enrollment`.`student_id` = ?", [sectionID, req.user.id], function(err, result) {
     if(err) {
       render('notFound', {page: 0, type: 'section', error: 'An unexpected error has occurred.'}, res);
-      if(debug) throw err;
+      throw err;
     } else if(result.length <= 0) {
       render('notFound', {page: 0, type: 'section'}, res);
     } else {
       connection.query("SELECT `id`,`name`,`description`,`due` FROM `assignments` WHERE `section_id` = ?", [sectionID], function(err, rows) {
         if(err) {
           render('notFound', {page: 0, type: 'section', error: 'An unexpected error has occurred.'}, res);
-          if(debug) throw err;
+          throw err;
         } else {
           render('section', {name: result[0].name, rows: rows}, res);
         }
@@ -263,14 +263,14 @@ router.post('/section/joinSection', function(req, res) {
     connection.query("SELECT `id` FROM `sections` WHERE `code` = ?", [sectionID], function(err, rows) {
       if(err) {
         render('joinSection', {error: 'An unknown error has occurred.'}, res);
-        if(debug) throw err;
+        throw err;
       } else if(rows.length <= 0) {
         render('joinSection', {error: 'That is not a valid section code.'}, res);
       } else {
         connection.query("INSERT INTO `enrollment` VALUES(?, ?)", [rows[0].id, req.user.id], function(err, result) {
           if(err) {
             render('joinSection', {error: 'An unknown error has occurred.'}, res);
-            if(debug) throw err;
+            throw err;
           } else {
             res.redirect('/student/section/' + rows[0].id);
           }
@@ -287,7 +287,7 @@ var findSectionInfo = function(id, res, finish) {
     connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`sections`.`id` FROM `enrollment`,`sections`,`teachers` WHERE `enrollment`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = `teachers`.`id` AND `enrollment`.`student_id` = ?", [id], function(err, rows) {
       if(err) {
         render('notFound', {page: 1, type: 'section', error: 'An unexpected error has occurred.'}, res);
-        if(debug) throw err;
+        throw err;
       } else {
         finish(rows);
       }
@@ -369,7 +369,7 @@ router.get('/settings', function(req, res) {
   connection.query("SELECT `fname`,`lname` FROM `students` WHERE `id` = ?", [req.user.id], function(err, rows) {
     if(err) {
       render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
-      if(debug) throw err;
+      throw err;
     } else {
       render('settings', {fname: rows[0].fname, lname: rows[0].lname}, res);
     }
@@ -390,7 +390,7 @@ router.post('/settings', function(req, res) {
         connection.query("UPDATE `students` SET `fname` = ?, `lname` = ?, `pass` = AES_ENCRYPT(?, ?) WHERE `id` = ? AND `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, studentID, oldPass, creds.aes_key], function(err, rows) {
           if(err) {
             render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
-            if(debug) throw err;
+            throw err;
           } else if(rows.affectedRows <= 0) {
             render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
           } else {
@@ -404,7 +404,7 @@ router.post('/settings', function(req, res) {
       connection.query("UPDATE `students` SET `fname` = ?, `lname` = ? WHERE `id` = ?", [fname, lname, req.user.id], function(err) {
         if(err) {
           render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
-          if(debug) throw err;
+          throw err;
         } else {
           render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
         }
@@ -427,10 +427,10 @@ router.post('/feedback', function(req, res) {
     type = 'other';
   }
   connection.query("SELECT `user`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.user.id], function(err, result) {
-    if(err && debug) throw err;
+    if(err) throw err;
 
     connection.query("INSERT INTO `feedback` VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)", [result[0].user, result[0].fname, result[0].lname, req.headers['user-agent'], type, req.param('feedback')], function(err) {
-      if(err && debug) throw err;
+      if(err) throw err;
       render('feedback', {success: 'Thank you for your feedback!'}, res);
     });
   });
