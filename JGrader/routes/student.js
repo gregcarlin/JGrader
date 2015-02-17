@@ -31,12 +31,14 @@ var render = function(page, options, res) {
     case 'sectionList':
       options.page = 0;
       options.title = 'Your Sections';
-      options.js = ['tooltip'];
+      options.js = ['tooltip', 'student/sectionList'];
       options.css = ['font-awesome.min'];
       break;
     case 'section':
       options.page = 0;
       // title should already be set
+      options.js = ['tooltip', 'student/sectionList'];
+      options.css = ['font-awesome.min'];
       break;
     case 'joinSection':
       options.page = 0;
@@ -249,11 +251,17 @@ router.get('/section/:id', function(req, res) {
           render('notFound', {page: 0, type: 'section', error: 'An unexpected error has occurred.'}, res);
           throw err;
         } else {
-          render('section', {name: result[0].name, rows: rows}, res);
+          render('section', {name: result[0].name, rows: rows, id: sectionID}, res);
         }
       });
     }
   });
+});
+
+// drop a class
+router.get('/section/:id/delete', function(req, res) {
+  // todo drop class and redirect to /student/section
+  res.send('hello there');
 });
 
 // Joins Class
