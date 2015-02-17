@@ -15,6 +15,7 @@ var render = function(page, options, res) {
       options.page = 0;
       options.title = 'Your Sections';
       options.js = ['tooltip', 'teacher/sectionList'];
+      options.css = ['font-awesome.min'];
       break;
     case 'sectionCreate':
       options.page = 0;
@@ -24,6 +25,7 @@ var render = function(page, options, res) {
       options.page = 0;
       // title must be set already
       options.js = ['tooltip', 'teacher/edit'];
+      options.css = ['font-awesome.min'];
       options.strftime = strftime;
       break;
     case 'assignmentList':
@@ -50,7 +52,7 @@ var render = function(page, options, res) {
       options.page = 1;
       // title must be set already
       options.js = ['prettify', 'teacher/submission', 'tooltip', 'teacher/edit'];
-      options.css = ['prettify'];
+      options.css = ['prettify', 'font-awesome.min'];
       options.onload = 'prettyPrint()';
       options.strftime = strftime;
       break;

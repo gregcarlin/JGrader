@@ -3,7 +3,7 @@
  
 <div class="page-header">
   <h1>Classes</h1>
-  <a href="/teacher/section/create" class="right plus-button"><span class="glyphicon glyphicon-plus-sign glyph-button" data-toggle="tooltip" data-placement="left" title="New Section"></span></a>
+  <a href="/teacher/section/create" class="right plus-button"><span class="fa fa-plus-circle" data-toggle="tooltip" data-placement="left" title="New Section"></span></a>
 </div>
 <div class="table-responsive">
   <table class="table table-striped table-linked">
@@ -26,7 +26,7 @@
               <td><a href="/teacher/section/<%= rows[i].id %>"><%= rows[i].name %></a></td>
               <td><%= rows[i].count %></td>
               <td><%- rows[i].aname ? '<a href="/teacher/assignment/' + rows[i].aid + '">' + rows[i].aname + '</a>' : 'None' %></td>
-              <td><span class="glyphicon glyphicon-trash glyph-button" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="confirmDelete(<%= rows[i].id %>)"></span></td>
+              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="confirmDelete(<%= rows[i].id %>)"></span></td>
             </tr>
        <% }
          } %>

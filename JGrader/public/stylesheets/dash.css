@@ -1,13 +1,6 @@
 /* Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. */
 
-.glyph-button {
-  color: #000;
-}
-.glyph-button:hover {
-  color: #428bca;
-  cursor: pointer;
-}
 .page-header h1 {
   margin: 0;
   display: inline;
@@ -29,19 +22,30 @@
 .page-header .fa {
   font-size: 22pt;
 }
+.page-header .edit + .fa {
+  font-size: inherit;
+}
 a .fa {
   color: #000;
 }
-a:hover .fa {
+.edit + .fa {
+  margin-left: 5px;
+  position: relative;
+  top: 1px;
+}
+a:hover .fa, .edit + .fa:hover, .fa[onclick]:hover, #execute .fa:hover {
   color: #428bca;
+  cursor: pointer;
+}
+.fa[data-toggle="tooltip"]:hover {
+  color: #428bca;
+}
+.table .fa {
+  font-size: 16px;
 }
 #dueh2 {
   position: relative;
   top: 8px;
-}
-#dueh2 .glyphicon {
-  position: relative;
-  top: -1px;
 }
 .main form {
   width: 50%;
@@ -113,10 +117,6 @@ ul.section-list {
   display: none;
   width: 75px;
 }
-.edit + .glyphicon {
-  margin-left: 4px;
-  font-size: 12pt;
-}
 .table-linked tr[onclick]:hover td {
   cursor: pointer;
   background-color: #f2f2f2 !important;
@@ -128,7 +128,7 @@ ul.section-list {
 .stderr {
   color: #D00;
 }
-#sec-edit + .glyphicon {
+#sec-edit + .fa {
   font-size: 8pt;
   margin-left: 0;
   margin-right: -5px;
