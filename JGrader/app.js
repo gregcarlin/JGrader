@@ -18,12 +18,6 @@ var student = require('./routes/student');
 
 var app = express();
 
-// suppress uncaught errors, from http://stackoverflow.com/questions/17245881/node-js-econnreset/17637900
-process.on('uncaughtException', function (err) {
-  console.error(err.stack);
-  console.log("Node NOT Exiting...");
-});
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
