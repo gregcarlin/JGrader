@@ -17,15 +17,7 @@ connection = mysql.createPool({
   database           : creds.mysql_db,
   user               : creds.mysql_user,
   password           : creds.mysql_pass,
-  multipleStatements : true,
-  debug              : true
-});
-
-connection.on('error', function(err) {
-  console.log("MySQL ERROR");
-  console.log("CODE: " + err.code);
-  console.log("STACK:");
-  console.log(err.stack);
+  multipleStatements : true
 });
 
 // todo set to false before release
