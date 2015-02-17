@@ -30,6 +30,7 @@ var render = function(page, options, res) {
       options.page = 1;
       options.title = 'Your Assignments';
       options.js = ['tooltip', 'teacher/assignmentList'];
+      options.css = ['font-awesome.min'];
       options.strftime = strftime;
       break;
     case 'assignmentCreate':
@@ -56,6 +57,8 @@ var render = function(page, options, res) {
     case 'studentList':
       options.page = 2;
       options.title = 'Your Students';
+      options.js = ['tooltip'];
+      options.css = ['font-awesome.min'];
       break;
     case 'student':
       options.page = 2;
@@ -245,6 +248,36 @@ router.get('/assignment', function(req, res) {
   });
 });
 
+router.get('/assignment.csv', function(req, res) {
+  connection.query("SELECT \
+                      `assignments`.`name`,\
+                      `sections`.`name` AS `sname`,\
+                      `students`.`fname`,\
+                      `students`.`lname`,\
+                      `submissions`.`grade` \
+                    FROM \
+                      `assignments` \
+                      JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+                      JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` \
+                      JOIN `students` ON `students`.`id` = `enrollment`.`student_id` \
+                      LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = `students`.`id` \
+                    WHERE `sections`.`teacher_id` = ? \
+                    ORDER BY \
+                      `assignments`.`name`,\
+                      `sections`.`name`,\
+                      `students`.`lname`,\
+                      `students`.`fname`", [req.user.id], function(err, rows) {
+    res.setHeader('Content-Disposition', 'attachment; filename=assignments.csv');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Descrption', 'File Transfer');
+    var output = 'Assignment,Section,Student,Grade\n';
+    for(i in rows) {
+      output += rows[i].name + ',' + rows[i].sname + ',' + rows[i].fname + ' ' + rows[i].lname + ',' + (rows[i].grade ? rows[i].grade : 'None') + '\n';
+    }
+    res.send(output);
+  });
+});
+
 var assignmentCreate = function(req, res) {
   connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [req.user.id], function(err, rows) {
     if(err) {
@@ -302,6 +335,31 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
   });
 }
 
+router.get('/assignment/:id.csv', function(req, res) {
+  connection.query("SELECT \
+                      `students`.`fname`,\
+                      `students`.`lname`,\
+                      `submissions`.`grade`,\
+                      `submissions`.`submitted`,\
+                      `assignments`.`due` \
+                    FROM \
+                      `students` \
+                      JOIN `enrollment` ON `enrollment`.`student_id` = `students`.`id` \
+                      JOIN `sections` ON `sections`.`id` = `enrollment`.`section_id` \
+                      JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` \
+                      LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = `students`.`id` \
+                      WHERE `assignments`.`id` = ?", [req.params.id], function(err, rows) {
+    res.setHeader('Content-Disposition', 'attachment; filename=assignment_' + req.params.id + '.csv');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Descrption', 'File Transfer');
+    var output = 'Student,Submitted,Grade,Late\n';
+    for(i in rows) {
+      output += rows[i].fname + ' ' + rows[i].lname + ',' + (rows[i].submitted ? 'Yes' : 'No') + ',' + (rows[i].grade ? rows[i].grade : 'None') + ',' + (rows[i].submitted ? (rows[i].submitted > rows[i].due ? 'Yes' : 'No') : (rows[i].due > Date.now() ? 'Yes' : 'Not Yet')) + '\n';
+    }
+    res.send(output);
+  });
+});
+
 router.get('/assignment/:id', function(req, res) {
   connection.query("SELECT \
                       `assignments`.`id` AS `aid`,\
@@ -334,7 +392,7 @@ router.get('/assignment/:id', function(req, res) {
                         WHERE \
                           `enrollment`.`student_id` = `students`.`id` AND \
                           `enrollment`.`section_id` = ?", [req.params.id, rows[0].sid], function(err, results) {
-        render('assignment', {title: rows[0].name, assignment: rows[0], results: results}, res);
+        render('assignment', {title: rows[0].name, assignment: rows[0], results: results, id: req.params.id}, res);
       });
     }
   });
@@ -555,6 +613,60 @@ router.get('/student', function(req, res) {
   });
 });
 
+router.get('/student.csv', function(req, res) {
+  connection.query("SELECT \
+                      `assignments`.`name`,\
+                      `sections`.`name` AS `sname`,\
+                      `students`.`fname`,\
+                      `students`.`lname`,\
+                      `submissions`.`id`,\
+                      `submissions`.`grade` \
+                    FROM \
+                      `assignments` \
+                      JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+                      JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` \
+                      JOIN `students` ON `students`.`id` = `enrollment`.`student_id` \
+                      LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = `students`.`id` \
+                    WHERE `sections`.`teacher_id` = ? \
+                    ORDER BY \
+                      `students`.`lname`,\
+                      `students`.`fname`,\
+                      `sections`.`name`,\
+                      `assignments`.`name`", [req.user.id], function(err, rows) {
+    res.setHeader('Content-Disposition', 'attachment; filename=students.csv');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Descrption', 'File Transfer');
+    var output = 'Student,Section,Assignment,Grade\n';
+    for(i in rows) {
+      output += rows[i].fname + ' ' + rows[i].lname + ',' + rows[i].sname + ',' + rows[i].name + ',' + (rows[i].grade ? rows[i].grade : (rows[i].id ? 'Not Graded' : 'Not Submitted')) + '\n';
+    }
+    res.send(output);
+  });
+});
+
+router.get('/student/:id.csv', function(req, res) {
+  connection.query("SELECT \
+                      `assignments`.`name`,\
+                      `sections`.`name` AS `sname`,\
+                      `submissions`.`id`,\
+                      `submissions`.`grade` \
+                    FROM \
+                      `assignments` \
+                      JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+                      JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` \
+                      LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = `enrollment`.`student_id` \
+                    WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
+    res.setHeader('Content-Disposition', 'attachment; filename=student_' + req.params.id + '.csv');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Descrption', 'File Transfer');
+    var output = 'Assignment,Section,Grade\n';
+    for(i in rows) {
+      output += rows[i].name + ',' + rows[i].sname + ',' + (rows[i].grade ? rows[i].grade : (rows[i].id ? 'Not Graded' : 'Not Submitted')) + '\n';
+    }
+    res.send(output);
+  });
+});
+
 router.get('/student/:id', function(req, res) {
   connection.query("SELECT `students`.`fname`,`students`.`lname` FROM `students` WHERE `id` = ? AND SECTIONS_WITH_STUDENT(?, `students`.`id`) > 0", [req.params.id, req.user.id], function(err, result) {
     if(err) {
@@ -571,16 +683,18 @@ router.get('/student/:id', function(req, res) {
                           `assignments`.`due`,\
                           `sections`.`name` AS `sname`,\
                           `sections`.`id` AS `sid` \
-                        FROM `sections`,(`assignments` LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = ?) \
-                        WHERE \
-                          `sections`.`id` = `assignments`.`section_id` AND \
-                          `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
+                        FROM \
+                          `assignments` \
+                          JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+                          JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` \
+                          LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = `enrollment`.`student_id` \
+                        WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
         if(err) {
           render('notFound', {page: 2, type: 'student', error: 'An unexpected error has occurred.'}, res);
           if(debug) throw err;
         } else {
           var name = result[0].fname + ' ' + result[0].lname;
-          render('student', {title: name, name: name, rows: rows}, res);
+          render('student', {title: name, name: name, rows: rows, id: req.params.id}, res);
         }
       });
     }
