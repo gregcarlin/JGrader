@@ -5,23 +5,21 @@ require('../common');
 var router = express.Router();
 
 var render = function(page, options, res) {
+  options.page = 0;
   switch(page) {
     case 'notFound':
-      // page must be set already
-      options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
+      options.title = 'Section Not Found';
+      options.type = 'section';
       break;
     case 'sectionList':
-      options.page = 0;
       options.title = 'Your Sections';
       options.js = ['tooltip', 'teacher/sectionList'];
       options.css = ['font-awesome.min'];
       break;
     case 'sectionCreate':
-      options.page = 0;
       options.title = 'Create a Section';
       break;
     case 'section':
-      options.page = 0;
       // title must be set already
       options.js = ['tooltip', 'teacher/edit'];
       options.css = ['font-awesome.min'];
@@ -83,7 +81,7 @@ router.get('/:id', function(req, res) {
   if(sectionID && sectionID.length > 0) {
     connection.query("SELECT * FROM `sections` WHERE `id` = ? AND `teacher_id` = ?", [sectionID, req.user.id], function(err, rows) {
       if(err || rows.length <= 0) {
-        render('notFound', {page: 0, type: 'section'}, res);
+        render('notFound', {}, res);
       } else {
         connection.query("SELECT \
                             `assignments`.`id` AS `aid`,\
@@ -101,7 +99,7 @@ router.get('/:id', function(req, res) {
                             `assignments`.`due` DESC, \
                             `assignments`.`name` ASC", [sectionID, sectionID], function(err, results) {
           if(err) {
-            render('notFound', {page: 0, error: 'Error getting section', type: 'section'}, res);
+            render('notFound', {error: 'Error getting section'}, res);
             throw err;
           } else {
             render('section', {title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, sectionCode: rows[0].code, rows: results}, res);
@@ -110,7 +108,7 @@ router.get('/:id', function(req, res) {
       }
     });
   } else {
-    render('notFound', {page: 0, type: 'section'}, res);
+    render('notFound', {}, res);
   }
 });
 
@@ -132,14 +130,14 @@ router.post('/:id/updatename/:name', function(req, res) {
 router.get('/:id/delete', function(req, res) {
   connection.query('DELETE FROM `sections` WHERE `id` = ? AND `teacher_id` = ? LIMIT 1', [req.params.id, req.user.id], function(err, rows) {
     if(err) {
-      render('notFound', {page: 0, error: 'Unable to delete class. Please go back and try again.'}, res);
+      render('notFound', {error: 'Unable to delete class. Please go back and try again.'}, res);
       throw err;
     } else if(rows.affectedRows <= 0) {
-      render('notFound', {page: 0, error: 'You are not allowed to delete that class.'}, res);
+      render('notFound', {error: 'You are not allowed to delete that class.'}, res);
     } else {
       connection.query("DELETE FROM `enrollment` WHERE `section_id` = ?; DELETE `assignments`,`submissions`,`files` FROM `assignments` LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` LEFT JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `assignments`.`section_id` = ?", [req.params.id, req.params.id], function(err) {
         if(err) {
-          render('notFound', {page: 0, error: 'Unable to delete class. Please go back and try again.'}, res);
+          render('notFound', {error: 'Unable to delete class. Please go back and try again.'}, res);
           throw err;
         } else {
           res.redirect('/teacher/section');

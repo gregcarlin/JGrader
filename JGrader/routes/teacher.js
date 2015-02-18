@@ -11,17 +11,15 @@ var submission = require('./teacher/submission');
 var student    = require('./teacher/student');
 
 var render = function(page, options, res) {
+  options.page = -1;
   switch(page) {
     case 'notFound':
-      // page must be set already
       options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
       break;
     case 'settings':
-      options.page = -1;
       options.title = 'Settings';
       break;
     case 'feedback':
-      options.page = -1;
       options.title = 'Feedback';
       options.css = ['feedback'];
       break;
@@ -113,7 +111,7 @@ router.use('/student', student);
 router.get('/settings', function(req, res) {
   connection.query("SELECT `fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, rows) {
     if(err) {
-      render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
+      render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
       throw err;
     } else {
       render('settings', {fname: rows[0].fname, lname: rows[0].lname}, res);
@@ -131,7 +129,7 @@ router.post('/settings', function(req, res) {
       if(isSet(oldPass) && isSet(newPass)) {
         connection.query("UPDATE `teachers` SET `fname` = ?, `lname` = ?, `pass` = AES_ENCRYPT(?, ?) WHERE `id` = ? AND `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, req.user.id, oldPass, creds.aes_key], function(err, rows) {
           if(err) {
-            render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
+            render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
             throw err;
           } else if(rows.affectedRows <= 0) {
             render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
@@ -145,7 +143,7 @@ router.post('/settings', function(req, res) {
     } else {
       connection.query("UPDATE `teachers` SET `fname` = ?, `lname` = ? WHERE `id` = ?", [fname, lname, req.user.id], function(err) {
         if(err) {
-          render('notFound', {page: -1, type: 'settings', error: 'An unexpected error has occurred.'}, res);
+          render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
           throw err;
         } else {
           render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);

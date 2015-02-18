@@ -6,26 +6,24 @@ var router = express.Router();
 var strftime = require('strftime');
 
 var render = function(page, options, res) {
+  options.page = 1;
   switch(page) {
     case 'notFound':
-      // page must be set already
-      options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
+      options.title = 'Assignment Not Found';
+      options.type = 'assignment';
       break;
     case 'assignmentList':
-      options.page = 1;
       options.title = 'Your Assignments';
       options.js = ['tooltip', 'teacher/assignmentList'];
       options.css = ['font-awesome.min'];
       options.strftime = strftime;
       break;
     case 'assignmentCreate':
-      options.page = 1;
       options.title = 'Create an Assignment';
       options.js = ['teacher/jquery.datetimepicker', 'teacher/datepicker'];
       options.css = ['jquery.datetimepicker'];
       break;
     case 'assignment':
-      options.page = 1;
       // title must be set already
       options.js = ['tooltip', 'strftime-min', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker'];
       options.css = ['jquery.datetimepicker', 'font-awesome.min'];
@@ -161,10 +159,10 @@ router.get('/:id', function(req, res) {
                       `sections`.`teacher_id` = ? AND \
                       `assignments`.`id` = ?", [req.user.id, req.params.id], function(err, rows) {
     if(err) {
-      render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
       throw err;
     } else if(rows.length <= 0) {
-      render('notFound', {page: 1, type: 'assignment'}, res);
+      render('notFound', {}, res);
     } else {
       connection.query("SELECT \
                           `students`.`id`,\
@@ -233,14 +231,14 @@ router.post('/:id/updatedue/:due', function(req, res) {
 router.get('/:id/delete', function(req, res) {
   connection.query('DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1', [req.params.id, req.user.id], function(err, rows) {
     if(err) {
-      render('notFound', {page: 0, error: 'Unable to delete assignment. Please go back and try again.'}, res);
+      render('notFound', {error: 'Unable to delete assignment. Please go back and try again.'}, res);
       throw err;
     } else if(rows.affectedRows <= 0) {
-      render('notFound', {page: 0, error: 'You are not allowed to delete that assignment.'}, res);
+      render('notFound', {error: 'You are not allowed to delete that assignment.'}, res);
     } else {
       connection.query("DELETE FROM `submissions` JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `submissions`.`assignment_id` = ?", [req.params.id], function(err) {
         if(err) {
-          render('notFound', {page: 0, error: 'Unable to delete assignment. Please go back and try again.'}, res);
+          render('notFound', {error: 'Unable to delete assignment. Please go back and try again.'}, res);
           throw err;
         }
         res.redirect('/teacher/assignment');

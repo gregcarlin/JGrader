@@ -6,13 +6,13 @@ var router = express.Router();
 var strftime = require('strftime');
 
 var render = function(page, options, res) {
+  options.page = 1;
   switch(page) {
     case 'notFound':
-      // page must be set already
-      options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
+      options.title = 'Submission Not Found';
+      options.type = 'submission';
       break;
     case 'submission':
-      options.page = 1;
       // title must be set already
       options.js = ['prettify', 'teacher/submission', 'tooltip', 'teacher/edit'];
       options.css = ['prettify', 'font-awesome.min'];
@@ -42,10 +42,10 @@ router.get('/:id', function(req, res) {
                       `assignments`.`section_id` = `sections`.`id` AND \
                       `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, subData) {
     if(err) {
-      render('notFound', {page: 1, type: 'submission', error: 'An unexpected error has occurred.'}, res);
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
       throw err;
     } else if(subData.length <= 0) {
-      render('notFound', {page: 1, type: 'submission'}, res);
+      render('notFound', {}, res);
     } else {
       connection.query("SELECT `id`,`name`,`contents` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
         if(err) {
