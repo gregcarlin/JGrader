@@ -210,12 +210,19 @@ router.post('/section/:id/updatename/:name', function(req, res) {
 router.get('/section/:id/delete', function(req, res) {
   connection.query('DELETE FROM `sections` WHERE `id` = ? AND `teacher_id` = ? LIMIT 1', [req.params.id, req.user.id], function(err, rows) {
     if(err) {
-      render('notFound', {page: 0, error: 'Unable to delete section. Please go back and try again.'}, res);
+      render('notFound', {page: 0, error: 'Unable to delete class. Please go back and try again.'}, res);
       throw err;
     } else if(rows.affectedRows <= 0) {
-      render('notFound', {page: 0, error: 'You are not allowed to delete that section.'}, res);
+      render('notFound', {page: 0, error: 'You are not allowed to delete that class.'}, res);
     } else {
-      res.redirect('/teacher/section');
+      connection.query("DELETE FROM `enrollment` WHERE `section_id` = ?; DELETE `assignments`,`submissions`,`files` FROM `assignments` LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` LEFT JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `assignments`.`section_id` = ?", [req.params.id, req.params.id], function(err) {
+        if(err) {
+          render('notFound', {page: 0, error: 'Unable to delete class. Please go back and try again.'}, res);
+          throw err;
+        } else {
+          res.redirect('/teacher/section');
+        }
+      });
     }
   });
 });
@@ -453,7 +460,13 @@ router.get('/assignment/:id/delete', function(req, res) {
     } else if(rows.affectedRows <= 0) {
       render('notFound', {page: 0, error: 'You are not allowed to delete that assignment.'}, res);
     } else {
-      res.redirect('/teacher/assignment');
+      connection.query("DELETE FROM `submissions` JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `submissions`.`assignment_id` = ?", [req.params.id], function(err) {
+        if(err) {
+          render('notFound', {page: 0, error: 'Unable to delete assignment. Please go back and try again.'}, res);
+          throw err;
+        }
+        res.redirect('/teacher/assignment');
+      });
     }
   });
 });
