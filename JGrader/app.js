@@ -41,7 +41,7 @@ app.use(useragent.express());
 app.use(function(req, res, next) {
   var ua = req.useragent;
   ua.isiOS = ua.isiPad || ua.isiPod || ua.isiPhone;
-  ua.majorVersion = parseInt(ua.Version.substring(0, ua.Version.indexOf('.')));
+  ua.majorVersion = ua.Version ? parseInt(ua.Version.substring(0, ua.Version.indexOf('.'))) : Number.NaN;
 
   var nosupport = ua.isOpera && (ua.isAndroid || ua.isiOS);
   nosupport = nosupport || (ua.isSafari && ua.isWindows);
