@@ -260,8 +260,10 @@ router.get('/section/:id', function(req, res) {
 
 // drop a class
 router.get('/section/:id/delete', function(req, res) {
-  // todo drop class and redirect to /student/section
-  res.send('hello there');
+  connection.query("DELETE FROM `enrollment` WHERE `section_id` = ? and `student_id` = ? LIMIT 1; DELETE `submissions`,`files` FROM `submissions` JOIN `files` ON `submissions`.`id` = `files`.`submission_id` WHERE `student_id` = ?", [req.params.id, req.user.id, req.user.id], function(err) {
+    if(err) throw err;
+    res.redirect('/student/section');
+  });
 });
 
 // Joins Class
