@@ -9,13 +9,13 @@
     var submitted = new Date(subData.submitted);
     var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
     if(subData.submitted > subData.due) {
-      submittedStr += ' <span class="glyphicon glyphicon-time" data-toggle="tooltip" data-placement="right" title="Late"></span>';
+      submittedStr += ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="right" title="Late"></span>';
     }
   %>
   <dt>Submitted:</dt>
     <dd><%- submittedStr %></dd>
   <dt>Grade:</dt>
-    <dd><span class="edit" data-key="updategrade" data-default="Not graded."><span><%= subData.grade ? subData.grade : '' %></span><input type="text" class="form-control" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
+    <dd><span class="edit" data-key="updategrade" data-default="Not graded."><span><%= subData.grade ? subData.grade : '' %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
 </dl>
 <div role="tabpanel">
   <ul class="nav nav-tabs" role="tablist">
@@ -23,7 +23,7 @@
       <% fileData[i].shortName = i; %>
       <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab"><%= fileData[i].name %></a></li>
     <% } %>
-    <li role="presentation" id="execute"><span class="glyphicon glyphicon-play-circle glyph-button" data-toggle="tooltip" data-placement="left" title="Run"></span></li>
+    <li role="presentation" id="execute"><span class="fa fa-play-circle-o" data-toggle="tooltip" data-placement="left" title="Run"></span></li>
   </ul>
 </div>
 <div class="tab-content">
@@ -35,7 +35,7 @@
 </div>
 <div>
   <span>Input</span>
-  <span class="glyphicon glyphicon-expand" id="input-expand"></span>
+  <span class="fa fa-caret-square-o-right" id="input-expand"></span>
   <textarea class="form-control put-text" id="input-text"></textarea>
   <span id="output-tag">Output</span>
   <pre class="form-control put-text" id="output-text" readonly></pre>

@@ -1,6 +1,22 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
- 
+<html>
+<head>
+<title>Error</title>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-59832097-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</head> 
+<body>
 <h1><%= message %></h1>
 <h2><%= error.status %></h2>
 <pre><%= error.stack %></pre>
+</body>
+</html>
+

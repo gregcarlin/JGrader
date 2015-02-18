@@ -8,6 +8,15 @@ if (typeof String.prototype.startsWith != 'function') {
   };
 }
 
+var loading = false;
+
+// warn users that try to close the page when an edit update is pending
+window.onbeforeunload = function() {
+  if(loading) {
+    return "Edits are currently pending. Leaving now may cause changes to be lost.";
+  }
+};
+
 $('.edit').each(function(index, element) {
 
   var span = $('span', element);
@@ -38,13 +47,18 @@ $('.edit').each(function(index, element) {
 
   // do stuff when done editing
   $('input', element).blur(function() {
+    loading = true;
+
     var input = $(this);
     var par   = input.parent();
     var span  = $('span', par);
     var icon  = par.next();
 
     input.hide();
-    // todo show loading thing
+
+    var spinner = $('<span class="fa fa-spinner fa-spin"></span>');
+    spinner.insertBefore(span);
+
     var text = input.val();
     if(par.attr('data-default') != 'none' || text.length > 0) {
       var url = document.URL;
@@ -62,10 +76,13 @@ $('.edit').each(function(index, element) {
         } else {
           alert('An error has occurred, please reload the page and try again.');
         }
+
+        spinner.remove();
+        span.show();
+        icon.show();
+        loading = false;
       });
     }
-    span.show();
-    icon.show();
   });
 
   // blur when user hits enter

@@ -3,13 +3,13 @@
 
 $('#input-expand').click(function() {
   var inputExpand = $('#input-expand');
-  inputExpand.toggleClass('glyphicon-expand');
-  inputExpand.toggleClass('glyphicon-collapse-down');
+  inputExpand.toggleClass('fa-caret-square-o-right');
+  inputExpand.toggleClass('fa-caret-square-o-down');
   $('#input-text').toggle();
 });
 
 $('#execute').click(function() {
-  $('#output-text').html('<span class="glyphicon glyphicon-refresh"></span>'); // todo make this spin so it actually looks like a loading thing
+  $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>'); // todo make this spin so it actually looks like a loading thing
   var fileID = $('.tab-content .active').attr('id');
   var url = document.URL;
   if(url.charAt(url.length-1) != '/') url += '/';
