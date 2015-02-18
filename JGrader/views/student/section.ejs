@@ -3,6 +3,7 @@
 
 <div class="page-header">
   <h1><%= name %></h1>
+  <a onclick="confirmDelete(<%= id %>)" class="right plus-button"><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="left" title="Drop"></span></a>
 </div>
 
 <div class="table-responsive">
@@ -30,4 +31,22 @@
        } %>
     </tbody>
   </table>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to drop this class? All associated data, including submitted assignments, will be lost.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger">Drop</button>
+      </div>
+    </div>
+  </div>
 </div>

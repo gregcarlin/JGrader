@@ -18,12 +18,6 @@ var student = require('./routes/student');
 
 var app = express();
 
-// suppress uncaught errors, from http://stackoverflow.com/questions/17245881/node-js-econnreset/17637900
-process.on('uncaughtException', function (err) {
-  console.error(err.stack);
-  console.log("Node NOT Exiting...");
-});
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -44,6 +38,20 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(useragent.express());
 
+app.use(function(req, res, next) {
+  var ua = req.useragent;
+  ua.isiOS = ua.isiPad || ua.isiPod || ua.isiPhone;
+  ua.majorVersion = parseInt(ua.Version.substring(0, ua.Version.indexOf('.')));
+
+  var nosupport = ua.isOpera && (ua.isAndroid || ua.isiOS);
+  nosupport = nosupport || (ua.isSafari && ua.isWindows);
+  nosupport = nosupport || (isNaN(ua.majorVersion) || (ua.isIE && ua.majorVersion <= 8));
+
+  res.locals.nosupport = nosupport;
+
+  next();
+});
+
 app.use('/', index);
 app.use('/sign-in', signIn);
 app.use('/sign-up', signUp);
@@ -52,9 +60,9 @@ app.use('/student', student);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
 
 // error handlers
@@ -62,23 +70,23 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
     });
+  });
 }
 
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
+  res.status(err.status || 500);
+  res.render('error', {
+    message: err.message,
+    error: {}
+  });
 });
 
 

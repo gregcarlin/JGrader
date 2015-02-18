@@ -2,12 +2,12 @@
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
 <div class="page-header">
-  <h1><span class="edit" data-key="updatename" data-default="none" id="sec-edit"><span><%= sectionName %></span><input type="text" class="form-control" /></span><span class="glyphicon glyphicon-edit glyph-button" data-toggle="tooltip" data-placement="bottom" title="Edit"></span>'s Assignments</h1>
-  <a href="/teacher/assignment/create/<%= sectionID %>" class="right plus-button glyph-button"><span class="glyphicon glyphicon-plus-sign" data-toggle="tooltip" data-placement="left" title="New Assignment"></span></a>
+  <h1><span class="edit" data-key="updatename" data-default="none" id="sec-edit"><span><%= sectionName %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil" data-toggle="tooltip" data-placement="bottom" title="Edit"></span>'s Assignments</h1>
+  <a href="/teacher/assignment/create/<%= sectionID %>" class="right plus-button"><span class="fa fa-plus-circle" data-toggle="tooltip" data-placement="left" title="New Assignment"></span></a>
 </div>
 <dl class="description">
   <dt>Section Code:</dt>
-  <dd><%= sectionCode %><span class="glyphicon glyphicon-question-sign glyph-button help" data-toggle="tooltip" data-placement="right" title="Give this to your students so they can join the section."></span></dd>
+  <dd><%= sectionCode %><span class="fa fa-question-circle help" data-toggle="tooltip" data-placement="right" title="Give this to your students so they can join the section."></span></dd>
 </dl>
 <div class="table-responsive">
   <table class="table table-striped">

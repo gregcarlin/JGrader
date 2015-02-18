@@ -17,19 +17,8 @@ connection = mysql.createPool({
   database           : creds.mysql_db,
   user               : creds.mysql_user,
   password           : creds.mysql_pass,
-  multipleStatements : true,
-  debug              : true
+  multipleStatements : true
 });
-
-connection.on('error', function(err) {
-  console.log("MySQL ERROR");
-  console.log("CODE: " + err.code);
-  console.log("STACK:");
-  console.log(err.stack);
-});
-
-// todo set to false before release
-debug = true;
 
 process.on('SIGINT', function() { // on ^C
   connection.end(function(err) { // close mysql connection
