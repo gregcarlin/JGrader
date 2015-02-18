@@ -6,19 +6,18 @@ var router = express.Router();
 var strftime = require('strftime');
 
 var render = function(page, options, res) {
+  options.page = 2;
   switch(page) {
     case 'notFound':
-      // page must be set already
-      options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
+      options.title = 'Student Not Found';
+      options.type = 'student';
       break;
     case 'studentList':
-      options.page = 2;
       options.title = 'Your Students';
       options.js = ['tooltip'];
       options.css = ['font-awesome.min'];
       break;
     case 'student':
-      options.page = 2;
       // title must be set already
       options.js = ['tooltip'];
       options.css = ['font-awesome.min'];
@@ -98,10 +97,10 @@ router.get('/:id.csv', function(req, res) {
 router.get('/:id', function(req, res) {
   connection.query("SELECT `students`.`fname`,`students`.`lname` FROM `students` WHERE `id` = ? AND SECTIONS_WITH_STUDENT(?, `students`.`id`) > 0", [req.params.id, req.user.id], function(err, result) {
     if(err) {
-      render('notFound', {page: 2, type: 'student', error: 'An unexpected error has occurred.'}, res);
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
       throw err;
     } else if(result.length <= 0) {
-      render('notFound', {page: 2, type: 'student'}, res);
+      render('notFound', {}, res);
     } else {
       connection.query("SELECT \
                           `submissions`.`id`,\
@@ -118,7 +117,7 @@ router.get('/:id', function(req, res) {
                           LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = `enrollment`.`student_id` \
                         WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
         if(err) {
-          render('notFound', {page: 2, type: 'student', error: 'An unexpected error has occurred.'}, res);
+          render('notFound', {error: 'An unexpected error has occurred.'}, res);
           throw err;
         } else {
           var name = result[0].fname + ' ' + result[0].lname;

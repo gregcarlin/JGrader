@@ -5,25 +5,23 @@ require('../common');
 var router = express.Router();
 
 var render = function(page, options, res) {
+  options.page = 0;
   switch(page) {
     case 'notFound':
-      // page must be set already
-      options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
+      options.title = 'Section Not Found';
+      options.type = 'section';
       break;
     case 'sectionList':
-      options.page = 0;
       options.title = 'Your Sections';
       options.js = ['tooltip', 'student/sectionList'];
       options.css = ['font-awesome.min'];
       break;
     case 'section':
-      options.page = 0;
       // title should already be set
       options.js = ['tooltip', 'student/sectionList'];
       options.css = ['font-awesome.min'];
       break;
     case 'joinSection':
-      options.page = 0;
       options.title = 'Join a Section';
       break;
   }
@@ -41,7 +39,7 @@ var findSectionInfo = function(id, res, finish) {
   if(id){
     connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`sections`.`id` FROM `enrollment`,`sections`,`teachers` WHERE `enrollment`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = `teachers`.`id` AND `enrollment`.`student_id` = ?", [id], function(err, rows) {
       if(err) {
-        render('notFound', {page: 1, type: 'section', error: 'An unexpected error has occurred.'}, res);
+        render('notFound', {error: 'An unexpected error has occurred.'}, res);
         throw err;
       } else {
         finish(rows);
@@ -86,14 +84,14 @@ router.get('/:id', function(req, res) {
   var sectionID = req.params.id;
   connection.query("SELECT `sections`.`name` FROM `sections`,`enrollment` WHERE `sections`.`id` = ? AND `sections`.`id` = `enrollment`.`section_id` AND `enrollment`.`student_id` = ?", [sectionID, req.user.id], function(err, result) {
     if(err) {
-      render('notFound', {page: 0, type: 'section', error: 'An unexpected error has occurred.'}, res);
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
       throw err;
     } else if(result.length <= 0) {
-      render('notFound', {page: 0, type: 'section'}, res);
+      render('notFound', {}, res);
     } else {
       connection.query("SELECT `id`,`name`,`description`,`due` FROM `assignments` WHERE `section_id` = ?", [sectionID], function(err, rows) {
         if(err) {
-          render('notFound', {page: 0, type: 'section', error: 'An unexpected error has occurred.'}, res);
+          render('notFound', {error: 'An unexpected error has occurred.'}, res);
           throw err;
         } else {
           render('section', {name: result[0].name, rows: rows, id: sectionID}, res);

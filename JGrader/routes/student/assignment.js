@@ -6,23 +6,21 @@ var router = express.Router();
 var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
 
 var render = function(page, options, res) {
+  options.page = 1;
   switch(page) {
     case 'notFound':
-      // page must be set already
-      options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
+      options.title = 'Assignment Not Found';
+      options.type = 'assignment';
       break;
     case 'assignmentList':
-      options.page = 1;
       options.title = 'Your Assignments';
       break;
     case 'assignment':
-      options.page = 1;
       // title should already be set
       options.js = ['student/dropzone', 'student/studentSubmit'];
       options.css = ['student/submit', 'font-awesome.min'];
       break;
     case 'assignmentComplete':
-      options.page = 1;
       // title should already be set
       options.js = ['prettify', 'student/studentSubmitted'];
       options.css = ['prettify', 'font-awesome.min'];
@@ -60,10 +58,10 @@ router.get('/:id', function(req, res) {
                       AND `enrollment`.`student_id` = ? \
                       AND `assignments`.`id` = ?", [req.user.id, assignmentID], function(err, rows) {
       if(err) {
-        render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+        render('notFound', {error: 'An unexpected error has occurred.'}, res);
         throw err;
       } else if(rows.length <= 0) {
-        render('notFound', {page: 1, type: 'assignment'}, res);
+        render('notFound', {}, res);
       } else {
         connection.query("SELECT `files`.`name`, `files`.`contents` \
                           FROM `files`, `students`, `assignments`, `submissions` \
@@ -72,7 +70,7 @@ router.get('/:id', function(req, res) {
                           AND `files`.`submission_id`= `submissions`.`id` \
                           AND  `students`.`id` = ? AND `assignments`.`id` = ?", [req.user.id, assignmentID], function(err, fileData){
           if(err) {
-            render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+            render('notFound', {error: 'An unexpected error has occurred.'}, res);
             throw err;
           } else if(fileData.length == 0) {
             render('assignment', {title: rows[0].name, rows: rows}, res);
@@ -114,12 +112,12 @@ router.post('/:id/submit', function(req, res) {
           if(rows.length == 0) {
             connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, rows) {
               if(err) {
-                render('notFound', {page: 1, type: 'assignment', error: 'An unexpected error has occurred.'}, res);
+                render('notFound', {error: 'An unexpected error has occurred.'}, res);
                 throw err;
               } else {
                 submitFiles(0, req.files, req.user.id, assignmentID, function(err, stderr) {
                   if(err) {
-                    render('notFound', {page: 1, type: 'assignment', error: 'Compilation has failed'}, res);
+                    render('notFound', {error: 'Compilation has failed'}, res);
                     throw err;
                   } if(stderr) {
                     console.log(stderr);
@@ -135,7 +133,7 @@ router.post('/:id/submit', function(req, res) {
             // Todo: block submission or something
             submitFiles(0, req.files, req.user.id, assignmentID, function(err) {
               if(err) {
-                render('notFound', {page: 1, type: 'assignment', error: 'Compilation has failed'}, res);
+                render('notFound', {error: 'Compilation has failed'}, res);
                 throw err;
               } else {
                 res.redirect('/student/assignment/' + req.params.id);
