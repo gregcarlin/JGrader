@@ -38,6 +38,20 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(useragent.express());
 
+app.use(function(req, res, next) {
+  var ua = req.useragent;
+  ua.isiOS = ua.isiPad || ua.isiPod || ua.isiPhone;
+  ua.majorVersion = parseInt(ua.Version.substring(0, ua.Version.indexOf('.')));
+
+  var nosupport = ua.isOpera && (ua.isAndroid || ua.isiOS);
+  nosupport = nosupport || (ua.isSafari && ua.isWindows);
+  nosupport = nosupport || (isNaN(ua.majorVersion) || (ua.isIE && ua.majorVersion <= 8));
+
+  res.locals.nosupport = nosupport;
+
+  next();
+});
+
 app.use('/', index);
 app.use('/sign-in', signIn);
 app.use('/sign-up', signUp);
