@@ -27,6 +27,12 @@ form {
 em {
   font-style: italic;
 }
+a {
+  color: #FFF;
+}
+a:hover {
+  text-decoration: underline;
+}
 .page-container {
   margin-top: 75px;
   height: calc(100% - 75px);
@@ -84,6 +90,7 @@ em {
 }
 .nav .right a:hover {
   color: #EEE;
+  text-decoration: none;
 }
 
 /* links in nav bar */
@@ -248,3 +255,8 @@ em {
   display: inline-block;
   text-align: center;
 }
+#learn .row-full {
+  width: 100%;
+  text-align: center;
+}
+
