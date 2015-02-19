@@ -44,15 +44,15 @@
         <% if(typeof error != 'undefined') { %>
           <div class="alert alert-danger" role="alert"><%= error %></div>
         <% } %>
-        <input type="text" class="form-control" name="fname" placeholder="First Name" required autofocus<%- typeof fname == 'undefined' ? '' : ' value="'+fname+'"' %>>
-        <input type="text" class="form-control" name="lname" placeholder="Last Name" required<%- typeof lname == 'undefined' ? '' : ' value="'+lname+'"' %>>
-      	<input type="email" class="form-control" name="email" placeholder="Email" required<%- typeof email == 'undefined' ? '' : ' value="'+email+'"' %>>
+        <input type="text" class="form-control" name="fname" placeholder="First Name" required autofocus<%- typeof user == 'undefined' ? '' : ' value="'+user.fname+'"' %>>
+        <input type="text" class="form-control" name="lname" placeholder="Last Name" required<%- typeof user == 'undefined' ? '' : ' value="'+user.lname+'"' %>>
+      	<input type="email" class="form-control" name="email" placeholder="Email" required<%- typeof user == 'undefined' ? '' : ' value="'+user.email+'"' %>>
       	<input type="password" class="form-control" name="password" placeholder="Password" required>
         <div class="iama">
           I am a...
-          <label><input type="radio" name="role" value="student" required<%- (typeof role == 'undefined' || role == 'student') ? ' checked' : '' %>>Student</label>
-          <label><input type="radio" name="role" value="teacher"<%- (typeof role != 'undefined' && role == 'teacher') ? ' checked' : '' %>>Teacher</label>
-          <label title="Teaching Assistant"><input type="radio" name="role" value="assistant"<%- (typeof role != 'undefined' && role == 'assistant') ? ' checked' : ''%>>T.A.</label>
+          <label><input type="radio" name="role" value="student" required<%- (typeof user == 'undefined' || user.role == 'student') ? ' checked' : '' %>>Student</label>
+          <label><input type="radio" name="role" value="teacher"<%- (typeof user != 'undefined' && user.role == 'teacher') ? ' checked' : '' %>>Teacher</label>
+          <label title="Teaching Assistant"><input type="radio" name="role" value="assistant"<%- (typeof user != 'undefined' && user.role == 'assistant') ? ' checked' : ''%>>T.A.</label>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Create account</button>
   		</form>
