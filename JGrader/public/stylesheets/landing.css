@@ -1,6 +1,6 @@
 /* Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. */
- 
+
 /* used for landing page (index.ejs) only */
 
 /* global stuff */
@@ -259,4 +259,3 @@ a:hover {
   width: 100%;
   text-align: center;
 }
-
