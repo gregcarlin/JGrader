@@ -204,6 +204,7 @@ a:hover {
 #home .right .button:hover {
   background-color: #A1BADA;
   cursor: pointer;
+  text-decoration: none;
 }
 
 /* stuff for learn 'page' */
