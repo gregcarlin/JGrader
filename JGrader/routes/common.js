@@ -60,13 +60,13 @@ logIn = function(hash, db, finish) {
   }
 }
 
-// attempt to authenticate user. calls finish(id) if id is found, otherwise redirects user to landing page.
+// attempt to authenticate user. calls finish(id) if id is found, otherwise redirects user to sign in page.
 var authenticate = function(hash, res, db, finish) {
   logIn(hash, db, function(id) {
     if(id) {
       finish(id);
     } else {
-      res.redirect('/');
+      res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.');
     }
   });
 }
