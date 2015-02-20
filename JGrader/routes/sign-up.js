@@ -7,7 +7,7 @@ var crypto  = require('crypto');
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('sign-up', {});
+  res.render('sign-up', {error: req.query.error});
 });
 
 // checks if a user exists in a given database. calls finish() iff user doesn't exist.

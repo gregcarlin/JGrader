@@ -7,7 +7,7 @@ var crypto  = require('crypto');
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('sign-in', {});
+  res.render('sign-in', {error: req.query.error});
 });
 
 // attempts to login to website with given database, calls finish() iff login information is incorrect
