@@ -4,6 +4,8 @@
 require('../common');
 var router = express.Router();
 var strftime = require('strftime');
+var Q = require('q');
+var query = Q.nbind(connection.query, connection);
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -35,31 +37,31 @@ var render = function(page, options, res) {
 
 // page that lists assignments
 router.get('/', function(req, res) {
-  connection.query("SELECT \
-                      `assignments`.`id` AS `aid`,\
-                      `assignments`.`name` AS `aname`,\
-                      `assignments`.`due`,\
-                      `sections`.`id` AS `sid`,\
-                      `sections`.`name` AS `sname`,\
-                      COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
-                      COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
-                      COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
-                    FROM `assignments` \
-                    JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
-                    LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
-                    LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                    WHERE `sections`.`teacher_id` = ? \
-                    GROUP BY `assignments`.`id` \
-                    ORDER BY \
-                      `assignments`.`due` DESC, \
-                      `assignments`.`name` ASC, \
-                      `sections`.`name` ASC", [req.user.id], function(err, rows) {
-    if(err) {
-      render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
-      throw err;
-    } else {
-      render('assignmentList', {rows: rows}, res);
-    }
+  query("SELECT \
+          `assignments`.`id` AS `aid`,\
+          `assignments`.`name` AS `aname`,\
+          `assignments`.`due`,\
+          `sections`.`id` AS `sid`,\
+          `sections`.`name` AS `sname`,\
+          COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
+          COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
+          COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
+        FROM `assignments` \
+        JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
+        LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
+        LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
+        WHERE `sections`.`teacher_id` = ? \
+        GROUP BY `assignments`.`id` \
+        ORDER BY \
+          `assignments`.`due` DESC, \
+          `assignments`.`name` ASC, \
+          `sections`.`name` ASC;", [req.user.id])
+  .then(function(rows) {
+    render('assignmentList', {rows: rows[0]}, res);
+  })
+  .catch(function(err) {
+    render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res); 
+    throw err;
   });
 });
 
