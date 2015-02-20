@@ -32,4 +32,5 @@ node_modules
 credentials.js
 bin
 *.log
+*.swp
 
