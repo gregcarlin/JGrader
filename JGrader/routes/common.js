@@ -20,6 +20,9 @@ connection = mysql.createPool({
   multipleStatements : true
 });
 
+Q = require('q');
+query = Q.nbind(connection.query, connection);
+
 process.on('SIGINT', function() { // on ^C
   connection.end(function(err) { // close mysql connection
     process.exit(); // also do normal exit stuff
