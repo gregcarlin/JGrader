@@ -122,8 +122,6 @@ router.post('/:id/run/:fileIndex', function(req, res) {
       }
     })
     .then(function(rows) {
-      //console.log('helo world');
-      //console.log(rows[0][0]);
       rows = rows[0][0];
       for(i in rows) {
         var name = rows[i].name;
@@ -133,20 +131,21 @@ router.post('/:id/run/:fileIndex', function(req, res) {
       }
       var fileIndex = req.params.fileIndex;
       if(fileIndex < rows.length) {
+        var defer = Q.defer();
         // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
-        var child = Q.nfcall(exec, 'cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */});
-        //child.stdin.write(req.body.stdin);
-        //child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
-        return Q.all([rows, child]);
+        var child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, defer.makeNodeResolver());
+        child.stdin.write(req.body.stdin);
+        child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
+        return Q.all([rows, defer.promise]);
       } else {
         var err = new Error('Invalid input');
         err.jsonCode = 1;
         return err;
       }
     })
-    .then(function(test) {
-      var rows = test[0];
-      res.json({code: 0, out: test[1][0], err: test[1][1]});
+    .then(function(arg) {
+      var rows = arg[0];
+      res.json({code: 0, out: arg[1][0], err: arg[1][1]});
       for(i in rows) {
         fs.unlinkSync('temp/' + rows[i].className + '.class');
       }
