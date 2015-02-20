@@ -25,11 +25,11 @@ var exists = function(user, db, res, finish) {
 
 router.post('/', function(req, res) {
   var user = {};
-  user.fname = req.param('fname');
-  user.lname = req.param('lname');
-  user.email = req.param('email');
-  user.pass  = req.param('password');
-  user.role  = req.param('role');
+  user.fname = req.params.fname;
+  user.lname = req.params.lname;
+  user.email = req.params.email;
+  user.pass  = req.params.password;
+  user.role  = req.params.role;
   if(user.fname && user.lname && user.email && user.pass && user.role && (user.role == 'student' || user.role == 'teacher' || user.role == 'assistant')) {
     exists(user, 'students', res, function() {
       exists(user, 'teachers', res, function() {

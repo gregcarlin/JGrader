@@ -113,10 +113,10 @@ router.post('/:id/run/:fileIndex', function(req, res) {
           fs.writeFileSync('temp/' + rows[i].className + '.class', rows[i].compiled);
         }
 
-        var fileIndex = req.param('fileIndex');
+        var fileIndex = req.params.fileIndex;
         if(fileIndex < rows.length) {
           // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
-          child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.param('fileIndex')].className, {timeout: 10000 /* 10 seconds */}, function(error, stdout, stderr) {
+          child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(error, stdout, stderr) {
             for(i in rows) {
               fs.unlinkSync('temp/' + rows[i].className + '.class');
             }

@@ -35,8 +35,8 @@ var login = function(db, email, pass, res, finish) {
 }
 
 router.post('/', function(req, res) {
-  var email = req.param('email');
-  var pass = req.param('password');
+  var email = req.params.email;
+  var pass = req.params.password;
   if(email && pass) {
     login('student', email, pass, res, function() {
       login('teacher', email, pass, res, function() {
