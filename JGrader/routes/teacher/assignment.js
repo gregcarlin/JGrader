@@ -245,6 +245,10 @@ router.get('/:id/delete', function(req, res) {
       });
     }
   });
+  /*query("DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1", [req.params.id, req.user.id]).
+  then(function(rows) {
+    
+  });*/
 });
 
 module.exports = router;
