@@ -99,6 +99,20 @@ ol.linenums li {
   padding-left: 15px;
   background-color: #f5f5f5;
 }
+ol.linenums li .fa {
+  position: relative;
+  left: -7px;
+  visibility: hidden;
+  color: #000;
+}
+ol.linenums li:hover .fa {
+  visibility: visible;
+  text-decoration: none;
+}
+ol.linenums li .fa:hover {
+  color: #428bca;
+  cursor: pointer;
+}
 .nav-tabs {
   border-bottom: none;
 }
