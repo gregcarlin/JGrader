@@ -16,7 +16,6 @@ var render = function(page, options, res) {
       // title must be set already
       options.js = ['prettify', 'teacher/submission', 'tooltip', 'teacher/edit'];
       options.css = ['prettify', 'font-awesome.min'];
-      options.onload = 'prettyPrint()';
       options.strftime = strftime;
       break;
   }
