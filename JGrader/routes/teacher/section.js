@@ -2,6 +2,7 @@
 // Copyright (c) 2015 JGrader. All rights reserved.
 
 require('../common');
+var strftime = require('strftime');
 var router = express.Router();
 
 var render = function(page, options, res) {
