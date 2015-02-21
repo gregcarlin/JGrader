@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "forever start --minUptime 1000ms --spinSleepTime 5000ms -f -a -l for.log -o out.log -e err.log -c nodemon ./bin/www --exitcrash"
+    "start": "forever start --minUptime 1000ms --spinSleepTime 5000ms -f -a -l for.log -o out.log -e err.log -c 'nodemon --harmony --exitcrash' ./bin/www"
   },
   "dependencies": {
     "body-parser": "~1.8.1",

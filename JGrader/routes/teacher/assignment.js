@@ -33,33 +33,62 @@ var render = function(page, options, res) {
   renderGenericTeacher(page, options, res);
 }
 
+// adapted from http://strongloop.com/strongblog/how-to-generators-node-js-yield-use-cases/
+function thunkify (nodefn, context) { // [1]
+  return function () { // [2]
+    var args = Array.prototype.slice.call(arguments)
+    return function (cb) { // [3]
+      args.push(cb)
+      nodefn.apply(context ? context : this, args)
+    }
+  }
+}
+
+// taken from http://strongloop.com/strongblog/how-to-generators-node-js-yield-use-cases/
+function run (genFn) {
+  var gen = genFn() // [1]
+  next() // [2]
+ 
+  function next (er, value) { // [3]
+    if (er) return gen.throw(er)
+    var continuable = gen.next(value) 
+
+    if (continuable.done) return // [4]
+    var cbFn = continuable.value // [5]
+    cbFn(next)
+  }
+}
+
+var query = thunkify(connection.query, connection);
+
 // page that lists assignments
 router.get('/', function(req, res) {
-  query("SELECT \
-           `assignments`.`id` AS `aid`,\
-           `assignments`.`name` AS `aname`,\
-           `assignments`.`due`,\
-           `sections`.`id` AS `sid`,\
-           `sections`.`name` AS `sname`,\
-           COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
-           COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
-           COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
-         FROM `assignments` \
-         JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
-         LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
-         LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
-         WHERE `sections`.`teacher_id` = ? \
-         GROUP BY `assignments`.`id` \
-         ORDER BY \
-           `assignments`.`due` DESC, \
-           `assignments`.`name` ASC, \
-           `sections`.`name` ASC", [req.user.id])
-  .then(function(rows) {
-    render('assignmentList', {rows: rows[0]}, res);
-  })
-  .catch(function(err) {
-    render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res); 
-    throw err;
+  run(function* () {
+    try {
+      var result = yield query("SELECT \
+                                  `assignments`.`id` AS `aid`,\
+                                  `assignments`.`name` AS `aname`,\
+                                  `assignments`.`due`,\
+                                  `sections`.`id` AS `sid`,\
+                                  `sections`.`name` AS `sname`,\
+                                  COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
+                                  COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
+                                  COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
+                                FROM `assignments` \
+                                JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
+                                LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
+                                LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                                WHERE `sections`.`teacher_id` = ? \
+                                GROUP BY `assignments`.`id` \
+                                ORDER BY \
+                                  `assignments`.`due` DESC, \
+                                  `assignments`.`name` ASC, \
+                                  `sections`.`name` ASC", [req.user.id]);
+      render('assignmentList', {rows: result}, res);
+    } catch (err) {
+      render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
+      throw err;
+    }
   });
 });
 
