@@ -61,7 +61,7 @@ router.get('/create', function(req, res) {
 
 // handles request to create a section
 router.post('/create', function(req, res) {
-  var name = req.params.name;
+  var name = req.body.name;
   if(!name || name.length <= 0) {
     render('sectionCreate', {error: 'Name cannot be blank.', name: name}, res);
   } else {

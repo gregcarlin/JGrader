@@ -56,11 +56,11 @@ router.get('/settings', function(req, res) {
 // in the MySql Database
 router.post('/settings', function(req, res) {
   // Takes in the users name and last name
-  var fname = req.params.fname;
-  var lname = req.params.lname;
+  var fname = req.body.fname;
+  var lname = req.body.lname;
   if(isSet(fname) && isSet(lname)) {
-    var oldPass = req.params.oldpass;
-    var newPass = req.params.newpass;
+    var oldPass = req.body.oldpass;
+    var newPass = req.body.newpass;
     if(isSet(oldPass) || isSet(newPass)) {
       if(isSet(oldPass) && isSet(newPass)) {
         connection.query("UPDATE `students` SET `fname` = ?, `lname` = ?, `pass` = AES_ENCRYPT(?, ?) WHERE `id` = ? AND `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, studentID, oldPass, creds.aes_key], function(err, rows) {
@@ -98,14 +98,14 @@ router.get('/feedback', function(req, res) {
 });
 
 router.post('/feedback', function(req, res) {
-  var type = req.params.type;
+  var type = req.body.type;
   if(!type || (type != 'question' && type != 'comment' && type != 'complaint' && type != 'other')) {
     type = 'other';
   }
   connection.query("SELECT `user`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.user.id], function(err, result) {
     if(err) throw err;
 
-    connection.query("INSERT INTO `feedback` VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)", [result[0].user, result[0].fname, result[0].lname, req.headers['user-agent'], type, req.params.feedback], function(err) {
+    connection.query("INSERT INTO `feedback` VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)", [result[0].user, result[0].fname, result[0].lname, req.headers['user-agent'], type, req.body.feedback], function(err) {
       if(err) throw err;
       render('feedback', {success: 'Thank you for your feedback!'}, res);
     });

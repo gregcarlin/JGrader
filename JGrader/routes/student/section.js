@@ -55,7 +55,7 @@ router.get('/joinSection', function(req, res) {
 
 // Joins Class
 router.post('/joinSection', function(req, res) {
-  var sectionID = req.params.sectionID;
+  var sectionID = req.body.sectionID;
   if(isSet(sectionID)) {
     connection.query("SELECT `id` FROM `sections` WHERE `code` = ?", [sectionID], function(err, rows) {
       if(err) {
