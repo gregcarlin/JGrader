@@ -48,10 +48,10 @@ function thunkify (nodefn, context) { // [1]
 function run (genFn) {
   var gen = genFn() // [1]
   next() // [2]
- 
+
   function next (er, value) { // [3]
     if (er) return gen.throw(er)
-    var continuable = gen.next(value) 
+    var continuable = gen.next(value)
 
     if (continuable.done) return // [4]
     var cbFn = continuable.value // [5]
@@ -276,8 +276,20 @@ router.get('/:id/delete', function(req, res) {
   });
   /*query("DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1", [req.params.id, req.user.id]).
   then(function(rows) {
-    
+
   });*/
+});
+
+router.get('/:id/testCase', function(req, res) {
+  connection.query('SELECT `test-cases`.`input`, `test-cases`.`output` \
+                    FROM `test-cases` \
+                    WHERE `test-cases`.`assignment_id` = ?', [req.params.id], function(err, rows) {
+    if(err) {
+      render('notFound', {error: 'Unable to select the test cases. Please go back and try again.'}, res);
+    } else {
+      render('testCaseList', {}, res);
+    }
+  });
 });
 
 module.exports = router;
