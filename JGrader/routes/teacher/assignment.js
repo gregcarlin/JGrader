@@ -113,10 +113,10 @@ router.get('/create/:preselect', assignmentCreate);
 
 // handles request to create an assignment
 router.post('/create', function(req, res) {
-  var name = req.params.name;
-  var desc = req.params.desc;
-  var due  = req.params.due;
-  var secs = req.params.section;
+  var name = req.body.name;
+  var desc = req.body.desc;
+  var due  = req.body.due;
+  var secs = req.body.section;
   if(!name || name.length <= 0 || !due || due.length <= 0) {
     render('assignmentCreate', {error: 'Name and due date must both be filled out.', name: name, desc: desc, due: due}, res);
   } else if(!secs || secs.length <= 0) {
