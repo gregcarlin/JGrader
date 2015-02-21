@@ -248,8 +248,20 @@ router.get('/:id/delete', function(req, res) {
   });
   /*query("DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1", [req.params.id, req.user.id]).
   then(function(rows) {
-    
+
   });*/
+});
+
+router.get('/:id/testCase', function(req, res) {
+  connection.query('SELECT `testcases`.`input`, `testcases`.`output` \
+                    FROM `testcases` \
+                    WHERE `testcases`.`assignment_id` = ?', [req.params.id], function(err, rows) {
+    if(err) {
+      render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
+    } else {
+      render('testCaseList', {}, res);
+    }
+  });
 });
 
 module.exports = router;
