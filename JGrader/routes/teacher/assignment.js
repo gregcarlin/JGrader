@@ -279,4 +279,14 @@ router.get('/:id/caseCreate', function(req, res) {
   render('caseCreate', {}, res);
 });
 
+router.post('/:id/caseCreate', function(req, res) {
+  connection.query('INSERT INTO `test-cases` VALUES (NULL, ?, ?, ?)', [req.params.id, req.body.input, req.body.output], function(err, rows) {
+    if(err) {
+      render('notFound', {error: 'The server was unable to create the test case. Please try again.'}, res);
+    } else {
+      res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+    }
+  });
+});
+
 module.exports = router;
