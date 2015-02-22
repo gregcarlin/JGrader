@@ -29,6 +29,10 @@ var render = function(page, options, res) {
       options.css = ['jquery.datetimepicker', 'font-awesome.min'];
       options.strftime = strftime;
       break;
+    case 'testCaseList':
+      options.js = ['tooltip'];
+      options.css = ['font-awesome.min'];
+      break;
   }
   renderGenericTeacher(page, options, res);
 }
@@ -253,15 +257,26 @@ router.get('/:id/delete', function(req, res) {
 });
 
 router.get('/:id/testCase', function(req, res) {
-  connection.query('SELECT `testcases`.`input`, `testcases`.`output` \
-                    FROM `testcases` \
-                    WHERE `testcases`.`assignment_id` = ?', [req.params.id], function(err, rows) {
+  connection.query('SELECT `assignments`.`name` \
+                    FROM `assignments` \
+                    WHERE `assignments`.`id` = ?', [req.params.id], function(err, assignment) {
     if(err) {
       render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
-    } else {
-      render('testCaseList', {}, res);
     }
+    connection.query('SELECT `test-cases`.`input`, `test-cases`.`output` \
+                      FROM `test-cases` \
+                      WHERE `test-cases`.`assignment_id` = ?', [req.params.id], function(err, testCases) {
+      if(err) {
+        render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
+      } else {
+        render('testCaseList', {testCases: testCases, assignment: assignment}, res);
+      }
+    });
   });
+});
+
+router.get('/:id/caseCreate', function(req, res) {
+  render('caseCreate', {}, res);
 });
 
 module.exports = router;
