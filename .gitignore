@@ -33,4 +33,5 @@ credentials.js
 bin
 *.log
 *.swp
+temp
 
