@@ -26,6 +26,7 @@
               <td><%= (+i + 1) %></td>
               <td><%= testCases[i].input %></td>
               <td><%= testCases[i].output %></td>
+              <td><td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="confirmDelete(<%= rows[i].id %>)"></span></td>
             </tr>
        <% }
          } %>
