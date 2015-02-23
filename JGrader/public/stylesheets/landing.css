@@ -34,7 +34,7 @@ a:hover {
   text-decoration: underline;
 }
 .page-container {
-  margin-top: 75px;
+  margin-top: 55px;
   height: calc(100% - 75px);
 }
 
@@ -54,9 +54,9 @@ a:hover {
 
 /* styling the nav bar */
 .nav {
-  height: 50px;
+  height: 55px;
   vertical-align: middle;
-  line-height: 75px;
+  line-height: 55px;
   position: fixed;
   min-width: 1237px;
   width: 100%;
@@ -121,7 +121,7 @@ a:hover {
 /* general 'page' stuff */
 .page {
   width: 100%;
-  height: 100%;
+  height: 102.75%;
 }
 .page .column {
   height: 100%;
