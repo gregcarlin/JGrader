@@ -123,6 +123,7 @@ router.post('/:id/submit', function(req, res) {
                     console.log(stderr);
                     res.send(stderr);
                   } else {
+                    console.log('success');
                     res.send("success");
                   }
                 });
@@ -136,7 +137,8 @@ router.post('/:id/submit', function(req, res) {
                 render('notFound', {error: 'Compilation has failed'}, res);
                 throw err;
               } else {
-                res.redirect('/student/assignment/' + req.params.id);
+                console.log('success 2');
+                //res.redirect('/student/assignment/' + req.params.id);
               }
             });
           }
@@ -196,29 +198,27 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
             console.log('stdout = ' + stdout);
             console.log('stderr = ' + stderr);
             console.log(files);
-            async.each(files, function(file, cb) {
-              var compilePath = file.path.substr(0, file.path.length-4) + 'class';
+            for(file in files) {
+              var compilePath = files[file].path.substr(0, files[file].path.length-4) + 'class';
               console.log('compilePath = ' + compilePath);
               async.parallel({
                   javaData: function(callback) {
-                    fs.readFile(file.path, callback);
+                    fs.readFile(files[file].path, callback);
                   },
                   classData: function(callback) {
                     fs.readFile(compilePath, callback);
                   }
                 }, function(err, data) {
-                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, file.originalname, data.javaData, data.classData], function(err, rows) {
+                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, data.javaData, data.classData], function(err, rows) {
                     if(err) throw err;
                     // Deletes files after submit
                     async.parallel([
-                        function(callback) { fs.unlink(file.path, callback) },
+                        function(callback) { fs.unlink(files[file].path, callback) },
                         function(callback) { fs.unlink(compilePath, callback) }
                       ]);
                   });
               });
-            }, function(err) {
-              finish(err ? err : stderr);
-            });
+            }
           });
         }
       });
