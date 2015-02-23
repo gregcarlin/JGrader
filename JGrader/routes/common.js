@@ -9,6 +9,8 @@ creds   = require('./credentials');
 fs   = require('fs'); // for file IO
 exec = require('child_process').exec; // for running bash commands
 
+async = require('async');
+
 mysql      = require('mysql');
 connection = mysql.createPool({
   connectionLimit    : 10,
@@ -19,34 +21,6 @@ connection = mysql.createPool({
   password           : creds.mysql_pass,
   multipleStatements : true
 });
-
-// adapted from http://strongloop.com/strongblog/how-to-generators-node-js-yield-use-cases/
-thunkify = function(nodefn, context) {
-  return function () {
-    var args = Array.prototype.slice.call(arguments)
-    return function (cb) {
-      args.push(cb)
-      nodefn.apply(context ? context : this, args)
-    }   
-  }
-}
-
-// taken from http://strongloop.com/strongblog/how-to-generators-node-js-yield-use-cases/
-run = function(genFn) {
-  var gen = genFn()
-  next()
-
-  function next (er, value) {
-    if (er) return gen.throw(er)
-    var continuable = gen.next(value) 
-
-    if (continuable.done) return
-    var cbFn = continuable.value
-    cbFn(next)
-  }
-}
-
-query = thunkify(connection.query, connection);
 
 process.on('SIGINT', function() { // on ^C
   connection.end(function(err) { // close mysql connection
