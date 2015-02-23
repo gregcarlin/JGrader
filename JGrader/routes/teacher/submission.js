@@ -100,6 +100,9 @@ router.post('/:id/run/:fileIndex', function(req, res) {
       mkdir('temp/', callback);
     },
     function(callback) {
+      mkdir('temp/' + req.params.id + '/', callback);
+    },
+    function(callback) {
       // security to ensure this teachers owns this submission and file
       connection.query("SELECT \
                           `files`.`id`,\
@@ -123,7 +126,7 @@ router.post('/:id/run/:fileIndex', function(req, res) {
           var name = row.name;
           row.className = name.substring(0, name.length - 5);
           // note: working directory seems to be one with app.js in it
-          fs.writeFile('temp/' + row.className + '.class', row.compiled, cb);
+          fs.writeFile('temp/' + req.params.id + '/' + row.className + '.class', row.compiled, cb);
         }, callback);
       }
     },
@@ -131,7 +134,7 @@ router.post('/:id/run/:fileIndex', function(req, res) {
       var fileIndex = req.params.fileIndex;
       if(fileIndex < rows.length) {
         // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
-        var child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds  */}, callback);
+        var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds  */}, callback);
         if(req.body.stdin) child.stdin.write(req.body.stdin);
         child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
       } else {
@@ -152,8 +155,9 @@ router.post('/:id/run/:fileIndex', function(req, res) {
         }
       } else {
         async.each(rows, function(row, cb) {
-          fs.unlink('temp/' + row.className + '.class', cb);
+          fs.unlink('temp/' + req.params.id + '/' + row.className + '.class', cb);
         });
+        fs.rmdir('temp/' + req.params.id + '/');
       }
   });
 });
