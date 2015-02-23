@@ -95,6 +95,7 @@ var mkdir = function(dir, callback) {
 };
 
 router.post('/:id/run/:fileIndex', function(req, res) {
+  var rows;
   async.waterfall([
     function(callback) {
       mkdir('temp/', callback);
@@ -114,7 +115,8 @@ router.post('/:id/run/:fileIndex', function(req, res) {
                           `files`.`submission_id` = `submissions`.`id` \
                         ORDER BY `files`.`id`", [req.params.id, req.user.id], callback);
     },
-    function(rows, fields, callback) {
+    function(results, fields, callback) {
+      rows = results;
       if(rows.length <= 0) {
         res.json({code: 2}); // invalid permissions
       } else {
@@ -123,26 +125,25 @@ router.post('/:id/run/:fileIndex', function(req, res) {
           row.className = name.substring(0, name.length - 5);
           // note: working directory seems to be one with app.js in it
           fs.writeFile('temp/' + row.className + '.class', row.compiled, cb);
-        }, function(err) {callback(err, rows)}); // kind of a hack to pass rows to the next function
+        }, callback);
       }
     },
-    function(rows, callback) {
+    function(callback) {
       var fileIndex = req.params.fileIndex;
       if(fileIndex < rows.length) {
         // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
-        var child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds  */}, function(err, stdout, stdin) {callback(err, rows, stdout, stdin)});
+        var child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds  */}, callback);
         if(req.body.stdin) child.stdin.write(req.body.stdin);
         child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
       } else {
         res.json({code: 1}); // invalid input
       }
     },
-    function(rows, stdout, stderr, callback) {
-      async.each(rows, function(row, cb) {
-        fs.unlink('temp/' + row.className + '.class', cb); 
-      }, function(err) {callback(err, stdout, stderr)});
+    function(stdout, stderr, callback) {
+      res.json({code: 0, out: stdout, err: stderr});
+      callback();
     }
-    ], function(err, stdout, stderr) {
+    ], function(err) {
       if(err) {
         if(err.killed) {
           res.json({code: 0, out: '', err: 'Code took too long to execute! There may be an infinite loop somewhere.'});
@@ -150,8 +151,11 @@ router.post('/:id/run/:fileIndex', function(req, res) {
           res.json({code: -1});
           throw err;
         }
+      } else {
+        async.each(rows, function(row, cb) {
+          fs.unlink('temp/' + row.className + '.class', cb);
+        });
       }
-      res.json({code: 0, out: stdout, err: stderr});
   });
 });
 
