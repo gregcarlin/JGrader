@@ -170,49 +170,55 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
             compileFiles = compileFiles + files[file].path + " ";
           }
 
+          console.log('compileFiles = ' + compileFiles);
           // Compiles the java
           exec("javac " + compileFiles, function (error, stdout, stderr) {
-            if(stderr){
-              for(file in files) {
-                var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
-                fs.readFile(files[file].path, function(err, javaData) {
-                  fs.readFile(compilePath, function (err, classData) {
-                    connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
-                      if(err){
-                        finish(err);
-                      }
-                      // Deletes files after submit
-                      fs.unlink(files[file].path, function() {
-                        fs.unlink(compilePath, function() {
-
-                        });
+            /*for(file in files) {
+              var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
+              fs.readFile(files[file].path, function(err, javaData) {
+                fs.readFile(compilePath, function (err, classData) {
+                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
+                    // Deletes files after submit
+                    fs.unlink(files[file].path, function() {
+                      fs.unlink(compilePath, function() {
+                        if(err) {
+                          finish(err);
+                        } else {
+                          finish(stderr);
+                        }
                       });
                     });
                   });
                 });
-              }
-              finish(null, stderr);
-            } else {
-              for(file in files) {
-                var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
-                fs.readFile(files[file].path, function(err, javaData) {
-                  fs.readFile(compilePath, function (err, classData) {
-                    connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
-                      if(err){
-                        finish(err);
-                      }
-                      // Deletes files after submit
-                      fs.unlink(files[file].path, function() {
-                        fs.unlink(compilePath, function() {
-
-                        });
-                      });
-                    });
+              });
+            }*/
+            if(error) throw error;
+            console.log('stdout = ' + stdout);
+            console.log('stderr = ' + stderr);
+            console.log(files);
+            async.each(files, function(file, cb) {
+              var compilePath = file.path.substr(0, file.path.length-4) + 'class';
+              console.log('compilePath = ' + compilePath);
+              async.parallel({
+                  javaData: function(callback) {
+                    fs.readFile(file.path, callback);
+                  },
+                  classData: function(callback) {
+                    fs.readFile(compilePath, callback);
+                  }
+                }, function(err, data) {
+                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, file.originalname, data.javaData, data.classData], function(err, rows) {
+                    if(err) throw err;
+                    // Deletes files after submit
+                    async.parallel([
+                        function(callback) { fs.unlink(file.path, callback) },
+                        function(callback) { fs.unlink(compilePath, callback) }
+                      ]);
                   });
-                });
-              }
-            }
-            finish(null);
+              });
+            }, function(err) {
+              finish(err ? err : stderr);
+            });
           });
         }
       });
