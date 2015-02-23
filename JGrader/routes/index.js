@@ -38,7 +38,7 @@ var tryRedirect = function(hash, res, db, finish) {
 }
 
 var gitUpdate = function(req, res) {
-  exec('git pull && npm install', {}, function(error, stdout, stderr) {
+  exec('git pull && npm install && forever restartall', {}, function(error, stdout, stderr) {
     res.json({stdout: stdout, stderr: stderr});
   });
 }
