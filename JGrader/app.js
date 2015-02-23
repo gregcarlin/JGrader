@@ -32,6 +32,9 @@ app.use(multer({
   dest: './uploads/',
   rename: function(fieldname,filename) {
     return filename;
+  },
+  changeDest: function(dest, req, res) {
+    return dest + '/' + req.user.id;
   }
 }));
 app.use(cookieParser());
