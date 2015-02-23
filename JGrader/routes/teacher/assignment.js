@@ -30,7 +30,7 @@ var render = function(page, options, res) {
       options.strftime = strftime;
       break;
     case 'testCaseList':
-      options.js = ['tooltip'];
+      options.js = ['tooltip', 'teacer/testCaseList'];
       options.css = ['font-awesome.min'];
       break;
   }
@@ -263,7 +263,7 @@ router.get('/:id/testCase', function(req, res) {
     if(err) {
       render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
     }
-    connection.query('SELECT `test-cases`.`input`, `test-cases`.`output` \
+    connection.query('SELECT `test-cases` \
                       FROM `test-cases` \
                       WHERE `test-cases`.`assignment_id` = ?', [req.params.id], function(err, testCases) {
       if(err) {
@@ -272,6 +272,17 @@ router.get('/:id/testCase', function(req, res) {
         render('testCaseList', {testCases: testCases, assignment: assignment}, res);
       }
     });
+  });
+});
+
+router.get('/:id/testCase/delete', function(req, res) {
+  connection.query('DELETE FROM `test-cases` \
+                    WHERE `assignment_id` = ?', [req.params.id], function(err, assignment) {
+    if(err) {
+      render('notFound', {error: 'The server was unable to delete the test case. Please try again.'}, res);
+    } else {
+      res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+    }
   });
 });
 
