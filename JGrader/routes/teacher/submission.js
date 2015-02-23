@@ -4,7 +4,6 @@
 require('../common');
 var router = express.Router();
 var strftime = require('strftime');
-var async = require('async');
 
 var render = function(page, options, res) {
   options.page = 1;
