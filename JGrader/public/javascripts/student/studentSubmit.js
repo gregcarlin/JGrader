@@ -26,9 +26,15 @@ myDropzone.on("addedfile", function(file) {
 
 myDropzone.on("success", function(file, response) {
   // Refresh Page after upload
-  console.log(response);
-  window.location.href = document.URL;
-  localStorage.setItem("response", response);
+  if(response == 'noSanitize'){
+    $(".page-header").after('<div class="alert alert-danger"> \
+      <strong> Some of the uploaded files were not .java files or the file name had characters not supported by jGrader.com. </strong> \
+      </div>');
+  } else {
+    console.log(response);
+    window.location.href = document.URL;
+    localStorage.setItem("response", response);
+  }
 });
 
 // Update the total progress bar
