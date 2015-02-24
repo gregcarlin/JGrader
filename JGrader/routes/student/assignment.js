@@ -138,6 +138,7 @@ router.post('/:id/submit', function(req, res) {
                 throw err;
               } else {
                 console.log('success 2');
+                res.send("success");
                 //res.redirect('/student/assignment/' + req.params.id);
               }
             });
@@ -145,11 +146,17 @@ router.post('/:id/submit', function(req, res) {
         });
       } else {
         // Will implement frontend name Same error to make it more friendly, no need for error response
-        res.redirect('/student/assignment/');
+        for(file in req.files) {
+          fs.unlinkSync(req.files[file].path);
+        }
+        res.send('noSanitize');
       }
     } else {
       // Will implement frontend sanitization to make it more friendly, no need for error response
-      res.redirect('/student/assignment/');
+      for(file in req.files) {
+        fs.unlinkSync(req.files[file].path);
+      }
+      res.send('noSanitize');
     }
   }
 });
@@ -175,7 +182,7 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
           // Compiles the java
           exec("javac " + compileFiles, function (error, stdout, stderr) {
             if(error) throw error;
- 
+
             // must convert from file object to file array
             var fileArr = [];
             for(i in files) {
@@ -184,6 +191,7 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
 
             async.each(fileArr, function(file, cb) {
               var compilePath = file.path.substr(0, file.path.length-4) + 'class';
+              console.log(compilePath);
               async.parallel({
                   javaData: function(callback) {
                     fs.readFile(file.path, callback);
