@@ -4,6 +4,7 @@
 require('../common');
 var router = express.Router();
 var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
+var multer = require('multer');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -83,6 +84,27 @@ router.get('/:id', function(req, res) {
     });
   }
 });
+
+// special version of fs.mkdir that suppresses errors on already created directories
+var mkdir = function(dir) {
+  try {
+    fs.mkdirSync(dir);
+  } catch (err) {
+    if(err.code != 'EEXIST') throw err;
+  }
+};
+
+router.use('/:id/submit', multer({
+  inMemory: false,
+  rename: function(fieldname, filename) {
+    return filename;
+  },
+  changeDest: function(dest, req, res) {
+    mkdir('./uploads');
+    mkdir('./uploads/' + req.user.id + '/');
+    return './uploads/' + req.user.id + '/';
+  }
+}));
 
 // Submits the file into the mysql database
 router.post('/:id/submit', function(req, res) {
@@ -178,6 +200,7 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
           for(file in files) {
             compileFiles = compileFiles + files[file].path + " ";
           }
+          console.log('compileFiles = ' + compileFiles);
 
           // Compiles the java
           exec("javac " + compileFiles, function (error, stdout, stderr) {
@@ -206,7 +229,10 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
                     async.parallel([
                         function(callback) { fs.unlink(file.path, callback) },
                         function(callback) { fs.unlink(compilePath, callback) }
-                      ], cb);
+                      ], function(err) {
+                        if(err) throw err;
+                        fs.rmdir(file.path.substring(0, file.path.lastIndexOf('/')), cb);
+                      });
                   });
               });
             }, function(err) {
