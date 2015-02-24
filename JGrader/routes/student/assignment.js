@@ -200,7 +200,6 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
           for(file in files) {
             compileFiles = compileFiles + files[file].path + " ";
           }
-          console.log('compileFiles = ' + compileFiles);
 
           // Compiles the java
           exec("javac " + compileFiles, function (error, stdout, stderr) {
