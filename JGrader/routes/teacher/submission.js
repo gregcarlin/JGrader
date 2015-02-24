@@ -134,7 +134,10 @@ router.post('/:id/run/:fileIndex', function(req, res) {
       var fileIndex = req.params.fileIndex;
       if(fileIndex < rows.length) {
         // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
-        var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds  */}, callback);
+        var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds  */}, function(err, stdout, stderr) {
+          if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
+          callback(err, stdout, stderr);
+        });
         if(req.body.stdin) child.stdin.write(req.body.stdin);
         child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
       } else {
