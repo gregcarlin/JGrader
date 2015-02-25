@@ -63,7 +63,7 @@ router.post('/settings', function(req, res) {
     var newPass = req.body.newpass;
     if(isSet(oldPass) || isSet(newPass)) {
       if(isSet(oldPass) && isSet(newPass)) {
-        connection.query("UPDATE `students` SET `fname` = ?, `lname` = ?, `pass` = AES_ENCRYPT(?, ?) WHERE `id` = ? AND `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, studentID, oldPass, creds.aes_key], function(err, rows) {
+        connection.query("UPDATE `students` SET `fname` = ?, `lname` = ?, `pass` = AES_ENCRYPT(?, ?) WHERE `id` = ? AND `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, req.user.id, oldPass, creds.aes_key], function(err, rows) {
           if(err) {
             render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
             throw err;
