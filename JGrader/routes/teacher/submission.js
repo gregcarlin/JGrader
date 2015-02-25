@@ -4,6 +4,7 @@
 require('../common');
 var router = express.Router();
 var strftime = require('strftime');
+var JSZip = require('jszip');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -28,6 +29,7 @@ router.get('/:id', function(req, res) {
                       `submissions`.`assignment_id`,\
                       `submissions`.`submitted`,\
                       `submissions`.`grade`,\
+                      `submissions`.`id` AS `subid`,\
                       `students`.`id`,\
                       `students`.`fname`,\
                       `students`.`lname`,\
@@ -163,6 +165,73 @@ router.post('/:id/run/:fileIndex', function(req, res) {
         fs.rmdir('temp/' + req.params.id + '/');
       }
   });
+});
+
+router.get('/:id/download', function(req, res) {
+  // security to ensure this teachers owns this submission and file
+  connection.query("SELECT \
+                      `files`.`id`,\
+                      `files`.`name`,\
+                      `files`.`contents` \
+                    FROM `submissions`,`assignments`,`sections`,`files` \
+                    WHERE \
+                      `submissions`.`assignment_id` = `assignments`.`id` AND \
+                      `assignments`.`section_id` = `sections`.`id` AND \
+                      `submissions`.`id` = ? AND \
+                      `sections`.`teacher_id` = ? AND \
+                      `files`.`submission_id` = `submissions`.`id` \
+                    ORDER BY `files`.`id`", [req.params.id, req.user.id], function(err, rows) {
+    if(err) {
+      res.send('Sorry, an error has occurred.');
+      throw err;
+    } else if(rows.length <= 0) {
+      res.send('Sorry, an error has occurred.');
+    } else {
+      var zip = new JSZip();
+      for(i in rows) {
+        zip.file(rows[i].name, rows[i].contents);
+      }
+      var content = zip.generate({type: 'nodebuffer'});
+
+      res.setHeader('Content-Disposition', 'attachment; filename=' + req.params.id + '.zip');
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Description', 'File Transfer');
+      res.send(content);
+    }
+  });
+});
+
+router.get('/:id/download/:fileIndex', function(req, res) {
+  async.waterfall([
+      function(callback) {
+        // security to ensure this teachers owns this submission and file
+        connection.query("SELECT \
+                            `files`.`id`,\
+                            `files`.`name`,\
+                            `files`.`contents` \
+                          FROM `submissions`,`assignments`,`sections`,`files` \
+                          WHERE \
+                            `submissions`.`assignment_id` = `assignments`.`id` AND \
+                            `assignments`.`section_id` = `sections`.`id` AND \
+                            `submissions`.`id` = ? AND \
+                            `sections`.`teacher_id` = ? AND \
+                            `files`.`submission_id` = `submissions`.`id` \
+                          ORDER BY `files`.`id`", [req.params.id, req.user.id], callback);
+      }
+    ], function(err, rows) {
+      if(err) {
+        res.send('Sorry, an error has occurred.');
+        throw err;
+      } else if(rows.length <= 0) {
+        res.send('You do not have permission to download this file.');
+      } else if(isNaN(req.params.fileIndex) || req.params.fileIndex >= rows.length) {
+        res.send('Sorry, an error has occurred.');
+      } else {
+        res.setHeader('Content-Disposition', 'attachment; filename=' + rows[req.params.fileIndex].name);
+        res.setHeader('Content-Description', 'File Transfer');
+        res.send(rows[req.params.fileIndex].contents);
+      }
+    });
 });
 
 module.exports = router;
