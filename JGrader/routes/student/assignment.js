@@ -197,8 +197,10 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
         } else {
           // List of file paths to compile
           var compileFiles = "";
+          var fileArr = [];
           for(file in files) {
             compileFiles = compileFiles + files[file].path + " ";
+            fileArr.push(files[file]);
           }
 
           // Compiles the java
@@ -206,14 +208,13 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
             if(error) throw error;
 
             // must convert from file object to file array
-            var fileArr = [];
-            for(i in files) {
-              fileArr.push(files[i]);
-            }
+            // var fileArr = [];
+            // for(i in files) {
+            //   fileArr.push(files[i]);
+            // }
 
             async.each(fileArr, function(file, cb) {
               var compilePath = file.path.substr(0, file.path.length-4) + 'class';
-              console.log(compilePath);
               async.parallel({
                   javaData: function(callback) {
                     fs.readFile(file.path, callback);
@@ -230,12 +231,15 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
                         function(callback) { fs.unlink(compilePath, callback) }
                       ], function(err) {
                         if(err) throw err;
-                        fs.rmdir(file.path.substring(0, file.path.lastIndexOf('/')), cb);
+                        // All files deleted and inserted into database, good to run final callback
+                        cb();
                       });
                   });
               });
+              // Final Callback after all of files delted then deletes dir.
             }, function(err) {
-              finish(err ? err: stderr);
+                fs.rmdirSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')))
+                finish(err ? err: stderr);
             });
           });
         }
