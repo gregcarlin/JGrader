@@ -3,14 +3,13 @@
 
 /* used for landing page (index.ejs) only */
 
-@import url(http://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic);
+@import url(http://fonts.googleapis.com/css?family=Lato:100,400,100italic,400italic);
 
 /* global stuff */
 html {
   height: 100%;
 }
 body {
-  /*font-family: 'Avenir Next';*/
   font-family: 'Lato', sans-serif;
   height: 100%;
   color: #FFF;
@@ -182,10 +181,6 @@ a:hover {
 #home .right label:first-child {
   margin-bottom: 10%;
 }
-/*@font-face {
-  font-family: 'Avenir Next';
-  src: local('Avenir Next LT Pro Condensed'), url('avenirnext.ttf') format('ttf');
-}*/
 #home .right input {
   width: 100%;
   border-radius: 3px;
@@ -194,7 +189,6 @@ a:hover {
   padding-left: 15px;
   padding-right: 15px;
   box-sizing: border-box;
-  /*font-family: 'Avenir Next';*/
   font-family: 'Lato', sans-serif;
   font-size: 16px;
   margin-top: 4%;
