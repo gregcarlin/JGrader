@@ -140,7 +140,7 @@ router.get('/:id.csv', function(req, res) {
                       WHERE `assignments`.`id` = ?", [req.params.id], function(err, rows) {
     res.setHeader('Content-Disposition', 'attachment; filename=assignment_' + req.params.id + '.csv');
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Descrption', 'File Transfer');
+    res.setHeader('Content-Description', 'File Transfer');
     var output = 'Student,Submitted,Grade,Late\n';
     for(i in rows) {
       output += rows[i].fname + ' ' + rows[i].lname + ',' + (rows[i].submitted ? 'Yes' : 'No') + ',' + (rows[i].grade ? rows[i].grade : 'None') + ',' + (rows[i].submitted ? (rows[i].submitted > rows[i].due ? 'Yes' : 'No') : (rows[i].due > Date.now() ? 'Yes' : 'Not Yet')) + '\n';
