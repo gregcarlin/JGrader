@@ -41,7 +41,7 @@ router.post('/', function(req, res) {
     login('student', email, pass, res, function() {
       login('teacher', email, pass, res, function() {
         login('assistant', email, pass, res, function() {
-          res.render('sign-in', { error: 'Incorrect email or password.', email: email});
+          res.render('sign-in', { error: 'Incorrect email or password. <a href="/forgot">Forgot your password?</a>', email: email });
         });
       });
     });

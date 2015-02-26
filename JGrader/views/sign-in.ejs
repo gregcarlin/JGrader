@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+    <link rel="icon" href="favicon.ico">
 
     <title>Sign In | JGrader</title>
 
@@ -42,7 +42,7 @@
       <form class="form-signin" role="form" action="/sign-in" method="POST">
   		  <h2 class="form-signin-heading">Sign in</h2>
         <% if(typeof error != 'undefined') { %>
-          <div class="alert alert-danger" role="alert"><%= error %></div>
+          <div class="alert alert-danger" role="alert"><%- error %></div>
         <% } %>
       	<input type="email" class="form-control" name="email" placeholder="Email" required autofocus<%- typeof email == 'undefined' ? '' : ' value="'+email+'"' %>>
       	<input type="password" class="form-control" name="password" placeholder="Password" required>
