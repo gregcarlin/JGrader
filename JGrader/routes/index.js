@@ -4,6 +4,7 @@
 require('./common');
 var router = express.Router();
 var nodemailer = require('nodemailer');
+var crypto = require('crypto');
 
 /* GET home page. */
 router.get('/', function(req, res) {
