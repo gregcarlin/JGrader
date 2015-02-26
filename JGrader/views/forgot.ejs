@@ -1,6 +1,6 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
-
+ 
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -11,7 +11,7 @@
     <meta name="author" content="">
     <link rel="icon" href="favicon.ico">
 
-    <title>Sign Up | JGrader</title>
+    <title>Forgot Password | JGrader</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
@@ -39,22 +39,17 @@
   <body>
 
     <div class="container">
-      <form class="form-signin" role="form" action="/sign-up" method="POST">
-  		  <h2 class="form-signin-heading">Sign up</h2>
+      <form class="form-signin" role="form" action="/forgot" method="POST">
+  		  <h2 class="form-signin-heading">Reset password</h2>
         <% if(typeof error != 'undefined') { %>
           <div class="alert alert-danger" role="alert"><%= error %></div>
+        <% }
+           if(typeof success != 'undefined') { %>
+          <div class="alert alert-success" role="alert"><%= success %></div>
         <% } %>
-        <input type="text" class="form-control" name="fname" placeholder="First Name" required autofocus<%- typeof user == 'undefined' ? '' : ' value="'+user.fname+'"' %>>
-        <input type="text" class="form-control" name="lname" placeholder="Last Name" required<%- typeof user == 'undefined' ? '' : ' value="'+user.lname+'"' %>>
-      	<input type="email" class="form-control" name="email" placeholder="Email" required<%- typeof user == 'undefined' ? '' : ' value="'+user.email+'"' %>>
-      	<input type="password" class="form-control" name="password" placeholder="Password" required>
-        <div class="iama">
-          I am a...
-          <label><input type="radio" name="role" value="student" required<%- (typeof user == 'undefined' || user.role == 'student') ? ' checked' : '' %>>Student</label>
-          <label><input type="radio" name="role" value="teacher"<%- (typeof user != 'undefined' && user.role == 'teacher') ? ' checked' : '' %>>Teacher</label>
-          <!-- <label title="Teaching Assistant"><input type="radio" name="role" value="assistant"<%- (typeof user != 'undefined' && user.role == 'assistant') ? ' checked' : ''%>>T.A.</label> -->
-        </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Create account</button>
+        <div class="info">Enter your email to have your password reset.</div>
+      	<input type="email" class="form-control" name="email" placeholder="Email" required autofocus>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Send</button>
   		</form>
     </div> <!-- /container -->
 

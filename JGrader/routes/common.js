@@ -115,7 +115,7 @@ isSet = function(param) {
 
 // finds out which database hash is logged into.
 // note: may be an issue if hash appears in more than one sessions table.
-// calls finish(id, name of db) when done, finish(null, null) if db not found.
+// calls finish(id, name-of-db) when done, finish(null, null) if db not found.
 getDatabase = function(hash, finish) {
   logIn(hash, 'students', function(id) {
     if(id) {
