@@ -31,14 +31,14 @@ router.get('/forgot', function(req, res) {
   res.render('forgot');
 });
 
-// calls finish(err, found) when done, err is null if there is no err, found is true if found, false if not found
+// calls finish(err, db) when done, err is null if there is no err, found is the database name if found, null if not found
 var findEmail = function(email, finish) {
   var find = function(db, cb) {
     connection.query("SELECT `id` FROM `" + db + "` WHERE `user` = ?", [email], function(err, rows) {
       if(err) {
-        finish(err);
+        finish(err, null);
       } else if(rows.length >= 1) {
-        finish(null, true);
+        finish(null, db, rows[0].id);
       } else {
         cb();
       }
@@ -48,7 +48,7 @@ var findEmail = function(email, finish) {
   find('students', function() {
     find('teachers', function() {
       find('assistants', function() {
-        finish(null, false);
+        finish(null, null, null);
       });
     });
   });
@@ -58,35 +58,36 @@ router.post('/forgot', function(req, res) {
   if(!req.body.email) {
     res.render('forgot', {error: 'All fields are required.'});
   } else {
-    findEmail(req.body.email, function(err, found) {
+    findEmail(req.body.email, function(err, db, id) {
       if(err) {
         res.render('forgot', {error: 'An unknown error has occurred.'});
         throw err;
-      } else if(!found) {
+      } else if(!db || !id) {
         res.render('forgot', {error: 'No account with that address exists.'});
       } else {
-        console.log(creds.email_user);
-        console.log(creds.email_pass);
-        var transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: creds.email_user,
-            pass: creds.email_pass
-          }
-        });
-        var mailOptions = {
-          from: creds.email_user,
-          to: req.body.email,
-          subject: 'Password Recovery',
-          html: 'Talk to Greg or Brian.'
-        };
-        transporter.sendMail(mailOptions, function(err, info) {
-          if(err) {
-            res.render('forgot', {error: 'Unable to send email.'});
-            throw err;
-          } else {
-            res.render('forgot', {success: 'An email has been sent with further instruction.'});
-          }
+        var hash = crypto.randomBytes(20).toString('hex');
+        connection.query('UPDATE `' + db + '` SET `pass` = AES_ENCRYPT(?,?) WHERE `id` = ?', [hash, creds.aes_key, id], function(err, result) {
+          var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: creds.email_user,
+              pass: creds.email_pass
+            }
+          });
+          var mailOptions = {
+            from: creds.email_user,
+            to: req.body.email,
+            subject: 'Password Recovery',
+            html: 'Your new password is ' + hash + '. Please <a href="http://www.jgrader.com/sign-in">log in</a> and change this as soon as possible.'
+          };
+          transporter.sendMail(mailOptions, function(err, info) {
+            if(err) {
+              res.render('forgot', {error: 'Unable to send email.'});
+              throw err;
+            } else {
+              res.render('forgot', {success: 'An email has been sent with further instruction.'});
+            }
+          });
         });
       }
     });
