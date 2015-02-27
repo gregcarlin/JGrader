@@ -7,6 +7,16 @@ const assert  = require('assert');
 Browser.localhost('jgrader.com', 3000);
 
 const browser = new Browser();
-//browser.visit();
+browser.visit('/sign-in', function(error) {
+  assert.ifError(error);
 
-//module.exports = app;
+  browser.fill('input[name="email"]', 'test71@test.com');
+  browser.fill('input[name="password"]', 'test');
+  browser.pressButton('button[type="submit"]', function(error) {
+    assert.ifError(error);
+
+    browser.assert.success();
+    browser.assert.text('title','Your Sections | JGrader');
+  });
+});
+
