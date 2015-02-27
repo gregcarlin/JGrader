@@ -1,0 +1,11 @@
+{
+  "name": "JGrader-Tests",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "zombie": "^2.5.1"
+  }
+}
