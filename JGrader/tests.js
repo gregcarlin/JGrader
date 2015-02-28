@@ -11,9 +11,9 @@ casper.test.begin('Homepage', function(test) {
   });
 
   casper.then(function() {
-    test.assertTitle('Sign In | jGrader');
+    test.assertTitle('Sign In | jGrader'); // why is this failing?
     test.assertExists('div.alert-danger');
-    test.assertSelectorHasText('div.alert-danger', 'Incorrect');
+    test.assertSelectorHasText('div.alert-danger', 'Incorrect email or password.');
   });
 
   casper.run(function() {
