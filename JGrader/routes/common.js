@@ -39,7 +39,6 @@ run = function(genFn) {
   function next (er, value) {
     if (er) return gen.throw(er)
     var continuable = gen.next(value)
-
     if (continuable.done) return
     var cbFn = continuable.value
     cbFn(next)
