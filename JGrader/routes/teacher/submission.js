@@ -86,81 +86,51 @@ router.post('/:id/updategrade/:grade', function(req, res) {
   });
 });
 
-// variation of fs.mkdir that allows directories to already exist
-var mkdir = function(dir) {
-  return Q.nfcall(fs.mkdir, dir)
-    .catch(function(err) {
-      if(err.code == 'EEXIST') {
-        return;
-      } else {
-        throw err;
-      }
-    });
-};
+router.get('/:id/run/:fileIndex', function(req, res) {
+  run(function* () {
+    // security to ensure this teacher owns this submission and file
+    var rows = yield query("SELECT \
+                        `files`.`id`,\
+                        `files`.`name`,\
+                        `files`.`compiled` \
+                      FROM `submissions`,`assignments`,`sections`,`files` \
+                      WHERE \
+                        `submissions`.`assignment_id` = `assignments`.`id` AND \
+                        `assignments`.`section_id` = `sections`.`id` AND \
+                        `submissions`.`id` = ? AND \
+                        `sections`.`teacher_id` = ? AND \
+                        `files`.`submission_id` = `submissions`.`id` \
+                      ORDER BY `files`.`id`", [req.params.id, req.user.id]);
+    if(rows.length <= 0) {
+      res.json({code: 2}); // invalid permissions
+    } else {
+      fs.mkdir('temp/', function(err) { // i don't know how to make this generator style
+        if(err.code != 'EEXIST') throw err;
 
-router.post('/:id/run/:fileIndex', function(req, res) {
-  // security to ensure this teacher owns this submission and file
-  query("SELECT \
-           `files`.`id`,\
-           `files`.`name`,\
-           `files`.`compiled` \
-         FROM `submissions`,`assignments`,`sections`,`files` \
-         WHERE \
-           `submissions`.`assignment_id` = `assignments`.`id` AND \
-           `assignments`.`section_id` = `sections`.`id` AND \
-           `submissions`.`id` = ? AND \
-           `sections`.`teacher_id` = ? AND \
-           `files`.`submission_id` = `submissions`.`id` \
-         ORDER BY `files`.`id`", [req.params.id, req.user.id])
-    .then(function(rows) {
-      if(rows[0].length <= 0) {
-        var err = new Error('Invalid permissions');
-        err.jsonCode = 2;
-        throw err;
-      } else {
-        return Q.all([rows, mkdir('temp/')]);
-      }
-    })
-    .then(function(rows) {
-      rows = rows[0][0];
-      for(i in rows) {
-        var name = rows[i].name;
-        rows[i].className = name.substring(0, name.length - 5);
-        // note: working directory seems to be one with app.js in it
-        fs.writeFileSync('temp/' + rows[i].className + '.class', rows[i].compiled);
-      }
-      var fileIndex = req.params.fileIndex;
-      if(fileIndex < rows.length) {
-        var defer = Q.defer();
-        // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
-        var child = exec('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, defer.makeNodeResolver());
-        child.stdin.write(req.body.stdin);
-        child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
-        return Q.all([rows, defer.promise]);
-      } else {
-        var err = new Error('Invalid input');
-        err.jsonCode = 1;
-        return err;
-      }
-    })
-    .then(function(arg) {
-      var rows = arg[0];
-      res.json({code: 0, out: arg[1][0], err: arg[1][1]});
-      for(i in rows) {
-        fs.unlinkSync('temp/' + rows[i].className + '.class');
-      }
-    })
-    .catch(function(err) {
-      if(err.jsonCode) {
-        res.json({code: err.jsonCode});
-      } else if(err.killed) { // if timeout
-        res.json({code: 0, out: '', err: 'Code took too long to execute! There may be an infinite loop somewhere.'});
-      } else {
-        res.json({code: -1});
-        console.log(err);
-        throw err;
-      }
-    });
+        for(i in rows) {
+          var name = rows[i].name;
+          rows[i].className = name.substring(0, name.length - 5);
+          // note: working directory seems to be one with app.js in it
+          fs.writeFileSync('temp/' + rows[i].className + '.class', rows[i].compiled);
+        }
+
+        var fileIndex = req.params.fileIndex;
+        if(fileIndex < rows.length) {
+          // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
+          /*var exect = thunkify(exec);
+          console.log(exect);*/
+          run(function* () {
+            /*var child = yield thunkify(exec)('cd temp/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[fileIndex].className, {timeout: 10000});
+            for(i in rows) {
+              fs.unlinkSync('temp/' + rows[i].className + '.class');
+            }
+            res.json({code: 0, out: });*/
+          });
+        }
+      });
+    }
+  });
 });
 
 module.exports = router;
+
