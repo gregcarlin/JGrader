@@ -30,7 +30,7 @@ var render = function(page, options, res) {
       options.strftime = strftime;
       break;
     case 'testCaseList':
-      options.js = ['tooltip', 'teacer/testCaseList'];
+      options.js = ['tooltip', 'teacher/testCaseList'];
       options.css = ['font-awesome.min'];
       break;
   }
@@ -294,7 +294,7 @@ router.get('/:id/testCase', function(req, res) {
     if(err) {
       render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
     }
-    connection.query('SELECT `test-cases` \
+    connection.query('SELECT `test-cases`.* \
                       FROM `test-cases` \
                       WHERE `test-cases`.`assignment_id` = ?', [req.params.id], function(err, testCases) {
       if(err) {
