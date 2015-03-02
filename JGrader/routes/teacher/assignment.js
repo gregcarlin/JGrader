@@ -67,32 +67,35 @@ var query = thunkify(connection.query, connection);
 
 // page that lists assignments
 router.get('/', function(req, res) {
-  run(function* () {
-    try {
-      var result = yield query("SELECT \
-                                  `assignments`.`id` AS `aid`,\
-                                  `assignments`.`name` AS `aname`,\
-                                  `assignments`.`due`,\
-                                  `sections`.`id` AS `sid`,\
-                                  `sections`.`name` AS `sname`,\
-                                  COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
-                                  COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
-                                  COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
-                                FROM `assignments` \
-                                JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
-                                LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
-                                LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                                WHERE `sections`.`teacher_id` = ? \
-                                GROUP BY `assignments`.`id` \
-                                ORDER BY \
-                                  `assignments`.`due` DESC, \
-                                  `assignments`.`name` ASC, \
-                                  `sections`.`name` ASC", [req.user.id]);
-      render('assignmentList', {rows: result}, res);
-    } catch (err) {
-      render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
-      throw err;
-    }
+  async.waterfall([
+      function(callback) {
+        connection.query("SELECT \
+                            `assignments`.`id` AS `aid`,\
+                            `assignments`.`name` AS `aname`,\
+                            `assignments`.`due`,\
+                            `sections`.`id` AS `sid`,\
+                            `sections`.`name` AS `sname`,\
+                            COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
+                            COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
+                            COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
+                          FROM `assignments` \
+                          JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
+                          LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
+                          LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                          WHERE `sections`.`teacher_id` = ? \
+                          GROUP BY `assignments`.`id` \
+                          ORDER BY \
+                            `assignments`.`due` DESC, \
+                            `assignments`.`name` ASC, \
+                            `sections`.`name` ASC", [req.user.id], callback);
+      }
+    ], function(err, result) {
+      if(err) {
+        render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
+        throw err;
+      } else {
+        render('assignmentList', {rows: result}, res);
+      }
   });
 });
 
@@ -169,7 +172,7 @@ router.get('/:id.csv', function(req, res) {
                       WHERE `assignments`.`id` = ?", [req.params.id], function(err, rows) {
     res.setHeader('Content-Disposition', 'attachment; filename=assignment_' + req.params.id + '.csv');
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Descrption', 'File Transfer');
+    res.setHeader('Content-Description', 'File Transfer');
     var output = 'Student,Submitted,Grade,Late\n';
     for(i in rows) {
       output += rows[i].fname + ' ' + rows[i].lname + ',' + (rows[i].submitted ? 'Yes' : 'No') + ',' + (rows[i].grade ? rows[i].grade : 'None') + ',' + (rows[i].submitted ? (rows[i].submitted > rows[i].due ? 'Yes' : 'No') : (rows[i].due > Date.now() ? 'Yes' : 'Not Yet')) + '\n';

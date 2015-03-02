@@ -4,6 +4,7 @@
 require('../common');
 var router = express.Router();
 var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
+var multer = require('multer');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -84,6 +85,27 @@ router.get('/:id', function(req, res) {
   }
 });
 
+// special version of fs.mkdir that suppresses errors on already created directories
+var mkdir = function(dir) {
+  try {
+    fs.mkdirSync(dir);
+  } catch (err) {
+    if(err.code != 'EEXIST') throw err;
+  }
+};
+
+router.use('/:id/submit', multer({
+  inMemory: false,
+  rename: function(fieldname, filename) {
+    return filename;
+  },
+  changeDest: function(dest, req, res) {
+    mkdir('./uploads');
+    mkdir('./uploads/' + req.user.id + '/');
+    return './uploads/' + req.user.id + '/';
+  }
+}));
+
 // Submits the file into the mysql database
 router.post('/:id/submit', function(req, res) {
   var assignmentID = req.params.id;
@@ -123,6 +145,7 @@ router.post('/:id/submit', function(req, res) {
                     console.log(stderr);
                     res.send(stderr);
                   } else {
+                    console.log('success');
                     res.send("success");
                   }
                 });
@@ -136,18 +159,26 @@ router.post('/:id/submit', function(req, res) {
                 render('notFound', {error: 'Compilation has failed'}, res);
                 throw err;
               } else {
-                res.redirect('/student/assignment/' + req.params.id);
+                console.log('success 2');
+                res.send("success");
+                //res.redirect('/student/assignment/' + req.params.id);
               }
             });
           }
         });
       } else {
         // Will implement frontend name Same error to make it more friendly, no need for error response
-        res.redirect('/student/assignment/');
+        for(file in req.files) {
+          fs.unlinkSync(req.files[file].path);
+        }
+        res.send('noSanitize');
       }
     } else {
       // Will implement frontend sanitization to make it more friendly, no need for error response
-      res.redirect('/student/assignment/');
+      for(file in req.files) {
+        fs.unlinkSync(req.files[file].path);
+      }
+      res.send('noSanitize');
     }
   }
 });
@@ -166,53 +197,50 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
         } else {
           // List of file paths to compile
           var compileFiles = "";
+          var fileArr = [];
           for(file in files) {
             compileFiles = compileFiles + files[file].path + " ";
+            fileArr.push(files[file]);
           }
 
           // Compiles the java
           exec("javac " + compileFiles, function (error, stdout, stderr) {
-            if(stderr){
-              for(file in files) {
-                var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
-                fs.readFile(files[file].path, function(err, javaData) {
-                  fs.readFile(compilePath, function (err, classData) {
-                    connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
-                      if(err){
-                        finish(err);
-                      }
-                      // Deletes files after submit
-                      fs.unlink(files[file].path, function() {
-                        fs.unlink(compilePath, function() {
+            if(error) throw error;
 
-                        });
-                      });
-                    });
-                  });
-                });
-              }
-              finish(null, stderr);
-            } else {
-              for(file in files) {
-                var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
-                fs.readFile(files[file].path, function(err, javaData) {
-                  fs.readFile(compilePath, function (err, classData) {
-                    connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
-                      if(err){
-                        finish(err);
-                      }
-                      // Deletes files after submit
-                      fs.unlink(files[file].path, function() {
-                        fs.unlink(compilePath, function() {
+            // must convert from file object to file array
+            // var fileArr = [];
+            // for(i in files) {
+            //   fileArr.push(files[i]);
+            // }
 
-                        });
+            async.each(fileArr, function(file, cb) {
+              var compilePath = file.path.substr(0, file.path.length-4) + 'class';
+              async.parallel({
+                  javaData: function(callback) {
+                    fs.readFile(file.path, callback);
+                  },
+                  classData: function(callback) {
+                    fs.readFile(compilePath, callback);
+                  }
+                }, function(err, data) {
+                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, file.originalname, data.javaData, data.classData], function(err, rows) {
+                    if(err) throw err;
+                    // Deletes files after submit
+                    async.parallel([
+                        function(callback) { fs.unlink(file.path, callback) },
+                        function(callback) { fs.unlink(compilePath, callback) }
+                      ], function(err) {
+                        if(err) throw err;
+                        // All files deleted and inserted into database, good to run final callback
+                        cb();
                       });
-                    });
                   });
-                });
-              }
-            }
-            finish(null);
+              });
+              // Final Callback after all of files delted then deletes dir.
+            }, function(err) {
+                fs.rmdirSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')))
+                finish(err ? err: stderr);
+            });
           });
         }
       });
