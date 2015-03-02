@@ -9,7 +9,7 @@ $('#input-expand').click(function() {
 });
 
 $('#execute').click(function() {
-  $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>'); // todo make this spin so it actually looks like a loading thing
+  $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>');
   var fileID = $('.tab-content .active').attr('id');
   var url = document.URL;
   if(url.charAt(url.length-1) != '/') url += '/';
@@ -20,4 +20,12 @@ $('#execute').click(function() {
       alert('An error has occurred, please reload the page and try again.');
     }
   });
+});
+
+$('#download').click(function() {
+  var fileID = $('.tab-content .active').attr('id');
+  var url = document.URL;
+  if(url.charAt(url.length-1) != '/') url += '/';
+  var win = window.open(url + 'download/' + fileID, '_blank');
+  win.focus();
 });
