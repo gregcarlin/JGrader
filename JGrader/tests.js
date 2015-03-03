@@ -1,5 +1,5 @@
-const url = 'http://127.0.0.1:3000/';
 const creds = require('./test_credentials');
+const url   = creds.url;
 
 // start with some helpful methods for later
 
