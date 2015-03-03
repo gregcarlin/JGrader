@@ -13,12 +13,13 @@
         <th>Section</th>
         <th>Current Average</th>
         <th>Last Submitted Assignment</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       <% if(rows.length == 0) { %>
         <tr>
-          <td colspan="4">You have no students!</td>
+          <td colspan="5">You have no students!</td>
         </tr>
       <% } else {
           for(i in rows) {%>
@@ -27,9 +28,28 @@
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
               <td><%= rows[i].avg ? (rows[i].avg + '%') : 'None' %></td>
               <td><%- rows[i].aname ? ('<a href="/teacher/submission/' + rows[i].subid + '">' + rows[i].aname + '</a>') : 'None' %></td>
+              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="confirmDelete(<%= rows[i].id %>)"></span></td>
             </tr>
        <% }
          } %>
     </tbody>
   </table>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to remove this student? This is permanent. All associated data, including submissions and grades, will be lost forever.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
 </div>

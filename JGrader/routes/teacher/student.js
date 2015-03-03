@@ -14,7 +14,7 @@ var render = function(page, options, res) {
       break;
     case 'studentList':
       options.title = 'Your Students';
-      options.js = ['tooltip'];
+      options.js = ['tooltip', 'teacher/studentList'];
       options.css = ['font-awesome.min'];
       break;
     case 'student':
@@ -126,6 +126,10 @@ router.get('/:id', function(req, res) {
       });
     }
   });
+});
+
+router.get('/:id/delete', function(req, res) {
+  // todo delete student from class and associated data
 });
 
 module.exports = router;
