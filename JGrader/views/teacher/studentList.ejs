@@ -28,7 +28,7 @@
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
               <td><%= rows[i].avg ? (rows[i].avg + '%') : 'None' %></td>
               <td><%- rows[i].aname ? ('<a href="/teacher/submission/' + rows[i].subid + '">' + rows[i].aname + '</a>') : 'None' %></td>
-              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="confirmDelete(<%= rows[i].id %>)"></span></td>
+              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Remove" onclick="confirmDelete(<%= rows[i].id %>,<%= rows[i].sid %>)"></span></td>
             </tr>
        <% }
          } %>
