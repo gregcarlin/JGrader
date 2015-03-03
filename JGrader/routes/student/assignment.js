@@ -64,7 +64,7 @@ router.get('/:id', function(req, res) {
       } else if(rows.length <= 0) {
         render('notFound', {}, res);
       } else {
-        connection.query("SELECT `files`.`name`, `files`.`contents` \
+        connection.query("SELECT `files`.`name`, `files`.`contents`, `submissions`.`grade` \
                           FROM `files`, `students`, `assignments`, `submissions` \
                           WHERE `submissions`.`assignment_id` = `assignments`.`id` \
                           AND `submissions`.`student_id` = `students`.`id` \
