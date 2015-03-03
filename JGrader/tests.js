@@ -1,5 +1,5 @@
 const url = 'http://127.0.0.1:3000/';
-const creds = require('./routes/credentials');
+const creds = require('./test_credentials');
 
 casper.test.begin('Homepage and Failed Sign In', function(test) {
   casper.start(url, function() {
@@ -63,6 +63,12 @@ casper.test.begin('Teacher Sign In', function(test) {
     test.done();
   });
 });
+
+/*casper.test.begin('Teacher Assignment List', function(test) {
+  casper.start(url + 'teacher/assignment', function() {
+    
+  });
+});*/
 
 signOut(); // don't think this is needed with our current set-up. either way, good to test.
 
