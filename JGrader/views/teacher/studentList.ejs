@@ -9,10 +9,10 @@
   <table class="table table-striped table-linked">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Section</th>
-        <th>Current Average</th>
-        <th>Last Submitted Assignment</th>
+        <th data-sort="string">Name <a class="fa fa-sort"></a></th>
+        <th data-sort="string">Section <a class="fa fa-sort"></a></th>
+        <th data-sort="int">Current Average <a class="fa fa-sort"></a></th>
+        <th data-sort="string">Last Submitted Assignment <a class="fa fa-sort"></a></th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -24,9 +24,9 @@
       <% } else {
           for(i in rows) {%>
             <tr>
-              <td><a href="/teacher/student/<%= rows[i].id %>"><%= rows[i].fname + ' ' + rows[i].lname %></a></td>
+              <td><a href="/teacher/student/<%= rows[i].id %>"><%= rows[i].lname + ', ' + rows[i].fname %></a></td>
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
-              <td><%= rows[i].avg ? (rows[i].avg + '%') : 'None' %></td>
+              <td data-sort-value="<%= rows[i].avg ? rows[i].avg : 0 %>"><%= rows[i].avg ? (rows[i].avg + '%') : 'None' %></td>
               <td><%- rows[i].aname ? ('<a href="/teacher/submission/' + rows[i].subid + '">' + rows[i].aname + '</a>') : 'None' %></td>
               <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Remove" onclick="confirmDelete(<%= rows[i].id %>,<%= rows[i].sid %>)"></span></td>
             </tr>
