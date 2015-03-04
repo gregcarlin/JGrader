@@ -233,5 +233,13 @@ router.get('/:id/download/:fileIndex', function(req, res) {
     });
 });
 
+router.get('/:id/comment', function(req, res) {
+  // todo return json of comments
+});
+
+router.post('/:id/comment/:text', function(req, res) {
+  // todo make a new comment
+});
+
 module.exports = router;
 
