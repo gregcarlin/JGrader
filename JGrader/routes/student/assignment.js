@@ -233,19 +233,20 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
                   connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, file.originalname, data.javaData, data.classData], function(err, rows) {
                     if(err) throw err;
                     // Deletes files after submit
-                    async.parallel([
-                        function(callback) { fs.unlink(file.path, callback) },
-                        function(callback) { fs.unlink(compilePath, callback) }
-                      ], function(err) {
-                        // All files deleted and inserted into database, good to run final callback
-                        cb();
-                        if(err) throw err;
-                      });
+                    // async.parallel([
+                    //     function(callback) { fs.unlink(file.path, callback) },
+                    //     function(callback) { fs.unlink(compilePath, callback) }
+                    //   ], function(err) {
+                    //     // All files deleted and inserted into database, good to run final callback
+                    //     cb();
+                    //     if(err) throw err;
+                    //   });
+                    cb();
                   });
               });
               // Final Callback after all of files delted then deletes dir.
             }, function(err) {
-                fs.rmdirSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')))
+                fs.removeSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')))
                 finish(err ? err : stderr);
             });
           });
