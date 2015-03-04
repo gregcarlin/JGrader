@@ -30,6 +30,7 @@ build/Release
 node_modules
 
 credentials.js
+test_credentials.js
 bin
 *.log
 *.swp
