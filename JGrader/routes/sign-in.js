@@ -7,7 +7,7 @@ var crypto  = require('crypto');
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('sign-in', {});
+  res.render('sign-in', {error: req.query.error});
 });
 
 // attempts to login to website with given database, calls finish() iff login information is incorrect
@@ -35,13 +35,13 @@ var login = function(db, email, pass, res, finish) {
 }
 
 router.post('/', function(req, res) {
-  var email = req.param('email');
-  var pass = req.param('password');
+  var email = req.body.email;
+  var pass  = req.body.password;
   if(email && pass) {
     login('student', email, pass, res, function() {
       login('teacher', email, pass, res, function() {
         login('assistant', email, pass, res, function() {
-          res.render('sign-in', { error: 'Incorrect email or password.', email: email});
+          res.render('sign-in', { error: 'Incorrect email or password. <a href="/forgot">Forgot your password?</a>', email: email });
         });
       });
     });

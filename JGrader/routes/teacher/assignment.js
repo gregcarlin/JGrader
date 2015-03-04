@@ -35,31 +35,35 @@ var render = function(page, options, res) {
 
 // page that lists assignments
 router.get('/', function(req, res) {
-  connection.query("SELECT \
-                      `assignments`.`id` AS `aid`,\
-                      `assignments`.`name` AS `aname`,\
-                      `assignments`.`due`,\
-                      `sections`.`id` AS `sid`,\
-                      `sections`.`name` AS `sname`,\
-                      COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
-                      COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
-                      COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
-                    FROM `assignments` \
-                    JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
-                    LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
-                    LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                    WHERE `sections`.`teacher_id` = ? \
-                    GROUP BY `assignments`.`id` \
-                    ORDER BY \
-                      `assignments`.`due` DESC, \
-                      `assignments`.`name` ASC, \
-                      `sections`.`name` ASC", [req.user.id], function(err, rows) {
-    if(err) {
-      render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
-      throw err;
-    } else {
-      render('assignmentList', {rows: rows}, res);
-    }
+  async.waterfall([
+      function(callback) {
+        connection.query("SELECT \
+                            `assignments`.`id` AS `aid`,\
+                            `assignments`.`name` AS `aname`,\
+                            `assignments`.`due`,\
+                            `sections`.`id` AS `sid`,\
+                            `sections`.`name` AS `sname`,\
+                            COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
+                            COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
+                            COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
+                          FROM `assignments` \
+                          JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
+                          LEFT JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
+                          LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                          WHERE `sections`.`teacher_id` = ? \
+                          GROUP BY `assignments`.`id` \
+                          ORDER BY \
+                            `assignments`.`due` DESC, \
+                            `assignments`.`name` ASC, \
+                            `sections`.`name` ASC", [req.user.id], callback);
+      }
+    ], function(err, result) {
+      if(err) {
+        render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
+        throw err;
+      } else {
+        render('assignmentList', {rows: result}, res);
+      }
   });
 });
 
@@ -84,10 +88,10 @@ router.get('/create/:preselect', assignmentCreate);
 
 // handles request to create an assignment
 router.post('/create', function(req, res) {
-  var name = req.param('name');
-  var desc = req.param('desc');
-  var due  = req.param('due');
-  var secs = req.param('section');
+  var name = req.body.name;
+  var desc = req.body.desc;
+  var due  = req.body.due;
+  var secs = req.body.section;
   if(!name || name.length <= 0 || !due || due.length <= 0) {
     render('assignmentCreate', {error: 'Name and due date must both be filled out.', name: name, desc: desc, due: due}, res);
   } else if(!secs || secs.length <= 0) {
@@ -136,7 +140,7 @@ router.get('/:id.csv', function(req, res) {
                       WHERE `assignments`.`id` = ?", [req.params.id], function(err, rows) {
     res.setHeader('Content-Disposition', 'attachment; filename=assignment_' + req.params.id + '.csv');
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Descrption', 'File Transfer');
+    res.setHeader('Content-Description', 'File Transfer');
     var output = 'Student,Submitted,Grade,Late\n';
     for(i in rows) {
       output += rows[i].fname + ' ' + rows[i].lname + ',' + (rows[i].submitted ? 'Yes' : 'No') + ',' + (rows[i].grade ? rows[i].grade : 'None') + ',' + (rows[i].submitted ? (rows[i].submitted > rows[i].due ? 'Yes' : 'No') : (rows[i].due > Date.now() ? 'Yes' : 'Not Yet')) + '\n';
@@ -169,7 +173,8 @@ router.get('/:id', function(req, res) {
                           `students`.`fname`,\
                           `students`.`lname`,\
                           `submissions`.`id` AS `subID`,\
-                          `submissions`.`submitted` \
+                          `submissions`.`submitted`,\
+                          `submissions`.`grade` \
                         FROM `enrollment`,`students` \
                         LEFT JOIN \
                           `submissions` ON `submissions`.`student_id` = `students`.`id` AND \
@@ -245,6 +250,10 @@ router.get('/:id/delete', function(req, res) {
       });
     }
   });
+  /*query("DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1", [req.params.id, req.user.id]).
+  then(function(rows) {
+    
+  });*/
 });
 
 module.exports = router;

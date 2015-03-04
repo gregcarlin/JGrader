@@ -1,6 +1,6 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
- 
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,9 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+    <link rel="icon" href="favicon.ico">
 
-    <title>Sign Up | JGrader</title>
+    <title>Sign Up | jGrader</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
@@ -52,7 +52,7 @@
           I am a...
           <label><input type="radio" name="role" value="student" required<%- (typeof user == 'undefined' || user.role == 'student') ? ' checked' : '' %>>Student</label>
           <label><input type="radio" name="role" value="teacher"<%- (typeof user != 'undefined' && user.role == 'teacher') ? ' checked' : '' %>>Teacher</label>
-          <label title="Teaching Assistant"><input type="radio" name="role" value="assistant"<%- (typeof user != 'undefined' && user.role == 'assistant') ? ' checked' : ''%>>T.A.</label>
+          <!-- <label title="Teaching Assistant"><input type="radio" name="role" value="assistant"<%- (typeof user != 'undefined' && user.role == 'assistant') ? ' checked' : ''%>>T.A.</label> -->
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Create account</button>
   		</form>

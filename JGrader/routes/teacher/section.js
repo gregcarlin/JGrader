@@ -2,6 +2,7 @@
 // Copyright (c) 2015 JGrader. All rights reserved.
 
 require('../common');
+var strftime = require('strftime');
 var router = express.Router();
 
 var render = function(page, options, res) {
@@ -61,7 +62,7 @@ router.get('/create', function(req, res) {
 
 // handles request to create a section
 router.post('/create', function(req, res) {
-  var name = req.param('name');
+  var name = req.body.name;
   if(!name || name.length <= 0) {
     render('sectionCreate', {error: 'Name cannot be blank.', name: name}, res);
   } else {

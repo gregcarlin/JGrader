@@ -4,6 +4,8 @@
 require('../common');
 var router = express.Router();
 var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
+var multer = require('multer');
+var strftime = require('strftime');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -14,17 +16,22 @@ var render = function(page, options, res) {
       break;
     case 'assignmentList':
       options.title = 'Your Assignments';
+      options.js = ['tooltip'];
+      options.css = ['font-awesome.min'];
+      options.strftime = strftime;
       break;
     case 'assignment':
       // title should already be set
       options.js = ['student/dropzone', 'student/studentSubmit'];
       options.css = ['student/submit', 'font-awesome.min'];
+      options.strftime = strftime;
       break;
     case 'assignmentComplete':
       // title should already be set
       options.js = ['prettify', 'student/studentSubmitted'];
       options.css = ['prettify', 'font-awesome.min'];
       options.onload = 'prettyPrint()';
+      options.strftime = strftime;
       break;
   }
   renderGenericStudent(page, options, res);
@@ -32,12 +39,13 @@ var render = function(page, options, res) {
 
 // The page that lists the assignments
 router.get('/', function(req, res) {
-  connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`, `assignments`.`id` \
-                    FROM `sections`, `teachers`, `assignments`,`enrollment` \
+  connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`,`assignments`.`id`,`submissions`.`submitted` \
+                    FROM `sections`, `teachers`,`enrollment`,`assignments` \
+                    LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = ? \
                     WHERE `enrollment`.`student_id` = ? \
                     AND `enrollment`.`section_id` = `assignments`.`section_id` \
                     AND `sections`.`id` = `enrollment`.`section_id` \
-                    AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id], function(err, rows) {
+                    AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id, req.user.id], function(err, rows) {
     if(err) {
       render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
       throw err;
@@ -63,7 +71,7 @@ router.get('/:id', function(req, res) {
       } else if(rows.length <= 0) {
         render('notFound', {}, res);
       } else {
-        connection.query("SELECT `files`.`name`, `files`.`contents` \
+        connection.query("SELECT `files`.`name`, `files`.`contents`, `submissions`.`grade`,`submissions`.`submitted` \
                           FROM `files`, `students`, `assignments`, `submissions` \
                           WHERE `submissions`.`assignment_id` = `assignments`.`id` \
                           AND `submissions`.`student_id` = `students`.`id` \
@@ -83,6 +91,27 @@ router.get('/:id', function(req, res) {
     });
   }
 });
+
+// special version of fs.mkdir that suppresses errors on already created directories
+var mkdir = function(dir) {
+  try {
+    fs.mkdirSync(dir);
+  } catch (err) {
+    if(err.code != 'EEXIST') throw err;
+  }
+};
+
+router.use('/:id/submit', multer({
+  inMemory: false,
+  rename: function(fieldname, filename) {
+    return filename;
+  },
+  changeDest: function(dest, req, res) {
+    mkdir('./uploads');
+    mkdir('./uploads/' + req.user.id + '/');
+    return './uploads/' + req.user.id + '/';
+  }
+}));
 
 // Submits the file into the mysql database
 router.post('/:id/submit', function(req, res) {
@@ -123,6 +152,7 @@ router.post('/:id/submit', function(req, res) {
                     console.log(stderr);
                     res.send(stderr);
                   } else {
+                    console.log('success');
                     res.send("success");
                   }
                 });
@@ -136,18 +166,26 @@ router.post('/:id/submit', function(req, res) {
                 render('notFound', {error: 'Compilation has failed'}, res);
                 throw err;
               } else {
-                res.redirect('/student/assignment/' + req.params.id);
+                console.log('success 2');
+                res.send("success");
+                //res.redirect('/student/assignment/' + req.params.id);
               }
             });
           }
         });
       } else {
         // Will implement frontend name Same error to make it more friendly, no need for error response
-        res.redirect('/student/assignment/');
+        for(file in req.files) {
+          fs.unlinkSync(req.files[file].path);
+        }
+        res.send('noSanitize');
       }
     } else {
       // Will implement frontend sanitization to make it more friendly, no need for error response
-      res.redirect('/student/assignment/');
+      for(file in req.files) {
+        fs.unlinkSync(req.files[file].path);
+      }
+      res.send('noSanitize');
     }
   }
 });
@@ -166,53 +204,50 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
         } else {
           // List of file paths to compile
           var compileFiles = "";
+          var fileArr = [];
           for(file in files) {
             compileFiles = compileFiles + files[file].path + " ";
+            fileArr.push(files[file]);
           }
 
           // Compiles the java
           exec("javac " + compileFiles, function (error, stdout, stderr) {
-            if(stderr){
-              for(file in files) {
-                var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
-                fs.readFile(files[file].path, function(err, javaData) {
-                  fs.readFile(compilePath, function (err, classData) {
-                    connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
-                      if(err){
-                        finish(err);
-                      }
-                      // Deletes files after submit
-                      fs.unlink(files[file].path, function() {
-                        fs.unlink(compilePath, function() {
+            if(error) throw error;
 
-                        });
-                      });
-                    });
-                  });
-                });
-              }
-              finish(null, stderr);
-            } else {
-              for(file in files) {
-                var compilePath = files[file].path.substr(0, files[file].path.length-4) + "class";
-                fs.readFile(files[file].path, function(err, javaData) {
-                  fs.readFile(compilePath, function (err, classData) {
-                    connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, files[file].originalname, javaData, classData], function(err, rows) {
-                      if(err){
-                        finish(err);
-                      }
-                      // Deletes files after submit
-                      fs.unlink(files[file].path, function() {
-                        fs.unlink(compilePath, function() {
+            // must convert from file object to file array
+            // var fileArr = [];
+            // for(i in files) {
+            //   fileArr.push(files[i]);
+            // }
 
-                        });
+            async.each(fileArr, function(file, cb) {
+              var compilePath = file.path.substr(0, file.path.length-4) + 'class';
+              async.parallel({
+                  javaData: function(callback) {
+                    fs.readFile(file.path, callback);
+                  },
+                  classData: function(callback) {
+                    fs.readFile(compilePath, callback);
+                  }
+                }, function(err, data) {
+                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, file.originalname, data.javaData, data.classData], function(err, rows) {
+                    if(err) throw err;
+                    // Deletes files after submit
+                    async.parallel([
+                        function(callback) { fs.unlink(file.path, callback) },
+                        function(callback) { fs.unlink(compilePath, callback) }
+                      ], function(err) {
+                        // All files deleted and inserted into database, good to run final callback
+                        cb();
+                        if(err) throw err;
                       });
-                    });
                   });
-                });
-              }
-            }
-            finish(null);
+              });
+              // Final Callback after all of files delted then deletes dir.
+            }, function(err) {
+                fs.rmdirSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')))
+                finish(err ? err : stderr);
+            });
           });
         }
       });
