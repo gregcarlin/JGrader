@@ -24,12 +24,14 @@ var render = function(page, options, res) {
       // title should already be set
       options.js = ['student/dropzone', 'student/studentSubmit'];
       options.css = ['student/submit', 'font-awesome.min'];
+      options.strftime = strftime;
       break;
     case 'assignmentComplete':
       // title should already be set
       options.js = ['prettify', 'student/studentSubmitted'];
       options.css = ['prettify', 'font-awesome.min'];
       options.onload = 'prettyPrint()';
+      options.strftime = strftime;
       break;
   }
   renderGenericStudent(page, options, res);
@@ -69,7 +71,7 @@ router.get('/:id', function(req, res) {
       } else if(rows.length <= 0) {
         render('notFound', {}, res);
       } else {
-        connection.query("SELECT `files`.`name`, `files`.`contents`, `submissions`.`grade` \
+        connection.query("SELECT `files`.`name`, `files`.`contents`, `submissions`.`grade`,`submissions`.`submitted` \
                           FROM `files`, `students`, `assignments`, `submissions` \
                           WHERE `submissions`.`assignment_id` = `assignments`.`id` \
                           AND `submissions`.`student_id` = `students`.`id` \

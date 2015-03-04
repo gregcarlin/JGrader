@@ -29,7 +29,7 @@
       <tbody>
               <tr>
                 <td><%= rows[0].description %></td>
-                <td><%= rows[0].due %></td>
+                <td><%= strftime('%b %d, %Y at %l:%M %p', new Date(rows[0].due)); %><%- rows[0].submitted > rows[0].due ? ' <span class="fa fa-clock-o"></span>' : '' %></td>
                 <td><%- fileData[0].grade ? fileData[0].grade : '<em>Not graded.</em>' %></td>
                 <td><span class="fa fa-check fa-2x"></span></td>
               </tr>
