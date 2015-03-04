@@ -22,17 +22,18 @@ $('#execute').click(function() {
   });
 });
 
-const addComment = function(line) {
-  var commentBox = $('<div class="comment"><textarea></textarea></div>');
-  //$($('ol.linenums li').get(line)).append(commentBox);
-  
+var addComment = function(tab, line) {
+  var commentBox = $('<form class="comment"><textarea class="form-control"></textarea><button class="btn btn-lg btn-primary" type="submit">Comment</button></form>');
+  $($('ol.comments li', $('.tab-pane').get(tab)).get(line)).append(commentBox);
 };
 
 $(document).ready(function() {
   prettyPrint();
-  $('ol.linenums li').each(function(index, element) {
-    $(element).prepend('<a onclick="addComment(' + index  + ')" class="fa fa-comment-o"></a>');
-    $('ol.comments', $(element).parents('pre')).append('<li>hi</li>');
+  $('.tab-pane').each(function(tab, elem) {
+    $('ol.linenums li', elem).each(function(index, element) {
+      $(element).prepend('<a onclick="addComment(' + tab + ','  + index  + ')" class="fa fa-comment-o"></a>');
+      $('ol.comments', elem).append('<li></li>');
+    });
   });
 });
 

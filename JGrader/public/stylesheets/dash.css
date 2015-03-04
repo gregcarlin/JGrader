@@ -99,10 +99,15 @@ li.L1, li.L3, li.L5, li.L7, li.L9 {
 li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
   list-style-type: inherit !important;
 }
+code {
+  display: inline-block;
+  width: 80%;
+  vertical-align: top;
+}
 ol.linenums {
   padding-left: 40px;
   background-color: #FFF;
-  width: 80%;
+  width: 100%;
   display: inline-block;
 }
 ol.linenums li {
@@ -128,6 +133,20 @@ ol.comments {
   list-style-type: none;
   width: 20%;
   display: inline-block;
+}
+ol.comments .comment {
+  margin: 0;
+  width: 100%;
+}
+ol.comments .comment textarea {
+  margin-bottom: 2px;
+  resize: none;
+}
+ol.comments .comment .btn {
+  font-size: 12px;
+  padding: 2px 4px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  float: right;
 }
 .nav-tabs {
   border-bottom: none;
