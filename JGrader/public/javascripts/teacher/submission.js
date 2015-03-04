@@ -22,9 +22,18 @@ $('#execute').click(function() {
   });
 });
 
+const addComment = function(line) {
+  var commentBox = $('<div class="comment"><textarea></textarea></div>');
+  //$($('ol.linenums li').get(line)).append(commentBox);
+  
+};
+
 $(document).ready(function() {
   prettyPrint();
-  $('ol.linenums li').prepend('<a class="fa fa-comment-o"></a>');
+  $('ol.linenums li').each(function(index, element) {
+    $(element).prepend('<a onclick="addComment(' + index  + ')" class="fa fa-comment-o"></a>');
+    $('ol.comments', $(element).parents('pre')).append('<li>hi</li>');
+  });
 });
 
 $('#download').click(function() {
