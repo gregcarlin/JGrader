@@ -39,11 +39,11 @@ var render = function(page, options, res) {
 router.get('/', function(req, res) {
   connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`,`assignments`.`id`,`submissions`.`submitted` \
                     FROM `sections`, `teachers`,`enrollment`,`assignments` \
-                    LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                    LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = ? \
                     WHERE `enrollment`.`student_id` = ? \
                     AND `enrollment`.`section_id` = `assignments`.`section_id` \
                     AND `sections`.`id` = `enrollment`.`section_id` \
-                    AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id], function(err, rows) {
+                    AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id, req.user.id], function(err, rows) {
     if(err) {
       render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
       throw err;
