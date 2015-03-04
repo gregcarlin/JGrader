@@ -162,3 +162,9 @@ ol.linenums li {
   margin-left: 4px;
   font-size: 10pt;
 }
+.fa-check, .fa-check-circle {
+  color: #08aa1d;
+}
+.fa-exclamation-circle {
+  color: #AA081D;
+}

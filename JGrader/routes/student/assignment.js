@@ -5,6 +5,7 @@ require('../common');
 var router = express.Router();
 var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
 var multer = require('multer');
+var strftime = require('strftime');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -15,6 +16,9 @@ var render = function(page, options, res) {
       break;
     case 'assignmentList':
       options.title = 'Your Assignments';
+      options.js = ['tooltip'];
+      options.css = ['font-awesome.min'];
+      options.strftime = strftime;
       break;
     case 'assignment':
       // title should already be set
@@ -33,8 +37,9 @@ var render = function(page, options, res) {
 
 // The page that lists the assignments
 router.get('/', function(req, res) {
-  connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`, `assignments`.`id` \
-                    FROM `sections`, `teachers`, `assignments`,`enrollment` \
+  connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`,`assignments`.`id`,`submissions`.`submitted` \
+                    FROM `sections`, `teachers`,`enrollment`,`assignments` \
+                    LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
                     WHERE `enrollment`.`student_id` = ? \
                     AND `enrollment`.`section_id` = `assignments`.`section_id` \
                     AND `sections`.`id` = `enrollment`.`section_id` \
