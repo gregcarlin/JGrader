@@ -165,6 +165,6 @@ ol.linenums li {
 .fa-check, .fa-check-circle {
   color: #08aa1d;
 }
-.fa-exclamation-circle {
+.fa-exclamation-circle, .fa-times {
   color: #AA081D;
 }
