@@ -235,16 +235,16 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
                         function(callback) { fs.unlink(file.path, callback) },
                         function(callback) { fs.unlink(compilePath, callback) }
                       ], function(err) {
-                        if(err) throw err;
                         // All files deleted and inserted into database, good to run final callback
                         cb();
+                        if(err) throw err;
                       });
                   });
               });
               // Final Callback after all of files delted then deletes dir.
             }, function(err) {
                 fs.rmdirSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')))
-                finish(err ? err: stderr);
+                finish(err ? err : stderr);
             });
           });
         }
