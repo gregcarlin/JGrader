@@ -26,14 +26,27 @@
         <tr>
           <td colspan="3">You have no Assignments... Lucky</td>
         </tr>
-      <% } else {
-          for(i in rows) {%>
+    <% 
+        } else {
+          for(i in rows) {
+            var dueString = strftime('%b %d, %Y at %l:%M %p', new Date(rows[i].due));
+            if(rows[i].submitted) { // assignment has been submitted
+              dueString += ' <span class="fa fa-check-circle" data-toggle="tooltip" data-placement="bottom" title="Done"></span>';
+              if(rows[i].submitted > rows[i].due) {
+                dueString += ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="bottom" title="Late"></span>';
+              }
+            } else if(Date.now() > rows[i].due) { // assignment is not submitted and late
+              dueString += ' <span class="fa fa-exclamation-circle" data-toggle="tooltip" data-placement="bottom" title="Overdue!"></span>';
+            } else { // not submitted but still time to submit
+              //dueString += ' <span class="></span>';
+            }
+    %>
             <tr>
               <td><a href="/student/assignment/<%= rows[i].id %>"><%= rows[i].assignmentName %></a></td>
-              <td><%= rows[i].description%></td>
-              <td><%= rows[i].due%></td>
-              <td><%= rows[i].name%></td>
-              <td><%= rows[i].lname + ', ' + rows[i].fname%></td>
+              <td><%= rows[i].description %></td>
+              <td><%- dueString %></td>
+              <td><%= rows[i].name %></td>
+              <td><%= rows[i].lname + ', ' + rows[i].fname %></td>
             </tr>
        <% }
        } %>
