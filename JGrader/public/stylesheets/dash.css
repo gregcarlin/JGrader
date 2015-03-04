@@ -133,6 +133,7 @@ ol.comments {
   list-style-type: none;
   width: 20%;
   display: inline-block;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 ol.comments .comment {
   margin: 0;
@@ -145,7 +146,6 @@ ol.comments .comment textarea {
 ol.comments .comment .btn {
   font-size: 12px;
   padding: 2px 4px;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   float: right;
 }
 .nav-tabs {
