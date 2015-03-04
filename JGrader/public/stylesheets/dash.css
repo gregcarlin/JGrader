@@ -102,6 +102,8 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 ol.linenums {
   padding-left: 40px;
   background-color: #FFF;
+  width: 80%;
+  display: inline-block;
 }
 ol.linenums li {
   border-left: 1px solid #BBB;
@@ -121,6 +123,11 @@ ol.linenums li:hover .fa {
 ol.linenums li .fa:hover {
   color: #428bca;
   cursor: pointer;
+}
+ol.comments {
+  list-style-type: none;
+  width: 20%;
+  display: inline-block;
 }
 .nav-tabs {
   border-bottom: none;
