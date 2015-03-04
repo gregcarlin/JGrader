@@ -173,7 +173,8 @@ router.get('/:id', function(req, res) {
                           `students`.`fname`,\
                           `students`.`lname`,\
                           `submissions`.`id` AS `subID`,\
-                          `submissions`.`submitted` \
+                          `submissions`.`submitted`,\
+                          `submissions`.`grade` \
                         FROM `enrollment`,`students` \
                         LEFT JOIN \
                           `submissions` ON `submissions`.`student_id` = `students`.`id` AND \
