@@ -32,10 +32,13 @@
               <td><%- results[i].submitted ? ('<a href="/teacher/submission/' + results[i].subID + '">' + results[i].fname + ' ' + results[i].lname + '</a>') : (results[i].fname + ' ' + results[i].lname) %></td>
               <%
                 var submitted = new Date(results[i].submitted);
-                var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
+                var submittedStr = results[i].submitted ? strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted) : 'Never';
+                if((results[i].submitted && results[i].submitted > assignment.due) || (!results[i].submitted && Date.now() > assignment.due)) {
+                  submittedStr += ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="right" data-title="Late"></span>';
+                }
               %>
-              <td><%- results[i].submitted ? submittedStr : 'Never' %></td>
-              <td>Not Graded</td>
+              <td><%- submittedStr %></td>
+              <td><%- results[i].grade ? (results[i].grade + '%') : '<em>Not graded.</em>' %></td>
             </tr>
        <% }
          } %>

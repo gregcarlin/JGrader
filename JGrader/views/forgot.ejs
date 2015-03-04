@@ -11,7 +11,7 @@
     <meta name="author" content="">
     <link rel="icon" href="favicon.ico">
 
-    <title>Sign In | jGrader</title>
+    <title>Forgot Password | JGrader</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
@@ -39,14 +39,17 @@
   <body>
 
     <div class="container">
-      <form class="form-signin" role="form" action="/sign-in" method="POST">
-  		  <h2 class="form-signin-heading">Sign in</h2>
+      <form class="form-signin" role="form" action="/forgot" method="POST">
+  		  <h2 class="form-signin-heading">Reset password</h2>
         <% if(typeof error != 'undefined') { %>
-          <div class="alert alert-danger" role="alert"><%- error %></div>
+          <div class="alert alert-danger" role="alert"><%= error %></div>
+        <% }
+           if(typeof success != 'undefined') { %>
+          <div class="alert alert-success" role="alert"><%= success %></div>
         <% } %>
-      	<input type="email" class="form-control" name="email" placeholder="Email" required autofocus<%- typeof email == 'undefined' ? '' : ' value="'+email+'"' %>>
-      	<input type="password" class="form-control" name="password" placeholder="Password" required>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+        <div class="info">Enter your email to have your password reset.</div>
+      	<input type="email" class="form-control" name="email" placeholder="Email" required autofocus>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Send</button>
   		</form>
     </div> <!-- /container -->
 

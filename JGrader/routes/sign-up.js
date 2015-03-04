@@ -7,7 +7,7 @@ var crypto  = require('crypto');
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('sign-up', {});
+  res.render('sign-up', {error: req.query.error});
 });
 
 // checks if a user exists in a given database. calls finish() iff user doesn't exist.
@@ -25,11 +25,11 @@ var exists = function(user, db, res, finish) {
 
 router.post('/', function(req, res) {
   var user = {};
-  user.fname = req.param('fname');
-  user.lname = req.param('lname');
-  user.email = req.param('email');
-  user.pass  = req.param('password');
-  user.role  = req.param('role');
+  user.fname = req.body.fname;
+  user.lname = req.body.lname;
+  user.email = req.body.email;
+  user.pass  = req.body.password;
+  user.role  = req.body.role;
   if(user.fname && user.lname && user.email && user.pass && user.role && (user.role == 'student' || user.role == 'teacher' || user.role == 'assistant')) {
     exists(user, 'students', res, function() {
       exists(user, 'teachers', res, function() {

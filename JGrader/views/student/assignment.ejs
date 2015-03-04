@@ -28,7 +28,8 @@
       <tbody>
               <tr>
                 <td><%= rows[0].description %></td>
-                <td><%= rows[0].due %></td>
+                <td><%= strftime('%b %d, %Y at %l:%M %p', new Date(rows[0].due)); %></td>
+                <td><span class="fa fa-times"></span></td>
               </tr>
       </tbody>
     </table>

@@ -14,7 +14,7 @@ var render = function(page, options, res) {
       break;
     case 'studentList':
       options.title = 'Your Students';
-      options.js = ['tooltip'];
+      options.js = ['tooltip', 'teacher/studentList', 'stupidtable.min'];
       options.css = ['font-awesome.min'];
       break;
     case 'student':
@@ -124,6 +124,17 @@ router.get('/:id', function(req, res) {
           render('student', {title: name, name: name, rows: rows, id: req.params.id}, res);
         }
       });
+    }
+  });
+});
+
+router.get('/:id/:section/delete', function(req, res) {
+  connection.query("DELETE `enrollment`,`submissions`,`files` FROM `enrollment` JOIN `sections` ON `enrollment`.`section_id` = `sections`.`id` LEFT JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` LEFT JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `enrollment`.`student_id` = ? AND `enrollment`.`section_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.params.section, req.user.id], function(err, result) {
+    if(err) {
+      render('notFound', {error: 'Unable to remove student. Please go back and try again.'}, res);
+      throw err;
+    } else {
+      res.redirect('/teacher/student');
     }
   });
 });
