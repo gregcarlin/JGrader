@@ -41,9 +41,21 @@ var closeComment = function(tab, line) {
 };
 
 var submitComment = function(tab, line) {
-  var text = $('textarea', getLineLi(tab, line)).html();
-  closeComment(tab, line);
-  $.post('TODO');
+  var lineLi = getLineLi(tab, line);
+  var text = $('textarea', lineLi).val();
+  //closeComment(tab, line);
+  var innerComment = $('.comment-text', lineLi);
+  innerComment.html('<span class="fa fa-spinner fa-spin"></span> Posting comment');
+  var url = document.URL;
+  if(url.charAt(url.length-1) != '/') url += '/';
+  $.post(url + 'comment', {tab: tab, line: line, text: text}, function(data, textStatus, jqXHR) {
+    if(data.code == 0) {
+      innerComment.remove();
+      lineLi.append('<div class="comment">' + text + '</div>');
+    } else {
+      alert('There was an issue posting your comment. Please reload the page and try again.');
+    }
+  });
 };
 
 $(document).ready(function() {

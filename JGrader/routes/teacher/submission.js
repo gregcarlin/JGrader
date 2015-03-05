@@ -237,8 +237,35 @@ router.get('/:id/comment', function(req, res) {
   // todo return json of comments
 });
 
-router.post('/:id/comment/:text', function(req, res) {
-  // todo make a new comment
+router.post('/:id/comment', function(req, res) {
+  // security to ensure this teachers owns this submission
+  if(req.body.tab && req.body.line && req.body.text) {
+    connection.query("SELECT * \
+                      FROM `submissions`,`assignments`,`sections` \
+                      WHERE \
+                        `submissions`.`assignment_id` = `assignments`.`id` AND \
+                        `assignments`.`section_id` = `sections`.`id` AND \
+                        `submissions`.`id` = ? AND \
+                        `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, result) {
+      if(err) {
+        res.json({code: -1});
+        throw err;
+      } else if(result.length <= 0) {
+        res.json({code: 2}); // invalid permissions (i think this is the right code)
+      } else {
+        connection.query("INSERT INTO `comments` VALUES(NULL, ?, ?, ?, 'teacher', ?, NOW(), ?)", [req.params.id, req.body.tab, req.body.line, req.user.id, req.body.text], function(err, result) {
+          if(err) {
+            res.json({code: -1});
+            throw err;
+          } else {
+            res.json({code: 0});
+          }
+        });
+      }
+    });
+  } else {
+    res.json({code: 1}); // missing data. i'm just making up codes here
+  }
 });
 
 module.exports = router;
