@@ -148,6 +148,12 @@ ol.comments .comment .btn {
   padding: 2px 4px;
   float: right;
 }
+ol.comments .btn {
+  margin-left: 3px;
+}
+ol.comments .btn .fa {
+  color: #FFF !important;
+}
 .nav-tabs {
   border-bottom: none;
 }
