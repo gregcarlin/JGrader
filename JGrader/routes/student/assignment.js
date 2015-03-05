@@ -174,17 +174,11 @@ router.post('/:id/submit', function(req, res) {
           }
         });
       } else {
-        // Will implement frontend name Same error to make it more friendly, no need for error response
-        for(file in req.files) {
-          fs.unlinkSync(req.files[file].path);
-        }
+        fs.removeSync(req.files['file[0]'].path.substring(0, req.files['file[0]'].path.lastIndexOf('/')));
         res.send('noSanitize');
       }
     } else {
-      // Will implement frontend sanitization to make it more friendly, no need for error response
-      for(file in req.files) {
-        fs.unlinkSync(req.files[file].path);
-      }
+      fs.removeSync(req.files['file[0]'].path.substring(0, req.files['file[0]'].path.lastIndexOf('/')));
       res.send('noSanitize');
     }
   }
@@ -246,7 +240,7 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
               });
               // Final Callback after all of files delted then deletes dir.
             }, function(err) {
-                fs.removeSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')))
+                fs.removeSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')));
                 finish(err ? err : stderr);
             });
           });
