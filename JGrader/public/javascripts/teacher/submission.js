@@ -22,9 +22,28 @@ $('#execute').click(function() {
   });
 });
 
+var getLineLi = function(tab, line) {
+  return $($('ol.comments li', $('.tab-pane').get(tab)).get(line));
+};
+
+// open new comment dialog at a given position
 var addComment = function(tab, line) {
-  var commentBox = $('<form class="comment"><textarea class="form-control"></textarea><button class="btn btn-lg btn-primary" type="submit">Comment</button></form>');
-  $($('ol.comments li', $('.tab-pane').get(tab)).get(line)).append(commentBox);
+  var lineLi = getLineLi(tab, line);
+  if($('.comment-text', lineLi).length == 0) {
+    var commentBox = $('<div class="comment comment-text"><textarea class="form-control"></textarea><button class="btn btn-lg btn-success" onclick="submitComment(' + tab + ',' + line + ')"><span class="fa fa-arrow-right"></span></button><button class="btn btn-lg btn-danger" onclick="closeComment(' + tab + ',' + line + ')"><span class="fa fa-times"></span></button></div>');
+    lineLi.append(commentBox);
+  }
+};
+
+// close an already-open new comment dialog at a given position
+var closeComment = function(tab, line) {
+  $('.comment-text', getLineLi(tab, line)).remove();
+};
+
+var submitComment = function(tab, line) {
+  var text = $('textarea', getLineLi(tab, line)).html();
+  closeComment(tab, line);
+  $.post('TODO');
 };
 
 $(document).ready(function() {
