@@ -234,7 +234,11 @@ router.get('/:id/download/:fileIndex', function(req, res) {
 });
 
 router.get('/:id/comment', function(req, res) {
-  connection.query("SELECT * FROM `comments` JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` WHERE `sections`.`teacher_id` = ? AND `comments`.`submission_id` = ?", [req.user.id, req.params.id], function(err, rows) {
+  connection.query("SELECT * FROM `comments` \
+                      JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
+                      JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                      JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+                      WHERE `sections`.`teacher_id` = ? AND `comments`.`submission_id` = ?", [req.user.id, req.params.id], function(err, rows) {
     if(err) {
       res.json({code: -1});
       throw err;
