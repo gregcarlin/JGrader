@@ -167,7 +167,7 @@ router.post('/:id/run/:fileIndex', function(req, res) {
 });
 
 router.get('/:id/download', function(req, res) {
-  // security to ensure this teachers owns this submission and file
+  // security to ensure this teacher owns this submission and file
   connection.query("SELECT \
                       `files`.`id`,\
                       `files`.`name`,\
@@ -203,7 +203,7 @@ router.get('/:id/download', function(req, res) {
 router.get('/:id/download/:fileIndex', function(req, res) {
   async.waterfall([
       function(callback) {
-        // security to ensure this teachers owns this submission and file
+        // security to ensure this teacher owns this submission and file
         connection.query("SELECT \
                             `files`.`id`,\
                             `files`.`name`,\
@@ -234,11 +234,19 @@ router.get('/:id/download/:fileIndex', function(req, res) {
 });
 
 router.get('/:id/comment', function(req, res) {
-  // todo return json of comments
+  connection.query("SELECT * FROM `comments` JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` WHERE `sections`.`teacher_id` = ? AND `comments`.`submission_id` = ?", [req.user.id, req.params.id], function(err, rows) {
+    if(err) {
+      res.json({code: -1});
+      throw err;
+    } else {
+      // todo
+      res.json({code: 0});
+    }
+  });
 });
 
 router.post('/:id/comment', function(req, res) {
-  // security to ensure this teachers owns this submission
+  // security to ensure this teacher owns this submission
   if(req.body.tab && req.body.line && req.body.text) {
     connection.query("SELECT * \
                       FROM `submissions`,`assignments`,`sections` \

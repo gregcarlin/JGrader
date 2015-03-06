@@ -43,7 +43,6 @@ var closeComment = function(tab, line) {
 var submitComment = function(tab, line) {
   var lineLi = getLineLi(tab, line);
   var text = $('textarea', lineLi).val();
-  //closeComment(tab, line);
   var innerComment = $('.comment-text', lineLi);
   innerComment.html('<span class="fa fa-spinner fa-spin"></span> Posting comment');
   var url = document.URL;
