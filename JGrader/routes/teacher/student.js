@@ -14,7 +14,7 @@ var render = function(page, options, res) {
       break;
     case 'studentList':
       options.title = 'Your Students';
-      options.js = ['tooltip', 'teacher/studentList', 'stupidtable.min'];
+      options.js = ['tooltip', 'teacher/studentList', 'stupidtable.min', 'tablesort'];
       options.css = ['font-awesome.min'];
       break;
     case 'student':
