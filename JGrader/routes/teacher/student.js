@@ -41,7 +41,7 @@ router.get('/', function(req, res) {
                       `students` \
                       JOIN `enrollment` ON `students`.`id` = `enrollment`.`student_id` \
                       JOIN `sections` ON `sections`.`id` = `enrollment`.`section_id` \
-                      JOIN \
+                      LEFT JOIN \
                         (SELECT `temp2`.* FROM \
                           (SELECT `student_id`,`assignments`.`section_id`,MAX(`submitted`) AS `max` \
                             FROM `submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
