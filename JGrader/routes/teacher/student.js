@@ -52,7 +52,7 @@ router.get('/', function(req, res) {
                             FROM `submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id`) AS `temp2` \
                           ON `temp`.`student_id` = `temp2`.`student_id` AND `temp`.`section_id` = `temp2`.`section_id` AND `temp2`.`submitted` = `temp`.`max`) AS `temp3` \
                       ON `temp3`.`student_id` = `students`.`id` AND `temp3`.`section_id` = `sections`.`id` \
-                      JOIN \
+                      LEFT JOIN \
                         (SELECT `submissions`.`id`,`submissions`.`student_id`,AVG(`submissions`.`grade`) AS `avg`,`assignments`.`section_id` \
                           FROM `submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
                           WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) \
