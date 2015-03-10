@@ -94,7 +94,7 @@ ul.section-list {
   border-top-left-radius: 0;
 }
 li.L1, li.L3, li.L5, li.L7, li.L9 {
-  background: #f5f5f5 !important;
+  background: #f5f5f5;
 }
 li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
   list-style-type: inherit !important;
