@@ -44,7 +44,7 @@ var submitComment = function(tab, line) {
   var lineLi = getLineLi(tab, line);
   var text = $('textarea', lineLi).val();
   var innerComment = $('.comment-text', lineLi);
-  innerComment.html('<span class="fa fa-spinner fa-spin"></span> Posting comment');
+  innerComment.html('<span class="fa fa-spinner fa-spin"></span> Posting');
   var url = document.URL;
   if(url.charAt(url.length-1) != '/') url += '/';
   $.post(url + 'comment', {tab: tab, line: line, text: text}, function(data, textStatus, jqXHR) {
