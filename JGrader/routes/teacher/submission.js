@@ -234,17 +234,47 @@ router.get('/:id/download/:fileIndex', function(req, res) {
 });
 
 router.get('/:id/comment', function(req, res) {
-  connection.query("SELECT * FROM `comments` \
-                      JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
-                      JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                      JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
-                      WHERE `sections`.`teacher_id` = ? AND `comments`.`submission_id` = ?", [req.user.id, req.params.id], function(err, rows) {
+  connection.query("SELECT \
+                      `comments`.`id`,\
+                      `comments`.`tab`,\
+                      `comments`.`line`,\
+                      `comments`.`commenter_type`,\
+                      `comments`.`timestamp`,\
+                      `comments`.`message`,\
+                      `teachers`.`fname` AS `tfname`,\
+                      `teachers`.`lname` AS `tlname`,\
+                      `students`.`fname` AS `sfname`,\
+                      `students`.`lname` AS `slname`,\
+                      `assistants`.`fname` AS `afname`,\
+                      `assistants`.`lname` AS `alname` \
+                    FROM `comments` \
+                    JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
+                    JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                    JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+                    LEFT JOIN `teachers` ON `teachers`.`id` = `comments`.`commenter_id` \
+                    LEFT JOIN `students` ON `students`.`id` = `comments`.`commenter_id` \
+                    LEFT JOIN `assistants` ON `assistants`.`id` = `comments`.`commenter_id` \
+                    WHERE `sections`.`teacher_id` = ? AND `comments`.`submission_id` = ?", [req.user.id, req.params.id], function(err, rows) {
     if(err) {
       res.json({code: -1});
       throw err;
+    } else if(rows.length <= 0) {
+      res.json({code: 2}); // invalid permissions (code may or may not be correct, see post method below as well)
     } else {
-      // todo
-      res.json({code: 0});
+      /*var comments = [];
+      for(i in rows) {
+        comments.push({
+          id: rows[i].id,
+          tab: rows[i].tab,
+          line: rows[i].line,
+
+        });
+      }
+      res.json({code: 0, comments: comments});*/
+      for(i in rows) {
+        // todo convert distribute name thing to single, accurate name
+      }
+      res.json({code: 0, comments: rows});
     }
   });
 });
