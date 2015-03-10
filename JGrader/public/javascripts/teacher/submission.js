@@ -61,6 +61,13 @@ var submitComment = function(tab, line) {
   });
 };
 
+var getTabLine = function(div) {
+  var classes = div.attr('class').split(' ');
+  var line = classes[1].split('-')[2];
+  var tab = classes[2].split('-')[2];
+  return {line: line, tab: tab};
+};
+
 $(document).ready(function() {
   prettyPrint();
   $('.tab-pane').each(function(tab, elem) {
@@ -75,17 +82,21 @@ $(document).ready(function() {
   if(url.charAt(url.length-1) != '/') url += '/';
   $.get(url + 'comment/', {}, function(data, textStatus, jqXHR) {
     if(data.code != 0) {
-      // todo show error in comments section
+      var lio = getOrigLi(0,0);
+      lio.append('<div class="comment">Error retrieving comments</div>');
     } else {
       for(i in data.comments) {
         var comment = data.comments[i];
         var li = getLineLi(comment.tab, comment.line);
-        var div = $('<div class="comment">' + comment.message  + '</div>');
-        var lio = getOrigLi(comment.tab, comment.line);
+        var div = $('<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '">' + comment.message  + '</div>');
         div.mouseenter(function() {
+          var tabLine = getTabLine($(this));
+          var lio = getOrigLi(tabLine.tab, tabLine.line);
           lio.css('background-color', '#FFA');
         });
         div.mouseleave(function() {
+          var tabLine = getTabLine($(this));
+          var lio = getOrigLi(tabLine.tab, tabLine.line);
           lio.css('background-color', '');
         });
         li.append(div);
