@@ -142,10 +142,18 @@ ol.comments .comment {
   padding: 5px;
   border: 1px solid #888;
   margin-top: -1px;
+  font-size: 14px;
 }
 ol.comments .comment textarea {
   margin-bottom: 2px;
   resize: none;
+}
+ol.comments .comment .data {
+  font-size: 11px;
+}
+ol.comments .comment .data .date {
+  color: #AAA;
+  font-style: italic;
 }
 ol.comments .comment .btn {
   font-size: 12px;
