@@ -26,6 +26,10 @@ var getLineLi = function(tab, line) {
   return $($('ol.comments li', $('.tab-pane').get(tab)).get(line));
 };
 
+var getOrigLi = function(tab, line) {
+  return $($('ol.linenums li', $('.tab-pane').get(tab)).get(line));
+}
+
 // open new comment dialog at a given position
 var addComment = function(tab, line) {
   var lineLi = getLineLi(tab, line);
@@ -73,7 +77,19 @@ $(document).ready(function() {
     if(data.code != 0) {
       // todo show error in comments section
     } else {
-      // todo display comments
+      for(i in data.comments) {
+        var comment = data.comments[i];
+        var li = getLineLi(comment.tab, comment.line);
+        var div = $('<div class="comment">' + comment.message  + '</div>');
+        var lio = getOrigLi(comment.tab, comment.line);
+        div.mouseenter(function() {
+          lio.css('background-color', '#FFA');
+        });
+        div.mouseleave(function() {
+          lio.css('background-color', '');
+        });
+        li.append(div);
+      }
     }
   });
 });
