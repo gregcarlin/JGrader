@@ -279,6 +279,7 @@ router.get('/:id/comment', function(req, res) {
         delete rows[i].slname;
         delete rows[i].afname;
         delete rows[i].alname;
+        delete rows[i].commenter_type;
       }
       res.json({code: 0, comments: rows});
     }

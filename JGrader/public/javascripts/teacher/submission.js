@@ -44,6 +44,7 @@ var closeComment = function(tab, line) {
   $('.comment-text', getLineLi(tab, line)).remove();
 };
 
+// add a comment in the db and update the ui
 var submitComment = function(tab, line) {
   var lineLi = getLineLi(tab, line);
   var text = $('textarea', lineLi).val();
@@ -54,13 +55,43 @@ var submitComment = function(tab, line) {
   $.post(url + 'comment', {tab: tab, line: line, text: text}, function(data, textStatus, jqXHR) {
     if(data.code == 0) {
       innerComment.remove();
-      lineLi.append('<div class="comment">' + text + '</div>');
+      appendComment({
+        id: 0, // todo
+        tab: tab,
+        line: line,
+        timestamp: 0, // todo
+        message: text,
+        name: '' // todo
+      });
     } else {
       alert('There was an issue posting your comment. Please reload the page and try again.');
     }
   });
 };
 
+// displays a comment. comment must have certain fields defined (see routes/teacher/submission.js)
+var appendComment = function(comment) {
+  var li = getLineLi(comment.tab, comment.line);
+  var html = '<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '">';
+  html += comment.message;
+  html += '<br />';
+  html += '-' + comment.name;
+  html += '</div>';;
+  var div = $(html);
+  div.mouseenter(function() {
+    var tabLine = getTabLine($(this));
+    var lio = getOrigLi(tabLine.tab, tabLine.line);
+    lio.css('background-color', '#FFA');
+  });
+  div.mouseleave(function() {
+    var tabLine = getTabLine($(this));
+    var lio = getOrigLi(tabLine.tab, tabLine.line);
+    lio.css('background-color', '');
+  });
+  li.append(div);
+}
+
+// finds the tab and line encoded into a div created in appendComment
 var getTabLine = function(div) {
   var classes = div.attr('class').split(' ');
   var line = classes[1].split('-')[2];
@@ -86,20 +117,7 @@ $(document).ready(function() {
       lio.append('<div class="comment">Error retrieving comments</div>');
     } else {
       for(i in data.comments) {
-        var comment = data.comments[i];
-        var li = getLineLi(comment.tab, comment.line);
-        var div = $('<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '">' + comment.message  + '</div>');
-        div.mouseenter(function() {
-          var tabLine = getTabLine($(this));
-          var lio = getOrigLi(tabLine.tab, tabLine.line);
-          lio.css('background-color', '#FFA');
-        });
-        div.mouseleave(function() {
-          var tabLine = getTabLine($(this));
-          var lio = getOrigLi(tabLine.tab, tabLine.line);
-          lio.css('background-color', '');
-        });
-        li.append(div);
+        appendComment(data.comments[i]);
       }
     }
   });
