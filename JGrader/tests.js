@@ -1,5 +1,6 @@
 const creds = require('./test_credentials');
 const url   = creds.url;
+const fs    = require('fs');
 
 // start with some helpful methods for later
 
@@ -117,3 +118,24 @@ casper.test.begin('Student Sign In', function(test) {
 testTitle('Student Section List', 'student/section', 'Your Sections | jGrader');
 testTitle('Student Assignment List', 'student/assignment', 'Your Assignments | jGrader');
 
+var hello = fs.read('./test_files/Hello.java');
+casper.test.begin('Simple Submission', function(test) {
+  /*casper.start(url + 'student/assignment/34', function() {
+  });*/
+  casper.start();
+  
+  casper.open(url + 'student/assignment/34/submit', {
+    method: 'post',
+    data: hello,
+    contentType: false,
+    headers: {'Content-type' : 'multipart/form-data'}
+  });
+
+  casper.then(function() {
+    casper.debugHTML();
+  });
+
+  casper.run(function() {
+    test.done();
+  });
+});
