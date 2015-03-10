@@ -65,6 +65,17 @@ $(document).ready(function() {
       $('ol.comments', elem).append('<li></li>');
     });
   });
+
+  // retrieve and display comments
+  var url = document.URL;
+  if(url.charAt(url.length-1) != '/') url += '/';
+  $.get(url + 'comment/', {}, function(data, textStatus, jqXHR) {
+    if(data.code != 0) {
+      // todo show error in comments section
+    } else {
+      // todo display comments
+    }
+  });
 });
 
 $('#download').click(function() {

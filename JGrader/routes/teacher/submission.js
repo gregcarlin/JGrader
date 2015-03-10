@@ -261,18 +261,24 @@ router.get('/:id/comment', function(req, res) {
     } else if(rows.length <= 0) {
       res.json({code: 2}); // invalid permissions (code may or may not be correct, see post method below as well)
     } else {
-      /*var comments = [];
       for(i in rows) {
-        comments.push({
-          id: rows[i].id,
-          tab: rows[i].tab,
-          line: rows[i].line,
-
-        });
-      }
-      res.json({code: 0, comments: comments});*/
-      for(i in rows) {
-        // todo convert distribute name thing to single, accurate name
+        switch(rows[i].commenter_type) {
+          case 'teacher':
+            rows[i].name = rows[i].tfname + ' ' + rows[i].tlname;
+            break;
+          case 'student':
+            rows[i].name = rows[i].sfname + ' ' + rows[i].slname;
+            break;
+          case 'assistant':
+            rows[i].name = rows[i].afname + ' ' + rows[i].alname;
+            break;
+        }
+        delete rows[i].tfname;
+        delete rows[i].tlname;
+        delete rows[i].sfname;
+        delete rows[i].slname;
+        delete rows[i].afname;
+        delete rows[i].alname;
       }
       res.json({code: 0, comments: rows});
     }
