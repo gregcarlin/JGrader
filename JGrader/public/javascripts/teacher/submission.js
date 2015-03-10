@@ -69,13 +69,17 @@ var submitComment = function(tab, line) {
   });
 };
 
+//var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 // displays a comment. comment must have certain fields defined (see routes/teacher/submission.js)
 var appendComment = function(comment) {
   var li = getLineLi(comment.tab, comment.line);
+  var date = new Date(comment.timestamp);
   var html = '<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '">';
+  //html += months[date.getMonth()-1] + ' ' + date.getDate() + ', ' + date.getFullYear() + ' at ' + date.getHours() + ':' + date.getMinutes() + '<br />';
+  html += date.toLocaleString() + '<br />';
+  html += comment.name + ':<br />';
   html += comment.message;
-  html += '<br />';
-  html += '-' + comment.name;
   html += '</div>';;
   var div = $(html);
   div.mouseenter(function() {

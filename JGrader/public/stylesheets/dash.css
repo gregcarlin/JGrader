@@ -138,6 +138,10 @@ ol.comments {
 ol.comments .comment {
   margin: 0;
   width: 100%;
+  background-color: #FFF;
+  padding: 5px;
+  border: 1px solid #888;
+  margin-top: -1px;
 }
 ol.comments .comment textarea {
   margin-bottom: 2px;
