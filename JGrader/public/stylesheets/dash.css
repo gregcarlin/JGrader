@@ -155,6 +155,12 @@ ol.comments .comment .data .date {
   color: #AAA;
   font-style: italic;
 }
+ol.comments .comment .links {
+  font-size: 11px;
+}
+ol.comments .comment .links a:hover {
+  cursor: pointer;
+}
 ol.comments .comment .btn {
   font-size: 12px;
   padding: 2px 4px;
