@@ -81,6 +81,9 @@ var appendComment = function(comment) {
   html += comment.name + ':<br />';
   html += '</div>';
   html += comment.message;
+  html += '<div class="links">';
+  html += '<a onclick="addComment(' + comment.tab + ',' + comment.line + ')">Reply</a>';
+  html += '</div>';
   html += '</div>';;
   var div = $(html);
   div.mouseenter(function() {
