@@ -68,7 +68,6 @@ a:hover {
 
 .nav .left {
   font-size: 48px;
-  font-weight: 300;
   color: #727272;
   background-color: #FAFAFA;
   position: absolute;
@@ -76,7 +75,7 @@ a:hover {
 .nav .left a {
   color: #727272;
   margin-left: 41px;
-  font-weight: 100;
+  font-weight: 300;
   position: relative;
   top: -5px;
 }
