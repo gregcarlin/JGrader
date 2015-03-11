@@ -89,7 +89,7 @@ a:hover {
   display: table;
   table-layout: fixed;
   position: absolute;
-  font-weight: 100;
+  font-weight: 300;
 }
 .nav .right a {
   display: table-cell;
