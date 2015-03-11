@@ -34,7 +34,7 @@ var getOrigLi = function(tab, line) {
 var addComment = function(tab, line) {
   var lineLi = getLineLi(tab, line);
   if($('.comment-text', lineLi).length == 0) {
-    var commentBox = $('<div class="comment comment-text"><textarea class="form-control"></textarea><button class="btn btn-lg btn-success" onclick="submitComment(' + tab + ',' + line + ')"><span class="fa fa-arrow-right"></span></button><button class="btn btn-lg btn-danger" onclick="closeComment(' + tab + ',' + line + ')"><span class="fa fa-times"></span></button></div>');
+    var commentBox = $('<div class="comment comment-text"><textarea class="form-control"></textarea><a onclick="closeComment(' + tab + ',' + line + ')" class="fa fa-times"></a><a onclick="submitComment(' + tab + ',' + line + ')" class="fa fa-arrow-right"></a></div>');
     lineLi.append(commentBox);
   }
 };

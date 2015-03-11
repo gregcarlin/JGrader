@@ -148,6 +148,15 @@ ol.comments .comment textarea {
   margin-bottom: 2px;
   resize: none;
 }
+ol.comments .comment-text a {
+  color: #000;
+}
+ol.comments .comment-text a:hover {
+  text-decoration: none;
+}
+ol.comments .comment-text a.fa-arrow-right {
+  float: right;
+}
 ol.comments .comment .data {
   font-size: 11px;
 }
@@ -160,17 +169,6 @@ ol.comments .comment .links {
 }
 ol.comments .comment .links a:hover {
   cursor: pointer;
-}
-ol.comments .comment .btn {
-  font-size: 12px;
-  padding: 2px 4px;
-  float: right;
-}
-ol.comments .btn {
-  margin-left: 3px;
-}
-ol.comments .btn .fa {
-  color: #FFF !important;
 }
 .nav-tabs {
   border-bottom: none;
