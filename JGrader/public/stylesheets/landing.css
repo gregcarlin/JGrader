@@ -162,7 +162,6 @@ a:hover {
 }
 #home .right h2 {
   font-size: 48px;
-  font-weight: 100;
 }
 #home .right .table-wrapper li {
   display: table-row;
@@ -229,9 +228,11 @@ a:hover {
 #learn h2 {
   font-size: 95px;
   margin-bottom: 40px;
+  font-weight: 100;
 }
 #learn h2 span {
   font-size: 125px;
+  font-weight: 100;
 }
 #learn h3 {
   font-weight: 300;
