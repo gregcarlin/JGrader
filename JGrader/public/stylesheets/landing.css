@@ -3,7 +3,7 @@
 
 /* used for landing page (index.ejs) only */
 
-@import url(http://fonts.googleapis.com/css?family=Lato:100,300,400,100italic,300italic,400italic);
+@import url(http://fonts.googleapis.com/css?family=Lato:100,200,300,400,100italic,300italic,400italic);
 
 /* global stuff */
 html {
@@ -217,7 +217,7 @@ a:hover {
 /* stuff for learn 'page' */
 #learn {
   background: linear-gradient(#FF8989, #484A6C);
-  font-weight: 100;
+  font-weight: 200;
   font-size: 24px;
   padding: 38px;
   box-sizing: border-box;
