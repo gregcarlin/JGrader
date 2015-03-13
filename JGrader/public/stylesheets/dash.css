@@ -157,6 +157,9 @@ ol.comments .comment-text a:hover {
 ol.comments .comment-text a.fa-arrow-right {
   float: right;
 }
+/*ol.comments .comment-text-edit a {
+  display: inline;
+}*/
 ol.comments .comment .data {
   font-size: 11px;
 }
