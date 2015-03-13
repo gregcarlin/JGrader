@@ -113,6 +113,7 @@ var editComment = function(id, tab, line) {
   var commentBox = $('<textarea class="form-control"></textarea><a onclick="cancelEditComment(' + tab + ',' + line + ')" class="fa fa-times"></a><a onclick="submitEditComment(' + tab + ',' + line + ')" class="fa fa-arrow-right"></a>');
   var comment = $('#comment-' + id);
   comment.addClass('comment-text');
+  comment.addClass('comment-text-edit');
   comment.html(commentBox);
   // todo update UI
 };
