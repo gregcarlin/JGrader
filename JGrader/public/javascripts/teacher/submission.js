@@ -67,15 +67,15 @@ var submitComment = function(tab, line) {
 var appendComment = function(comment) {
   var li = getLineLi(comment.tab, comment.line);
   var date = new Date(comment.timestamp);
-  var html = '<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '">';
+  var html = '<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '" id="comment-' + comment.id + '"">';
   html += '<div class="data">'
   html += '<div class="date">'
   html += date.toLocaleString();
   html += '</div>';
-  if(comment.owns) {
+  if(comment.owns) { // if this person owns this comment, add delete and edit buttons
     html += '<div class="buttons">';
-    html += '<a class="fa fa-pencil-square-o"></a>';
-    html += '<a class="fa fa-trash-o"></a>';
+    html += '<a class="fa fa-pencil-square-o" onclick="editComment(' + comment.tab + ',' + comment.line + ')"></a>';
+    html += '<a class="fa fa-trash-o" onclick="deleteComment(' + comment.id + ')"></a>';
     html += '</div>';
   }
   html += '<div class="name">';
@@ -107,6 +107,22 @@ var getTabLine = function(div) {
   var line = classes[1].split('-')[2];
   var tab = classes[2].split('-')[2];
   return {line: line, tab: tab};
+};
+
+var editComment = function(tab, line) {
+  // todo
+};
+
+var deleteComment = function(id) {
+  var url = document.URL;
+  if(url.charAt(url.length-1) != '/') url += '/';
+  $.post(url + 'comment/' + id + '/delete', '', function(data, textStatus, jqXHR) {
+    if(data.code == -1) {
+      alert('An error has occurred. Please reload the page.');
+    } else {
+      $('#comment-' + id).remove();
+    }
+  });
 };
 
 $(document).ready(function() {
