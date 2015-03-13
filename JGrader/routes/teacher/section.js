@@ -136,7 +136,12 @@ router.get('/:id/delete', function(req, res) {
     } else if(rows.affectedRows <= 0) {
       render('notFound', {error: 'You are not allowed to delete that class.'}, res);
     } else {
-      connection.query("DELETE FROM `enrollment` WHERE `section_id` = ?; DELETE `assignments`,`submissions`,`files` FROM `assignments` LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` LEFT JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `assignments`.`section_id` = ?", [req.params.id, req.params.id], function(err) {
+      connection.query("DELETE FROM `enrollment` WHERE `section_id` = ?;\
+                        DELETE `assignments`,`submissions`,`files` \
+                          FROM `assignments` \
+                          LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                          LEFT JOIN `files` ON `files`.`submission_id` = `submissions`.`id` \
+                          WHERE `assignments`.`section_id` = ?", [req.params.id, req.params.id], function(err) {
         if(err) {
           render('notFound', {error: 'Unable to delete class. Please go back and try again.'}, res);
           throw err;

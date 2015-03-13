@@ -332,14 +332,18 @@ router.post('/:id/comment', function(req, res) {
 
 router.post('/:id/comment/:commentId/delete', function(req, res) {
   // security to ensure this teacher owns this submission
-  connection.query("SELECT * \
-                    FROM `submissions`,`assignments`,`sections` \
-                    WHERE \
-                      `submissions`.`assignment_id` = `assignments`.`id` AND \
-                      `assignments`.`section_id` = `sections`.`id` AND \
-                      `submissions`.`id` = ? AND \
-                      `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, result) {
-    // todo
+  connection.query("DELETE `comments` \
+                      FROM `comments` \
+                      JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
+                      JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                      JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+                      WHERE `submissions`.`id` = ? AND `sections`.`teacher_id` = ? AND `comments`.`id` = ?", [req.params.id, req.user.id, req.params.commentId], function(err, result) {
+    if(err) {
+      res.json({code: -1});
+      throw err;
+    } else {
+      res.json({code: 0});
+    }
   });
 });
 
