@@ -74,7 +74,7 @@ var appendComment = function(comment) {
   html += '</div>';
   if(comment.owns) { // if this person owns this comment, add delete and edit buttons
     html += '<div class="buttons">';
-    html += '<a class="fa fa-pencil-square-o" onclick="editComment(' + comment.tab + ',' + comment.line + ')"></a>';
+    html += '<a class="fa fa-pencil-square-o" onclick="editComment(' + comment.id + ')"></a>';
     html += '<a class="fa fa-trash-o" onclick="deleteComment(' + comment.id + ')"></a>';
     html += '</div>';
   }
@@ -109,8 +109,20 @@ var getTabLine = function(div) {
   return {line: line, tab: tab};
 };
 
-var editComment = function(tab, line) {
-  // todo
+var editComment = function(id) {
+  // todo update UI
+};
+
+var submitEditComment = function(id, text) {
+  var url = document.URL;
+  if(url.charAt(url.length-1) != '/') url += '/';
+  $.post(url + 'comment/' + id + '/edit', {text: text}, function(data, textStatus, jqXHR) {
+    if(data.code == -1) {
+      alert('An error has occurred. Please reload the page.');
+    } else {
+      // todo update UI
+    }
+  });
 };
 
 var deleteComment = function(id) {
