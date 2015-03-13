@@ -74,7 +74,7 @@ var appendComment = function(comment) {
   html += '</div>';
   if(comment.owns) { // if this person owns this comment, add delete and edit buttons
     html += '<div class="buttons">';
-    html += '<a class="fa fa-pencil-square-o" onclick="editComment(' + comment.id + ')"></a>';
+    html += '<a class="fa fa-pencil-square-o" onclick="editComment(' + comment.id + ',' + comment.tab + ',' + comment.line + ')"></a>';
     html += '<a class="fa fa-trash-o" onclick="deleteComment(' + comment.id + ')"></a>';
     html += '</div>';
   }
@@ -109,8 +109,16 @@ var getTabLine = function(div) {
   return {line: line, tab: tab};
 };
 
-var editComment = function(id) {
+var editComment = function(id, tab, line) {
+  var commentBox = $('<textarea class="form-control"></textarea><a onclick="cancelEditComment(' + tab + ',' + line + ')" class="fa fa-times"></a><a onclick="submitEditComment(' + tab + ',' + line + ')" class="fa fa-arrow-right"></a>');
+  var comment = $('#comment-' + id);
+  comment.addClass('comment-text');
+  comment.html(commentBox);
   // todo update UI
+};
+
+var cancelEditComment = function(tab, line) {
+  // todo
 };
 
 var submitEditComment = function(id, text) {
