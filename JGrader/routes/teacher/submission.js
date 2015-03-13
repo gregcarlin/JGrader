@@ -347,5 +347,20 @@ router.post('/:id/comment/:commentId/delete', function(req, res) {
   });
 });
 
+router.post('/:id/comment/:commentId/edit', function(req, res) {
+  if(req.body.text) {
+    // todo security
+    connection.query("UPDATE `comments` SET `message` = ? WHERE `id` = ?", [req.body.text, req.params.commentId], function(err, result) {
+      if(err) {
+        res.json({code: -1});
+      } else {
+        res.json({code: 0});
+      }
+    });
+  } else {
+    res.json({code: 1}); // missing data, i guess
+  }
+});
+
 module.exports = router;
 
