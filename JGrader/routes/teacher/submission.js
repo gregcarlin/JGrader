@@ -239,6 +239,7 @@ router.get('/:id/comment', function(req, res) {
                       `comments`.`tab`,\
                       `comments`.`line`,\
                       `comments`.`commenter_type`,\
+                      `comments`.`commenter_id`,\
                       `comments`.`timestamp`,\
                       `comments`.`message`,\
                       `teachers`.`fname` AS `tfname`,\
@@ -262,9 +263,11 @@ router.get('/:id/comment', function(req, res) {
       res.json({code: 2}); // invalid permissions (code may or may not be correct, see post method below as well)
     } else {
       for(i in rows) {
+        rows[i].owns = false;
         switch(rows[i].commenter_type) {
           case 'teacher':
             rows[i].name = rows[i].tfname + ' ' + rows[i].tlname;
+            rows[i].owns = req.user.id == rows[i].commenter_id;
             break;
           case 'student':
             rows[i].name = rows[i].sfname + ' ' + rows[i].slname;
@@ -280,6 +283,7 @@ router.get('/:id/comment', function(req, res) {
         delete rows[i].afname;
         delete rows[i].alname;
         delete rows[i].commenter_type;
+        delete rows[i].commenter_id;
       }
       res.json({code: 0, comments: rows});
     }
@@ -302,12 +306,21 @@ router.post('/:id/comment', function(req, res) {
       } else if(result.length <= 0) {
         res.json({code: 2}); // invalid permissions (i think this is the right code)
       } else {
-        connection.query("INSERT INTO `comments` VALUES(NULL, ?, ?, ?, 'teacher', ?, NOW(), ?)", [req.params.id, req.body.tab, req.body.line, req.user.id, req.body.text], function(err, result) {
+        var now = Date.now();
+        connection.query("INSERT INTO `comments` VALUES(NULL, ?, ?, ?, 'teacher', ?, FROM_UNIXTIME(?), ?)", [req.params.id, req.body.tab, req.body.line, req.user.id, now, req.body.text], function(err, result) {
           if(err) {
             res.json({code: -1});
             throw err;
           } else {
-            res.json({code: 0});
+            connection.query("SELECT `fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, teacher) {
+              console.log(teacher);
+              if(err) {
+                res.json({code: -2}); // it semi worked, but page needs to be reloaded
+                throw err;
+              } else {
+                res.json({code: 0, id: result.insertId, tab: req.body.tab, line: req.body.line, timestamp: now, message: req.body.text, name: (teacher[0].fname + ' ' + teacher[0].lname), owns: true});
+              }
+            });
           }
         });
       }
@@ -315,6 +328,19 @@ router.post('/:id/comment', function(req, res) {
   } else {
     res.json({code: 1}); // missing data. i'm just making up codes here
   }
+});
+
+router.post('/:id/comment/:commentId/delete', function(req, res) {
+  // security to ensure this teacher owns this submission
+  connection.query("SELECT * \
+                    FROM `submissions`,`assignments`,`sections` \
+                    WHERE \
+                      `submissions`.`assignment_id` = `assignments`.`id` AND \
+                      `assignments`.`section_id` = `sections`.`id` AND \
+                      `submissions`.`id` = ? AND \
+                      `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, result) {
+    // todo
+  });
 });
 
 module.exports = router;

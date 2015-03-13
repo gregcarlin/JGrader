@@ -55,30 +55,32 @@ var submitComment = function(tab, line) {
   $.post(url + 'comment', {tab: tab, line: line, text: text}, function(data, textStatus, jqXHR) {
     if(data.code == 0) {
       innerComment.remove();
-      appendComment({
-        id: 0, // todo
-        tab: tab,
-        line: line,
-        timestamp: 0, // todo
-        message: text,
-        name: '' // todo
-      });
+      delete data.code;
+      appendComment(data);
     } else {
       alert('There was an issue posting your comment. Please reload the page and try again.');
     }
   });
 };
 
-// displays a comment. comment must have certain fields defined (see routes/teacher/submission.js)
+// displays a comment in UI. comment must have certain fields defined (see GET or POST '/:id/comment' in routes/teacher/submission.js)
 var appendComment = function(comment) {
   var li = getLineLi(comment.tab, comment.line);
   var date = new Date(comment.timestamp);
   var html = '<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '">';
   html += '<div class="data">'
   html += '<div class="date">'
-  html += date.toLocaleString() + '<br />';
+  html += date.toLocaleString();
   html += '</div>';
-  html += comment.name + ':<br />';
+  if(comment.owns) {
+    html += '<div class="buttons">';
+    html += '<a class="fa fa-pencil-square-o"></a>';
+    html += '<a class="fa fa-trash-o"></a>';
+    html += '</div>';
+  }
+  html += '<div class="name">';
+  html += comment.name + ':';
+  html += '</div>';
   html += '</div>';
   html += comment.message;
   html += '<div class="links">';
