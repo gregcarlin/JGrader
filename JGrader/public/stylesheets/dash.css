@@ -163,6 +163,22 @@ ol.comments .comment .data {
 ol.comments .comment .data .date {
   color: #AAA;
   font-style: italic;
+  display: inline;
+}
+ol.comments .comment .data .buttons {
+  float: right;
+}
+ol.comments .comment .data .buttons a {
+  color: #000;
+  font-size: 14px;
+}
+ol.comments .comment .data .buttons a:hover {
+  text-decoration: none;
+  color: #428bca;
+  cursor: pointer;
+}
+ol.comments .comment .data .buttons a:first-child {
+  margin-right: 2px;
 }
 ol.comments .comment .links {
   font-size: 11px;
