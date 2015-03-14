@@ -148,18 +148,18 @@ ol.comments .comment textarea {
   margin-bottom: 2px;
   resize: none;
 }
-ol.comments .comment-text a {
+ol.comments .comment-text a, ol.comments .comment-text-edit a {
   color: #000;
 }
-ol.comments .comment-text a:hover {
+ol.comments .comment-text a:hover, ol.comments .comment-text-edit a:hover {
   text-decoration: none;
 }
-ol.comments .comment-text a.fa-arrow-right {
+ol.comments .comment-text a.fa-arrow-right, ol.comments .comment-text-edit a.fa-arrow-right {
   float: right;
 }
-/*ol.comments .comment-text-edit a {
-  display: inline;
-}*/
+ol.comments .comment-text-edit .data, ol.comments .comment-text-edit .message, ol.comments .comment-text-edit .links {
+  display: none;
+}
 ol.comments .comment .data {
   font-size: 11px;
 }

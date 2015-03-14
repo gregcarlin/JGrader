@@ -67,7 +67,7 @@ var submitComment = function(tab, line) {
 var appendComment = function(comment) {
   var li = getLineLi(comment.tab, comment.line);
   var date = new Date(comment.timestamp);
-  var html = '<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '" id="comment-' + comment.id + '"">';
+  var html = '<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '" id="comment-' + comment.id + '">';
   html += '<div class="data">'
   html += '<div class="date">'
   html += date.toLocaleString();
@@ -82,7 +82,9 @@ var appendComment = function(comment) {
   html += comment.name + ':';
   html += '</div>';
   html += '</div>';
+  html += '<div class="message">';
   html += comment.message;
+  html += '</div>';
   html += '<div class="links">';
   html += '<a onclick="addComment(' + comment.tab + ',' + comment.line + ')">Reply</a>';
   html += '</div>';
@@ -110,16 +112,16 @@ var getTabLine = function(div) {
 };
 
 var editComment = function(id, tab, line) {
-  var commentBox = $('<textarea class="form-control"></textarea><a onclick="cancelEditComment(' + tab + ',' + line + ')" class="fa fa-times"></a><a onclick="submitEditComment(' + tab + ',' + line + ')" class="fa fa-arrow-right"></a>');
+  var text = $('#comment-' + id + ' .message').html();
+  var commentBox = $('<div class="edit"><textarea class="form-control">' + text + '</textarea><div><a onclick="cancelEditComment(' + id + ')" class="fa fa-times"></a><a onclick="submitEditComment(' + tab + ',' + line + ')" class="fa fa-arrow-right"></a></div></div>');
   var comment = $('#comment-' + id);
-  comment.addClass('comment-text');
   comment.addClass('comment-text-edit');
-  comment.html(commentBox);
-  // todo update UI
+  comment.append(commentBox); // add old html with new html (old html is hidden via magic css)
 };
 
-var cancelEditComment = function(tab, line) {
-  // todo
+var cancelEditComment = function(id) {
+  $('#comment-' + id + ' .edit').remove();
+  $('#comment-' + id).removeClass('comment-text-edit');
 };
 
 var submitEditComment = function(id, text) {
