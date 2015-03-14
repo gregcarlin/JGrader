@@ -5,6 +5,7 @@ require('../common');
 var router = express.Router();
 var strftime = require('strftime');
 var JSZip = require('jszip');
+var comments = require('../comments');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -233,141 +234,7 @@ router.get('/:id/download/:fileIndex', function(req, res) {
     });
 });
 
-router.get('/:id/comment', function(req, res) {
-  connection.query("SELECT \
-                      `comments`.`id`,\
-                      `comments`.`tab`,\
-                      `comments`.`line`,\
-                      `comments`.`commenter_type`,\
-                      `comments`.`commenter_id`,\
-                      `comments`.`timestamp`,\
-                      `comments`.`message`,\
-                      `teachers`.`fname` AS `tfname`,\
-                      `teachers`.`lname` AS `tlname`,\
-                      `students`.`fname` AS `sfname`,\
-                      `students`.`lname` AS `slname`,\
-                      `assistants`.`fname` AS `afname`,\
-                      `assistants`.`lname` AS `alname` \
-                    FROM `comments` \
-                    JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
-                    JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                    JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
-                    LEFT JOIN `teachers` ON `teachers`.`id` = `comments`.`commenter_id` \
-                    LEFT JOIN `students` ON `students`.`id` = `comments`.`commenter_id` \
-                    LEFT JOIN `assistants` ON `assistants`.`id` = `comments`.`commenter_id` \
-                    WHERE `sections`.`teacher_id` = ? AND `comments`.`submission_id` = ?", [req.user.id, req.params.id], function(err, rows) {
-    if(err) {
-      res.json({code: -1});
-      throw err;
-    } else if(rows.length <= 0) {
-      res.json({code: 2}); // invalid permissions (code may or may not be correct, see post method below as well)
-    } else {
-      for(i in rows) {
-        rows[i].owns = false;
-        switch(rows[i].commenter_type) {
-          case 'teacher':
-            rows[i].name = rows[i].tfname + ' ' + rows[i].tlname;
-            rows[i].owns = req.user.id == rows[i].commenter_id;
-            break;
-          case 'student':
-            rows[i].name = rows[i].sfname + ' ' + rows[i].slname;
-            break;
-          case 'assistant':
-            rows[i].name = rows[i].afname + ' ' + rows[i].alname;
-            break;
-        }
-        delete rows[i].tfname;
-        delete rows[i].tlname;
-        delete rows[i].sfname;
-        delete rows[i].slname;
-        delete rows[i].afname;
-        delete rows[i].alname;
-        delete rows[i].commenter_type;
-        delete rows[i].commenter_id;
-      }
-      res.json({code: 0, comments: rows});
-    }
-  });
-});
-
-router.post('/:id/comment', function(req, res) {
-  // security to ensure this teacher owns this submission
-  if(req.body.tab && req.body.line && req.body.text) {
-    connection.query("SELECT * \
-                      FROM `submissions`,`assignments`,`sections` \
-                      WHERE \
-                        `submissions`.`assignment_id` = `assignments`.`id` AND \
-                        `assignments`.`section_id` = `sections`.`id` AND \
-                        `submissions`.`id` = ? AND \
-                        `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, result) {
-      if(err) {
-        res.json({code: -1});
-        throw err;
-      } else if(result.length <= 0) {
-        res.json({code: 2}); // invalid permissions (i think this is the right code)
-      } else {
-        var now = Date.now();
-        connection.query("INSERT INTO `comments` VALUES(NULL, ?, ?, ?, 'teacher', ?, FROM_UNIXTIME(?), ?)", [req.params.id, req.body.tab, req.body.line, req.user.id, now, req.body.text], function(err, result) {
-          if(err) {
-            res.json({code: -1});
-            throw err;
-          } else {
-            connection.query("SELECT `fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, teacher) {
-              console.log(teacher);
-              if(err) {
-                res.json({code: -2}); // it semi worked, but page needs to be reloaded
-                throw err;
-              } else {
-                res.json({code: 0, id: result.insertId, tab: req.body.tab, line: req.body.line, timestamp: now, message: req.body.text, name: (teacher[0].fname + ' ' + teacher[0].lname), owns: true});
-              }
-            });
-          }
-        });
-      }
-    });
-  } else {
-    res.json({code: 1}); // missing data. i'm just making up codes here
-  }
-});
-
-router.post('/:id/comment/:commentId/delete', function(req, res) {
-  // security to ensure this teacher owns this submission
-  connection.query("DELETE `comments` \
-                      FROM `comments` \
-                      JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
-                      JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                      JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
-                      WHERE `submissions`.`id` = ? AND `sections`.`teacher_id` = ? AND `comments`.`id` = ?", [req.params.id, req.user.id, req.params.commentId], function(err, result) {
-    if(err) {
-      res.json({code: -1});
-      throw err;
-    } else {
-      res.json({code: 0});
-    }
-  });
-});
-
-router.post('/:id/comment/:commentId/edit', function(req, res) {
-  if(req.body.text) {
-    connection.query("UPDATE `comments` \
-                        JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
-                        JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                        JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
-                      SET `comments`.`message` = ? \
-                      WHERE \
-                        `submissions`.`id` = ? AND \
-                        `sections`.`teacher_id` = ? AND \
-                        `comments`.`id` = ?", [req.body.text, req.params.id, req.user.id, req.params.commentId], function(err, result) {
-      if(err) {
-        res.json({code: -1});
-      } else {
-        res.json({code: 0});
-      }
-    });
-  } else {
-    res.json({code: 1}); // missing data, i guess
-  }
-});
+comments.setup(router);
 
 module.exports = router;
 
