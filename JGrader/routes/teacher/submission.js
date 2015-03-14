@@ -349,7 +349,6 @@ router.post('/:id/comment/:commentId/delete', function(req, res) {
 
 router.post('/:id/comment/:commentId/edit', function(req, res) {
   if(req.body.text) {
-    // todo security
     connection.query("UPDATE `comments` \
                         JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
                         JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
