@@ -16,7 +16,7 @@ var render = function(page, options, res) {
       break;
     case 'submission':
       // title must be set already
-      options.js = ['prettify', 'teacher/submission', 'tooltip', 'teacher/edit'];
+      options.js = ['prettify', 'teacher/submission', 'tooltip', 'teacher/edit', 'comments'];
       options.css = ['prettify', 'font-awesome.min'];
       options.strftime = strftime;
       break;

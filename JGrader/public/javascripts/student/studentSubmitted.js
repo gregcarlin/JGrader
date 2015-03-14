@@ -11,8 +11,3 @@ if(response != null) {
   }
 }
 
-$(document).ready(function() {
-  prettyPrint();
-  $('ol.linenums li').prepend('<a class="fa fa-comment-o"></a>');
-});
-
