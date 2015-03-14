@@ -6,6 +6,7 @@ var router = express.Router();
 var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
 var multer = require('multer');
 var strftime = require('strftime');
+var comments = require('../comments');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -28,9 +29,8 @@ var render = function(page, options, res) {
       break;
     case 'assignmentComplete':
       // title should already be set
-      options.js = ['prettify', 'student/studentSubmitted'];
+      options.js = ['prettify', 'student/studentSubmitted', 'comments'];
       options.css = ['prettify', 'font-awesome.min'];
-      options.onload = 'prettyPrint()';
       options.strftime = strftime;
       break;
   }
@@ -289,5 +289,7 @@ router.get('/:id/comment', function(req, res) {
 router.post('/:id/comment/:text', function(req, res) {
   // todo make a new comment
 });
+
+comments.setup(router, 'student');
 
 module.exports = router;
