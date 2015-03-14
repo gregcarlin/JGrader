@@ -39,7 +39,7 @@ var submitComment = function(tab, line) {
   });
 };
 
-// displays a comment in UI. comment must have certain fields defined (see GET or POST '/:id/comment' in routes/teacher/submission.js)
+// displays a comment in UI. comment must have certain fields defined (see GET or POST '/:id/comment' in routes/comments.js)
 var appendComment = function(comment) {
   var li = getLineLi(comment.tab, comment.line);
   var date = new Date(comment.timestamp);

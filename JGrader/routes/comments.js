@@ -1,6 +1,4 @@
-var type = '';
-
-var getComments = function(req, res) {
+var getComments = function(req, res, type) {
   connection.query("SELECT \
                       `comments`.`id`,\
                       `comments`.`tab`,\
@@ -57,7 +55,7 @@ var getComments = function(req, res) {
 };
 
 // used in postComment to ensure that a user has permission to post a comment
-var security = function(req, finish) {
+var security = function(req, type, finish) {
   switch(type) {
     case 'teacher':
       connection.query("SELECT * \
@@ -84,9 +82,9 @@ var security = function(req, finish) {
   }
 };
 
-var postComment = function(req, res) {
+var postComment = function(req, res, type) {
   if(req.body.tab && req.body.line && req.body.text) {
-    security(req, function(err, result) {
+    security(req, type, function(err, result) {
       if(err) {
         res.json({code: -1});
         throw err;
@@ -116,7 +114,7 @@ var postComment = function(req, res) {
   }
 };
 
-var deleteComment = function(req, res) {
+var deleteComment = function(req, res, type) {
   // security to ensure this user owns this submission
   connection.query("DELETE FROM `comments` WHERE `id` = ? AND `commenter_type` = ? AND `commenter_id` = ?", [req.params.commentId, type, req.user.id], function(err, result) {
     if(err) {
@@ -128,7 +126,7 @@ var deleteComment = function(req, res) {
   });
 };
 
-var editComment = function(req, res) {
+var editComment = function(req, res, type) {
   if(req.body.text) {
     connection.query("UPDATE `comments` SET `message` = ? WHERE `id` = ? AND `commenter_type` = ? AND `commenter_id` = ?", [req.body.text, req.params.commentId, type, req.user.id], function(err, result) {
       if(err) {
@@ -143,12 +141,11 @@ var editComment = function(req, res) {
   }
 };
 
-var setup = function(router, dbType) {
-  type = dbType;
-  router.get('/:id/comment', getComments);
-  router.post('/:id/comment', postComment);
-  router.post('/:id/comment/:commentId/delete', deleteComment);
-  router.post('/:id/comment/:commentId/edit', editComment);
+var setup = function(router, type) {
+  router.get('/:id/comment', function(req, res) {getComments(req, res, type)});
+  router.post('/:id/comment', function(req, res) {postComment(req, res, type)});
+  router.post('/:id/comment/:commentId/delete', function(req, res) {deleteComment(req, res, type)});
+  router.post('/:id/comment/:commentId/edit', function(req, res) {editComment(req, res, type)});
 };
 
 module.exports = {setup: setup};
