@@ -350,7 +350,15 @@ router.post('/:id/comment/:commentId/delete', function(req, res) {
 router.post('/:id/comment/:commentId/edit', function(req, res) {
   if(req.body.text) {
     // todo security
-    connection.query("UPDATE `comments` SET `message` = ? WHERE `id` = ?", [req.body.text, req.params.commentId], function(err, result) {
+    connection.query("UPDATE `comments` \
+                        JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
+                        JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                        JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+                      SET `comments`.`message` = ? \
+                      WHERE \
+                        `submissions`.`id` = ? AND \
+                        `sections`.`teacher_id` = ? AND \
+                        `comments`.`id` = ?", [req.body.text, req.params.id, req.user.id, req.params.commentId], function(err, result) {
       if(err) {
         res.json({code: -1});
       } else {
