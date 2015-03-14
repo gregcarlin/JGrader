@@ -127,7 +127,7 @@ var editComment = function(id, tab, line) {
   var commentBox = $(html);
   var comment = $('#comment-' + id);
   comment.addClass('comment-text-edit');
-  comment.append(commentBox); // add old html with new html (old html is hidden via magic css)
+  comment.append(commentBox); // add new html to end of old html (old html is hidden via magic css)
 };
 
 var cancelEditComment = function(id) {
@@ -136,15 +136,18 @@ var cancelEditComment = function(id) {
 };
 
 var submitEditComment = function(id) {
+  $('#comment-' + id).append('<span class="fa fa-spinner fa-spin"></span>');
   var text = $('#comment-' + id + ' .edit textarea').val();
+  $('#comment-' + id + ' .edit').remove(); // remove text area and stuff
   var url = document.URL;
   if(url.charAt(url.length-1) != '/') url += '/';
   $.post(url + 'comment/' + id + '/edit', {text: text}, function(data, textStatus, jqXHR) {
-    if(data.code == -1) {
+    if(data.code != 0) {
       alert('An error has occurred. Please reload the page.');
     } else {
-      cancelEditComment(id); // removes editing stuff
+      $('#comment-' + id + ' .fa-spinner').remove();
       $('#comment-' + id + ' .message').html(text); // update text
+      $('#comment-' + id).removeClass('comment-text-edit'); // removes class so old comment is displayed properly
     }
   });
 };
