@@ -3,7 +3,7 @@
 
 /* used for landing page (index.ejs) only */
 
-@import url(http://fonts.googleapis.com/css?family=Lato:100,400,100italic,400italic);
+@import url(http://fonts.googleapis.com/css?family=Lato:100,300,400,100italic,300italic,400italic);
 
 /* global stuff */
 html {
@@ -67,28 +67,29 @@ a:hover {
 }
 
 .nav .left {
-  font-size: 48px;
+  font-size: 35px;
   color: #727272;
   background-color: #FAFAFA;
   position: absolute;
 }
 .nav .left a {
   color: #727272;
-  margin-left: 41px;
-  font-weight: 100;
+  margin-left: 30px;
+  font-weight: 300;
   position: relative;
-  top: -5px;
+  top: -1px;
 }
 .nav .left a:hover {
   text-decoration: none;
 }
 .nav .right {
   right: 0;
-  font-size: 36px;
+  font-size: 30px;
   text-align: center;
   display: table;
   table-layout: fixed;
   position: absolute;
+  font-weight: 300;
 }
 .nav .right a {
   display: table-cell;
@@ -150,7 +151,7 @@ a:hover {
 }
 #home .left .table-wrapper > span {
   display: table-cell;
-  font-size: 175px;
+  font-size: 225px;
   font-weight: 100;
 }
 #home .left .table-wrapper > span > span {
@@ -161,7 +162,8 @@ a:hover {
   background-color: rgba(1,1,1,0.5);
 }
 #home .right h2 {
-  font-size: 48px;
+  font-size: 50px;
+  font-weight: 300;
 }
 #home .right .table-wrapper li {
   display: table-row;
@@ -203,9 +205,10 @@ a:hover {
   background-color: #BCDAFF;
   border-style: none;
   display: inline-block;
-  font-weight: 100;
+  font-weight: 300;
   color: #000;
   padding: 14px 8px;
+  margin-bottom: 30px;
   box-sizing: content-box;
 }
 #home .right .button:hover {
@@ -217,8 +220,8 @@ a:hover {
 /* stuff for learn 'page' */
 #learn {
   background: linear-gradient(#FF8989, #484A6C);
-  font-weight: 100;
-  font-size: 24px;
+  font-weight: 300;
+  font-size: 20px;
   padding: 38px;
   box-sizing: border-box;
   text-align: justify;
@@ -228,13 +231,15 @@ a:hover {
 #learn h2 {
   font-size: 95px;
   margin-bottom: 40px;
+  font-weight: 100;
 }
 #learn h2 span {
   font-size: 125px;
+  font-weight: 100;
 }
 #learn h3 {
-  font-weight: 400;
-  font-size: 34px;
+  font-weight: 300;
+  font-size: 45px;
 }
 #learn .col-right h3 {
   text-align: right;
@@ -264,6 +269,7 @@ a:hover {
   text-align: center;
 }
 #learn .row-full {
+  margin-top: 25px;
   width: 100%;
   text-align: center;
 }
