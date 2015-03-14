@@ -131,6 +131,7 @@ var submitEditComment = function(id) {
 var deleteComment = function(id) {
   var url = document.URL;
   if(url.charAt(url.length-1) != '/') url += '/';
+  $('#comment-' + id).html('<span class="fa fa-spinner fa-spin"></span>');
   $.post(url + 'comment/' + id + '/delete', '', function(data, textStatus, jqXHR) {
     if(data.code == -1) {
       alert('An error has occurred. Please reload the page.');
