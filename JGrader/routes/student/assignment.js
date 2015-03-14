@@ -282,14 +282,6 @@ router.get('/:id/resubmit', function(req,res) {
   });
 });
 
-router.get('/:id/comment', function(req, res) {
-  // todo get comments as json
-});
-
-router.post('/:id/comment/:text', function(req, res) {
-  // todo make a new comment
-});
-
 comments.setup(router, 'student');
 
 module.exports = router;
