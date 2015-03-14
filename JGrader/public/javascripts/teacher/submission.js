@@ -113,7 +113,18 @@ var getTabLine = function(div) {
 
 var editComment = function(id, tab, line) {
   var text = $('#comment-' + id + ' .message').html();
-  var commentBox = $('<div class="edit"><textarea class="form-control">' + text + '</textarea><div><a onclick="cancelEditComment(' + id + ')" class="fa fa-times"></a><a onclick="submitEditComment(' + tab + ',' + line + ')" class="fa fa-arrow-right"></a></div></div>');
+  var html = '<div class="edit">';
+  html += '<textarea class="form-control">';
+  html += text;
+  html += '</textarea>';
+  html += '<div>';
+  html += '<a onclick="cancelEditComment(' + id + ')" class="fa fa-times">';
+  html += '</a>';
+  html += '<a onclick="submitEditComment(' + id + ')" class="fa fa-arrow-right">';
+  html += '</a>';
+  html += '</div>';
+  html += '</div>'; // close .edit div
+  var commentBox = $(html);
   var comment = $('#comment-' + id);
   comment.addClass('comment-text-edit');
   comment.append(commentBox); // add old html with new html (old html is hidden via magic css)
@@ -124,14 +135,16 @@ var cancelEditComment = function(id) {
   $('#comment-' + id).removeClass('comment-text-edit');
 };
 
-var submitEditComment = function(id, text) {
+var submitEditComment = function(id) {
+  var text = $('#comment-' + id + ' .edit textarea').val();
   var url = document.URL;
   if(url.charAt(url.length-1) != '/') url += '/';
   $.post(url + 'comment/' + id + '/edit', {text: text}, function(data, textStatus, jqXHR) {
     if(data.code == -1) {
       alert('An error has occurred. Please reload the page.');
     } else {
-      // todo update UI
+      cancelEditComment(id); // removes editing stuff
+      $('#comment-' + id + ' .message').html(text); // update text
     }
   });
 };
