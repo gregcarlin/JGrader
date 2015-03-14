@@ -20,8 +20,7 @@ var getComments = function(req, res, type) {
                     LEFT JOIN `teachers` ON `teachers`.`id` = `comments`.`commenter_id` \
                     LEFT JOIN `students` ON `students`.`id` = `comments`.`commenter_id` \
                     LEFT JOIN `assistants` ON `assistants`.`id` = `comments`.`commenter_id` \
-                    LEFT JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` AND `enrollment`.`student_id` = `students`.`id` \
-                    WHERE ((`sections`.`teacher_id` = ? AND 'teacher' = '" + type + "') OR (`enrollment`.`student_id` = ? AND 'student' = '" + type + "')) AND `comments`.`submission_id` = ?", [req.user.id, req.user.id, req.params.id], function(err, rows) {
+                    WHERE ((`sections`.`teacher_id` = ? AND 'teacher' = '" + type + "') OR (`submissions`.`student_id` = ? AND 'student' = '" + type + "')) AND `comments`.`submission_id` = ?", [req.user.id, req.user.id, req.params.id], function(err, rows) {
     if(err) {
       res.json({code: -1});
       throw err;
@@ -66,14 +65,7 @@ var security = function(req, type, finish) {
                           `sections`.`teacher_id` = ?", [req.params.id, req.user.id], finish);
       break;
     case 'student':
-      connection.query("SELECT * \
-                        FROM `submissions`,`assignments`,`sections`,`enrollment` \
-                        WHERE \
-                          `submissions`.`assignment_id` = `assignments`.`id` AND \
-                          `assignments`.`section_id` = `sections`.`id` AND \
-                          `sections`.`id` = `enrollment`.`section_id` AND \
-                          `submissions`.`id` = ? AND \
-                          `enrollment`.`student_id` = ?", [req.params.id, req.user.id], finish);
+      connection.query("SELECT * FROM `submissions` WHERE `id` = ? AND `student_id` = ?", [req.params.id, req.user.id], finish);
       break;
     case 'assistant':
       // todo when assistants are implemented
