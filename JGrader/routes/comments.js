@@ -140,11 +140,24 @@ var editComment = function(req, res, type) {
   }
 };
 
+// converts assignment ids from student requests to submission ids
+var process = function(func, req, res, type) {
+  if(type == 'student') {
+    connection.query("SELECT `id` FROM `submissions` WHERE `assignment_id` = ? AND `student_id` = ?", [req.params.id, req.user.id], function(err, result) {
+      if(err) throw err;
+      req.params.id = result[0].id;
+      func(req, res, type);
+    });
+  } else {
+    func(req, res, type);
+  }
+};
+
 var setup = function(router, type) {
-  router.get('/:id/comment', function(req, res) {getComments(req, res, type)});
-  router.post('/:id/comment', function(req, res) {postComment(req, res, type)});
-  router.post('/:id/comment/:commentId/delete', function(req, res) {deleteComment(req, res, type)});
-  router.post('/:id/comment/:commentId/edit', function(req, res) {editComment(req, res, type)});
+  router.get('/:id/comment', function(req, res) {process(getComments, req, res, type)});
+  router.post('/:id/comment', function(req, res) {process(postComment, req, res, type)});
+  router.post('/:id/comment/:commentId/delete', function(req, res) {process(deleteComment, req, res, type)});
+  router.post('/:id/comment/:commentId/edit', function(req, res) {process(editComment, req, res, type)});
 };
 
 module.exports = {setup: setup};
