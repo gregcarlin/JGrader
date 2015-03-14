@@ -234,7 +234,7 @@ router.get('/:id/download/:fileIndex', function(req, res) {
     });
 });
 
-comments.setup(router);
+comments.setup(router, 'teacher');
 
 module.exports = router;
 
