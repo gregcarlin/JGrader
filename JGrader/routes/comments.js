@@ -118,12 +118,7 @@ var postComment = function(req, res) {
 
 var deleteComment = function(req, res) {
   // security to ensure this user owns this submission
-  connection.query("DELETE `comments` \
-                      FROM `comments` \
-                      JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
-                      JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                      JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
-                      WHERE `submissions`.`id` = ? AND `sections`.`teacher_id` = ? AND `comments`.`id` = ?", [req.params.id, req.user.id, req.params.commentId], function(err, result) {
+  connection.query("DELETE FROM `comments` WHERE `id` = ? AND `commenter_type` = ? AND `commenter_id` = ?", [req.params.commentId, type, req.user.id], function(err, result) {
     if(err) {
       res.json({code: -1});
       throw err;
@@ -135,17 +130,10 @@ var deleteComment = function(req, res) {
 
 var editComment = function(req, res) {
   if(req.body.text) {
-    connection.query("UPDATE `comments` \
-                        JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
-                        JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                        JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
-                      SET `comments`.`message` = ? \
-                      WHERE \
-                        `submissions`.`id` = ? AND \
-                        `sections`.`teacher_id` = ? AND \
-                        `comments`.`id` = ?", [req.body.text, req.params.id, req.user.id, req.params.commentId], function(err, result) {
+    connection.query("UPDATE `comments` SET `message` = ? WHERE `id` = ? AND `commenter_type` = ? AND `commenter_id` = ?", [req.body.text, req.params.commentId, type, req.user.id], function(err, result) {
       if(err) {
         res.json({code: -1});
+        throw err;
       } else {
         res.json({code: 0});
       }
