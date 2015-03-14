@@ -1,3 +1,5 @@
+var type = '';
+
 var getComments = function(req, res) {
   connection.query("SELECT \
                       `comments`.`id`,\
@@ -28,11 +30,9 @@ var getComments = function(req, res) {
       res.json({code: 2}); // invalid permissions (code may or may not be correct, see post method below as well)
     } else {
       for(i in rows) {
-        rows[i].owns = false;
         switch(rows[i].commenter_type) {
           case 'teacher':
-            rows[i].name = rows[i].tfname + ' ' + rows[i].tlname; // todo work for students too
-            rows[i].owns = req.user.id == rows[i].commenter_id;
+            rows[i].name = rows[i].tfname + ' ' + rows[i].tlname;
             break;
           case 'student':
             rows[i].name = rows[i].sfname + ' ' + rows[i].slname;
@@ -41,6 +41,7 @@ var getComments = function(req, res) {
             rows[i].name = rows[i].afname + ' ' + rows[i].alname;
             break;
         }
+        rows[i].owns = type == rows[i].commenter_type && req.user.id == rows[i].commenter_id;
         delete rows[i].tfname;
         delete rows[i].tlname;
         delete rows[i].sfname;
@@ -55,16 +56,37 @@ var getComments = function(req, res) {
   });
 };
 
+// used in postComment to ensure that a user has permission to post a comment
+var security = function(req, finish) {
+  switch(type) {
+    case 'teacher':
+      connection.query("SELECT * \
+                        FROM `submissions`,`assignments`,`sections` \
+                        WHERE \
+                          `submissions`.`assignment_id` = `assignments`.`id` AND \
+                          `assignments`.`section_id` = `sections`.`id` AND \
+                          `submissions`.`id` = ? AND \
+                          `sections`.`teacher_id` = ?", [req.params.id, req.user.id], finish);
+      break;
+    case 'student':
+      connection.query("SELECT * \
+                        FROM `submissions`,`assignments`,`sections`,`enrollment` \
+                        WHERE \
+                          `submissions`.`assignment_id` = `assignments`.`id` AND \
+                          `assignments`.`section_id` = `sections`.`id` AND \
+                          `sections`.`id` = `enrollment`.`section_id` AND \
+                          `submissions`.`id` = ? AND \
+                          `enrollment`.`student_id` = ?", [req.params.id, req.user.id], finish);
+      break;
+    case 'assistant':
+      // todo when assistants are implemented
+      break;
+  }
+};
+
 var postComment = function(req, res) {
-  // security to ensure this teacher owns this submission
   if(req.body.tab && req.body.line && req.body.text) {
-    connection.query("SELECT * \
-                      FROM `submissions`,`assignments`,`sections` \
-                      WHERE \
-                        `submissions`.`assignment_id` = `assignments`.`id` AND \
-                        `assignments`.`section_id` = `sections`.`id` AND \
-                        `submissions`.`id` = ? AND \
-                        `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, result) {
+    security(req, function(err, result) {
       if(err) {
         res.json({code: -1});
         throw err;
@@ -72,18 +94,17 @@ var postComment = function(req, res) {
         res.json({code: 2}); // invalid permissions (i think this is the right code)
       } else {
         var now = Date.now();
-        connection.query("INSERT INTO `comments` VALUES(NULL, ?, ?, ?, 'teacher', ?, FROM_UNIXTIME(?), ?)", [req.params.id, req.body.tab, req.body.line, req.user.id, now, req.body.text], function(err, result) {
+        connection.query("INSERT INTO `comments` VALUES(NULL, ?, ?, ?, '" + type + "', ?, FROM_UNIXTIME(?), ?)", [req.params.id, req.body.tab, req.body.line, req.user.id, now, req.body.text], function(err, result) {
           if(err) {
             res.json({code: -1});
             throw err;
           } else {
-            connection.query("SELECT `fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, teacher) {
-              console.log(teacher);
+            connection.query("SELECT `fname`,`lname` FROM `" + type + "s` WHERE `id` = ?", [req.user.id], function(err, user) {
               if(err) {
                 res.json({code: -2}); // it semi worked, but page needs to be reloaded
                 throw err;
               } else {
-                res.json({code: 0, id: result.insertId, tab: req.body.tab, line: req.body.line, timestamp: now, message: req.body.text, name: (teacher[0].fname + ' ' + teacher[0].lname), owns: true});
+                res.json({code: 0, id: result.insertId, tab: req.body.tab, line: req.body.line, timestamp: now, message: req.body.text, name: (user[0].fname + ' ' + user[0].lname), owns: true});
               }
             });
           }
@@ -96,7 +117,7 @@ var postComment = function(req, res) {
 };
 
 var deleteComment = function(req, res) {
-  // security to ensure this teacher owns this submission
+  // security to ensure this user owns this submission
   connection.query("DELETE `comments` \
                       FROM `comments` \
                       JOIN `submissions` ON `comments`.`submission_id` = `submissions`.`id` \
@@ -134,7 +155,8 @@ var editComment = function(req, res) {
   }
 };
 
-var setup = function(router) {
+var setup = function(router, dbType) {
+  type = dbType;
   router.get('/:id/comment', getComments);
   router.post('/:id/comment', postComment);
   router.post('/:id/comment/:commentId/delete', deleteComment);
