@@ -154,7 +154,7 @@ $(document).ready(function() {
   if(url.charAt(url.length-1) != '/') url += '/';
   $.get(url + 'comment/', {}, function(data, textStatus, jqXHR) {
     if(data.code != 0) {
-      var lio = getOrigLi(0,0);
+      var lio = getLineLi(0,0);
       lio.append('<div class="comment">Error retrieving comments</div>');
     } else {
       for(i in data.comments) {

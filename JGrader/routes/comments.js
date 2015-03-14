@@ -20,12 +20,11 @@ var getComments = function(req, res, type) {
                     LEFT JOIN `teachers` ON `teachers`.`id` = `comments`.`commenter_id` \
                     LEFT JOIN `students` ON `students`.`id` = `comments`.`commenter_id` \
                     LEFT JOIN `assistants` ON `assistants`.`id` = `comments`.`commenter_id` \
-                    WHERE `sections`.`teacher_id` = ? AND `comments`.`submission_id` = ?", [req.user.id, req.params.id], function(err, rows) {
+                    LEFT JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` AND `enrollment`.`student_id` = `students`.`id` \
+                    WHERE ((`sections`.`teacher_id` = ? AND 'teacher' = '" + type + "') OR (`enrollment`.`student_id` = ? AND 'student' = '" + type + "')) AND `comments`.`submission_id` = ?", [req.user.id, req.user.id, req.params.id], function(err, rows) {
     if(err) {
       res.json({code: -1});
       throw err;
-    } else if(rows.length <= 0) {
-      res.json({code: 2}); // invalid permissions (code may or may not be correct, see post method below as well)
     } else {
       for(i in rows) {
         switch(rows[i].commenter_type) {
