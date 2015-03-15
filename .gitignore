@@ -36,4 +36,5 @@ bin
 *.swp
 temp
 uploads
+test_credentials.js
 

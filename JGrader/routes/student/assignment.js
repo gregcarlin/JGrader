@@ -5,6 +5,8 @@ require('../common');
 var router = express.Router();
 var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
 var multer = require('multer');
+var strftime = require('strftime');
+var comments = require('../comments');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -15,17 +17,21 @@ var render = function(page, options, res) {
       break;
     case 'assignmentList':
       options.title = 'Your Assignments';
+      options.js = ['tooltip'];
+      options.css = ['font-awesome.min'];
+      options.strftime = strftime;
       break;
     case 'assignment':
       // title should already be set
       options.js = ['student/dropzone', 'student/studentSubmit'];
       options.css = ['student/submit', 'font-awesome.min'];
+      options.strftime = strftime;
       break;
     case 'assignmentComplete':
       // title should already be set
-      options.js = ['prettify', 'student/studentSubmitted'];
+      options.js = ['prettify', 'student/studentSubmitted', 'comments'];
       options.css = ['prettify', 'font-awesome.min'];
-      options.onload = 'prettyPrint()';
+      options.strftime = strftime;
       break;
   }
   renderGenericStudent(page, options, res);
@@ -33,12 +39,13 @@ var render = function(page, options, res) {
 
 // The page that lists the assignments
 router.get('/', function(req, res) {
-  connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`, `assignments`.`id` \
-                    FROM `sections`, `teachers`, `assignments`,`enrollment` \
+  connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`,`assignments`.`id`,`submissions`.`submitted` \
+                    FROM `sections`, `teachers`,`enrollment`,`assignments` \
+                    LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = ? \
                     WHERE `enrollment`.`student_id` = ? \
                     AND `enrollment`.`section_id` = `assignments`.`section_id` \
                     AND `sections`.`id` = `enrollment`.`section_id` \
-                    AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id], function(err, rows) {
+                    AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id, req.user.id], function(err, rows) {
     if(err) {
       render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
       throw err;
@@ -64,7 +71,7 @@ router.get('/:id', function(req, res) {
       } else if(rows.length <= 0) {
         render('notFound', {}, res);
       } else {
-        connection.query("SELECT `files`.`name`, `files`.`contents` \
+        connection.query("SELECT `files`.`name`, `files`.`contents`, `submissions`.`grade`,`submissions`.`submitted` \
                           FROM `files`, `students`, `assignments`, `submissions` \
                           WHERE `submissions`.`assignment_id` = `assignments`.`id` \
                           AND `submissions`.`student_id` = `students`.`id` \
@@ -167,17 +174,11 @@ router.post('/:id/submit', function(req, res) {
           }
         });
       } else {
-        // Will implement frontend name Same error to make it more friendly, no need for error response
-        for(file in req.files) {
-          fs.unlinkSync(req.files[file].path);
-        }
+        fs.removeSync(req.files['file[0]'].path.substring(0, req.files['file[0]'].path.lastIndexOf('/')));
         res.send('noSanitize');
       }
     } else {
-      // Will implement frontend sanitization to make it more friendly, no need for error response
-      for(file in req.files) {
-        fs.unlinkSync(req.files[file].path);
-      }
+      fs.removeSync(req.files['file[0]'].path.substring(0, req.files['file[0]'].path.lastIndexOf('/')));
       res.send('noSanitize');
     }
   }
@@ -226,20 +227,21 @@ var submitFiles = function(i, files, student_id, assignment_id, finish) {
                   connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, file.originalname, data.javaData, data.classData], function(err, rows) {
                     if(err) throw err;
                     // Deletes files after submit
-                    async.parallel([
-                        function(callback) { fs.unlink(file.path, callback) },
-                        function(callback) { fs.unlink(compilePath, callback) }
-                      ], function(err) {
-                        if(err) throw err;
-                        // All files deleted and inserted into database, good to run final callback
-                        cb();
-                      });
+                    // async.parallel([
+                    //     function(callback) { fs.unlink(file.path, callback) },
+                    //     function(callback) { fs.unlink(compilePath, callback) }
+                    //   ], function(err) {
+                    //     // All files deleted and inserted into database, good to run final callback
+                    //     cb();
+                    //     if(err) throw err;
+                    //   });
+                    cb();
                   });
               });
               // Final Callback after all of files delted then deletes dir.
             }, function(err) {
-                fs.rmdirSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')))
-                finish(err ? err: stderr);
+                fs.removeSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')));
+                finish(err ? err : stderr);
             });
           });
         }
@@ -279,5 +281,7 @@ router.get('/:id/resubmit', function(req,res) {
     }
   });
 });
+
+comments.setup(router, 'student');
 
 module.exports = router;

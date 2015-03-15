@@ -14,7 +14,7 @@ var render = function(page, options, res) {
       break;
     case 'studentList':
       options.title = 'Your Students';
-      options.js = ['tooltip'];
+      options.js = ['tooltip', 'teacher/studentList', 'stupidtable.min', 'tablesort'];
       options.css = ['font-awesome.min'];
       break;
     case 'student':
@@ -34,40 +34,37 @@ router.get('/', function(req, res) {
                       `students`.`lname`,\
                       `sections`.`id` AS `sid`,\
                       `sections`.`name` AS `sname`,\
-                      `assignments`.`name` AS `aname`,\
-                      `temp`.`id` AS `subid`,\
-                      `temp2`.`avg` \
-                      FROM \
-                        `students` \
-                        JOIN `enrollment` ON `enrollment`.`student_id` = `students`.`id` \
-                        JOIN `sections` ON `sections`.`id` = `enrollment`.`section_id` \
-                        LEFT JOIN \
-                          (SELECT \
-                              `assignment_id`,\
-                              `student_id`,\
-                              `submissions`.`id`,\
-                              MAX(`submitted`),\
-                              `assignments`.`section_id` \
-                            FROM \
-                              `submissions` \
-                              LEFT JOIN `assignments` ON `assignments`.`id` = `assignment_id` WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) GROUP BY `student_id`,`assignments`.`section_id`) \
-                          AS `temp` ON `students`.`id` = `temp`.`student_id` AND `sections`.`id` = `temp`.`section_id` \
-                        LEFT JOIN `assignments` ON `assignments`.`id` = `temp`.`assignment_id` \
-                        LEFT JOIN \
-                          (SELECT \
-                              `submissions`.`id`,\
-                              `submissions`.`student_id`,\
-                              AVG(`submissions`.`grade`) AS `avg`,\
-                              `assignments`.`section_id` \
-                            FROM \
-                              (`submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id`) \
-                            WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) \
-                            GROUP BY `student_id`,`section_id`) \
-                          AS `temp2` \
-                          ON `students`.`id` = `temp2`.`student_id` AND `sections`.`id` = `temp2`.`section_id` \
-                      WHERE \
-                        `sections`.`teacher_id` = ?", [req.user.id, req.user.id, req.user.id], function(err, rows) {
-    render('studentList', {rows: rows}, res);
+                      `temp3`.`name` AS `aname`,\
+                      `temp3`.`subid`,\
+                      `temp4`.`avg` \
+                    FROM \
+                      `students` \
+                      JOIN `enrollment` ON `students`.`id` = `enrollment`.`student_id` \
+                      JOIN `sections` ON `sections`.`id` = `enrollment`.`section_id` \
+                      LEFT JOIN \
+                        (SELECT `temp2`.* FROM \
+                          (SELECT `student_id`,`assignments`.`section_id`,MAX(`submitted`) AS `max` \
+                            FROM `submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                            WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`) \
+                            GROUP BY `student_id`,`assignments`.`section_id`) AS `temp` \
+                          JOIN \
+                          (SELECT `submissions`.`student_id`,`assignments`.`section_id`,`submissions`.`submitted`,`assignments`.`name`,`assignments`.`id`,`submissions`.`id` AS `subid` \
+                            FROM `submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id`) AS `temp2` \
+                          ON `temp`.`student_id` = `temp2`.`student_id` AND `temp`.`section_id` = `temp2`.`section_id` AND `temp2`.`submitted` = `temp`.`max`) AS `temp3` \
+                      ON `temp3`.`student_id` = `students`.`id` AND `temp3`.`section_id` = `sections`.`id` \
+                      LEFT JOIN \
+                        (SELECT `submissions`.`id`,`submissions`.`student_id`,AVG(`submissions`.`grade`) AS `avg`,`assignments`.`section_id` \
+                          FROM `submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                          WHERE TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) \
+                          GROUP BY `student_id`,`section_id`) AS `temp4` \
+                      ON `students`.`id` = `temp4`.`student_id` AND `sections`.`id` = `temp4`.`section_id` \
+                    WHERE `sections`.`teacher_id` = ?", [req.user.id, req.user.id, req.user.id], function(err, rows) {
+    if(err) {
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
+      throw err;
+    } else {
+      render('studentList', {rows: rows}, res);
+    }
   });
 });
 
@@ -124,6 +121,17 @@ router.get('/:id', function(req, res) {
           render('student', {title: name, name: name, rows: rows, id: req.params.id}, res);
         }
       });
+    }
+  });
+});
+
+router.get('/:id/:section/delete', function(req, res) {
+  connection.query("DELETE `enrollment`,`submissions`,`files` FROM `enrollment` JOIN `sections` ON `enrollment`.`section_id` = `sections`.`id` LEFT JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` LEFT JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `enrollment`.`student_id` = ? AND `enrollment`.`section_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.params.section, req.user.id], function(err, result) {
+    if(err) {
+      render('notFound', {error: 'Unable to remove student. Please go back and try again.'}, res);
+      throw err;
+    } else {
+      res.redirect('/teacher/student');
     }
   });
 });

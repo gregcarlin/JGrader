@@ -5,6 +5,7 @@ require('../common');
 var router = express.Router();
 var strftime = require('strftime');
 var JSZip = require('jszip');
+var comments = require('../comments');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -15,9 +16,8 @@ var render = function(page, options, res) {
       break;
     case 'submission':
       // title must be set already
-      options.js = ['prettify', 'teacher/submission', 'tooltip', 'teacher/edit'];
+      options.js = ['prettify', 'teacher/submission', 'tooltip', 'teacher/edit', 'comments'];
       options.css = ['prettify', 'font-awesome.min'];
-      options.onload = 'prettyPrint()';
       options.strftime = strftime;
       break;
   }
@@ -168,7 +168,7 @@ router.post('/:id/run/:fileIndex', function(req, res) {
 });
 
 router.get('/:id/download', function(req, res) {
-  // security to ensure this teachers owns this submission and file
+  // security to ensure this teacher owns this submission and file
   connection.query("SELECT \
                       `files`.`id`,\
                       `files`.`name`,\
@@ -204,7 +204,7 @@ router.get('/:id/download', function(req, res) {
 router.get('/:id/download/:fileIndex', function(req, res) {
   async.waterfall([
       function(callback) {
-        // security to ensure this teachers owns this submission and file
+        // security to ensure this teacher owns this submission and file
         connection.query("SELECT \
                             `files`.`id`,\
                             `files`.`name`,\
@@ -233,6 +233,8 @@ router.get('/:id/download/:fileIndex', function(req, res) {
       }
     });
 });
+
+comments.setup(router, 'teacher');
 
 module.exports = router;
 
