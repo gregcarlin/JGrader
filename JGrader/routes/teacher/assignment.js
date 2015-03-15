@@ -25,7 +25,7 @@ var render = function(page, options, res) {
       break;
     case 'assignment':
       // title must be set already
-      options.js = ['tooltip', 'strftime-min', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker'];
+      options.js = ['tooltip', 'strftime-min', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker', 'stupidtable.min', 'tablesort'];
       options.css = ['jquery.datetimepicker', 'font-awesome.min'];
       options.strftime = strftime;
       break;
@@ -205,7 +205,8 @@ router.get('/:id', function(req, res) {
                           `students`.`fname`,\
                           `students`.`lname`,\
                           `submissions`.`id` AS `subID`,\
-                          `submissions`.`submitted` \
+                          `submissions`.`submitted`,\
+                          `submissions`.`grade` \
                         FROM `enrollment`,`students` \
                         LEFT JOIN \
                           `submissions` ON `submissions`.`student_id` = `students`.`id` AND \

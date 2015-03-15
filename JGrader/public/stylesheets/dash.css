@@ -40,8 +40,17 @@ a:hover .fa, .edit + .fa:hover, .fa[onclick]:hover, .nav-tabs .fa:hover {
 .fa[data-toggle="tooltip"]:hover {
   color: #428bca;
 }
-.table .fa {
+.table tbody .fa {
   font-size: 16px;
+}
+.table thead .fa {
+  font-size: 14px;
+  color: #000;
+}
+.table thead .fa:hover {
+  color: #428bca;
+  cursor: pointer;
+  text-decoration: none;
 }
 #dueh2 {
   position: relative;
@@ -85,19 +94,100 @@ ul.section-list {
   border-top-left-radius: 0;
 }
 li.L1, li.L3, li.L5, li.L7, li.L9 {
-  background: #f5f5f5 !important;
+  background: #f5f5f5;
 }
 li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
   list-style-type: inherit !important;
 }
+code {
+  display: inline-block;
+  width: 80%;
+  vertical-align: top;
+}
 ol.linenums {
   padding-left: 40px;
   background-color: #FFF;
+  width: 100%;
+  display: inline-block;
 }
 ol.linenums li {
   border-left: 1px solid #BBB;
   padding-left: 15px;
   background-color: #f5f5f5;
+}
+ol.linenums li .fa {
+  position: relative;
+  left: -7px;
+  visibility: hidden;
+  color: #000;
+}
+ol.linenums li:hover .fa {
+  visibility: visible;
+  text-decoration: none;
+}
+ol.linenums li .fa:hover {
+  color: #428bca;
+  cursor: pointer;
+}
+ol.comments {
+  list-style-type: none;
+  width: 20%;
+  display: inline-block;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+ol.comments .comment {
+  margin: 0;
+  width: 100%;
+  background-color: #FFF;
+  padding: 5px;
+  border: 1px solid #888;
+  margin-top: -1px;
+  font-size: 14px;
+}
+ol.comments .comment textarea {
+  margin-bottom: 2px;
+  resize: none;
+}
+ol.comments .comment-text a, ol.comments .comment-text-edit a {
+  color: #000;
+}
+ol.comments .comment-text a:hover, ol.comments .comment-text-edit a:hover {
+  text-decoration: none;
+}
+ol.comments .comment-text a.fa-arrow-right, ol.comments .comment-text-edit a.fa-arrow-right {
+  float: right;
+}
+ol.comments .comment-text-edit .data, ol.comments .comment-text-edit .message, ol.comments .comment-text-edit .links {
+  display: none;
+}
+ol.comments .comment .data {
+  font-size: 11px;
+}
+ol.comments .comment .data .date {
+  color: #AAA;
+  font-style: italic;
+  display: inline;
+}
+ol.comments .comment .data .buttons {
+  float: right;
+}
+ol.comments .comment .data .buttons a {
+  color: #000;
+  font-size: 14px;
+}
+ol.comments .comment .data .buttons a:hover {
+  text-decoration: none;
+  color: #428bca;
+  cursor: pointer;
+}
+ol.comments .comment .data .buttons a:first-child {
+  margin-right: 2px;
+}
+ol.comments .comment .links {
+  font-size: 11px;
+}
+ol.comments .comment .links a:hover {
+  cursor: pointer;
 }
 .nav-tabs {
   border-bottom: none;
@@ -152,4 +242,10 @@ ol.linenums li {
 .help {
   margin-left: 4px;
   font-size: 10pt;
+}
+.fa-check, .fa-check-circle {
+  color: #08aa1d;
+}
+.fa-exclamation-circle, .fa-times {
+  color: #AA081D;
 }
