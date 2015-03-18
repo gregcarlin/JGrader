@@ -252,3 +252,10 @@ ol.comments .comment .links a:hover {
 .red {
   color: #AA081D;
 }
+.disabled span {
+  color: #AAA;
+}
+.disabled span:hover {
+  color: #AAA !important;
+  cursor: inherit !important;
+}

@@ -22,7 +22,7 @@
   <ul class="nav nav-tabs" role="tablist">
     <% for(i in fileData) { %>
       <% fileData[i].shortName = i; %>
-      <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab"><%= fileData[i].name %></a></li>
+      <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab" data-canrun="<%= fileData[i].compiled ? 'true' : 'false' %>"><%= fileData[i].name %></a></li>
     <% } %>
     <li role="presentation" id="execute" class="icon"><span class="fa fa-play-circle-o" data-toggle="tooltip" data-placement="top" title="Run"></span></li>
     <li role="presentation" id="download" class="icon"><span class="fa fa-download" data-toggle="tooltip" data-placement="top" title="Download"></span></li>
