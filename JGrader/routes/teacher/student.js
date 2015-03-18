@@ -19,7 +19,7 @@ var render = function(page, options, res) {
       break;
     case 'student':
       // title must be set already
-      options.js = ['tooltip'];
+      options.js = ['tooltip', 'stupidtable.min', 'tablesort'];
       options.css = ['font-awesome.min'];
       options.strftime = strftime;
       break;
