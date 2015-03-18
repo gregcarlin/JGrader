@@ -3,7 +3,6 @@
 
 require('../common');
 var router = express.Router();
-var alphanumericAndPeriod = /^[a-zA-Z0-9]+\.java$/;
 var multer = require('multer');
 var strftime = require('strftime');
 var comments = require('../comments');
@@ -23,13 +22,13 @@ var render = function(page, options, res) {
       break;
     case 'assignment':
       // title should already be set
-      options.js = ['student/dropzone', 'student/studentSubmit'];
+      options.js = ['student/dropzone', 'student/submit'];
       options.css = ['student/submit', 'font-awesome.min'];
       options.strftime = strftime;
       break;
     case 'assignmentComplete':
       // title should already be set
-      options.js = ['prettify', 'student/studentSubmitted', 'comments'];
+      options.js = ['prettify', 'student/submitted', 'comments'];
       options.css = ['prettify', 'font-awesome.min'];
       options.strftime = strftime;
       break;
@@ -92,164 +91,105 @@ router.get('/:id', function(req, res) {
   }
 });
 
-// special version of fs.mkdir that suppresses errors on already created directories
-var mkdir = function(dir) {
-  try {
-    fs.mkdirSync(dir);
-  } catch (err) {
-    if(err.code != 'EEXIST') throw err;
-  }
-};
-
 router.use('/:id/submit', multer({
   inMemory: false,
   rename: function(fieldname, filename) {
+    // don't rename
     return filename;
   },
   changeDest: function(dest, req, res) {
-    mkdir('./uploads');
-    mkdir('./uploads/' + req.user.id + '/');
-    return './uploads/' + req.user.id + '/';
+    var directory = './uploads/' + req.user.id + '/';
+    fs.ensureDirSync(directory); // note: i tried the async version of this but i got weird errors
+    return directory;
   }
 }));
 
 // Submits the file into the mysql database
 router.post('/:id/submit', function(req, res) {
-  var assignmentID = req.params.id;
   if(req.files) {
-    // Sanatize file name a-z A-Z 0-9 and .
-    var isSanitize = true;
-    var noNameSame = true;
-    var stringArray = new Array();
-    // Checks if any files are the same or have weird names
+
+    // first, check all the file names for legality
     for(file in req.files) {
-      if(!alphanumericAndPeriod.test(req.files[file].originalname)) {
-        isSanitize = false;
+      if(!/^[a-zA-Z0-9.]+$/.test(req.files[file].name)) { // if the name contains anything besides alphanumerical characters and periods
+        res.json({code: 2}); // invalid name
+        return; // just stop
       }
-      if(stringArray.indexOf(req.files[file].originalname) != -1){
-        noNameSame = false;
-      }
-      stringArray.push(req.files[file].originalname);
     }
-    if(isSanitize) {
-      if(noNameSame) {
-        // Checks if already submission
-        connection.query("SELECT `submissions`.`id` \
-                          FROM `submissions` \
-                          WHERE `submissions`.`student_id` = ? \
-                          AND `submissions`.`assignment_id` = ?", [req.user.id, req.params.id], function(err, rows) {
-          if(rows.length == 0) {
-            connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, rows) {
-              if(err) {
-                render('notFound', {error: 'An unexpected error has occurred.'}, res);
-                throw err;
-              } else {
-                submitFiles(0, req.files, req.user.id, assignmentID, function(err, stderr) {
-                  if(err) {
-                    render('notFound', {error: 'Compilation has failed'}, res);
-                    throw err;
-                  } if(stderr) {
-                    console.log(stderr);
-                    res.send(stderr);
-                  } else {
-                    console.log('success');
-                    res.send("success");
-                  }
-                });
-              }
+
+    console.log('submit check');
+    // now, check to see if this student already submitted this assignment
+    connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
+      if(err) {
+        res.json({code: -1}); // unknown error
+        throw err;
+      } else if(submissions.length > 0) {
+        res.json({code: 3}); // already submitted this assignment
+      } else {
+
+        var toCompile = "";
+        for(file in req.files) {
+          toCompile += req.files[file].path + " ";
+        }
+        // compile the java files
+        exec("javac " + toCompile, function(err, stdout, stderr) {
+          if(err) {
+            fs.remove('./uploads/' + req.user.id + '/', function(err) {
+              res.json({code: 1}); // code can't compile
             });
           } else {
-            // Submission is already added
-            // Todo: block submission or something
-            submitFiles(0, req.files, req.user.id, assignmentID, function(err) {
+
+            // finally, make necessary changes in database
+            connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, result) {
               if(err) {
-                render('notFound', {error: 'Compilation has failed'}, res);
+                res.json({code: -1}); // unknown error
                 throw err;
               } else {
-                console.log('success 2');
-                res.send("success");
-                //res.redirect('/student/assignment/' + req.params.id);
+
+                var args = [];
+                var stmt = "";
+                for(file in req.files) {
+                  // read java and class data into variables
+                  var javaData = fs.readFileSync(req.files[file].path);
+                  var classData = fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class');
+
+                  stmt += "(NULL,?,?,?,?),";
+                  args.push(result.insertId);
+                  args.push(req.files[file].name);
+                  args.push(javaData);
+                  args.push(classData);
+                }
+                stmt = stmt.substr(0, stmt.length-1); // remove last character from stmt (extraneous comma)
+                connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
+                  if(err) {
+                    fs.removeSync('./uploads/' + req.user.id + '/'); // we must cleanup, even on error
+                    res.json({code: -1}); // unknown error
+                    throw err;
+                  } else {
+                    // clean up files used for compilation
+                    fs.remove('./uploads/' + req.user.id + '/', function(err) {
+                      if(err) {
+                        res.json({code: -1}) // unknown error
+                        throw err;
+                      } else {
+                        res.json({code: 0});
+                      }
+                    });
+                  }
+                });
+
               }
             });
+
           }
         });
-      } else {
-        fs.removeSync(req.files['file[0]'].path.substring(0, req.files['file[0]'].path.lastIndexOf('/')));
-        res.send('noSanitize');
+
       }
-    } else {
-      fs.removeSync(req.files['file[0]'].path.substring(0, req.files['file[0]'].path.lastIndexOf('/')));
-      res.send('noSanitize');
-    }
+    });
+
+  } else {
+    res.json({code: 1}); // no files submitted
   }
 });
-
-// Compiles and submits the information to the database
-var submitFiles = function(i, files, student_id, assignment_id, finish) {
-  // Makes sure safe upload
-  if(files) {
-      // Gets submission created in the POST method
-      connection.query("SELECT `submissions`.`id` \
-                        FROM `students`,`submissions` \
-                        WHERE `students`.`id` = ?  \
-                        AND `submissions`.`student_id` = `students`.`id` AND `submissions`.`assignment_id` = ?", [student_id, assignment_id], function(err, rows) {
-        if(err){
-          finish(err);
-        } else {
-          // List of file paths to compile
-          var compileFiles = "";
-          var fileArr = [];
-          for(file in files) {
-            compileFiles = compileFiles + files[file].path + " ";
-            fileArr.push(files[file]);
-          }
-
-          // Compiles the java
-          exec("javac " + compileFiles, function (error, stdout, stderr) {
-            if(error) throw error;
-
-            // must convert from file object to file array
-            // var fileArr = [];
-            // for(i in files) {
-            //   fileArr.push(files[i]);
-            // }
-
-            async.each(fileArr, function(file, cb) {
-              var compilePath = file.path.substr(0, file.path.length-4) + 'class';
-              async.parallel({
-                  javaData: function(callback) {
-                    fs.readFile(file.path, callback);
-                  },
-                  classData: function(callback) {
-                    fs.readFile(compilePath, callback);
-                  }
-                }, function(err, data) {
-                  connection.query("INSERT INTO `files` VALUES(NULL,?,?,?,?)", [rows[0].id, file.originalname, data.javaData, data.classData], function(err, rows) {
-                    if(err) throw err;
-                    // Deletes files after submit
-                    // async.parallel([
-                    //     function(callback) { fs.unlink(file.path, callback) },
-                    //     function(callback) { fs.unlink(compilePath, callback) }
-                    //   ], function(err) {
-                    //     // All files deleted and inserted into database, good to run final callback
-                    //     cb();
-                    //     if(err) throw err;
-                    //   });
-                    cb();
-                  });
-              });
-              // Final Callback after all of files delted then deletes dir.
-            }, function(err) {
-                fs.removeSync(fileArr[0].path.substring(0, fileArr[0].path.lastIndexOf('/')));
-                finish(err ? err : stderr);
-            });
-          });
-        }
-      });
-  } else {
-    finish(err);
-  }
-}
 
 router.get('/:id/resubmit', function(req,res) {
   connection.query("SELECT `submissions`.`id` \
@@ -258,24 +198,22 @@ router.get('/:id/resubmit', function(req,res) {
                     AND `submissions`.`assignment_id` = ?", [req.user.id, req.params.id], function(err, rows) {
     if(err) {
       res.redirect('/student/assignment');
+      throw err;
     } else if (rows.length == 0) {
       // User has not submitted so cannot resubmit
+      console.error('USER ' + req.user.id + ' IS TRYING TO RESUBMIT BUT SHOULDNT BE');
       res.redirect('/student/assignment');
     } else {
       // Means user has already submitted and is able to resubmit
-      connection.query("DELETE FROM `files` WHERE `files`.`submission_id` = ?", [rows[0].id], function(err, rows) {
-        if(err) {
-          res.redirect('/student/assignment');
-        } else {
-          connection.query("DELETE FROM `submissions` \
+      connection.query("DELETE FROM `files` WHERE `files`.`submission_id` = ?; \
+                        DELETE FROM `submissions` \
                             WHERE `submissions`.`assignment_id` = ? \
-                            AND `submissions`.`student_id` = ?", [req.params.id, req.user.id], function(err, rows) {
-            if(err) {
-              res.redirect('/student/assignment/');
-            } else {
-              res.redirect('/student/assignment/' + req.params.id);
-            }
-          });
+                            AND `submissions`.`student_id` = ?", [rows[0].id, req.params.id, req.user.id], function(err, rows) {
+        if(err) {
+          res.redirect('/student/assignment/');
+          throw err;
+        } else {
+          res.redirect('/student/assignment/' + req.params.id);
         }
       });
     }
