@@ -70,18 +70,21 @@ router.get('/:id', function(req, res) {
       } else if(rows.length <= 0) {
         render('notFound', {}, res);
       } else {
-        connection.query("SELECT `files`.`name`, `files`.`contents`, `submissions`.`grade`,`submissions`.`submitted` \
+        connection.query("SELECT `files`.`name`,`files`.`contents`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
                           FROM `files`, `students`, `assignments`, `submissions` \
                           WHERE `submissions`.`assignment_id` = `assignments`.`id` \
                           AND `submissions`.`student_id` = `students`.`id` \
                           AND `files`.`submission_id`= `submissions`.`id` \
-                          AND  `students`.`id` = ? AND `assignments`.`id` = ?", [req.user.id, assignmentID], function(err, fileData){
+                          AND  `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, assignmentID], function(err, fileData){
           if(err) {
             render('notFound', {error: 'An unexpected error has occurred.'}, res);
             throw err;
           } else if(fileData.length == 0) {
             render('assignment', {title: rows[0].name, rows: rows}, res);
           } else {
+            for(file in fileData) {
+              fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
+            }
             // Sends file data
             render('assignmentComplete', {title: rows[0].name, rows: rows, fileData: fileData}, res);
           }
