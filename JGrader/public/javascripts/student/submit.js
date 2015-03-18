@@ -19,7 +19,9 @@ var myDropzone = new Dropzone(document.querySelector(".tester"), {
   clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
 });
 
+var responded = false;
 myDropzone.on("success", function(file, response) {
+  if(responded) return; // we already alerted the user or whatever
   // fuck it, we're just going to alert errors
   switch(response.code) {
     case -1: // unknown error
@@ -33,12 +35,13 @@ myDropzone.on("success", function(file, response) {
       alert('Your code could not be compiled. Please fix it and try again.');
       break;
     case 2: // invalid name
-      alert('Some of your files have invalid names. Only alphanumeric characters and periods are allowed. Please rename one or more of your files and try again.');
+      alert('Some of your files have invalid names. Only alphanumeric characters and periods are allowed, and names must contain at least 6 characters. Please rename one or more of your files and try again.');
       break;
     case 3: // already submitted
       alert('You already submitted this!. Please reload the page and try again.');
       break;
   }
+  responded = true;
 });
 
 // Update the total progress bar
@@ -57,8 +60,7 @@ myDropzone.on("sending", function(file) {
 // Hide the total progress bar when nothing is uploading anymore
 myDropzone.on("queuecomplete", function(progress) {
   $('.progress').hide();
-  $('#actions .buttons').show();
-  $('#actions .drag-zone').show();
+  $('#actions').html('<div class="red">Please reload the page in order to try again.</div>');
 });
 
 // Setup the buttons for all transfers

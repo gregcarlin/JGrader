@@ -110,13 +110,12 @@ router.post('/:id/submit', function(req, res) {
 
     // first, check all the file names for legality
     for(file in req.files) {
-      if(!/^[a-zA-Z0-9.]+$/.test(req.files[file].name)) { // if the name contains anything besides alphanumerical characters and periods
+      if(!/^[a-zA-Z0-9.]+$/.test(req.files[file].name) || req.files[file].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
         res.json({code: 2}); // invalid name
         return; // just stop
       }
     }
 
-    console.log('submit check');
     // now, check to see if this student already submitted this assignment
     connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
       if(err) {
@@ -128,11 +127,13 @@ router.post('/:id/submit', function(req, res) {
 
         var toCompile = "";
         for(file in req.files) {
-          toCompile += req.files[file].path + " ";
+          req.files[file].isJava = req.files[file].path.substr(req.files[file].path.length-4).toLowerCase() == 'java';
+          if(req.files[file].isJava) toCompile += req.files[file].path + " ";
         }
         // compile the java files
         exec("javac " + toCompile, function(err, stdout, stderr) {
           if(err) {
+            // clean up
             fs.remove('./uploads/' + req.user.id + '/', function(err) {
               res.json({code: 1}); // code can't compile
             });
@@ -150,7 +151,7 @@ router.post('/:id/submit', function(req, res) {
                 for(file in req.files) {
                   // read java and class data into variables
                   var javaData = fs.readFileSync(req.files[file].path);
-                  var classData = fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class');
+                  var classData = req.files[file].isJava ? fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class') : null;
 
                   stmt += "(NULL,?,?,?,?),";
                   args.push(result.insertId);
