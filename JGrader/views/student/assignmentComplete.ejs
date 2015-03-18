@@ -49,7 +49,7 @@
 <div class="tab-content">
     <% for (i in fileData) { %>
       <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>">
-        <pre><code class="prettyprint language-java linenums"><%= fileData[i].contents.length > 4096 ? 'There is too much data to be displayed.' : fileData[i].contents %></code><ol class="comments"></ol></pre>
+        <pre><code class="prettyprint language-java linenums"><%= fileData[i].display ? fileData[i].contents : 'There is too much data to be displayed.' %></code><ol class="comments"></ol></pre>
       </div>
     <% } %>
 </div>
