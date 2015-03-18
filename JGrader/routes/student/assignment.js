@@ -130,6 +130,12 @@ router.post('/:id/submit', function(req, res) {
           req.files[file].isJava = req.files[file].path.substr(req.files[file].path.length-4).toLowerCase() == 'java';
           if(req.files[file].isJava) toCompile += req.files[file].path + " ";
         }
+
+        if(!toCompile) {
+          res.json({code: 4}); // must have at least one java file
+          return; // easier than another if/else
+        }
+
         // compile the java files
         exec("javac " + toCompile, function(err, stdout, stderr) {
           if(err) {
@@ -206,10 +212,11 @@ router.get('/:id/resubmit', function(req,res) {
       res.redirect('/student/assignment');
     } else {
       // Means user has already submitted and is able to resubmit
-      connection.query("DELETE FROM `files` WHERE `files`.`submission_id` = ?; \
+      connection.query("DELETE FROM `files` WHERE `submission_id` = ?; \
                         DELETE FROM `submissions` \
-                            WHERE `submissions`.`assignment_id` = ? \
-                            AND `submissions`.`student_id` = ?", [rows[0].id, req.params.id, req.user.id], function(err, rows) {
+                            WHERE `assignment_id` = ? \
+                            AND `student_id` = ?; \
+                        DELETE FROM `comments` WHERE `submission_id` = ?", [rows[0].id, req.params.id, req.user.id, rows[0].id], function(err, rows) {
         if(err) {
           res.redirect('/student/assignment/');
           throw err;
