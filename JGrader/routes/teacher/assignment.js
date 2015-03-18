@@ -14,7 +14,7 @@ var render = function(page, options, res) {
       break;
     case 'assignmentList':
       options.title = 'Your Assignments';
-      options.js = ['tooltip', 'teacher/assignmentList'];
+      options.js = ['tooltip', 'teacher/assignmentList', 'stupidtable.min', 'tablesort'];
       options.css = ['font-awesome.min'];
       options.strftime = strftime;
       break;
