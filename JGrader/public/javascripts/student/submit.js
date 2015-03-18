@@ -40,6 +40,9 @@ myDropzone.on("success", function(file, response) {
     case 3: // already submitted
       alert('You already submitted this!. Please reload the page and try again.');
       break;
+    case 4: // no java files submitted
+      alert('You must submit at least one java file. Make sure they end in .java');
+      break;
   }
   responded = true;
 });
