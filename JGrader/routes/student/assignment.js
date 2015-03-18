@@ -114,6 +114,13 @@ router.post('/:id/submit', function(req, res) {
         res.json({code: 2}); // invalid name
         return; // just stop
       }
+      for(file2 in req.files) {
+        if(file2 == file) continue;
+        if(req.files[file].name == req.files[file2].name) {
+          res.json({code: 5}); // duplicate names
+          return; // just stop
+        }
+      }
     }
 
     // now, check to see if this student already submitted this assignment

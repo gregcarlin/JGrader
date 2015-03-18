@@ -43,6 +43,9 @@ myDropzone.on("success", function(file, response) {
     case 4: // no java files submitted
       alert('You must submit at least one java file. Make sure they end in .java');
       break;
+    case 5: // duplicate names
+      alert('No two files can share the same name.');
+      break;
   }
   responded = true;
 });
