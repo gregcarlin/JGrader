@@ -3,7 +3,6 @@
 
 require('./common');
 var router = express.Router();
-var crypto  = require('crypto');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -15,12 +14,10 @@ var login = function(db, email, pass, res, finish) {
   connection.query("SELECT * FROM `" + db + "s` WHERE `user` = ? AND `pass` = AES_ENCRYPT(?, '" + creds.aes_key + "')", [email, pass], function(err, rows) {
     if(err) {
       res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
-      console.log(err); // To see whats wrong on server
+      throw err;
     } else {
       if(rows.length > 0) {
-        var hash = crypto.randomBytes(20).toString('hex'); // http://stackoverflow.com/a/14869745/720889
-        res.cookie('hash', hash);
-        connection.query('INSERT INTO `sessions-' + db + 's` VALUES(?, ?)', [rows[0].id, hash], function(err, rows) {
+        signIn(db + 's', rows[0].id, res, function(err, rows) {
           if(err) {
             res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
           } else {
