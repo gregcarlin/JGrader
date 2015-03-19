@@ -81,6 +81,11 @@
               You have JavaScript turned off! Many features of this site will not work!
             </div>
           </noscript>
+          <% if(mustResetPass) { %>
+            <div class="alert alert-danger" role="alert">
+              Please go to the <a href="/teacher/settings">settings</a> and change your password.
+            </div>
+          <% } %>
           <% if(nosupport) { %>
             <div class="alert alert-warning" role="alert">
               Your browser is not supported. Consider <a href="http://browsehappy.com/" target="_blank">upgrading to a newer one</a>.
