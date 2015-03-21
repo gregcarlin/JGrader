@@ -90,6 +90,12 @@ ul.section-list {
   clear: left;
   margin-right: 5px;
 }
+.description .right {
+  margin-right: 5px;
+}
+.description .right:first-child {
+  margin-right: 0;
+}
 .first pre {
   border-top-left-radius: 0;
 }
@@ -249,3 +255,33 @@ ol.comments .comment .links a:hover {
 .fa-exclamation-circle, .fa-times {
   color: #AA081D;
 }
+#caseCreate .input, #caseCreate .output {
+  width: 50%;
+  margin-bottom: 5px;
+}
+#caseCreate .input {
+  float: left;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+#caseCreate .output {
+  float: right;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+#caseCreate button, #caseCreate input[type="submit"] {
+  width: 50%;
+  margin-top: 10px !important;
+}
+#caseCreate button {
+  float: left;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+#caseCreate input[type="submit"] {
+  float: right;
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
