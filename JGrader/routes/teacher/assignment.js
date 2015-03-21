@@ -317,7 +317,18 @@ router.get('/:id/caseCreate', function(req, res) {
 });
 
 router.post('/:id/caseCreate', function(req, res) {
-  connection.query('INSERT INTO `test-cases` VALUES (NULL, ?, ?, ?)', [req.params.id, req.body.input, req.body.output], function(err, rows) {
+  var string = '';
+  var params = [];
+  for(i in req.body.in_case) {
+    if(req.body.out_case) {
+      string += '(NULL, ?, ?, ?),';
+      params.push(req.params.id);
+      params.push(req.body.in_case[i]);
+      params.push(req.body.out_case[i]);
+    }
+  }
+  string = string.substr(0, string.length-1);
+  connection.query('INSERT INTO `test-cases` VALUES ' + string, params, function(err, rows) {
     if(err) {
       render('notFound', {error: 'The server was unable to create the test case. Please try again.'}, res);
       throw err;
