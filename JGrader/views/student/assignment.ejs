@@ -1,20 +1,9 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
 
-<% if (typeof rows == 'undefined') { %>
-<!-- Need to implement a way of getting section name not related to rows-->
-<h1> Some kind of Error has happened</h1>
-<% } else {
-    if (typeof rows[0].description  === 'object') {
-      rows[0].description = "N/A";
-    }%>
 <div class="page-header">
-  <h1> <%= rows[0].name %> </h1>
+  <h1> <%= assignment.name %> </h1>
 </div>
-
-<% if(rows.length == 0) { %>
-    <h1>Some Error has occured/td>
-<% } else { %>
 
 <div class="table-responsive">
   <table class="table table-striped">
@@ -27,8 +16,8 @@
       </thead>
       <tbody>
               <tr>
-                <td><%= rows[0].description %></td>
-                <td><%= strftime('%b %d, %Y at %l:%M %p', new Date(rows[0].due)); %></td>
+                <td><%= assignment.description ? assignment.description : 'None' %></td>
+                <td><%= strftime('%b %d, %Y at %l:%M %p', new Date(assignment.due)); %></td>
                 <td><span class="fa fa-times"></span></td>
               </tr>
       </tbody>
@@ -92,6 +81,4 @@
   </div>
 
 </div>
-  <% } %>
 
-<% } %>
