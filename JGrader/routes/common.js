@@ -10,6 +10,7 @@ fs   = require('fs-extra'); // for file IO
 exec = require('child_process').exec; // for running bash commands
 
 async = require('async');
+var crypto = require('crypto');
 
 mysql      = require('mysql');
 connection = mysql.createPool({
@@ -89,11 +90,21 @@ logIn = function(hash, db, finish) {
   }
 }
 
-// attempt to authenticate user. calls finish(id) if id is found, otherwise redirects user to sign in page.
+// attempt to authenticate user. calls finish(id, mustResetPass) if id is found, otherwise redirects user to sign in page.
+// mustResetPass is a flag to indicate whether or not a message should be displayed asking the user to reset his or her password.
 var authenticate = function(hash, res, db, finish) {
   logIn(hash, db, function(id) {
     if(id) {
-      finish(id);
+      connection.query("SELECT `pass_reset_hash` FROM `" + db + "` WHERE `id` = ?", [id], function(err, rows) {
+        if(err) {
+          res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.');
+          throw err;
+        } else if(rows.length <= 0) {
+          res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.');
+        } else {
+          finish(id, rows[0].pass_reset_hash == null ? false : true);
+        }
+      });
     } else {
       res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.');
     }
@@ -171,5 +182,12 @@ if (typeof String.prototype.startsWith != 'function') {
     return this.slice(0, str.length) == str;
   };
 }
+
+signIn = function(dbType, userID, res, finish) {
+  var hash = crypto.randomBytes(20).toString('hex'); // http://stackoverflow.com/a/14869745/720889
+  res.cookie('hash', hash);
+  var db = 'sessions-' + dbType;
+  connection.query('INSERT INTO ?? VALUES(?, ?)', [db, userID, hash], finish);
+};
 
 // modules.exports not required because everything needed is global

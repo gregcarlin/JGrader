@@ -29,6 +29,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(useragent.express());
 
+// alert users with unsupported browsers/devices
 app.use(function(req, res, next) {
   var ua = req.useragent;
   ua.isiOS = ua.isiPad || ua.isiPod || ua.isiPhone;

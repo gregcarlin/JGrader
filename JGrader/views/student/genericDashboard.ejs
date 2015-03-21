@@ -70,11 +70,26 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li<%- page == 0 ? ' class="active"' : '' %>><a href="/student/section"> Classes <span class="sr-only">(current)</span></a></li>
-            <li<%- page == 1 ? ' class="active"' : '' %>><a href="/student/assignment"> Assignments</a></li>
+            <li<%- page == 0 ? ' class="active"' : '' %>><a href="/student/section">Classes <span class="sr-only">(current)</span></a></li>
+            <li<%- page == 1 ? ' class="active"' : '' %>><a href="/student/assignment">Assignments</a></li>
           </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <noscript>
+            <div class="alert alert-warning" role="alert">
+              You have JavaScript turned off! Many features of this site will not work!
+            </div>
+          </noscript>
+          <% if(mustResetPass) { %>
+            <div class="alert alert-danger" role="alert">
+              Please go to the <a href="/student/settings">settings</a> and change your password.
+            </div>
+          <% } %>
+          <% if(nosupport) { %>
+            <div class="alert alert-warning" role="alert">
+              Your browser is not supported. Consider <a href="http://browsehappy.com/" target="_blank">upgrading to a newer one</a>.
+            </div>
+          <% } %>
           <% if(typeof error != 'undefined') { %>
             <div class="alert alert-danger alert-dismissable" role="alert">
               <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -91,6 +106,7 @@
         </div>
       </div>
     </div>
+
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->

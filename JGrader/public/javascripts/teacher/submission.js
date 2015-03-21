@@ -8,18 +8,21 @@ $('#input-expand').click(function() {
   $('#input-text').toggle();
 });
 
+var disabled = false;
 $('#execute').click(function() {
-  $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>');
-  var fileID = $('.tab-content .active').attr('id');
-  var url = document.URL;
-  if(url.charAt(url.length-1) != '/') url += '/';
-  $.post(url + 'run/' + fileID, {stdin: $('#input-text').val()}, function(data, textStatus, jqXHR) {
-    if(data.code == 0) {
-      $('#output-text').html(data.out + '\n\n<span class="stderr">' + data.err + '</span>');
-    } else {
-      alert('An error has occurred, please reload the page and try again.');
-    }
-  });
+  if(!disabled) {
+    $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>');
+    var fileID = $('.tab-content .active').attr('id');
+    var url = document.URL;
+    if(url.charAt(url.length-1) != '/') url += '/';
+    $.post(url + 'run/' + fileID, {stdin: $('#input-text').val()}, function(data, textStatus, jqXHR) {
+      if(data.code == 0) {
+        $('#output-text').html(data.out + '\n\n<span class="stderr">' + data.err + '</span>');
+      } else {
+        alert('An error has occurred, please reload the page and try again.');
+      }
+    });
+  }
 });
 
 $('#download').click(function() {
@@ -28,5 +31,25 @@ $('#download').click(function() {
   if(url.charAt(url.length-1) != '/') url += '/';
   var win = window.open(url + 'download/' + fileID, '_blank');
   win.focus();
+});
+
+$('.nav-tabs a[data-toggle="tab"]').click(function() {
+  if($(this).attr('data-canrun') == 'true') {
+    $('#execute span').tooltip();
+    $('#execute').removeClass('disabled');
+    disabled = false;
+  } else {
+    $('#execute span').tooltip('destroy');
+    $('#execute').addClass('disabled');
+    disabled = true;
+  }
+});
+
+$(window).load(function() {
+  if($('.nav-tabs .active a[data-toggle="tab"]').attr('data-canrun') == 'false') {
+    $('#execute span').tooltip('destroy');
+    $('#execute').addClass('disabled');
+    disabled = true;
+  }
 });
 

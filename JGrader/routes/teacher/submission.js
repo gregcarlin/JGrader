@@ -49,11 +49,14 @@ router.get('/:id', function(req, res) {
     } else if(subData.length <= 0) {
       render('notFound', {}, res);
     } else {
-      connection.query("SELECT `id`,`name`,`contents` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
+      connection.query("SELECT `id`,`name`,`contents`,`compiled` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
         if(err) {
           render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: [], error: 'Unable to retrieve file data.'}, res);
           throw err;
         } else {
+          for(file in fileData) {
+            fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
+          }
           render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData}, res);
         }
       });

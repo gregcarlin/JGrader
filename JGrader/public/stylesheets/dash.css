@@ -284,4 +284,14 @@ ol.comments .comment .links a:hover {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
+.red {
+  color: #AA081D;
+}
+.disabled span {
+  color: #AAA;
+}
+.disabled span:hover {
+  color: #AAA !important;
+  cursor: inherit !important;
+}
 

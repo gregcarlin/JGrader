@@ -14,7 +14,7 @@ var render = function(page, options, res) {
       break;
     case 'sectionList':
       options.title = 'Your Sections';
-      options.js = ['tooltip', 'teacher/sectionList'];
+      options.js = ['tooltip', 'teacher/sectionList', 'stupidtable.min', 'tablesort'];
       options.css = ['font-awesome.min'];
       break;
     case 'sectionCreate':
@@ -22,7 +22,7 @@ var render = function(page, options, res) {
       break;
     case 'section':
       // title must be set already
-      options.js = ['tooltip', 'teacher/edit'];
+      options.js = ['tooltip', 'teacher/edit', 'stupidtable.min', 'tablesort'];
       options.css = ['font-awesome.min'];
       options.strftime = strftime;
       break;

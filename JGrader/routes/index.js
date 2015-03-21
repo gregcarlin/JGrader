@@ -67,7 +67,8 @@ router.post('/forgot', function(req, res) {
         res.render('forgot', {error: 'No account with that address exists.'});
       } else {
         var hash = crypto.randomBytes(20).toString('hex');
-        connection.query('UPDATE `' + db + '` SET `pass` = AES_ENCRYPT(?,?) WHERE `id` = ?', [hash, creds.aes_key, id], function(err, result) {
+        var url = 'http://jgrader.com/forgot/' + db + '/' + hash;
+        connection.query("UPDATE `" + db + "` SET `pass_reset_hash` = ? WHERE `id` = ?", [hash, id], function(err, result) {
           var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -79,7 +80,7 @@ router.post('/forgot', function(req, res) {
             from: creds.email_user,
             to: req.body.email,
             subject: 'Password Recovery',
-            html: 'Your new password is ' + hash + '. Please <a href="http://www.jgrader.com/sign-in">log in</a> and change this as soon as possible.'
+            html: 'Your password reset request has been received. If you would like to reset your password, please go to <a href="' + url + '">' + url + '</a>. If you did not want to reset your password, you can safely ignore this message.'
           };
           transporter.sendMail(mailOptions, function(err, info) {
             if(err) {
@@ -95,6 +96,28 @@ router.post('/forgot', function(req, res) {
   }
 });
 
+router.get('/forgot/:db/:hash', function(req, res) {
+  connection.query("SELECT `id` FROM ?? WHERE `pass_reset_hash` = ?", [req.params.db, req.params.hash], function(err, rows) {
+    if(err) {
+      res.render('forgot', {error: 'An unknown error has occurred.'});
+      // don't throw err because it might be caused by an incorrect database
+      console.log(err);
+    } else if(rows.length <= 0) {
+      res.render('forgot', {error: 'Your account could not be found. Please try again.'});
+    } else {
+      signIn(req.params.db, rows[0].id, res, function(err, result) {
+        if(err) {
+          res.render('forgot', {error: 'An unknown error has occurred.'});
+          throw err;
+        } else {
+          // user will be automatically redirected to their proper section
+          res.redirect('/');
+        }
+      });
+    }
+  });
+});
+
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, db, finish) {
   logIn(hash, db + 's', function(id) {
@@ -107,7 +130,7 @@ var tryRedirect = function(hash, res, db, finish) {
 }
 
 var gitUpdate = function(req, res) {
-  exec('git pull && npm install && forever restartall', {}, function(error, stdout, stderr) {
+  exec('git pull && forever stopall && npm install && npm start', {}, function(error, stdout, stderr) {
     res.json({stdout: stdout, stderr: stderr});
   });
 }

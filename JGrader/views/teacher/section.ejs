@@ -13,10 +13,10 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Due</th>
-        <th>Completed</th>
-        <th>Graded</th>
+        <th data-sort="string">Name <a class="fa fa-sort"></th>
+        <th data-sort="int">Due <a class="fa fa-sort"></th>
+        <th data-sort="float">Completed <a class="fa fa-sort"></th>
+        <th data-sort="float">Graded <a class="fa fa-sort"></th>
       </tr>
     </thead>
     <tbody>
@@ -32,9 +32,9 @@
                 var due = new Date(rows[i].due);
                 var dueStr = strftime(due.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', due);
               %>
-              <td title="<%= strftime('%b %d %Y, %l:%M %p', due) %>"><%= dueStr %></td>
-              <td><%= rows[i].complete %> of <%= rows[i].total %></td>
-              <td><%= rows[i].graded %> of <%= rows[i].complete %></td>
+              <td title="<%= strftime('%b %d %Y, %l:%M %p', due) %>" data-sort-value="<%= due ? due.getTime() : 0 %>"><%= dueStr %></td>
+              <td data-sort-value="<%= rows[i].total == 0 ? 0 : (rows[i].complete / rows[i].total) %>"><%= rows[i].complete %> of <%= rows[i].total %></td>
+              <td data-sort-value="<%= rows[i].complete == 0 ? 0 : (rows[i].graded / rows[i].complete) %>"><%= rows[i].graded %> of <%= rows[i].complete %></td>
             </tr>
        <% }
          } %>
