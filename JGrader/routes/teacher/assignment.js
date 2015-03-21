@@ -124,6 +124,25 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
   });
 }
 
+router.use('/:id', function(req, res, next) {
+  connection.query({
+      sql: "SELECT * FROM `assignments` JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` WHERE `assignments`.`id` = ? AND `sections`.`teacher_id` = ?", 
+      nestTables: true,
+      values: [req.params.id, req.user.id]
+    }, function(err, result) {
+      if(err) {
+        render('notFound', {error: 'An unexpected error has occurred.'}, res);
+        throw err;
+      } else if(result.length <= 0) {
+        render('notFound', {}, res);
+      } else {
+        req.assignment = result[0].assignments;
+        req.section = result[0].sections;
+        next();
+      }
+  });
+});
+
 router.get('/:id.csv', function(req, res) {
   connection.query("SELECT \
                       `students`.`fname`,\
@@ -151,40 +170,20 @@ router.get('/:id.csv', function(req, res) {
 
 router.get('/:id', function(req, res) {
   connection.query("SELECT \
-                      `assignments`.`id` AS `aid`,\
-                      `assignments`.`name`,\
-                      `assignments`.`description`,\
-                      `assignments`.`due`,\
-                      `sections`.`name` AS `sname`,\
-                      `sections`.`id` AS `sid` \
-                    FROM `assignments`,`sections` \
+                      `students`.`id`,\
+                      `students`.`fname`,\
+                      `students`.`lname`,\
+                      `submissions`.`id` AS `subID`,\
+                      `submissions`.`submitted`,\
+                      `submissions`.`grade` \
+                    FROM `enrollment`,`students` \
+                    LEFT JOIN \
+                      `submissions` ON `submissions`.`student_id` = `students`.`id` AND \
+                      `submissions`.`assignment_id` = ? \
                     WHERE \
-                      `assignments`.`section_id` = `sections`.`id` AND \
-                      `sections`.`teacher_id` = ? AND \
-                      `assignments`.`id` = ?", [req.user.id, req.params.id], function(err, rows) {
-    if(err) {
-      render('notFound', {error: 'An unexpected error has occurred.'}, res);
-      throw err;
-    } else if(rows.length <= 0) {
-      render('notFound', {}, res);
-    } else {
-      connection.query("SELECT \
-                          `students`.`id`,\
-                          `students`.`fname`,\
-                          `students`.`lname`,\
-                          `submissions`.`id` AS `subID`,\
-                          `submissions`.`submitted`,\
-                          `submissions`.`grade` \
-                        FROM `enrollment`,`students` \
-                        LEFT JOIN \
-                          `submissions` ON `submissions`.`student_id` = `students`.`id` AND \
-                          `submissions`.`assignment_id` = ? \
-                        WHERE \
-                          `enrollment`.`student_id` = `students`.`id` AND \
-                          `enrollment`.`section_id` = ?", [req.params.id, rows[0].sid], function(err, results) {
-        render('assignment', {title: rows[0].name, assignment: rows[0], results: results, id: req.params.id}, res);
-      });
-    }
+                      `enrollment`.`student_id` = `students`.`id` AND \
+                      `enrollment`.`section_id` = ?", [req.params.id, req.section.id], function(err, results) {
+    render('assignment', {title: req.assignment.name, assignment: req.assignment, results: results, id: req.params.id}, res);
   });
 });
 
@@ -193,12 +192,10 @@ router.post('/:id/updatedesc/:desc', function(req, res) {
   if(req.params.desc.startsWith('<em>')) {
     res.json({code: 1}); // invalid input
   } else {
-    connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.desc, req.params.id, req.user.id], function(err, rows) {
+    connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ?", [req.params.desc, req.params.id], function(err, rows) {
       if(err) {
         res.json({code: -1}); // unknown error
         throw err;
-      } else if(rows.affectedRows <= 0) {
-        res.json({code: 2}); // invalid permissions
       } else {
         res.json({code: 0, newValue: req.params.desc}); // success
       }
@@ -208,12 +205,10 @@ router.post('/:id/updatedesc/:desc', function(req, res) {
 
 // update description to nothing
 router.post('/:id/updatedesc', function(req, res) {
-  connection.query("UPDATE `assignments` SET `description` = NULL WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.id, req.user.id], function(err, rows) {
+  connection.query("UPDATE `assignments` SET `description` = NULL WHERE `id` = ?", [req.params.id], function(err, rows) {
     if(err) {
       res.json({code: -1}); // unknown error
       throw err;
-    } else if(rows.affectedRows <= 0) {
-      res.json({code: 2}); // invalid permissions
     } else {
       res.json({code: 0, newValue: ''}); // success
     }
@@ -221,12 +216,10 @@ router.post('/:id/updatedesc', function(req, res) {
 });
 
 router.post('/:id/updatedue/:due', function(req, res) {
-  connection.query("UPDATE `assignments` SET `due` = ? WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignments`.`id`)", [req.params.due, req.params.id, req.user.id], function(err, rows) {
+  connection.query("UPDATE `assignments` SET `due` = ? WHERE `id` = ?", [req.params.due, req.params.id], function(err, rows) {
     if(err) {
       res.json({code: -1}); // unknown error
       throw err;
-    } else if(rows.affectedRows <= 0) {
-      res.json({code: 2}); // invalid permissions
     } else {
       res.json({code: 0, newValue: req.params.due});
     }
@@ -234,12 +227,10 @@ router.post('/:id/updatedue/:due', function(req, res) {
 });
 
 router.get('/:id/delete', function(req, res) {
-  connection.query('DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1', [req.params.id, req.user.id], function(err, rows) {
+  connection.query('DELETE FROM `assignments` WHERE `id` = ? LIMIT 1', [req.params.id], function(err, rows) {
     if(err) {
       render('notFound', {error: 'Unable to delete assignment. Please go back and try again.'}, res);
       throw err;
-    } else if(rows.affectedRows <= 0) {
-      render('notFound', {error: 'You are not allowed to delete that assignment.'}, res);
     } else {
       connection.query("DELETE FROM `submissions` JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `submissions`.`assignment_id` = ?", [req.params.id], function(err) {
         if(err) {
@@ -250,10 +241,6 @@ router.get('/:id/delete', function(req, res) {
       });
     }
   });
-  /*query("DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1", [req.params.id, req.user.id]).
-  then(function(rows) {
-    
-  });*/
 });
 
 module.exports = router;
