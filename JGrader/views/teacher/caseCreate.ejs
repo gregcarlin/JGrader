@@ -1,8 +1,10 @@
 <div class="page-header">
   <h1>New Test Case</h1>
 </div>
-<form action="caseCreate" method="post">
-  <textarea class="form-control" placeholder="Input" name="input"></textarea>
-  <textarea class="form-control" placeholder="Output" name="output"></textarea>
-  <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create" />
+<form action="caseCreate" method="post" id="caseCreate">
+  <div>
+    <!-- inputs will be placed here -->
+  </div>
+  <button type="button" class="btn btn-lg btn-primary btn-block" onclick="addRow()">Add Row</button>
+  <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create tests" />
 </form>

@@ -10,7 +10,8 @@
 </div>
 <div class="description">
   <span class="edit" data-key="updatedesc" data-default="No Description"><span><%= assignment.description ? assignment.description : '' %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span>
-  <a href="/teacher/assignment/<%= id %>.csv" class="right"><span class="fa fa-table" data-toggle="tooltip" data-placement="left" title="Export"></span></a>
+  <a href="/teacher/assignment/<%= id %>.csv" class="right"><span class="fa fa-table" data-toggle="tooltip" data-placement="bottom" title="Export"></span></a>
+  <a href="/teacher/assignment/<%= id %>/testCase" class="right"><span class="fa fa-wrench" data-toggle="tooltip" data-placement="bottom" title="Test cases"></span></a>
 </div>
 <div class="table-responsive">
   <table class="table table-striped table-linked">
@@ -19,6 +20,7 @@
         <th data-sort="string">Student <a class="fa fa-sort"></a></th>
         <th data-sort="int">Submitted <a class="fa fa-sort"></a></th>
         <th data-sort="int">Grade <a class="fa fa-sort"></a></th>
+        <th data-sort="float">Passed tests <a class="fa fa-sort"></a></th>
       </tr>
     </thead>
     <tbody>
@@ -39,6 +41,7 @@
               %>
               <td data-sort-value="<%= submitted ? submitted.getTime() : 0 %>"><%- submittedStr %></td>
               <td data-sort-value="<%= results[i].grade ? results[i].grade : 0  %>"><%- results[i].grade ? (results[i].grade + '%') : '<em>Not graded.</em>' %></td>
+              <td data-sort-value="">X of Y</td>
             </tr>
        <% }
          } %>

@@ -33,6 +33,9 @@ var render = function(page, options, res) {
       options.js = ['tooltip', 'teacher/testCaseList'];
       options.css = ['font-awesome.min'];
       break;
+    case 'caseCreate':
+      options.js = ['teacher/caseCreate'];
+      break;
   }
   renderGenericTeacher(page, options, res);
 }
@@ -282,16 +285,12 @@ router.get('/:id/delete', function(req, res) {
       });
     }
   });
-  /*query("DELETE FROM `assignments` WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`) LIMIT 1", [req.params.id, req.user.id]).
-  then(function(rows) {
-
-  });*/
 });
 
 router.get('/:id/testCase', function(req, res) {
-  connection.query('SELECT `assignments`.`name` \
+  connection.query('SELECT `name`,`id` \
                     FROM `assignments` \
-                    WHERE `assignments`.`id` = ?', [req.params.id], function(err, assignment) {
+                    WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`)', [req.params.id, req.user.id], function(err, assignment) {
     if(err) {
       render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
     }
@@ -301,7 +300,7 @@ router.get('/:id/testCase', function(req, res) {
       if(err) {
         render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
       } else {
-        render('testCaseList', {testCases: testCases, assignment: assignment}, res);
+        render('testCaseList', {testCases: testCases, assignment: assignment[0]}, res);
       }
     });
   });
@@ -309,7 +308,7 @@ router.get('/:id/testCase', function(req, res) {
 
 router.get('/:id/testCase/delete', function(req, res) {
   connection.query('DELETE FROM `test-cases` \
-                    WHERE `assignment_id` = ?', [req.params.id], function(err, assignment) {
+                    WHERE `assignment_id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`)', [req.params.id, req.user.id], function(err, assignment) {
     if(err) {
       render('notFound', {error: 'The server was unable to delete the test case. Please try again.'}, res);
     } else {
