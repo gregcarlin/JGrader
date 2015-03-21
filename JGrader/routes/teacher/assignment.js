@@ -183,7 +183,7 @@ router.get('/:id', function(req, res) {
                     WHERE \
                       `enrollment`.`student_id` = `students`.`id` AND \
                       `enrollment`.`section_id` = ?", [req.params.id, req.section.id], function(err, results) {
-    render('assignment', {title: req.assignment.name, assignment: req.assignment, results: results, id: req.params.id}, res);
+    render('assignment', {title: req.assignment.name, assignment: req.assignment, section: req.section, results: results, id: req.params.id}, res);
   });
 });
 
