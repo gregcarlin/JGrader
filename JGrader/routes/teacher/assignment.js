@@ -293,24 +293,28 @@ router.get('/:id/testCase', function(req, res) {
                     WHERE `id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`id`)', [req.params.id, req.user.id], function(err, assignment) {
     if(err) {
       render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
+      throw err;
+    } else {
+      connection.query('SELECT `input`,`output` \
+                        FROM `test-cases` \
+                        WHERE `assignment_id` = ?', [req.params.id], function(err, testCases) {
+        if(err) {
+          render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
+          throw err;
+        } else {
+          render('testCaseList', {testCases: testCases, assignment: assignment[0]}, res);
+        }
+      });
     }
-    connection.query('SELECT `test-cases`.* \
-                      FROM `test-cases` \
-                      WHERE `test-cases`.`assignment_id` = ?', [req.params.id], function(err, testCases) {
-      if(err) {
-        render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
-      } else {
-        render('testCaseList', {testCases: testCases, assignment: assignment[0]}, res);
-      }
-    });
   });
 });
 
-router.get('/:id/testCase/delete', function(req, res) {
+router.get('/:id/testCase/delete/:testID', function(req, res) {
   connection.query('DELETE FROM `test-cases` \
-                    WHERE `assignment_id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`)', [req.params.id, req.user.id], function(err, assignment) {
+                    WHERE `assignment_id` = ? AND TEACHER_OWNS_ASSIGNMENT(?,`assignment_id`) AND `id` = ? LIMIT 1', [req.params.id, req.user.id, req.params.testID], function(err, assignment) {
     if(err) {
       render('notFound', {error: 'The server was unable to delete the test case. Please try again.'}, res);
+      throw err;
     } else {
       res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
     }
@@ -325,6 +329,7 @@ router.post('/:id/caseCreate', function(req, res) {
   connection.query('INSERT INTO `test-cases` VALUES (NULL, ?, ?, ?)', [req.params.id, req.body.input, req.body.output], function(err, rows) {
     if(err) {
       render('notFound', {error: 'The server was unable to create the test case. Please try again.'}, res);
+      throw err;
     } else {
       res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
     }
