@@ -9,10 +9,10 @@
   <table class="table table-striped table-linked">
     <thead>
       <tr>
-        <th>Assignment</th>
-        <th>Section</th>
-        <th>Submitted</th>
-        <th>Grade</th>
+        <th data-sort="string">Assignment <a class="fa fa-sort"></th>
+        <th data-sort="string">Section <a class="fa fa-sort"></th>
+        <th data-sort="int">Submitted <a class="fa fa-sort"></th>
+        <th data-sort="int">Grade <a class="fa fa-sort"></th>
       </tr>
     </thead>
     <tbody>
@@ -34,8 +34,8 @@
                   }
                 }
               %>
-              <td><%- rows[i].submitted ? submittedStr : 'Not submitted' %></td>
-              <td><%= rows[i].grade ? rows[i].grade : 'Not graded' %></td>
+              <td data-sort-value="<%= rows[i].submitted ? submitted.getTime() : 0 %>"><%- rows[i].submitted ? submittedStr : 'Not submitted' %></td>
+              <td data-sort-value="<%= rows[i].grade ? rows[i].grade : 0 %>"><%= rows[i].grade ? rows[i].grade : 'Not graded' %></td>
             </tr>
        <% }
          } %>

@@ -26,8 +26,9 @@ var render = function(page, options, res) {
 
 // automatically authenticate student for every page in this section
 router.use(function(req, res, next) {
-  authStudent(req.cookies.hash, res, function(id) {
+  authStudent(req.cookies.hash, res, function(id, mustResetPass) {
     req.user = {id: id};
+    res.locals.mustResetPass = mustResetPass; // variable is accessible in ejs
     next();
   });
 });
@@ -63,7 +64,14 @@ router.post('/settings', function(req, res) {
     var newPass = req.body.newpass;
     if(isSet(oldPass) || isSet(newPass)) {
       if(isSet(oldPass) && isSet(newPass)) {
-        connection.query("UPDATE `students` SET `fname` = ?, `lname` = ?, `pass` = AES_ENCRYPT(?, ?) WHERE `id` = ? AND `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, req.user.id, oldPass, creds.aes_key], function(err, rows) {
+        connection.query("UPDATE `students` \
+                            SET `fname` = ?, \
+                            `lname` = ?, \
+                            `pass` = AES_ENCRYPT(?, ?), \
+                            `pass_reset_hash` = NULL \
+                          WHERE \
+                            `id` = ? AND \
+                            `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, req.user.id, oldPass, creds.aes_key], function(err, rows) {
           if(err) {
             render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
             throw err;
