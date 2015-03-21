@@ -79,24 +79,28 @@ router.post('/joinSection', function(req, res) {
   }
 });
 
-// Gets information for specific class
-router.get('/:id', function(req, res) {
-  var sectionID = req.params.id;
-  connection.query("SELECT `sections`.`name` FROM `sections`,`enrollment` WHERE `sections`.`id` = ? AND `sections`.`id` = `enrollment`.`section_id` AND `enrollment`.`student_id` = ?", [sectionID, req.user.id], function(err, result) {
+router.use('/:id', function(req, res, next) {
+  connection.query("SELECT `sections`.* FROM `sections` JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`id` = ? AND `enrollment`.`student_id` = ?", [req.params.id, req.user.id], function(err, result) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       throw err;
     } else if(result.length <= 0) {
       render('notFound', {}, res);
     } else {
-      connection.query("SELECT `id`,`name`,`description`,`due` FROM `assignments` WHERE `section_id` = ?", [sectionID], function(err, rows) {
-        if(err) {
-          render('notFound', {error: 'An unexpected error has occurred.'}, res);
-          throw err;
-        } else {
-          render('section', {name: result[0].name, rows: rows, id: sectionID}, res);
-        }
-      });
+      req.section = result[0];
+      next();
+    }
+  });
+});
+
+// Gets information for specific class
+router.get('/:id', function(req, res) {
+  connection.query("SELECT `id`,`name`,`description`,`due` FROM `assignments` WHERE `section_id` = ?", [req.params.id], function(err, rows) {
+    if(err) {
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
+      throw err;
+    } else {
+      render('section', {name: req.section.name, rows: rows, id: req.params.id}, res);
     }
   });
 });
