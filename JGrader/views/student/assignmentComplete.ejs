@@ -1,20 +1,9 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
 
-<% if (typeof rows == 'undefined') { %>
-<!-- Need to implement a way of getting section name not related to rows-->
-<h1> Some kind of Error has happened</h1>
-<% } else {
-    if (typeof rows[0].description  === 'object') {
-      rows[0].description = "N/A";
-    }%>
 <div class="page-header">
-  <h1> <%= rows[0].name %> </h1>
+  <h1> <%= assignment.name %> </h1>
 </div>
-
-<% if(rows.length == 0) { %>
-    <h1>Some Error has occured/td>
-<% } else { %>
 
 <div class="table-responsive">
   <table class="table table-striped">
@@ -28,8 +17,8 @@
       </thead>
       <tbody>
               <tr>
-                <td><%= rows[0].description %></td>
-                <td><%= strftime('%b %d, %Y at %l:%M %p', new Date(rows[0].due)); %><%- rows[0].submitted > rows[0].due ? ' <span class="fa fa-clock-o"></span>' : '' %></td>
+                <td><%= assignment.description ? assignment.description : 'None' %></td>
+                <td><%= strftime('%b %d, %Y at %l:%M %p', new Date(assignment.due)); %><%- assignment.submitted > assignment.due ? ' <span class="fa fa-clock-o"></span>' : '' %></td>
                 <td><%- fileData[0].grade ? fileData[0].grade : '<em>Not graded.</em>' %></td>
                 <td><span class="fa fa-check fa-2x"></span></td>
               </tr>
@@ -56,5 +45,4 @@
 <div class"row">
   <a class="btn btn-primary start" href="resubmit/" role="button"  id="resubmit" value="Resubmit">Resubmit</a>
 </div>
-<% }
-} %>
+

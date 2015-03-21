@@ -54,44 +54,46 @@ router.get('/', function(req, res) {
   });
 });
 
-// Gets the assignment information based on id
-router.get('/:id', function(req, res) {
-  var assignmentID = req.params.id;
-  if(assignmentID) {
-    connection.query("SELECT `assignments`.`id`, `assignments`.`name`, `assignments`.`description`,`assignments`.`due` \
-                      FROM `enrollment`,`assignments`,`sections` \
-                      WHERE `enrollment`.`section_id` = `sections`.`id` \
-                      AND `sections`.`id` = `assignments`.`section_id` \
-                      AND `enrollment`.`student_id` = ? \
-                      AND `assignments`.`id` = ?", [req.user.id, assignmentID], function(err, rows) {
+router.use('/:id', function(req, res, next) {
+  connection.query({
+      sql: "SELECT `assignments`.*,`sections`.* FROM `assignments` JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `assignments`.`id` = ? AND `enrollment`.`student_id` = ?",
+      nestTables: true,
+      values: [req.params.id, req.user.id]
+    }, function(err, result) {
       if(err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         throw err;
-      } else if(rows.length <= 0) {
+      } else if(result.length <= 0) {
         render('notFound', {}, res);
       } else {
-        connection.query("SELECT `files`.`name`,`files`.`contents`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
-                          FROM `files`, `students`, `assignments`, `submissions` \
-                          WHERE `submissions`.`assignment_id` = `assignments`.`id` \
-                          AND `submissions`.`student_id` = `students`.`id` \
-                          AND `files`.`submission_id`= `submissions`.`id` \
-                          AND  `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, assignmentID], function(err, fileData){
-          if(err) {
-            render('notFound', {error: 'An unexpected error has occurred.'}, res);
-            throw err;
-          } else if(fileData.length == 0) {
-            render('assignment', {title: rows[0].name, rows: rows}, res);
-          } else {
-            for(file in fileData) {
-              fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
-            }
-            // Sends file data
-            render('assignmentComplete', {title: rows[0].name, rows: rows, fileData: fileData}, res);
-          }
-        });
+        req.assignment = result[0].assignments;
+        req.section = result[0].sections;
+        next();
       }
     });
-  }
+});
+
+// Gets the assignment information based on id
+router.get('/:id', function(req, res) {
+  connection.query("SELECT `files`.`name`,`files`.`contents`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
+                    FROM `files`, `students`, `assignments`, `submissions` \
+                    WHERE `submissions`.`assignment_id` = `assignments`.`id` \
+                    AND `submissions`.`student_id` = `students`.`id` \
+                    AND `files`.`submission_id`= `submissions`.`id` \
+                    AND  `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData){
+    if(err) {
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
+      throw err;
+    } else if(fileData.length == 0) {
+      render('assignment', {title: req.assignment.name, assignment: req.assignment}, res);
+    } else {
+      for(file in fileData) {
+        fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
+      }
+      // Sends file data
+      render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData}, res);
+    }
+  });
 });
 
 router.use('/:id/submit', multer({
