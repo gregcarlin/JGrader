@@ -68,6 +68,29 @@ router.get('/', function(req, res) {
   });
 });
 
+router.use('/:id', function(req, res, next) {
+  connection.query({
+      sql: "SELECT `students`.*,`sections`.* FROM `students` JOIN `enrollment` ON `students`.`id` = `enrollment`.`student_id` JOIN `sections` ON `enrollment`.`section_id` = `sections`.`id` WHERE `students`.`id` = ? AND `sections`.`teacher_id` = ?",
+      nestTables: true,
+      values: [req.params.id, req.user.id]
+    }, function(err, result) {
+      if(err) {
+        render('notFound', {error: 'An unexpected error has occurred.'}, res);
+        throw err;
+      } else if(result.length <= 0) {
+        render('notFound', {}, res);
+      } else {
+        console.log(result);
+        req.student = result[0].students;
+        req.sections = [];
+        for(i in result) {
+          req.sections[i] = result[i].sections;
+        }
+        next();
+      }
+    });
+});
+
 router.get('/:id.csv', function(req, res) {
   connection.query("SELECT \
                       `assignments`.`name`,\
@@ -92,41 +115,42 @@ router.get('/:id.csv', function(req, res) {
 });
 
 router.get('/:id', function(req, res) {
-  connection.query("SELECT `students`.`fname`,`students`.`lname` FROM `students` WHERE `id` = ? AND SECTIONS_WITH_STUDENT(?, `students`.`id`) > 0", [req.params.id, req.user.id], function(err, result) {
+  connection.query("SELECT \
+                      `submissions`.`id`,\
+                      `submissions`.`grade`,\
+                      `submissions`.`submitted`,\
+                      `assignments`.`name`,\
+                      `assignments`.`due`,\
+                      `sections`.`name` AS `sname`,\
+                      `sections`.`id` AS `sid` \
+                    FROM \
+                      `assignments` \
+                      JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+                      JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` \
+                      LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = `enrollment`.`student_id` \
+                    WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       throw err;
-    } else if(result.length <= 0) {
-      render('notFound', {}, res);
     } else {
-      connection.query("SELECT \
-                          `submissions`.`id`,\
-                          `submissions`.`grade`,\
-                          `submissions`.`submitted`,\
-                          `assignments`.`name`,\
-                          `assignments`.`due`,\
-                          `sections`.`name` AS `sname`,\
-                          `sections`.`id` AS `sid` \
-                        FROM \
-                          `assignments` \
-                          JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
-                          JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` \
-                          LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = `enrollment`.`student_id` \
-                        WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
-        if(err) {
-          render('notFound', {error: 'An unexpected error has occurred.'}, res);
-          throw err;
-        } else {
-          var name = result[0].fname + ' ' + result[0].lname;
-          render('student', {title: name, name: name, rows: rows, id: req.params.id}, res);
-        }
-      });
+      var name = req.student.fname + ' ' + req.student.lname;
+      render('student', {title: name, name: name, rows: rows, id: req.params.id}, res);
     }
   });
 });
 
 router.get('/:id/:section/delete', function(req, res) {
-  connection.query("DELETE `enrollment`,`submissions`,`files` FROM `enrollment` JOIN `sections` ON `enrollment`.`section_id` = `sections`.`id` LEFT JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` LEFT JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `enrollment`.`student_id` = ? AND `enrollment`.`section_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.params.section, req.user.id], function(err, result) {
+  connection.query("DELETE `enrollment`,`submissions`,`files` \
+                    FROM \
+                      `enrollment` \
+                      JOIN `sections` ON `enrollment`.`section_id` = `sections`.`id` \
+                      LEFT JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` \
+                      LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                      LEFT JOIN `files` ON `files`.`submission_id` = `submissions`.`id` \
+                    WHERE \
+                      `enrollment`.`student_id` = ? AND \
+                      `enrollment`.`section_id` = ? AND \
+                      `sections`.`teacher_id` = ?", [req.params.id, req.params.section, req.user.id], function(err, result) {
     if(err) {
       render('notFound', {error: 'Unable to remove student. Please go back and try again.'}, res);
       throw err;
