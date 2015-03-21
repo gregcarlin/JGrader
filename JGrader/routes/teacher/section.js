@@ -76,51 +76,52 @@ router.post('/create', function(req, res) {
   }
 });
 
+router.use('/:id', function(req, res, next) {
+  connection.query("SELECT * FROM `sections` WHERE `id` = ? AND `teacher_id` = ?", [req.params.id, req.user.id], function(err, result) {
+    if(err) {
+      render('notFound', {error: 'An unknown error has occurred.'}, res);
+      throw err;
+    } else if(result.length <= 0) {
+      render('notFound', {}, res);
+    } else {
+      req.section = result[0];
+      next();
+    }
+  });
+});
+
 // page providing info on a specific section
 router.get('/:id', function(req, res) {
-  var sectionID = req.params.id;
-  if(sectionID && sectionID.length > 0) {
-    connection.query("SELECT * FROM `sections` WHERE `id` = ? AND `teacher_id` = ?", [sectionID, req.user.id], function(err, rows) {
-      if(err || rows.length <= 0) {
-        render('notFound', {}, res);
-      } else {
-        connection.query("SELECT \
-                            `assignments`.`id` AS `aid`,\
-                            `assignments`.`name` AS `aname`,\
-                            `assignments`.`due`,\
-                            COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
-                            COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
-                            COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
-                          FROM `assignments` \
-                          LEFT JOIN `enrollment` ON `enrollment`.`section_id` = ? \
-                          LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
-                          WHERE `assignments`.`section_id` = ? \
-                          GROUP BY `assignments`.`id` \
-                          ORDER BY \
-                            `assignments`.`due` DESC, \
-                            `assignments`.`name` ASC", [sectionID, sectionID], function(err, results) {
-          if(err) {
-            render('notFound', {error: 'Error getting section'}, res);
-            throw err;
-          } else {
-            render('section', {title: rows[0].name, sectionName: rows[0].name, sectionID: sectionID, sectionCode: rows[0].code, rows: results}, res);
-          }
-        });
-      }
-    });
-  } else {
-    render('notFound', {}, res);
-  }
+  connection.query("SELECT \
+                      `assignments`.`id` AS `aid`,\
+                      `assignments`.`name` AS `aname`,\
+                      `assignments`.`due`,\
+                      COUNT(DISTINCT(`enrollment`.`student_id`)) AS `total`,\
+                      COUNT(DISTINCT(`submissions`.`student_id`)) AS `complete`,\
+                      COUNT(DISTINCT(`submissions`.`grade`)) AS `graded`\
+                    FROM `assignments` \
+                    LEFT JOIN `enrollment` ON `enrollment`.`section_id` = ? \
+                    LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` \
+                    WHERE `assignments`.`section_id` = ? \
+                    GROUP BY `assignments`.`id` \
+                    ORDER BY \
+                      `assignments`.`due` DESC, \
+                      `assignments`.`name` ASC", [req.params.id, req.params.id], function(err, results) {
+    if(err) {
+      render('notFound', {error: 'Error getting section'}, res);
+      throw err;
+    } else {
+      render('section', {title: req.section.name, sectionName: req.section.name, sectionID: req.params.id, sectionCode: req.section.code, rows: results}, res);
+    }
+  });
 });
 
 // POST request to update name of section
 router.post('/:id/updatename/:name', function(req, res) {
-  connection.query("UPDATE `sections` SET `name` = ? WHERE `id` = ? AND `teacher_id` = ?", [req.params.name, req.params.id, req.user.id], function(err, rows) {
+  connection.query("UPDATE `sections` SET `name` = ? WHERE `id` = ?", [req.params.name, req.params.id], function(err, rows) {
     if(err) {
       res.json({code: -1}); // unknown error
       throw err;
-    } else if(rows.affectedRows <= 0) {
-      res.json({code: 2}); // no permission
     } else {
       res.json({code: 0, newValue: req.params.name});
     }
@@ -129,12 +130,10 @@ router.post('/:id/updatename/:name', function(req, res) {
 
 // request for deleting a section
 router.get('/:id/delete', function(req, res) {
-  connection.query('DELETE FROM `sections` WHERE `id` = ? AND `teacher_id` = ? LIMIT 1', [req.params.id, req.user.id], function(err, rows) {
+  connection.query('DELETE FROM `sections` WHERE `id` = ? LIMIT 1', [req.params.id], function(err, rows) {
     if(err) {
       render('notFound', {error: 'Unable to delete class. Please go back and try again.'}, res);
       throw err;
-    } else if(rows.affectedRows <= 0) {
-      render('notFound', {error: 'You are not allowed to delete that class.'}, res);
     } else {
       connection.query("DELETE FROM `enrollment` WHERE `section_id` = ?;\
                         DELETE `assignments`,`submissions`,`files` \
