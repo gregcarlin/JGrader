@@ -17,6 +17,14 @@
     <dd><%- submittedStr %></dd>
   <dt>Grade:</dt>
     <dd><span class="edit" data-key="updategrade" data-default="Not graded."><span><%= subData.grade ? subData.grade : '' %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
+  <dt>Test Cases:</dt>
+    <% if(passed + failed == 0) { %>
+      <dd>None created</dd>
+    <% } else if(passed + failed < 0) { %>
+      <dd>Error</dd>
+    <% } else { %>
+      <dd><%= passed %> of <%= (passed + failed) %> Passed</dd>
+    <% } %>
 </dl>
 <div role="tabpanel">
   <ul class="nav nav-tabs" role="tablist">

@@ -36,12 +36,12 @@ router.get('/:id', function(req, res) {
                       `assignments`.`id` AS `aid`,\
                       `assignments`.`name`,\
                       `assignments`.`due` \
-                    FROM `submissions`,`students`,`assignments`,`sections` \
+                    FROM `submissions` \
+                      JOIN `students` ON `students`.`id` = `submissions`.`student_id` \
+                      JOIN `assignments` ON `assignments`.`id` = `submissions`.`assignment_id` \
+                      JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
                     WHERE \
-                      `students`.`id` = `submissions`.`student_id` AND \
-                      `assignments`.`id` = `submissions`.`assignment_id` AND \
                       `submissions`.`id` = ? AND \
-                      `assignments`.`section_id` = `sections`.`id` AND \
                       `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, subData) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
@@ -51,13 +51,25 @@ router.get('/:id', function(req, res) {
     } else {
       connection.query("SELECT `id`,`name`,`contents`,`compiled` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
         if(err) {
-          render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: [], error: 'Unable to retrieve file data.'}, res);
+          render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: [], error: 'Unable to retrieve file data.', passed: -1, failed: -1}, res);
           throw err;
         } else {
           for(file in fileData) {
             fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
           }
-          render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData}, res);
+          connection.query("SELECT `result` FROM `test-case-results` WHERE `submission_id` = ?", [req.params.id], function(err, testData) {
+            if(err) throw err;
+            var passed = 0;
+            var failed = 0;
+            for(i in testData) {
+              if(testData[i].result) {
+                passed++;
+              } else {
+                failed++;
+              }
+            }
+            render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData, passed: passed, failed: failed}, res);
+          });
         }
       });
     }

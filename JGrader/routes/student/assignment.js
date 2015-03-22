@@ -190,6 +190,7 @@ router.post('/:id/submit', function(req, res) {
                         res.json({code: -1}) // unknown error
                         throw err;
                       } else {
+                        // TODO check code against test cases
                         res.json({code: 0});
                       }
                     });
