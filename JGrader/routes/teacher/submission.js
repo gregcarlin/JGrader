@@ -139,7 +139,7 @@ router.post('/:id/run/:fileIndex', function(req, res) {
       var fileIndex = req.params.fileIndex;
       if(fileIndex < rows.length) {
         // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
-        var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds  */}, function(err, stdout, stderr) {
+        var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
           if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
           callback(err, stdout, stderr);
         });
@@ -184,19 +184,56 @@ router.get('/:id/test/:fileIndex', function(req, res) {
                         `sections`.`teacher_id` = ? AND \
                         `files`.`submission_id` = `submissions`.`id` \
                       ORDER BY `files`.`id`", [req.params.id, req.user.id], function(err, files) {
-      async.each(rows, function(row, cb) {
-        var name = row.name;
-        row.className = name.substring(0, name.length - 5);
-        // note: working directory seems to be one with app.js in it
-        fs.writeFile('temp/' + req.params.id + '/' + row.className + '.class', row.compiled, cb);
-      }, function(err) {
-        if(err) {
-          res.json({code: -1});
-          throw err;
-        } else {
-          // TODO execute tests
-        }
-      });
+      if(err) {
+        res.json({code: -1});
+        throw err;
+      } else {
+        connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.params.id], function(err, tests) {
+          if(err) {
+            res.json({code: -1});
+            throw err;
+          } else {
+            for(var i in files) {
+              files[i].className = files[i].name.substring(0, files[i].name.length - 5);
+              fs.writeFileSync('temp/' + req.params.id + '/' + files[i].className + '.class', files[i].compiled);
+            }
+            if(req.params.fileIndex < rows.length) {
+              async.eachSeries(tests, function(test, callback) {
+                var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + files[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
+                  if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
+                  if(err) {
+                    if(err.killed) {
+                      res.json({code: 2}); // code took too long to execute
+                    } else {
+                      res.json({code: -1});
+                      fs.removeSync('temp/' + req.params.id + '/'); // cleanup
+                      throw err;
+                    }
+                  } else {
+                    callback();
+                  }
+                });
+                child.stdin.write('TODO');
+                child.stdin.end();
+              }, function(err0) {
+                fs.remove('temp/' + req.params.id + '/', function(err1) {
+                  if(err0) {
+                    res.json({code: -1});
+                    throw err0;
+                  } else if(err1) {
+                    res.json({code: -1});
+                    throw err1;
+                  } else {
+                    // TODO
+                  }
+                });
+              });
+            } else {
+              res.json({code: 1}); // invalid input
+            }
+          }
+        });
+      }
     });
   });
 });
