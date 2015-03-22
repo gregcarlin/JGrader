@@ -190,8 +190,15 @@ router.post('/:id/submit', function(req, res) {
                         res.json({code: -1}) // unknown error
                         throw err;
                       } else {
-                        // TODO check code against test cases
-                        res.json({code: 0});
+                        connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.params.id], function(err, tests) {
+                          if(err) {
+                            res.json({code: -1});
+                            throw err;
+                          } else {
+                            // TODO finish test cases
+                            res.json({code: 0});
+                          }
+                        });
                       }
                     });
                   }
