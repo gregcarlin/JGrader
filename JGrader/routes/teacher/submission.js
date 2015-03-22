@@ -51,25 +51,13 @@ router.get('/:id', function(req, res) {
     } else {
       connection.query("SELECT `id`,`name`,`contents`,`compiled` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
         if(err) {
-          render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: [], error: 'Unable to retrieve file data.', passed: -1, failed: -1}, res);
+          render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: [], error: 'Unable to retrieve file data.'}, res);
           throw err;
         } else {
           for(file in fileData) {
             fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
           }
-          connection.query("SELECT `result` FROM `test-case-results` WHERE `submission_id` = ?", [req.params.id], function(err, testData) {
-            if(err) throw err;
-            var passed = 0;
-            var failed = 0;
-            for(i in testData) {
-              if(testData[i].result) {
-                passed++;
-              } else {
-                failed++;
-              }
-            }
-            render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData, passed: passed, failed: failed}, res);
-          });
+          render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData}, res);
         }
       });
     }
@@ -247,6 +235,10 @@ router.get('/:id/download/:fileIndex', function(req, res) {
         res.send(rows[req.params.fileIndex].contents);
       }
     });
+});
+
+router.get('/:id/test/:fileIndex', function(req, res) {
+  // TODO execute tests
 });
 
 comments.setup(router, 'teacher');

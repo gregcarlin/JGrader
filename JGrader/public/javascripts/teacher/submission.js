@@ -33,14 +33,22 @@ $('#download').click(function() {
   win.focus();
 });
 
+$('#test').click(function() {
+  // TODO retrieve and display test case results
+});
+
 $('.nav-tabs a[data-toggle="tab"]').click(function() {
   if($(this).attr('data-canrun') == 'true') {
     $('#execute span').tooltip();
     $('#execute').removeClass('disabled');
+    $('#test span').tooltip();
+    $('#test').removeClass('disabled');
     disabled = false;
   } else {
     $('#execute span').tooltip('destroy');
     $('#execute').addClass('disabled');
+    $('#test span').tooltip('destroy');
+    $('#test').addClass('disabled');
     disabled = true;
   }
 });
@@ -49,6 +57,8 @@ $(window).load(function() {
   if($('.nav-tabs .active a[data-toggle="tab"]').attr('data-canrun') == 'false') {
     $('#execute span').tooltip('destroy');
     $('#execute').addClass('disabled');
+    $('#test span').tooltip('destroy');
+    $('#test').addClass('disabled');
     disabled = true;
   }
 });
