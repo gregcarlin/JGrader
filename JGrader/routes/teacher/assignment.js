@@ -40,34 +40,6 @@ var render = function(page, options, res) {
   renderGenericTeacher(page, options, res);
 }
 
-// adapted from http://strongloop.com/strongblog/how-to-generators-node-js-yield-use-cases/
-function thunkify (nodefn, context) { // [1]
-  return function () { // [2]
-    var args = Array.prototype.slice.call(arguments)
-    return function (cb) { // [3]
-      args.push(cb)
-      nodefn.apply(context ? context : this, args)
-    }
-  }
-}
-
-// taken from http://strongloop.com/strongblog/how-to-generators-node-js-yield-use-cases/
-function run (genFn) {
-  var gen = genFn() // [1]
-  next() // [2]
-
-  function next (er, value) { // [3]
-    if (er) return gen.throw(er)
-    var continuable = gen.next(value)
-
-    if (continuable.done) return // [4]
-    var cbFn = continuable.value // [5]
-    cbFn(next)
-  }
-}
-
-var query = thunkify(connection.query, connection);
-
 // page that lists assignments
 router.get('/', function(req, res) {
   async.waterfall([
