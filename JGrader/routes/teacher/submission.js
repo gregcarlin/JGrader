@@ -228,9 +228,9 @@ router.get('/:id/test/:fileIndex', function(req, res) {
                   } else {
                     var data = [];
                     for(var i in results) {
-                      data.push({input: tests[i].input, expected: tests[i].output, result: (results[i][1] ? '0' : (results[i][0] == tests[i].output ? '1' : '0'))});
+                      data.push({input: tests[i].input, expected: tests[i].output, result: results[i][0]});
                     }
-                    res.json(data);
+                    res.json({code: 0, results: data});
                   }
                 });
               });
