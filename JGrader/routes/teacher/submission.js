@@ -24,71 +24,71 @@ var render = function(page, options, res) {
   renderGenericTeacher(page, options, res);
 }
 
+router.use('/:id', function(req, res, next) {
+  connection.query({
+      sql: "SELECT * FROM `submissions` JOIN `assignments` ON `submissions`.`assignment_id` = `assignments`.`id` JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` WHERE `submissions`.`id` = ? AND `sections`.`teacher_id` = ?",
+      nestTables: true,
+      values: [req.params.id, req.user.id]
+    }, function(err, result) {
+      if(err) {
+        render('notFound', {error: 'An unexpected error has occurred.'}, res);
+        throw err;
+      } else if(result.length <= 0) {
+        render('notFound', {}, res);
+      } else {
+        req.submission = result[0].submissions;
+        req.assignment = result[0].assignments;
+        req.section = result[0].sections;
+        next();
+      }
+    });
+});
+
 router.get('/:id', function(req, res) {
-  connection.query("SELECT \
-                      `submissions`.`assignment_id`,\
-                      `submissions`.`submitted`,\
-                      `submissions`.`grade`,\
-                      `submissions`.`id` AS `subid`,\
-                      `students`.`id`,\
-                      `students`.`fname`,\
-                      `students`.`lname`,\
-                      `assignments`.`id` AS `aid`,\
-                      `assignments`.`name`,\
-                      `assignments`.`due` \
-                    FROM `submissions` \
-                      JOIN `students` ON `students`.`id` = `submissions`.`student_id` \
-                      JOIN `assignments` ON `assignments`.`id` = `submissions`.`assignment_id` \
-                      JOIN `sections` ON `sections`.`id` = `assignments`.`section_id` \
-                    WHERE \
-                      `submissions`.`id` = ? AND \
-                      `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, subData) {
+  connection.query("SELECT `id`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.submission.student_id], function(err, students) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       throw err;
-    } else if(subData.length <= 0) {
-      render('notFound', {}, res);
     } else {
       connection.query("SELECT `id`,`name`,`contents`,`compiled` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
         if(err) {
-          render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: [], error: 'Unable to retrieve file data.'}, res);
+          render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + req.assignment.name, student: students[0], fileData: [], submission: req.submission, assignment: req.assignment, error: 'Unable to retrieve file data.'}, res);
           throw err;
         } else {
           for(file in fileData) {
             fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
           }
-          render('submission', {title: subData[0].fname + ' ' + subData[0].lname + "'s submission to " + subData[0].name, subData: subData[0], fileData: fileData}, res);
+          render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name, student: students[0], fileData: fileData, submission: req.submission, assignment: req.assignment}, res);
         }
       });
     }
   });
 });
 
-router.post('/:id/updategrade/:grade', function(req, res) {
-  // security to ensure this teacher owns this submission
-  connection.query("SELECT \
-                      `submissions`.`id` \
-                    FROM \
-                      `submissions`,`assignments`,`sections` \
-                    WHERE \
-                    `submissions`.`assignment_id` = `assignments`.`id` AND \
-                    `assignments`.`section_id` = `sections`.`id` AND \
-                    `submissions`.`id` = ? AND \
-                    `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
-    if(isNaN(req.params.grade)) {
-      res.json({code: 1}); // invalid input
-    } else if(rows.length <= 0) {
-      res.json({code: 2}); // invalid permissions
+router.post('/:id/updategrade', function(req, res) {
+  connection.query("UPDATE `submissions` SET `grade` = NULL WHERE `id` = ?", [req.params.id], function(err) {
+    if(err) {
+      res.json({code: -1});
+      throw err;
     } else {
-      connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
-        if(err) {
-          res.json({code: -1}); // unknown error
-        } else {
-          res.json({code: 0, newValue: req.params.grade}); // success
-        }
-      });
+      res.json({code: 0, newValue: '<em>Not graded.</em>'});
     }
   });
+});
+
+router.post('/:id/updategrade/:grade', function(req, res) {
+  if(isNaN(req.params.grade)) {
+    res.json({code: 1}); // invalid input
+  } else {
+    connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
+      if(err) {
+        res.json({code: -1}); // unknown error
+        throw err;
+      } else {
+        res.json({code: 0, newValue: req.params.grade}); // success
+      }
+    });
+  }
 });
 
 var mkdir = function(dir, callback) {
@@ -108,19 +108,15 @@ router.post('/:id/run/:fileIndex', function(req, res) {
       mkdir('temp/' + req.params.id + '/', callback);
     },
     function(callback) {
-      // security to ensure this teachers owns this submission and file
       connection.query("SELECT \
                           `files`.`id`,\
                           `files`.`name`,\
                           `files`.`compiled` \
-                        FROM `submissions`,`assignments`,`sections`,`files` \
+                        FROM `submissions`,`files` \
                         WHERE \
-                          `submissions`.`assignment_id` = `assignments`.`id` AND \
-                          `assignments`.`section_id` = `sections`.`id` AND \
                           `submissions`.`id` = ? AND \
-                          `sections`.`teacher_id` = ? AND \
                           `files`.`submission_id` = `submissions`.`id` \
-                        ORDER BY `files`.`id`", [req.params.id, req.user.id], callback);
+                        ORDER BY `files`.`id`", [req.params.id], callback);
     },
     function(results, fields, callback) {
       rows = results;
@@ -243,19 +239,15 @@ router.get('/:id/test/:fileIndex', function(req, res) {
 });
 
 router.get('/:id/download', function(req, res) {
-  // security to ensure this teacher owns this submission and file
   connection.query("SELECT \
                       `files`.`id`,\
                       `files`.`name`,\
                       `files`.`contents` \
-                    FROM `submissions`,`assignments`,`sections`,`files` \
+                    FROM `submissions`,`files` \
                     WHERE \
-                      `submissions`.`assignment_id` = `assignments`.`id` AND \
-                      `assignments`.`section_id` = `sections`.`id` AND \
                       `submissions`.`id` = ? AND \
-                      `sections`.`teacher_id` = ? AND \
                       `files`.`submission_id` = `submissions`.`id` \
-                    ORDER BY `files`.`id`", [req.params.id, req.user.id], function(err, rows) {
+                    ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
     if(err) {
       res.send('Sorry, an error has occurred.');
       throw err;
@@ -279,19 +271,15 @@ router.get('/:id/download', function(req, res) {
 router.get('/:id/download/:fileIndex', function(req, res) {
   async.waterfall([
       function(callback) {
-        // security to ensure this teacher owns this submission and file
         connection.query("SELECT \
                             `files`.`id`,\
                             `files`.`name`,\
                             `files`.`contents` \
-                          FROM `submissions`,`assignments`,`sections`,`files` \
+                          FROM `submissions`,`files` \
                           WHERE \
-                            `submissions`.`assignment_id` = `assignments`.`id` AND \
-                            `assignments`.`section_id` = `sections`.`id` AND \
                             `submissions`.`id` = ? AND \
-                            `sections`.`teacher_id` = ? AND \
                             `files`.`submission_id` = `submissions`.`id` \
-                          ORDER BY `files`.`id`", [req.params.id, req.user.id], callback);
+                          ORDER BY `files`.`id`", [req.params.id], callback);
       }
     ], function(err, rows) {
       if(err) {
