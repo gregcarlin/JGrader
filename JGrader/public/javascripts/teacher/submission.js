@@ -34,12 +34,43 @@ $('#download').click(function() {
 });
 
 $('#test').click(function() {
-  var fileID = $('.tab-content .active').attr('id');
-  var url = document.URL;
-  if(url.charAt(url.length-1) != '/') url += '/';
-  $.get(url + 'test/' + fileID, {}, function(data, textStatus, jqXHR) {
-    // TODO display results
-  });
+  if(!disabled) {
+    $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>');
+    var fileID = $('.tab-content .active').attr('id');
+    var url = document.URL;
+    if(url.charAt(url.length-1) != '/') url += '/';
+    $.get(url + 'test/' + fileID, {}, function(data, textStatus, jqXHR) {
+      switch(data.code) {
+        case -1:
+        case 1:
+        default:
+          alert('An unknown error has occurred. Please reload the page and try again.');
+          break;
+        case 2:
+          alert('Error: The code is taking too long to execute.');
+          break;
+        case 0:
+          var output = '';
+          var passes = 0;
+          var fails = 0;
+          for(var i in data.results) {
+            output += 'Input: ' + data.results[i].input + ', Expected: ' + data.results[i].expected + ', Actual: ' + data.results[i].result + ' ';
+            if(data.results[i].result == data.results[i].expected) {
+              passes++;
+              output += '[PASS] <span class="fa fa-check';
+            } else {
+              fails++;
+              output += '[FAIL] <span class="fa fa-times';
+            }
+            output += '-circle"></span><br />';
+          }
+          output += '-------------------------------------------------<br />';
+          output += passes + ' of ' + (passes + fails) + ' tests passed.';
+          $('#output-text').html(output);
+          break;
+      }
+    });
+  }
 });
 
 $('.nav-tabs a[data-toggle="tab"]').click(function() {
