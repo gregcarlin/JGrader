@@ -258,7 +258,7 @@ router.get('/:id/testCase', function(req, res) {
       render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
       throw err;
     } else {
-      connection.query('SELECT `input`,`output` \
+      connection.query('SELECT `id`,`input`,`output` \
                         FROM `test-cases` \
                         WHERE `assignment_id` = ?', [req.params.id], function(err, testCases) {
         if(err) {
@@ -289,25 +289,35 @@ router.get('/:id/caseCreate', function(req, res) {
 });
 
 router.post('/:id/caseCreate', function(req, res) {
-  var string = '';
-  var params = [];
-  for(i in req.body.in_case) {
-    if(req.body.out_case) {
-      string += '(NULL, ?, ?, ?),';
-      params.push(req.params.id);
-      params.push(req.body.in_case[i]);
-      params.push(req.body.out_case[i]);
+  if(req.body.in_case && req.body.out_case) {
+    var string = '';
+    var params = [];
+    for(i in req.body.in_case) {
+      if(req.body.in_case[i] && i < req.body.out_case.length && req.body.out_case[i]) {
+        string += '(NULL, ?, ?, ?),';
+        params.push(req.params.id);
+        params.push(req.body.in_case[i]);
+        params.push(req.body.out_case[i]);
+      }
     }
-  }
-  string = string.substr(0, string.length-1);
-  connection.query('INSERT INTO `test-cases` VALUES ' + string, params, function(err, rows) {
-    if(err) {
-      render('notFound', {error: 'The server was unable to create the test case. Please try again.'}, res);
-      throw err;
+    if(params.length > 0) {
+      string = string.substr(0, string.length-1);
+      connection.query('INSERT INTO `test-cases` VALUES ' + string, params, function(err, rows) {
+        if(err) {
+          render('notFound', {error: 'The server was unable to create the test case. Please try again.'}, res);
+          throw err;
+        } else {
+          res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+        }
+      });
     } else {
+      // not enough data sent, don't add any cases and just redirect
       res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
     }
-  });
+  } else {
+    // no data sent, don't add any cases and just redirect
+    res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+  }
 });
 
 module.exports = router;
