@@ -2,21 +2,21 @@
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
 <div class="page-header">
-  <h1><a href="/teacher/student/<%= subData.id %>"><%= subData.fname + ' ' + subData.lname %>'s</a> submission to <a href="/teacher/assignment/<%= subData.aid %>"><%= subData.name %></a></h1>
-  <a href="/teacher/submission/<%= subData.subid %>/download" class="right"><span class="fa fa-download" data-toggle="tooltip" data-placement="left" title="Download All"></span></a>
+  <h1><a href="/teacher/student/<%= submission.id %>"><%= student.fname + ' ' + student.lname %>'s</a> submission to <a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a></h1>
+  <a href="/teacher/submission/<%= submission.id %>/download" class="right"><span class="fa fa-download" data-toggle="tooltip" data-placement="left" title="Download All"></span></a>
 </div>
 <dl class="description">
   <%
-    var submitted = new Date(subData.submitted);
+    var submitted = new Date(submission.submitted);
     var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
-    if(subData.submitted > subData.due) {
+    if(submission.submitted > submission.due) {
       submittedStr += ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="right" title="Late"></span>';
     }
   %>
   <dt>Submitted:</dt>
     <dd><%- submittedStr %></dd>
   <dt>Grade:</dt>
-    <dd><span class="edit" data-key="updategrade" data-default="Not graded."><span><%= subData.grade ? subData.grade : '' %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
+    <dd><span class="edit" data-key="updategrade" data-default="Not graded."><span><%= submission.grade ? submission.grade : '' %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
 </dl>
 <div role="tabpanel">
   <ul class="nav nav-tabs" role="tablist">
