@@ -170,6 +170,37 @@ router.post('/:id/run/:fileIndex', function(req, res) {
   });
 });
 
+router.get('/:id/test/:fileIndex', function(req, res) {
+  fs.ensureDir('temp/' + req.params.id + '/', function(err) {
+    connection.query("SELECT \
+                        `files`.`id`,\
+                        `files`.`name`,\
+                        `files`.`compiled` \
+                      FROM `submissions`,`assignments`,`sections`,`files` \
+                      WHERE \
+                        `submissions`.`assignment_id` = `assignments`.`id` AND \
+                        `assignments`.`section_id` = `sections`.`id` AND \
+                        `submissions`.`id` = ? AND \
+                        `sections`.`teacher_id` = ? AND \
+                        `files`.`submission_id` = `submissions`.`id` \
+                      ORDER BY `files`.`id`", [req.params.id, req.user.id], function(err, files) {
+      async.each(rows, function(row, cb) {
+        var name = row.name;
+        row.className = name.substring(0, name.length - 5);
+        // note: working directory seems to be one with app.js in it
+        fs.writeFile('temp/' + req.params.id + '/' + row.className + '.class', row.compiled, cb);
+      }, function(err) {
+        if(err) {
+          res.json({code: -1});
+          throw err;
+        } else {
+          // TODO execute tests
+        }
+      });
+    });
+  });
+});
+
 router.get('/:id/download', function(req, res) {
   // security to ensure this teacher owns this submission and file
   connection.query("SELECT \
@@ -235,10 +266,6 @@ router.get('/:id/download/:fileIndex', function(req, res) {
         res.send(rows[req.params.fileIndex].contents);
       }
     });
-});
-
-router.get('/:id/test/:fileIndex', function(req, res) {
-  // TODO execute tests
 });
 
 comments.setup(router, 'teacher');

@@ -34,7 +34,12 @@ $('#download').click(function() {
 });
 
 $('#test').click(function() {
-  // TODO retrieve and display test case results
+  var fileID = $('.tab-content .active').attr('id');
+  var url = document.URL;
+  if(url.charAt(url.length-1) != '/') url += '/';
+  $.get(url + 'test/' + fileID, {}, function(data, textStatus, jqXHR) {
+    // TODO display results
+  });
 });
 
 $('.nav-tabs a[data-toggle="tab"]').click(function() {
