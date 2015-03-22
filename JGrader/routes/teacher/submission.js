@@ -189,6 +189,7 @@ router.get('/:id/test/:fileIndex', function(req, res) {
         throw err;
       } else {
         connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.params.id], function(err, tests) {
+          console.log('tests='+tests);
           if(err) {
             res.json({code: -1});
             throw err;
@@ -197,8 +198,8 @@ router.get('/:id/test/:fileIndex', function(req, res) {
               files[i].className = files[i].name.substring(0, files[i].name.length - 5);
               fs.writeFileSync('temp/' + req.params.id + '/' + files[i].className + '.class', files[i].compiled);
             }
-            if(req.params.fileIndex < rows.length) {
-              async.eachSeries(tests, function(test, callback) {
+            if(req.params.fileIndex < files.length) {
+              async.mapSeries(tests, function(test, callback) {
                 var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + files[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
                   if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
                   if(err) {
@@ -210,12 +211,14 @@ router.get('/:id/test/:fileIndex', function(req, res) {
                       throw err;
                     }
                   } else {
-                    callback();
+                    // TODO stuff
+                    console.log('out='+stdout);
+                    callback(null, stdout);
                   }
                 });
                 child.stdin.write('TODO');
                 child.stdin.end();
-              }, function(err0) {
+              }, function(err0, results) {
                 fs.remove('temp/' + req.params.id + '/', function(err1) {
                   if(err0) {
                     res.json({code: -1});
@@ -225,6 +228,7 @@ router.get('/:id/test/:fileIndex', function(req, res) {
                     throw err1;
                   } else {
                     // TODO
+                    res.json(results);
                   }
                 });
               });
