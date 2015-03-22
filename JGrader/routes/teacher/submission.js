@@ -184,8 +184,9 @@ router.get('/:id/test/:fileIndex', function(req, res) {
         res.json({code: -1});
         throw err;
       } else {
-        connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.params.id], function(err, tests) {
-          console.log('tests='+tests);
+        connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.assignment.id], function(err, tests) {
+          console.log('tests=');
+          console.log(tests);
           if(err) {
             res.json({code: -1});
             throw err;
@@ -207,12 +208,14 @@ router.get('/:id/test/:fileIndex', function(req, res) {
                       throw err;
                     }
                   } else {
-                    // TODO stuff
-                    console.log('out='+stdout);
-                    callback(null, stdout);
+                    if(stdout.length >= 1) {
+                      // truncate last new line character
+                      stdout = stdout.substring(0, stdout.length - 1);
+                    }
+                    callback(null, [stdout, stderr]);
                   }
                 });
-                child.stdin.write('TODO');
+                child.stdin.write(test.input);
                 child.stdin.end();
               }, function(err0, results) {
                 fs.remove('temp/' + req.params.id + '/', function(err1) {
@@ -223,8 +226,11 @@ router.get('/:id/test/:fileIndex', function(req, res) {
                     res.json({code: -1});
                     throw err1;
                   } else {
-                    // TODO
-                    res.json(results);
+                    var data = [];
+                    for(var i in results) {
+                      data.push({input: tests[i].input, expected: tests[i].output, result: (results[i][1] ? '0' : (results[i][0] == tests[i].output ? '1' : '0'))});
+                    }
+                    res.json(data);
                   }
                 });
               });
