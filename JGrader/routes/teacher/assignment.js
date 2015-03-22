@@ -307,6 +307,7 @@ router.get('/:id/testCase/delete/:testID', function(req, res) {
       render('notFound', {error: 'The server was unable to delete the test case. Please try again.'}, res);
       throw err;
     } else {
+      // TODO update what has already been submitted
       res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
     }
   });
@@ -333,6 +334,7 @@ router.post('/:id/caseCreate', function(req, res) {
       render('notFound', {error: 'The server was unable to create the test case. Please try again.'}, res);
       throw err;
     } else {
+      // TODO update what has already been submitted
       res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
     }
   });
