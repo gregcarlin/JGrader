@@ -277,8 +277,13 @@ a:hover {
   body {
     min-width: 0;
   }
+  .page {
+    height: auto;
+  }
   .column {
     width: 100%;
+    display: block;
+    float: none;
   }
   .nav {
     min-width: 0;
@@ -289,6 +294,9 @@ a:hover {
   .nav .right {
     margin-top: 55px;
   }
+  #home .left {
+    height: 400px;
+  }
   .row .col {
     width: 100% !important;
     margin-top: 20px !important;
@@ -298,5 +306,16 @@ a:hover {
   }
   .row .col-mid {
     display: none !important;
+  }
+  #learn h2 {
+    text-align: center;
+  }
+}
+@media (max-width: 833px) {
+  #home .left {
+    min-width: 0;
+  }
+  #home .left .table-wrapper > span {
+    font-size: 25vw;
   }
 }
