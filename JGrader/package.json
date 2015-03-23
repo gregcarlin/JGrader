@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "forever start --minUptime 1000ms --spinSleepTime 5000ms -f -a -l for.log -o out.log -e err.log -c 'nodemon --harmony --exitcrash' ./bin/www",
-    "test": "casperjs test tests.js"
+    "start": "forever start --minUptime 1000ms --spinSleepTime 5000ms -f -a -l for.log -o out.log -e err.log -c 'nodemon --exitcrash' ./bin/www",
+    "stop" : "forever stopall",
+    "test" : "casperjs test tests.js"
   },
   "dependencies": {
     "async": "^0.9.0",
