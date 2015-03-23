@@ -273,3 +273,30 @@ a:hover {
   width: 100%;
   text-align: center;
 }
+@media (max-width: 1237px) {
+  body {
+    min-width: 0;
+  }
+  .column {
+    width: 100%;
+  }
+  .nav {
+    min-width: 0;
+  }
+  .nav .left {
+    display: block;
+  }
+  .nav .right {
+    margin-top: 55px;
+  }
+  .row .col {
+    width: 100% !important;
+    margin-top: 20px !important;
+  }
+  .row .col h3 {
+    text-align: center !important;
+  }
+  .row .col-mid {
+    display: none !important;
+  }
+}
