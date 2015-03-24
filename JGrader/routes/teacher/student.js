@@ -27,7 +27,7 @@ var render = function(page, options, res) {
   renderGenericTeacher(page, options, res);
 }
 
-router.get('/', function(req, res) {
+router.get('/', function(req, res, next) {
   connection.query("SELECT \
                       `students`.`id`,\
                       `students`.`fname`,\
@@ -61,7 +61,8 @@ router.get('/', function(req, res) {
                     WHERE `sections`.`teacher_id` = ?", [req.user.id, req.user.id, req.user.id], function(err, rows) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       render('studentList', {rows: rows}, res);
     }
@@ -76,7 +77,8 @@ router.use('/:id', function(req, res, next) {
     }, function(err, result) {
       if(err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
-        throw err;
+        err.handled = true;
+        next(err);
       } else if(result.length <= 0) {
         render('notFound', {}, res);
       } else {
@@ -91,7 +93,7 @@ router.use('/:id', function(req, res, next) {
     });
 });
 
-router.get('/:id.csv', function(req, res) {
+router.get('/:id.csv', function(req, res, next) {
   connection.query("SELECT \
                       `assignments`.`name`,\
                       `sections`.`name` AS `sname`,\
@@ -103,18 +105,22 @@ router.get('/:id.csv', function(req, res) {
                       JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` \
                       LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = `enrollment`.`student_id` \
                     WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
-    res.setHeader('Content-Disposition', 'attachment; filename=student_' + req.params.id + '.csv');
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Descrption', 'File Transfer');
-    var output = 'Assignment,Section,Grade\n';
-    for(i in rows) {
-      output += rows[i].name + ',' + rows[i].sname + ',' + (rows[i].grade ? rows[i].grade : (rows[i].id ? 'Not Graded' : 'Not Submitted')) + '\n';
+    if(err) {
+      next(err);
+    } else {
+      res.setHeader('Content-Disposition', 'attachment; filename=student_' + req.params.id + '.csv');
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Descrption', 'File Transfer');
+      var output = 'Assignment,Section,Grade\n';
+      for(i in rows) {
+        output += rows[i].name + ',' + rows[i].sname + ',' + (rows[i].grade ? rows[i].grade : (rows[i].id ? 'Not Graded' : 'Not Submitted')) + '\n';
+      }
+      res.send(output);
     }
-    res.send(output);
   });
 });
 
-router.get('/:id', function(req, res) {
+router.get('/:id', function(req, res, next) {
   connection.query("SELECT \
                       `submissions`.`id`,\
                       `submissions`.`grade`,\
@@ -131,7 +137,8 @@ router.get('/:id', function(req, res) {
                     WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       var name = req.student.fname + ' ' + req.student.lname;
       render('student', {title: name, name: name, rows: rows, id: req.params.id}, res);
@@ -139,7 +146,7 @@ router.get('/:id', function(req, res) {
   });
 });
 
-router.get('/:id/:section/delete', function(req, res) {
+router.get('/:id/:section/delete', function(req, res, next) {
   connection.query("DELETE `enrollment`,`submissions`,`files` \
                     FROM \
                       `enrollment` \
@@ -153,7 +160,8 @@ router.get('/:id/:section/delete', function(req, res) {
                       `sections`.`teacher_id` = ?", [req.params.id, req.params.section, req.user.id], function(err, result) {
     if(err) {
       render('notFound', {error: 'Unable to remove student. Please go back and try again.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       res.redirect('/teacher/student');
     }

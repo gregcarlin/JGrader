@@ -209,14 +209,15 @@ router.get('/:id', function(req, res, next) {
 });
 
 // update description
-router.post('/:id/updatedesc/:desc', function(req, res) {
+router.post('/:id/updatedesc/:desc', function(req, res, next) {
   if(req.params.desc.startsWith('<em>')) {
     res.json({code: 1}); // invalid input
   } else {
     connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ?", [req.params.desc, req.params.id], function(err, rows) {
       if(err) {
         res.json({code: -1}); // unknown error
-        throw err;
+        err.handled = true;
+        next(err);
       } else {
         res.json({code: 0, newValue: req.params.desc}); // success
       }
@@ -225,59 +226,66 @@ router.post('/:id/updatedesc/:desc', function(req, res) {
 });
 
 // update description to nothing
-router.post('/:id/updatedesc', function(req, res) {
+router.post('/:id/updatedesc', function(req, res, next) {
   connection.query("UPDATE `assignments` SET `description` = NULL WHERE `id` = ?", [req.params.id], function(err, rows) {
     if(err) {
       res.json({code: -1}); // unknown error
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       res.json({code: 0, newValue: ''}); // success
     }
   });
 });
 
-router.post('/:id/updatedue/:due', function(req, res) {
+router.post('/:id/updatedue/:due', function(req, res, next) {
   connection.query("UPDATE `assignments` SET `due` = ? WHERE `id` = ?", [req.params.due, req.params.id], function(err, rows) {
     if(err) {
       res.json({code: -1}); // unknown error
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       res.json({code: 0, newValue: req.params.due});
     }
   });
 });
 
-router.get('/:id/delete', function(req, res) {
+router.get('/:id/delete', function(req, res, next) {
   connection.query('DELETE FROM `assignments` WHERE `id` = ? LIMIT 1', [req.params.id], function(err, rows) {
     if(err) {
       render('notFound', {error: 'Unable to delete assignment. Please go back and try again.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       connection.query("DELETE FROM `submissions` JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `submissions`.`assignment_id` = ?", [req.params.id], function(err) {
         if(err) {
           render('notFound', {error: 'Unable to delete assignment. Please go back and try again.'}, res);
-          throw err;
+          err.handled = true;
+          next(err);
+        } else {
+          res.redirect('/teacher/assignment');
         }
-        res.redirect('/teacher/assignment');
       });
     }
   });
 });
 
-router.get('/:id/testCase', function(req, res) {
+router.get('/:id/testCase', function(req, res, next) {
   connection.query('SELECT `name`,`id` \
                     FROM `assignments` \
                     WHERE `id` = ?', [req.params.id], function(err, assignment) {
     if(err) {
       render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       connection.query('SELECT `id`,`input`,`output` \
                         FROM `test-cases` \
                         WHERE `assignment_id` = ?', [req.params.id], function(err, testCases) {
         if(err) {
           render('notFound', {error: 'The server was unable to retrieve the test case information. Please try again.'}, res);
-          throw err;
+          err.handled = true;
+          next(err);
         } else {
           render('testCaseList', {testCases: testCases, assignment: assignment[0]}, res);
         }
@@ -286,12 +294,13 @@ router.get('/:id/testCase', function(req, res) {
   });
 });
 
-router.get('/:id/testCase/delete/:testID', function(req, res) {
+router.get('/:id/testCase/delete/:testID', function(req, res, next) {
   connection.query('DELETE FROM `test-cases` \
                     WHERE `assignment_id` = ? AND `id` = ? LIMIT 1', [req.params.id, req.params.testID], function(err, assignment) {
     if(err) {
       render('notFound', {error: 'The server was unable to delete the test case. Please try again.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
     }
@@ -302,7 +311,7 @@ router.get('/:id/caseCreate', function(req, res) {
   render('caseCreate', {}, res);
 });
 
-router.post('/:id/caseCreate', function(req, res) {
+router.post('/:id/caseCreate', function(req, res, next) {
   if(req.body.in_case && req.body.out_case) {
     var string = '';
     var params = [];
@@ -319,7 +328,8 @@ router.post('/:id/caseCreate', function(req, res) {
       connection.query('INSERT INTO `test-cases` VALUES ' + string, params, function(err, rows) {
         if(err) {
           render('notFound', {error: 'The server was unable to create the test case. Please try again.'}, res);
-          throw err;
+          err.handled = true;
+          next(err);
         } else {
           res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
         }
