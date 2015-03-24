@@ -31,7 +31,7 @@ var render = function(page, options, res) {
 }
 
 // page for listing sections
-router.get('/', function(req, res) {
+router.get('/', function(req, res, next) {
   connection.query("SELECT \
                       `sections`.`name`,\
                       `sections`.`id`,\
@@ -48,7 +48,8 @@ router.get('/', function(req, res) {
                     ORDER BY `sections`.`name` ASC", [req.user.id], function(err, rows) {
     if(err) {
       render('sectionList', {rows: [], error: 'An unexpected error has occurred.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       render('sectionList', {rows: rows}, res);
     }
