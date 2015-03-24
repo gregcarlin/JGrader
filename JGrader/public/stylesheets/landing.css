@@ -297,6 +297,13 @@ a:hover {
   #home .left {
     height: 400px;
   }
+  #home ul.table-wrapper {
+    padding-top: 10px;
+  }
+  #home ul.table-wrapper li:nth-child(3) div {
+    position: relative;
+    top: -10px;
+  }
   .row .col {
     width: 100% !important;
     margin-top: 20px !important;
