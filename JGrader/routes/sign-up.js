@@ -42,7 +42,7 @@ router.post('/', function(req, res) {
                 if(err || rows.length <= 0) {
                   res.render('sign-up', { error: 'An unknown error has occurred. Please try again later.', user: user });
                 } else {
-                  signIn(user.role + 's', rows[i].id, res, function(err, rows) {
+                  signIn(user.role + 's', rows[0].id, res, function(err, rows) {
                     if(err) {
                       res.render('sign-up', { error: 'An unknown error has occurred. Please try again later.', user: user });
                     } else {
