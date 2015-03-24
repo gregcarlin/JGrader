@@ -32,7 +32,8 @@ router.use('/:id', function(req, res, next) {
     }, function(err, result) {
       if(err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
-        throw err;
+        err.handled = true;
+        next(err);
       } else if(result.length <= 0) {
         render('notFound', {}, res);
       } else {
@@ -44,16 +45,18 @@ router.use('/:id', function(req, res, next) {
     });
 });
 
-router.get('/:id', function(req, res) {
+router.get('/:id', function(req, res, next) {
   connection.query("SELECT `id`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.submission.student_id], function(err, students) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       connection.query("SELECT `id`,`name`,`contents`,`compiled` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
         if(err) {
           render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + req.assignment.name, student: students[0], fileData: [], submission: req.submission, assignment: req.assignment, error: 'Unable to retrieve file data.'}, res);
-          throw err;
+          err.handled = true;
+          next(err);
         } else {
           for(file in fileData) {
             fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
@@ -65,25 +68,27 @@ router.get('/:id', function(req, res) {
   });
 });
 
-router.post('/:id/updategrade', function(req, res) {
+router.post('/:id/updategrade', function(req, res, next) {
   connection.query("UPDATE `submissions` SET `grade` = NULL WHERE `id` = ?", [req.params.id], function(err) {
     if(err) {
       res.json({code: -1});
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       res.json({code: 0, newValue: '<em>Not graded.</em>'});
     }
   });
 });
 
-router.post('/:id/updategrade/:grade', function(req, res) {
+router.post('/:id/updategrade/:grade', function(req, res, next) {
   if(isNaN(req.params.grade)) {
     res.json({code: 1}); // invalid input
   } else {
     connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
       if(err) {
         res.json({code: -1}); // unknown error
-        throw err;
+        err.handled = true;
+        next(err);
       } else {
         res.json({code: 0, newValue: req.params.grade}); // success
       }
@@ -98,6 +103,7 @@ var mkdir = function(dir, callback) {
   });
 };
 
+// TODO get rid of async
 router.post('/:id/run/:fileIndex', function(req, res) {
   var rows;
   async.waterfall([
@@ -166,7 +172,7 @@ router.post('/:id/run/:fileIndex', function(req, res) {
   });
 });
 
-router.get('/:id/test/:fileIndex', function(req, res) {
+router.get('/:id/test/:fileIndex', function(req, res, next) {
   fs.ensureDir('temp/' + req.params.id + '/', function(err) {
     connection.query("SELECT \
                         `files`.`id`,\
@@ -182,14 +188,14 @@ router.get('/:id/test/:fileIndex', function(req, res) {
                       ORDER BY `files`.`id`", [req.params.id, req.user.id], function(err, files) {
       if(err) {
         res.json({code: -1});
-        throw err;
+        err.handled = true;
+        next(err);
       } else {
         connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.assignment.id], function(err, tests) {
-          console.log('tests=');
-          console.log(tests);
           if(err) {
             res.json({code: -1});
-            throw err;
+            err.handled = true;
+            next(err);
           } else {
             for(var i in files) {
               files[i].className = files[i].name.substring(0, files[i].name.length - 5);
@@ -205,7 +211,8 @@ router.get('/:id/test/:fileIndex', function(req, res) {
                     } else {
                       res.json({code: -1});
                       fs.removeSync('temp/' + req.params.id + '/'); // cleanup
-                      throw err;
+                      err.handled = true;
+                      next(err);
                     }
                   } else {
                     if(stdout.length >= 1) {
@@ -221,10 +228,12 @@ router.get('/:id/test/:fileIndex', function(req, res) {
                 fs.remove('temp/' + req.params.id + '/', function(err1) {
                   if(err0) {
                     res.json({code: -1});
-                    throw err0;
+                    err0.handled = true;
+                    next(err0);
                   } else if(err1) {
                     res.json({code: -1});
-                    throw err1;
+                    err1.handled = true;
+                    next(err1);
                   } else {
                     var data = [];
                     for(var i in results) {
@@ -244,7 +253,7 @@ router.get('/:id/test/:fileIndex', function(req, res) {
   });
 });
 
-router.get('/:id/download', function(req, res) {
+router.get('/:id/download', function(req, res, next) {
   connection.query("SELECT \
                       `files`.`id`,\
                       `files`.`name`,\
@@ -255,8 +264,7 @@ router.get('/:id/download', function(req, res) {
                       `files`.`submission_id` = `submissions`.`id` \
                     ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
     if(err) {
-      res.send('Sorry, an error has occurred.');
-      throw err;
+      next(err);
     } else if(rows.length <= 0) {
       res.send('Sorry, an error has occurred.');
     } else {
@@ -274,7 +282,7 @@ router.get('/:id/download', function(req, res) {
   });
 });
 
-router.get('/:id/download/:fileIndex', function(req, res) {
+router.get('/:id/download/:fileIndex', function(req, res, next) {
   async.waterfall([
       function(callback) {
         connection.query("SELECT \
@@ -289,8 +297,7 @@ router.get('/:id/download/:fileIndex', function(req, res) {
       }
     ], function(err, rows) {
       if(err) {
-        res.send('Sorry, an error has occurred.');
-        throw err;
+        next(err);
       } else if(rows.length <= 0) {
         res.send('You do not have permission to download this file.');
       } else if(isNaN(req.params.fileIndex) || req.params.fileIndex >= rows.length) {
