@@ -41,7 +41,7 @@ var render = function(page, options, res) {
 }
 
 // page that lists assignments
-router.get('/', function(req, res) {
+router.get('/', function(req, res, next) {
   async.waterfall([
       function(callback) {
         connection.query("SELECT \
@@ -67,18 +67,20 @@ router.get('/', function(req, res) {
     ], function(err, result) {
       if(err) {
         render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
-        throw err;
+        err.handled = true;
+        next(err);
       } else {
         render('assignmentList', {rows: result}, res);
       }
   });
 });
 
-var assignmentCreate = function(req, res) {
+var assignmentCreate = function(req, res, next) {
   connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [req.user.id], function(err, rows) {
     if(err) {
       render('assignmentCreate', {error: 'An unexpected error has occurred.', rows: []}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else if(rows.length <= 0) {
       render('assignmentCreate', {error: 'You must create a section before you can create an assignment.', rows: [], preselect: req.params.preselect}, res);
     } else {
@@ -94,7 +96,7 @@ router.get('/create', assignmentCreate);
 router.get('/create/:preselect', assignmentCreate);
 
 // handles request to create an assignment
-router.post('/create', function(req, res) {
+router.post('/create', function(req, res, next) {
   var name = req.body.name;
   var desc = req.body.desc;
   var due  = req.body.due;
@@ -105,13 +107,13 @@ router.post('/create', function(req, res) {
     render('assignmentCreate', {error: 'You must select at least one section.', name: name, desc: desc, due: due}, res);
   } else {
     for(i in secs) {
-      createAssignment(req.user.id, secs[i], res, name, desc, due);
+      createAssignment(req.user.id, secs[i], res, name, desc, due, next);
     }
     res.redirect('/teacher/assignment');
   }
 });
 
-var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
+var createAssignment = function(teacherID, sectionID, res, name, desc, due, next) {
   // verify that teacher owns this section
   connection.query("SELECT (SELECT `teacher_id` FROM `sections` WHERE `id` = ?) = ? AS `result`", [sectionID, teacherID], function(err, rows) {
     if(err) {
@@ -124,6 +126,8 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due) {
       connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [sectionID, name, desc, due], function(err, rows) {
         if(err) {
           render('assignmentCreate', {error: 'Invalid due date.', name: name, desc: desc, due: due}, res); // probably an invalid due date. i think.
+          err.handled = true;
+          next(err);
         }
         // nothing to do here
       });
@@ -139,7 +143,8 @@ router.use('/:id', function(req, res, next) {
     }, function(err, result) {
       if(err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
-        throw err;
+        err.handled = true;
+        next(err);
       } else if(result.length <= 0) {
         render('notFound', {}, res);
       } else {
@@ -150,7 +155,7 @@ router.use('/:id', function(req, res, next) {
   });
 });
 
-router.get('/:id.csv', function(req, res) {
+router.get('/:id.csv', function(req, res, next) {
   connection.query("SELECT \
                       `students`.`fname`,\
                       `students`.`lname`,\
@@ -164,18 +169,22 @@ router.get('/:id.csv', function(req, res) {
                       JOIN `assignments` ON `assignments`.`section_id` = `sections`.`id` \
                       LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = `students`.`id` \
                       WHERE `assignments`.`id` = ?", [req.params.id], function(err, rows) {
-    res.setHeader('Content-Disposition', 'attachment; filename=assignment_' + req.params.id + '.csv');
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Description', 'File Transfer');
-    var output = 'Student,Submitted,Grade,Late\n';
-    for(i in rows) {
-      output += rows[i].fname + ' ' + rows[i].lname + ',' + (rows[i].submitted ? 'Yes' : 'No') + ',' + (rows[i].grade ? rows[i].grade : 'None') + ',' + (rows[i].submitted ? (rows[i].submitted > rows[i].due ? 'Yes' : 'No') : (rows[i].due > Date.now() ? 'Yes' : 'Not Yet')) + '\n';
+    if(err) {
+      next(err);
+    } else {
+      res.setHeader('Content-Disposition', 'attachment; filename=assignment_' + req.params.id + '.csv');
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Description', 'File Transfer');
+      var output = 'Student,Submitted,Grade,Late\n';
+      for(i in rows) {
+        output += rows[i].fname + ' ' + rows[i].lname + ',' + (rows[i].submitted ? 'Yes' : 'No') + ',' + (rows[i].grade ? rows[i].grade : 'None') + ',' + (rows[i].submitted ? (rows[i].submitted > rows[i].due ? 'Yes' : 'No') : (rows[i].due > Date.now() ? 'Yes' : 'Not Yet')) + '\n';
+      }
+      res.send(output);
     }
-    res.send(output);
   });
 });
 
-router.get('/:id', function(req, res) {
+router.get('/:id', function(req, res, next) {
   connection.query("SELECT \
                       `students`.`id`,\
                       `students`.`fname`,\
@@ -190,6 +199,11 @@ router.get('/:id', function(req, res) {
                     WHERE \
                       `enrollment`.`student_id` = `students`.`id` AND \
                       `enrollment`.`section_id` = ?", [req.params.id, req.section.id], function(err, results) {
+    if(err) {
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
+      err.handled = true;
+      next(err);
+    }
     render('assignment', {title: req.assignment.name, assignment: req.assignment, section: req.section, results: results, id: req.params.id}, res);
   });
 });
