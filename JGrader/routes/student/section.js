@@ -3,6 +3,7 @@
 
 require('../common');
 var router = express.Router();
+var strftime = require('strftime');
 
 var render = function(page, options, res) {
   options.page = 0;
@@ -20,6 +21,7 @@ var render = function(page, options, res) {
       // title should already be set
       options.js = ['tooltip', 'student/sectionList'];
       options.css = ['font-awesome.min'];
+      options.strftime = strftime;
       break;
     case 'joinSection':
       options.title = 'Join a Section';
@@ -111,7 +113,16 @@ router.use('/:id', function(req, res, next) {
 
 // Gets information for specific class
 router.get('/:id', function(req, res, next) {
-  connection.query("SELECT `id`,`name`,`description`,`due` FROM `assignments` WHERE `section_id` = ?", [req.params.id], function(err, rows) {
+  connection.query("SELECT \
+                      `assignments`.`id`,\
+                      `assignments`.`name`,\
+                      `assignments`.`description`,\
+                      `assignments`.`due`,\
+                      `submissions`.`submitted` \
+                    FROM \
+                      `assignments` \
+                      LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = ? \
+                    WHERE `assignments`.`section_id` = ?", [req.user.id, req.params.id], function(err, rows) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
