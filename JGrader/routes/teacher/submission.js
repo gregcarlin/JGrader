@@ -54,14 +54,16 @@ router.get('/:id', function(req, res, next) {
     } else {
       connection.query("SELECT `id`,`name`,`contents`,`compiled` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
         if(err) {
-          render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + req.assignment.name, student: students[0], fileData: [], submission: req.submission, assignment: req.assignment, error: 'Unable to retrieve file data.'}, res);
+          render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + req.assignment.name, student: students[0], fileData: [], submission: req.submission, assignment: req.assignment, error: 'Unable to retrieve file data.', anyCompiled: true}, res);
           err.handled = true;
           next(err);
         } else {
+          var anyCompiled = false;
           for(file in fileData) {
             fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
+            if(fileData[file].compiled) anyCompiled = true;
           }
-          render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name, student: students[0], fileData: fileData, submission: req.submission, assignment: req.assignment}, res);
+          render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name, student: students[0], fileData: fileData, submission: req.submission, assignment: req.assignment, anyCompiled: anyCompiled}, res);
         }
       });
     }
@@ -103,7 +105,7 @@ var mkdir = function(dir, callback) {
   });
 };
 
-// TODO get rid of async
+// TODO get rid of async and implement proper error handling
 router.post('/:id/run/:fileIndex', function(req, res) {
   var rows;
   async.waterfall([
