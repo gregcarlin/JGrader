@@ -37,7 +37,7 @@ var render = function(page, options, res) {
 }
 
 // The page that lists the assignments
-router.get('/', function(req, res) {
+router.get('/', function(req, res, next) {
   connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`,`assignments`.`id`,`submissions`.`submitted` \
                     FROM `sections`, `teachers`,`enrollment`,`assignments` \
                     LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = ? \
@@ -47,7 +47,8 @@ router.get('/', function(req, res) {
                     AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id, req.user.id], function(err, rows) {
     if(err) {
       render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       render('assignmentList', {rows: rows}, res);
     }
@@ -62,7 +63,8 @@ router.use('/:id', function(req, res, next) {
     }, function(err, result) {
       if(err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
-        throw err;
+        err.handled = true;
+        next(err);
       } else if(result.length <= 0) {
         render('notFound', {}, res);
       } else {
@@ -74,7 +76,7 @@ router.use('/:id', function(req, res, next) {
 });
 
 // Gets the assignment information based on id
-router.get('/:id', function(req, res) {
+router.get('/:id', function(req, res, next) {
   connection.query("SELECT `files`.`name`,`files`.`contents`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
                     FROM `files`, `students`, `assignments`, `submissions` \
                     WHERE `submissions`.`assignment_id` = `assignments`.`id` \
@@ -83,7 +85,8 @@ router.get('/:id', function(req, res) {
                     AND  `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData){
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else if(fileData.length == 0) {
       render('assignment', {title: req.assignment.name, assignment: req.assignment}, res);
     } else {
@@ -110,7 +113,7 @@ router.use('/:id/submit', multer({
 }));
 
 // Submits the file into the mysql database
-router.post('/:id/submit', function(req, res) {
+router.post('/:id/submit', function(req, res, next) {
   if(req.files) {
 
     // first, check all the file names for legality
@@ -132,7 +135,8 @@ router.post('/:id/submit', function(req, res) {
     connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
       if(err) {
         res.json({code: -1}); // unknown error
-        throw err;
+        err.handled = true;
+        next(err);
       } else if(submissions.length > 0) {
         res.json({code: 3}); // already submitted this assignment
       } else {
@@ -161,7 +165,8 @@ router.post('/:id/submit', function(req, res) {
             connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, result) {
               if(err) {
                 res.json({code: -1}); // unknown error
-                throw err;
+                err.handled = true;
+                next(err);
               } else {
 
                 var args = [];
@@ -182,13 +187,15 @@ router.post('/:id/submit', function(req, res) {
                   if(err) {
                     fs.removeSync('./uploads/' + req.user.id + '/'); // we must cleanup, even on error
                     res.json({code: -1}); // unknown error
-                    throw err;
+                    err.handled = true;
+                    next(err);
                   } else {
                     // clean up files used for compilation
                     fs.remove('./uploads/' + req.user.id + '/', function(err) {
                       if(err) {
-                        res.json({code: -1}) // unknown error
-                        throw err;
+                        res.json({code: -1}); // unknown error
+                        err.handled = true;
+                        next(err);
                       } else {
                         res.json({code: 0});
                       }
@@ -217,7 +224,8 @@ router.get('/:id/resubmit', function(req,res) {
                     AND `submissions`.`assignment_id` = ?", [req.user.id, req.params.id], function(err, rows) {
     if(err) {
       res.redirect('/student/assignment');
-      throw err;
+      err.handled = true;
+      next(err);
     } else if (rows.length == 0) {
       // User has not submitted so cannot resubmit
       console.error('USER ' + req.user.id + ' IS TRYING TO RESUBMIT BUT SHOULDNT BE');
@@ -231,7 +239,8 @@ router.get('/:id/resubmit', function(req,res) {
                         DELETE FROM `comments` WHERE `submission_id` = ?", [rows[0].id, req.params.id, req.user.id, rows[0].id], function(err, rows) {
         if(err) {
           res.redirect('/student/assignment/');
-          throw err;
+          err.handled = true;
+          next(err);
         } else {
           res.redirect('/student/assignment/' + req.params.id);
         }

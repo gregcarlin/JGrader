@@ -29,18 +29,31 @@ var render = function(page, options, res) {
 }
 
 // Lists all of the current sections (classes)
-router.get('/', function(req, res) {
-  findSectionInfo(req.user.id, res, function(rows) {
+router.get('/', function(req, res, next) {
+  findSectionInfo(req.user.id, res, next, function(rows) {
     render('sectionList', {rows: rows}, res);
   });
 });
 
-var findSectionInfo = function(id, res, finish) {
+var findSectionInfo = function(id, res, next, finish) {
   if(id){
-    connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`sections`.`id` FROM `enrollment`,`sections`,`teachers` WHERE `enrollment`.`section_id` = `sections`.`id` AND `sections`.`teacher_id` = `teachers`.`id` AND `enrollment`.`student_id` = ?", [id], function(err, rows) {
+    connection.query("SELECT \
+                        `sections`.`name`,\
+                        `teachers`.`fname`,\
+                        `teachers`.`lname`,\
+                        `sections`.`id` \
+                      FROM \
+                        `enrollment`,\
+                        `sections`,\
+                        `teachers` \
+                      WHERE \
+                        `enrollment`.`section_id` = `sections`.`id` AND \
+                        `sections`.`teacher_id` = `teachers`.`id` AND \
+                        `enrollment`.`student_id` = ?", [id], function(err, rows) {
       if(err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
-        throw err;
+        err.handled = true;
+        next(err);
       } else {
         finish(rows);
       }
@@ -54,20 +67,22 @@ router.get('/joinSection', function(req, res) {
 });
 
 // Joins Class
-router.post('/joinSection', function(req, res) {
+router.post('/joinSection', function(req, res, next) {
   var sectionID = req.body.sectionID;
   if(isSet(sectionID)) {
     connection.query("SELECT `id` FROM `sections` WHERE `code` = ?", [sectionID], function(err, rows) {
       if(err) {
         render('joinSection', {error: 'An unknown error has occurred.'}, res);
-        throw err;
+        err.handled = true;
+        next(err);
       } else if(rows.length <= 0) {
         render('joinSection', {error: 'That is not a valid section code.'}, res);
       } else {
         connection.query("INSERT INTO `enrollment` VALUES(?, ?)", [rows[0].id, req.user.id], function(err, result) {
           if(err) {
             render('joinSection', {error: 'An unknown error has occurred.'}, res);
-            throw err;
+            err.handled = true;
+            next(err);
           } else {
             res.redirect('/student/section/' + rows[0].id);
           }
@@ -83,7 +98,8 @@ router.use('/:id', function(req, res, next) {
   connection.query("SELECT `sections`.* FROM `sections` JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`id` = ? AND `enrollment`.`student_id` = ?", [req.params.id, req.user.id], function(err, result) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else if(result.length <= 0) {
       render('notFound', {}, res);
     } else {
@@ -94,11 +110,12 @@ router.use('/:id', function(req, res, next) {
 });
 
 // Gets information for specific class
-router.get('/:id', function(req, res) {
+router.get('/:id', function(req, res, next) {
   connection.query("SELECT `id`,`name`,`description`,`due` FROM `assignments` WHERE `section_id` = ?", [req.params.id], function(err, rows) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       render('section', {name: req.section.name, rows: rows, id: req.params.id}, res);
     }
@@ -106,10 +123,19 @@ router.get('/:id', function(req, res) {
 });
 
 // drop a class
-router.get('/:id/delete', function(req, res) {
-  connection.query("DELETE FROM `enrollment` WHERE `section_id` = ? and `student_id` = ? LIMIT 1; DELETE `submissions`,`files` FROM `submissions` JOIN `files` ON `submissions`.`id` = `files`.`submission_id` WHERE `student_id` = ?", [req.params.id, req.user.id, req.user.id], function(err) {
-    if(err) throw err;
-    res.redirect('/student/section');
+router.get('/:id/delete', function(req, res, next) {
+  connection.query("DELETE FROM `enrollment` WHERE `section_id` = ? and `student_id` = ? LIMIT 1; \
+                    DELETE \
+                      `submissions`,`files` \
+                    FROM \
+                      `submissions` \
+                      JOIN `files` ON `submissions`.`id` = `files`.`submission_id` \
+                    WHERE `student_id` = ?", [req.params.id, req.user.id, req.user.id], function(err) {
+    if(err) {
+      next(err);
+    } else {
+      res.redirect('/student/section');
+    }
   });
 });
 
