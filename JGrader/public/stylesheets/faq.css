@@ -6,11 +6,12 @@ body {
   text-align: center;
 }
 h1 {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 dt {
   font-weight: 500;
   font-size: 28px;
+  margin-top: 15px;
 }
 dd {
   display: none;
@@ -18,4 +19,7 @@ dd {
 .fa:hover {
   color: #428bca;
   cursor: pointer;
+}
+#bottom {
+  font-size: 21px;
 }
