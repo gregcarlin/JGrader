@@ -82,7 +82,7 @@ router.get('/:id', function(req, res, next) {
                     WHERE `submissions`.`assignment_id` = `assignments`.`id` \
                     AND `submissions`.`student_id` = `students`.`id` \
                     AND `files`.`submission_id`= `submissions`.`id` \
-                    AND  `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData){
+                    AND `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData){
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
@@ -90,11 +90,13 @@ router.get('/:id', function(req, res, next) {
     } else if(fileData.length == 0) {
       render('assignment', {title: req.assignment.name, assignment: req.assignment}, res);
     } else {
+      var anyCompiled = false;
       for(file in fileData) {
         fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
+        if(fileData[file].compiled) anyCompiled = true;
       }
       // Sends file data
-      render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData}, res);
+      render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled}, res);
     }
   });
 });
@@ -154,59 +156,57 @@ router.post('/:id/submit', function(req, res, next) {
 
         // compile the java files
         exec("javac " + toCompile, function(err, stdout, stderr) {
-          if(err) {
-            // clean up
-            fs.remove('./uploads/' + req.user.id + '/', function(err) {
-              res.json({code: 1}); // code can't compile
-            });
-          } else {
-
-            // finally, make necessary changes in database
-            connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, result) {
-              if(err) {
-                res.json({code: -1}); // unknown error
-                err.handled = true;
-                next(err);
-              } else {
-
-                var args = [];
-                var stmt = "";
-                for(file in req.files) {
-                  // read java and class data into variables
-                  var javaData = fs.readFileSync(req.files[file].path);
-                  var classData = req.files[file].isJava ? fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class') : null;
-
-                  stmt += "(NULL,?,?,?,?),";
-                  args.push(result.insertId);
-                  args.push(req.files[file].name);
-                  args.push(javaData);
-                  args.push(classData);
-                }
-                stmt = stmt.substr(0, stmt.length-1); // remove last character from stmt (extraneous comma)
-                connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
-                  if(err) {
-                    fs.removeSync('./uploads/' + req.user.id + '/'); // we must cleanup, even on error
-                    res.json({code: -1}); // unknown error
-                    err.handled = true;
-                    next(err);
-                  } else {
-                    // clean up files used for compilation
-                    fs.remove('./uploads/' + req.user.id + '/', function(err) {
-                      if(err) {
-                        res.json({code: -1}); // unknown error
-                        err.handled = true;
-                        next(err);
-                      } else {
-                        res.json({code: 0});
-                      }
-                    });
-                  }
-                });
-
-              }
-            });
-
+          if(err) { // compilation error, treat all files as non-java files
+            for(file in req.files) {
+              req.files[file].isJava = false;
+            }
           }
+
+          // finally, make necessary changes in database
+          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, result) {
+            if(err) {
+              res.json({code: -1}); // unknown error
+              err.handled = true;
+              next(err);
+            } else {
+
+              var args = [];
+              var stmt = "";
+              for(file in req.files) {
+                // read java and class data into variables
+                var javaData = fs.readFileSync(req.files[file].path);
+                var classData = req.files[file].isJava ? fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class') : null;
+
+                stmt += "(NULL,?,?,?,?),";
+                args.push(result.insertId);
+                args.push(req.files[file].name);
+                args.push(javaData);
+                args.push(classData);
+              }
+              stmt = stmt.substr(0, stmt.length-1); // remove last character from stmt (extraneous comma)
+              connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
+                if(err) {
+                  fs.removeSync('./uploads/' + req.user.id + '/'); // we must cleanup, even on error
+                  res.json({code: -1}); // unknown error
+                  err.handled = true;
+                  next(err);
+                } else {
+                  // clean up files used for compilation
+                  fs.remove('./uploads/' + req.user.id + '/', function(err) {
+                    if(err) {
+                      res.json({code: -1}); // unknown error
+                      err.handled = true;
+                      next(err);
+                    } else {
+                      res.json({code: 0});
+                    }
+                  });
+                }
+              });
+
+            }
+          });
+
         });
 
       }

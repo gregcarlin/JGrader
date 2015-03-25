@@ -2,7 +2,7 @@
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
 <div class="page-header">
-  <h1><a href="/teacher/student/<%= submission.id %>"><%= student.fname + ' ' + student.lname %>'s</a> submission to <a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a></h1>
+  <h1><a href="/teacher/student/<%= student.id %>"><%= student.fname + ' ' + student.lname %>'s</a> submission to <a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a></h1>
   <a href="/teacher/submission/<%= submission.id %>/download" class="right"><span class="fa fa-download" data-toggle="tooltip" data-placement="left" title="Download All"></span></a>
 </div>
 <dl class="description">
@@ -18,6 +18,11 @@
   <dt>Grade:</dt>
     <dd><span class="edit" data-key="updategrade" data-default="Not graded."><span><%= submission.grade ? submission.grade : '' %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
 </dl>
+<% if(!anyCompiled) { %>
+  <div class="alert alert-warning" role="alert">
+    WARNING: An error was encountered during the compilation of this code.
+  </div>
+<% } %>
 <div role="tabpanel">
   <ul class="nav nav-tabs" role="tablist">
     <% for(i in fileData) { %>

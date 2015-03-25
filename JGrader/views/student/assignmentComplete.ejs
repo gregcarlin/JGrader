@@ -26,6 +26,12 @@
     </table>
 </div>
 
+<% if(!anyCompiled) { %>
+  <div class="alert alert-warning" role="alert">
+    WARNING: This code could not successfully be compiled. Your teacher will be unable to run it.
+  </div>
+<% } %>
+
 <!-- If student has submitted files needs resubmit -->
 <div role="tabpanel">
   <ul class="nav nav-tabs" role="tablist">
