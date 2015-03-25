@@ -12,3 +12,10 @@ dt {
   font-weight: 500;
   font-size: 28px;
 }
+dd {
+  display: none;
+}
+.fa:hover {
+  color: #428bca;
+  cursor: pointer;
+}
