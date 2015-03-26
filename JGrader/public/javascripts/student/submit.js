@@ -117,11 +117,10 @@ function handleAuthResult(authResult) {
   }
 }
 
-// Create and render a Picker object for searching images.
+// Create and render a Picker object for searching files.
 function createPicker() {
   if (pickerApiLoaded && oauthToken) {
     var view = new google.picker.View(google.picker.ViewId.DOCS);
-    view.setMimeTypes("image/png,image/jpeg,image/jpg");
     var picker = new google.picker.PickerBuilder()
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
         .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
@@ -141,5 +140,6 @@ function pickerCallback(data) {
   if (data.action == google.picker.Action.PICKED) {
     var fileId = data.docs[0].id;
     alert('The user selected: ' + fileId);
+    // TODO get file contents
   }
 }
