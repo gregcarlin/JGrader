@@ -3,7 +3,7 @@ body {
 }
 .starter-template {
   padding: 40px 15px;
-  text-align: center;
+  text-align: left;
 }
 h1 {
   margin-bottom: 25px;
@@ -14,7 +14,7 @@ dt {
   margin-top: 15px;
 }
 dd {
-  display: none;
+  
 }
 .fa:hover {
   color: #428bca;
