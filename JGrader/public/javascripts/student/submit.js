@@ -139,7 +139,11 @@ function createPicker() {
 function pickerCallback(data) {
   if (data.action == google.picker.Action.PICKED) {
     var fileId = data.docs[0].id;
-    alert('The user selected: ' + fileId);
-    // TODO get file contents
+    console.log('The user selected: ' + fileId);
+    $.get('https://www.googleapis.com/drive/v2/files/' + fileId, {}, function(data, textStatus, jqXHR) {
+      // TODO
+      console.log('DATA RECEIVED');
+      console.log(data);
+    });
   }
 }
