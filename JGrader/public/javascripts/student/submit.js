@@ -69,6 +69,10 @@ myDropzone.on("queuecomplete", function(progress) {
   $('#actions').html('<div class="red">Please reload the page in order to try again.</div>');
 });
 
+document.querySelector("#actions .start").onclick = function() {
+  myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
+};
+
 // The Browser API key obtained from the Google Developers Console.
 // Replace with your own Browser API key, or your own key.
 var developerKey = 'AIzaSyA-SyAcuSH8rt5FTFng9m668zG41pEImtM';
