@@ -116,10 +116,15 @@
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="/javascripts/ie10-viewport-bug-workaround.js"></script>
 
-    <% if(typeof js != 'undefined') {
-        for(i in js) { %>
-          <script src="/javascripts/<%= js[i] %>.js"></script>
-        <% }
-      } %>
+    <% 
+      if(typeof js != 'undefined') {
+        for(i in js) { 
+          if(!js[i].startsWith('http')) js[i] = '/javascripts/' + js[i];
+    %>
+          <script type="text/javascript" src="<%= js[i] %>.js"></script>
+    <%
+        }
+      } 
+    %>
   </body>
 </html>
