@@ -84,25 +84,25 @@ var clientId = '835071763335-v3cfbmm39vboo0lh1dureqe0cqkop6j9.apps.googleusercon
 var appId = '835071763335';
 
 // Scope to use to access user's Drive items.
-var scope = ['https://www.googleapis.com/auth/drive'];
+var scope = ['https://www.googleapis.com/auth/drive.readonly'];
 
 var pickerApiLoaded = false;
 var oauthToken;
 
 // Use the Google API Loader script to load the google.picker script.
 function loadPicker() {
-gapi.load('auth', {'callback': onAuthApiLoad});
-gapi.load('picker', {'callback': onPickerApiLoad});
+  gapi.load('auth', {'callback': onAuthApiLoad});
+  gapi.load('picker', {'callback': onPickerApiLoad});
 }
 
 function onAuthApiLoad() {
-window.gapi.auth.authorize(
-    {
-      'client_id': clientId,
-      'scope': scope,
-      'immediate': false
-    },
-    handleAuthResult);
+  window.gapi.auth.authorize(
+      {
+        'client_id': clientId,
+        'scope': scope,
+        'immediate': false
+      },
+      handleAuthResult);
 }
 
 function onPickerApiLoad() {
@@ -120,14 +120,13 @@ function handleAuthResult(authResult) {
 // Create and render a Picker object for searching files.
 function createPicker() {
   if (pickerApiLoaded && oauthToken) {
-    var view = new google.picker.View(google.picker.ViewId.DOCS);
+    var view = new google.picker.View(google.picker.ViewId.FOLDERS);
     var picker = new google.picker.PickerBuilder()
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
         .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
         .setAppId(appId)
         .setOAuthToken(oauthToken)
         .addView(view)
-        .addView(new google.picker.DocsUploadView())
         .setDeveloperKey(developerKey)
         .setCallback(pickerCallback)
         .build();
@@ -140,7 +139,7 @@ function pickerCallback(data) {
   if (data.action == google.picker.Action.PICKED) {
     var fileId = data.docs[0].id;
     console.log('The user selected: ' + fileId);
-    $.get('https://www.googleapis.com/drive/v2/files/' + fileId, {}, function(data, textStatus, jqXHR) {
+    $.get('https://www.googleapis.com/drive/v2/files/' + fileId + '?key=' + developerKey + '&acknowledgeAbuse=true&alt=media', {}, function(data, textStatus, jqXHR) {
       // TODO
       console.log('DATA RECEIVED');
       console.log(data);
