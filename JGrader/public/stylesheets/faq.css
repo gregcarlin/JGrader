@@ -13,13 +13,11 @@ dt {
   font-size: 28px;
   margin-top: 15px;
 }
-dd {
-  
-}
 .fa:hover {
   color: #428bca;
   cursor: pointer;
 }
 #bottom {
   font-size: 21px;
+  margin-top: 30px;
 }
