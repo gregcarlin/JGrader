@@ -219,7 +219,7 @@ function initPicker() {
     onSelect: function(file) {
       downloadFile(file, function(contents) {
         if(contents) {
-          // TODO
+          // TODO add to dropzone, maybe see http://stackoverflow.com/questions/24445724/add-existing-image-files-in-dropzone
         } else {
           // TODO unable to get contents, probably a spreadsheet or something gross
         }
