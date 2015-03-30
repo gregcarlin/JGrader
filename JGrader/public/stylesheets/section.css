@@ -3,12 +3,12 @@
 
 /* This stylesheet is shared between the teacher and student sections */
 
-/* Move down content because we have a fixed navbar that is 50px tall */
+/* Move down content because we have a fixed navbar that is 55px tall */
 html {
   position: relative;
 }
 body {
-  padding-top: 50px;
+  padding-top: 55px;
   margin-bottom: 60px;
   height: 100%;
 }
@@ -26,7 +26,7 @@ body {
  */
 .sidebar {
   position: fixed;
-  top: 51px;
+  top: 56px;
   bottom: 0;
   left: 0;
   z-index: 1000;
@@ -59,13 +59,7 @@ body {
  * Main content
  */
 .main {
-  padding: 20px;
-}
-@media (min-width: 768px) {
-  .main {
-    padding-right: 40px;
-    padding-left: 40px;
-  }
+  padding: 20px 40px;
 }
 .main .page-header {
   margin-top: 0;
