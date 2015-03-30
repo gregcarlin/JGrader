@@ -22,7 +22,7 @@ var render = function(page, options, res) {
       break;
     case 'assignment':
       // title should already be set
-      options.js = ['student/dropzone', 'student/submit', 'https://www.google.com/jsapi?key=AIzaSyA-SyAcuSH8rt5FTFng9m668zG41pEImtM', 'https://apis.google.com/js/client.js?onload=initPicker'];
+      options.js = ['student/dropzone', 'student/submit'];
       options.css = ['student/submit', 'font-awesome.min'];
       options.strftime = strftime;
       break;
