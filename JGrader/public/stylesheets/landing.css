@@ -47,35 +47,33 @@ a:hover {
   min-width: 337px;
 }
 
-/* styling the nav bar */
-.nav {
-  height: 55px;
+/* styling the.navbar bar */
+.navbar {
   vertical-align: middle;
   line-height: 55px;
   position: fixed;
-  min-width: 1237px;
   width: 100%;
   top: 0;
   box-shadow: 0 0 100px 5px #000;
 }
 
-.nav .left {
+.navbar .left {
   font-size: 35px;
   color: #727272;
   background-color: #FAFAFA;
   position: absolute;
 }
-.nav .left a {
+.navbar .left a {
   color: #727272;
   margin-left: 30px;
   font-weight: 300;
   position: relative;
   top: -1px;
 }
-.nav .left a:hover {
+.navbar .left a:hover {
   text-decoration: none;
 }
-.nav .right {
+.navbar .right {
   right: 0;
   font-size: 30px;
   text-align: center;
@@ -84,17 +82,17 @@ a:hover {
   position: absolute;
   font-weight: 300;
 }
-.nav .right a {
+.navbar .right a {
   display: table-cell;
   text-align: center;
   color: #FFF;
 }
-.nav .right a:hover {
+.navbar .right a:hover {
   color: #EEE;
   text-decoration: none;
 }
 
-/* links in nav bar */
+/* links in.navbar bar */
 #link-home {
   background-color: #97C3FA;
 }
@@ -278,13 +276,13 @@ a:hover {
     display: block;
     float: none;
   }
-  .nav {
+  .navbar {
     min-width: 0;
   }
-  .nav .left {
+  .navbar .left {
     display: block;
   }
-  .nav .right {
+  .navbar .right {
     margin-top: 55px;
   }
   #home .left {
