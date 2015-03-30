@@ -6,9 +6,7 @@
 /* Move down content because we have a fixed navbar that is 50px tall */
 html {
   position: relative;
-  height: 100%;
 }
-
 body {
   padding-top: 50px;
   margin-bottom: 60px;
@@ -26,7 +24,6 @@ body {
 /*
  * Sidebar
  */
-
 .sidebar {
   position: fixed;
   top: 51px;
@@ -58,11 +55,9 @@ body {
   background-color: #428bca;
 }
 
-
 /*
  * Main content
  */
-
 .main {
   padding: 20px;
 }
