@@ -1,8 +1,11 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
+// hide submit button before any files are added
+$('#actions .start').hide();
+
 // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
-var previewNode = document.querySelector("#template");
+var previewNode = document.querySelector(".file-row");
 previewNode.id = "";
 var previewTemplate = previewNode.parentNode.innerHTML;
 previewNode.parentNode.removeChild(previewNode);
@@ -50,9 +53,21 @@ myDropzone.on("success", function(file, response) {
   responded = true;
 });
 
-// Update the total progress bar
-myDropzone.on("totaluploadprogress", function(progress) {
-  $('#total-progress .progress-bar').css('width', progress + '%');
+// show submit button when a file is added
+myDropzone.on("addedfile", function(file) {
+  $('#actions .start').show();
+});
+
+// hide submit button when all files are removed
+myDropzone.on("removedfile", function(file) {
+  if(myDropzone.files.length <= 0) {
+    $('#actions .start').hide();
+  }
+});
+
+// Update the progress bars
+myDropzone.on("uploadprogress", function(file, progress) {
+  $('.progress-bar', $('p.name:contains("' + file.name + '")').parent().parent()).css('width', progress + '%');
 });
 
 myDropzone.on("sending", function(file) {
@@ -61,6 +76,7 @@ myDropzone.on("sending", function(file) {
   // And disable the start button
   $('#actions .buttons').hide();
   $('#actions .drag-zone').hide();
+  $('button.cancel').hide();
 });
 
 // Hide the total progress bar when nothing is uploading anymore
