@@ -4,12 +4,7 @@
 /* used for landing page (index.ejs) only */
 
 /* global stuff */
-html {
-  height: 100%;
-}
 body {
-  font-family: 'Lato', sans-serif;
-  height: 100%;
   color: #FFF;
   min-width: 1237px;
 }
