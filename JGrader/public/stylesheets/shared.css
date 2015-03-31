@@ -16,6 +16,28 @@ body {
   height: 55px;
   min-width: 1237px;
 }
+.navbar-inverse {
+  background-color: #FAFAFA;
+  font-weight: 300;
+}
+.navbar-inverse .navbar-brand {
+  font-size: 35px;
+  color: #727272;
+  margin-left: 30px;
+}
+.navbar-right {
+  display: table !important;
+  table-layout: fixed !important;
+  position: absolute !important;
+  right: 0;
+}
+.navbar-right > * {
+  display: table-cell !important;
+  text-align: center;
+}
+.navbar-right a:hover {
+  color: #EEE !important;
+}
 
 /* links in.navbar bar */
 #link-home {

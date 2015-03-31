@@ -58,15 +58,9 @@ a:hover {
 }
 
 .navbar .left {
-  font-size: 35px;
-  color: #727272;
-  background-color: #FAFAFA;
   position: absolute;
 }
 .navbar .left a {
-  color: #727272;
-  margin-left: 30px;
-  font-weight: 300;
   position: relative;
   top: -1px;
 }
@@ -74,21 +68,13 @@ a:hover {
   text-decoration: none;
 }
 .navbar .right {
-  right: 0;
   font-size: 30px;
   text-align: center;
-  display: table;
-  table-layout: fixed;
-  position: absolute;
-  font-weight: 300;
 }
 .navbar .right a {
-  display: table-cell;
-  text-align: center;
   color: #FFF;
 }
 .navbar .right a:hover {
-  color: #EEE;
   text-decoration: none;
 }
 
