@@ -65,6 +65,20 @@ body {
   margin-top: 0;
 }
 
+.navbar-inverse {
+  background-color: #FAFAFA;
+  font-weight: 300;
+}
+.navbar-inverse .navbar-brand {
+  font-size: 35px;
+  color: #727272;
+  line-height: 55px;
+  padding: 0;
+  margin-left: 30px;
+}
+.navbar-inverse .navbar-brand:hover {
+  color: #727272;
+}
 .navbar-inverse .navbar-nav > li > a {
   color: #FFF;
 }
@@ -74,7 +88,9 @@ body {
   width: 30%;
   position: absolute;
   right: 0;
-  font-weight: 300;
+}
+.navbar-right:last-child {
+  margin-right: 0 !important;
 }
 .navbar-right li {
   display: table-cell;
