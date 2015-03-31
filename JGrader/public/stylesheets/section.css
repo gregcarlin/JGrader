@@ -64,3 +64,28 @@ body {
 .main .page-header {
   margin-top: 0;
 }
+
+.navbar-inverse .navbar-nav > li > a {
+  color: #FFF;
+}
+.navbar-right {
+  display: table;
+  table-layout: fixed;
+  width: 30%;
+  position: absolute;
+  right: 0;
+  font-weight: 300;
+}
+.navbar-right li {
+  display: table-cell;
+  height: 55px;
+  float: none;
+  width: 100%;
+  text-align: center;
+  font-size: 30px;
+}
+.navbar-right li a {
+  padding: 0;
+  height: 100%;
+  line-height: 55px;
+}
