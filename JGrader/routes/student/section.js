@@ -9,11 +9,11 @@ var render = function(page, options, res) {
   options.page = 0;
   switch(page) {
     case 'notFound':
-      options.title = 'Section Not Found';
-      options.type = 'section';
+      options.title = 'Class Not Found';
+      options.type = 'class';
       break;
     case 'sectionList':
-      options.title = 'Your Sections';
+      options.title = 'Your Classes';
       options.js = ['tooltip', 'student/sectionList'];
       options.css = ['font-awesome.min'];
       break;
@@ -24,7 +24,7 @@ var render = function(page, options, res) {
       options.strftime = strftime;
       break;
     case 'joinSection':
-      options.title = 'Join a Section';
+      options.title = 'Join a Class';
       break;
   }
   renderGenericStudent(page, options, res);
