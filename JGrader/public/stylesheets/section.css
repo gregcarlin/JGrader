@@ -153,6 +153,11 @@ body {
   position: relative;
   top: 5px;
 }
+.main .page-header-right {
+  float: right;
+  font-size: 36px;
+  color: #FFF;
+}
 .main table {
   border-collapse: separate;
   border-spacing: 0 14px;
@@ -178,10 +183,10 @@ body {
   background-color: #9BCD78;
 }
 .main table tbody tr td.status-late {
-  background-color: #F8E71C;
+  background-color: #CD7878;
 }
 .main table tbody tr td.status-notsubmitted {
-  background-color: #CD7878;
+  background-color: #F8E71C;
 .fa[data-toggle="tooltip"]:hover, .fa[onclick]:hover {
   color: #2a6496;
 }
