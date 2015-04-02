@@ -18,7 +18,7 @@
             <tr>
               <td><a href="/student/section/<%= rows[i].id %>"><%= rows[i].name %></a></td>
               <td><%= rows[i].lname + ', ' + rows[i].fname %></td>
-              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Drop" onclick="confirmDelete(<%= rows[i].id %>)"></span></td>
+              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="left" title="Drop" onclick="confirmDelete(<%= rows[i].id %>)"></span></td>
             </tr>
        <% }
        } %>
