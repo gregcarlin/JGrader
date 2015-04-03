@@ -139,11 +139,9 @@ body {
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
 }
-/*.main .page-header-right {
-  float: right;
-  font-size: 36px;
-  color: #FFF;
-}*/
+.table {
+  margin-bottom: 0;
+}
 .main table {
   border-collapse: separate;
   border-spacing: 0 14px;
@@ -175,6 +173,8 @@ body {
 .main table tbody tr td.status-notsubmitted {
   background-color: #F8E71C;
 }
+
+/* general global style stuff */
 .fa[data-toggle="tooltip"]:hover, .fa[onclick]:hover {
   color: #2a6496;
 }
@@ -183,4 +183,60 @@ body {
 }
 .fa[onclick]:hover {
   cursor: pointer;
+}
+a.fa:hover {
+  text-decoration: none;
+}
+a[onclick]:hover {
+  cursor: pointer;
+}
+
+/* assignment complete page */
+.nav-tabs {
+  border: none;
+}
+.nav-tabs li {
+  margin-bottom: 0;
+}
+.nav-tabs a {
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 5px 15px !important;
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #FFF;
+}
+.nav-tabs a:hover {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  color: #000;
+}
+.nav-tabs .active a {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  color: #000 !important;
+}
+ol.linenums li {
+  list-style-type: inherit;
+  background: inherit;
+}
+ol.linenums li .fa {
+  visibility: hidden;
+  color: #000;
+}
+ol.linenums li:hover .fa {
+  visibility: visible;
+  text-decoration: none;
+}
+pre {
+  border-radius: 0;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.75);
+}
+code {
+  vertical-align: top;
+  width: 80%;
+  display: inline-block;
+}
+ol.comments {
+  list-style-type: none;
+  width: 20%;
+  display: inline-block;
 }
