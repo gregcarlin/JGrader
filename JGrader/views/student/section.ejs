@@ -2,13 +2,13 @@
  Copyright (c) 2015 JGrader. All rights reserved. -->
 
 <div class="page-header" id="header-classes">
-  <h1>Classes</h1>
-</div>
-<div class="page-header-right">
-  <div class="name">
-    <%= name %>
+  <div class="left-header">
+    <h1>Classes</h1>
   </div>
-  <a onclick="confirmDelete(<%= id %>)" class="right plus-button"><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="left" title="Drop"></span></a>
+  <div class="right-header">
+    <div class="name"><%= name %></div>
+    <a onclick="confirmDelete(<%= id %>)" class="right plus-button"><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="left" title="Drop"></span></a>
+  </div>
 </div>
 
 <div class="table-responsive">
