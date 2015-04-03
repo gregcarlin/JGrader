@@ -115,7 +115,6 @@ body {
   border-bottom: none;
   display: block;
   content: " ";
-  width: calc(100% - 80px);
   height: 157px;
   right: 40px;
   top: 83px;
