@@ -38,7 +38,7 @@ var render = function(page, options, res) {
 
 // The page that lists the assignments
 router.get('/', function(req, res, next) {
-  connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`description`,`assignments`.`due`,`assignments`.`id`,`submissions`.`submitted` \
+  connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`due`,`assignments`.`id`,`submissions`.`submitted` \
                     FROM `sections`, `teachers`,`enrollment`,`assignments` \
                     LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = ? \
                     WHERE `enrollment`.`student_id` = ? \
