@@ -106,7 +106,6 @@ body {
   margin-bottom: 46px;
   padding: 0;
   border-bottom: none;
-  /*display: block;*/
   display: table;
   content: " ";
   height: 157px;
@@ -148,7 +147,6 @@ body {
   height: 100%;
   background-color: #fff;
   display: inline-block;
-  /*display: table-cell;*/
 }
 .main .page-header .left-header h1 {
   font-weight: 100;
@@ -176,6 +174,7 @@ body {
   border-bottom: 0;
   color: #fff;
   padding: 0 35px;
+  font-weight: 300;
 }
 .main table tbody tr {
   height: 60px;
@@ -249,6 +248,7 @@ ol.linenums li {
 ol.linenums li .fa {
   visibility: hidden;
   color: #000;
+  margin-right: 5px;
 }
 ol.linenums li:hover .fa {
   visibility: visible;
@@ -258,6 +258,7 @@ pre {
   border-radius: 0;
   border: none;
   background-color: rgba(255, 255, 255, 0.75);
+  padding-bottom: 35px;
 }
 code {
   vertical-align: top;
@@ -268,4 +269,19 @@ ol.comments {
   list-style-type: none;
   width: 20%;
   display: inline-block;
+}
+#resubmit {
+  border: none;
+  font-size: 20px;
+  background-color: #B3EBFF;
+  color: #000;
+  box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+  padding: 10px 20px;
+  float: right;
+  margin-top: -45px;
+  margin-right: -12px;
+}
+#resubmit:hover {
+  background-color: #83D7F7;
 }
