@@ -48,28 +48,30 @@ var appendComment = function(comment) {
   html += '<div class="date">'
   html += date.toLocaleString();
   html += '</div>';
+  html += '</div>';
+  html += '<div class="name">';
+  html += comment.name + ':';
+  html += '</div>';
+  html += '<div class="message">';
+  html += comment.message;
+  html += '</div>';
+  html += '<div class="bottom-links">';
+  html += '<div class="links">';
+  html += '<a onclick="addComment(' + comment.tab + ',' + comment.line + ')">Reply</a>';
+  html += '</div>';
   if(comment.owns) { // if this person owns this comment, add delete and edit buttons
     html += '<div class="buttons">';
     html += '<a class="fa fa-pencil-square-o" onclick="editComment(' + comment.id + ',' + comment.tab + ',' + comment.line + ')"></a>';
     html += '<a class="fa fa-trash-o" onclick="deleteComment(' + comment.id + ')"></a>';
     html += '</div>';
   }
-  html += '<div class="name">';
-  html += comment.name + ':';
   html += '</div>';
   html += '</div>';
-  html += '<div class="message">';
-  html += comment.message;
-  html += '</div>';
-  html += '<div class="links">';
-  html += '<a onclick="addComment(' + comment.tab + ',' + comment.line + ')">Reply</a>';
-  html += '</div>';
-  html += '</div>';;
   var div = $(html);
   div.mouseenter(function() {
     var tabLine = getTabLine($(this));
     var lio = getOrigLi(tabLine.tab, tabLine.line);
-    lio.css('background-color', '#FFA');
+    lio.css('background-color', 'rgba(234,128,128,60)');
   });
   div.mouseleave(function() {
     var tabLine = getTabLine($(this));
