@@ -173,6 +173,7 @@ body {
 }
 .main table tbody tr td.status-notsubmitted {
   background-color: #F8E71C;
+}
 .fa[data-toggle="tooltip"]:hover, .fa[onclick]:hover {
   color: #2a6496;
 }
