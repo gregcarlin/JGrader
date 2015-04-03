@@ -107,34 +107,37 @@ body {
 .main {
   padding: 20px 40px;
 }
+/* creates background box */
 .main .page-header {
   margin-top: 22px;
   margin-bottom: 46px;
-  padding: 28px 35px;
+  padding: 0;
   border-bottom: none;
-}
-/* creates background box */
-.main .page-header:before {
   display: block;
   content: " ";
   width: calc(100% - 80px);
   height: 157px;
-  position: absolute;
   right: 40px;
   top: 83px;
-  z-index: -1;
+  z-index: 0;
   box-shadow: 0 20px 30px 0 #000;
 }
-.main .page-header#header-classes:before {
+.main .page-header#header-classes {
   background-color: rgba(89,111,185,0.60);
 }
-.main .page-header#header-assignments:before {
+.main .page-header#header-assignments {
   background-color: rgba(233,128,128,0.60);
+}
+.main .page-header .left-header {
+  height: 100%;
+  background-color: #fff;
+  display: inline-block;
 }
 .main .page-header h1 {
   font-weight: 100;
   font-size: 72px;
   margin: 0;
+  display: inline-block;
   position: relative;
   top: 5px;
 }
