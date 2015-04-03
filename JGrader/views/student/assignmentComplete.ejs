@@ -1,28 +1,26 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
 
-<div class="page-header">
-  <h1> <%= assignment.name %> </h1>
+<div class="page-header" id="header-assignments">
+  <h1>Assignments</h1>
+</div>
+<div class="triangle"></div>
+<div class="page-header-right">
+  <div class="name">
+    <%= assignment.name %>
+  </div>
 </div>
 
 <div class="table-responsive">
   <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Due</th>
-          <th>Grade</th>
-          <th>Done</th>
-        </tr>
-      </thead>
-      <tbody>
-              <tr>
-                <td><%= assignment.description ? assignment.description : 'None' %></td>
-                <td><%= strftime('%b %d, %Y at %l:%M %p', new Date(assignment.due)); %><%- assignment.submitted > assignment.due ? ' <span class="fa fa-clock-o"></span>' : '' %></td>
-                <td><%- fileData[0].grade ? fileData[0].grade : '<em>Not graded.</em>' %></td>
-                <td><span class="fa fa-check fa-2x"></span></td>
-              </tr>
-      </tbody>
+    <tbody>
+      <tr>
+        <td><%= assignment.description ? assignment.description : 'None' %></td>
+        <td><strong>Due:</strong> <%= strftime('%m-%d-%y', new Date(assignment.due)); %><%- assignment.submitted > assignment.due ? ' <span class="fa fa-clock-o"></span>' : '' %></td>
+        <td><strong>Grade:</strong> <%- fileData[0].grade ? fileData[0].grade : '<em>Not graded.</em>' %></td>
+        <td class="status status-submitted">&nbsp;</td>
+      </tr>
+    </tbody>
     </table>
 </div>
 
