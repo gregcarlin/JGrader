@@ -177,6 +177,9 @@ body {
 .fa[data-toggle="tooltip"]:hover, .fa[onclick]:hover {
   color: #2a6496;
 }
+.fa-trash-o[data-toggle="tooltip"]:hover, .fa-trash-o[onclick]:hover {
+  color: #ff5050;
+}
 .fa[onclick]:hover {
   cursor: pointer;
 }
