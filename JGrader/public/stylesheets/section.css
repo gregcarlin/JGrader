@@ -110,11 +110,12 @@ body {
 .main .page-header {
   margin-top: 22px;
   margin-bottom: 46px;
-  background-color: #FFF;
   padding: 28px 35px;
   border-bottom: none;
-  display: inline-block;
-  height: 157px;
+  background: url(/images/header.svg) no-repeat center center;
+}
+.main .header-pic {
+  position: absolute;
 }
 /* creates background box */
 .main .page-header:before {
