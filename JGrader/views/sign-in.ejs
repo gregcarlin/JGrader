@@ -17,7 +17,9 @@
     <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="/stylesheets/signin.css" rel="stylesheet">
+    <link href="/stylesheets/shared.css" rel="stylesheet">
+    <link href="/stylesheets/section.css" rel="stylesheet">
+    <!--<link href="/stylesheets/signin.css" rel="stylesheet">-->
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -36,16 +38,31 @@
     </script>
   </head>
 
-  <body>
+  <body class="signin">
 
-    <div class="container">
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/student">jGrader</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li id="link-home"><a href="/">Home</a></li>
+          <li id="link-learn"><a href="/#learn">Learn</a></li>
+          <li id="link-sign-in"><a href="/sign-in">Sign In</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container sign-form">
       <form class="form-signin" role="form" action="/sign-in" method="POST">
   		  <h2 class="form-signin-heading">Sign in</h2>
         <% if(typeof error != 'undefined') { %>
           <div class="alert alert-danger" role="alert"><%- error %></div>
         <% } %>
-      	<input type="email" class="form-control" name="email" placeholder="Email" required autofocus<%- typeof email == 'undefined' ? '' : ' value="'+email+'"' %>>
-      	<input type="password" class="form-control" name="password" placeholder="Password" required>
+        <label for="email">Email</label>
+      	<input type="email" class="form-control" name="email" id="email" required autofocus<%- typeof email == 'undefined' ? '' : ' value="'+email+'"' %>>
+        <label for="password">Password</label>
+      	<input type="password" class="form-control" name="password" id="password" required>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
   		</form>
     </div> <!-- /container -->
@@ -53,5 +70,7 @@
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="/javascripts/ie10-viewport-bug-workaround.js"></script>
+    <script src="/javascripts/jquery-2.1.1.min.js"></script>
+    <script src="/javascripts/nav.js"></script>
   </body>
 </html>
