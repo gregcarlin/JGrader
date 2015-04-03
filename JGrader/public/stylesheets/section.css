@@ -12,7 +12,6 @@ body {
   margin-bottom: 60px;
   height: 100%;
 }
-
 /*
  * Top navigation
  * Hide default border to remove 1px line.
@@ -121,6 +120,20 @@ body {
 .main .page-header#header-assignments {
   background-color: rgba(233,128,128,0.60);
 }
+.right-header {
+  height: 100%;
+  display: inline-block;
+}
+.right-header .name {
+  color: #fff;
+  display: inline-block;
+  margin: 0;
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
 .main .page-header .left-header {
   height: 100%;
   background-color: #fff;
@@ -148,11 +161,16 @@ body {
   border-collapse: separate;
   border-spacing: 0 14px;
   font-weight: 300;
+  font-size: 24px;
+}
+.main table thead tr th {
+  border-bottom: 0;
+  color: #fff;
+  padding: 0 35px;
 }
 .main table tbody tr {
-  height: 61px;
+  height: 60px;
   background-color: #FFF;
-  font-size: 24px;
   opacity: 0.9;
 }
 .main table tbody tr td {
