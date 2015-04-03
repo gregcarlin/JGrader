@@ -56,7 +56,7 @@ body {
   bottom: 0;
   left: 0;
   display: block;
-  padding: 20px;
+  padding-left: 10px;
   overflow-x: hidden;
   overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
   background-color: #efefef;
@@ -185,6 +185,7 @@ body {
 .main table tbody tr td {
   vertical-align: middle;
   padding: 0 35px;
+  border-top: 0px;
 }
 .main table tbody tr td:last-child:not(:first-child) {
   text-align: right;
