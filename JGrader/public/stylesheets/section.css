@@ -139,11 +139,11 @@ body {
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
 }
-.main .page-header-right {
+/*.main .page-header-right {
   float: right;
   font-size: 36px;
   color: #FFF;
-}
+}*/
 .main table {
   border-collapse: separate;
   border-spacing: 0 14px;
