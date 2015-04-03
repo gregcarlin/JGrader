@@ -112,10 +112,6 @@ body {
   margin-bottom: 46px;
   padding: 28px 35px;
   border-bottom: none;
-  background: url(/images/header.svg) no-repeat center center;
-}
-.main .header-pic {
-  position: absolute;
 }
 /* creates background box */
 .main .page-header:before {
