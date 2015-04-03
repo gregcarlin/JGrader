@@ -120,6 +120,9 @@ body {
 .main .page-header#header-assignments {
   background-color: rgba(233,128,128,0.60);
 }
+.page-header > div {
+  vertical-align: middle;
+}
 .right-header {
   height: 100%;
   display: inline-block;
