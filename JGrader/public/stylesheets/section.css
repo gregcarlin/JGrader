@@ -131,11 +131,13 @@ body {
   font-size: 72px;
   margin: 0;
   display: inline-block;
+  padding-left: 22px;
+  padding-right: 22px;
   position: relative;
-  top: 5px;
-  padding-top: 12%;
-  padding-left: 5%;
-  padding-right: 10%;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
 }
 .main .page-header-right {
   float: right;
