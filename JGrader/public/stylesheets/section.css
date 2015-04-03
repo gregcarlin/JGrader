@@ -103,7 +103,6 @@ body {
 /* creates background box */
 .main .page-header {
   margin-top: 22px;
-  margin-bottom: 46px;
   padding: 0;
   border-bottom: none;
   display: table;
@@ -174,7 +173,7 @@ body {
   border-bottom: 0;
   color: #fff;
   padding: 0 35px;
-  font-weight: 300;
+  font-weight: 400;
 }
 .main table tbody tr {
   height: 60px;
