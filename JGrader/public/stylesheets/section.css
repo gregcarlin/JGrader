@@ -91,18 +91,12 @@ body {
  * Main content
  */
 .background {
-  background: url('/images/home.jpg') no-repeat center center;
+  background: url('/images/home-blurred.jpg') no-repeat center center;
   background-size: cover;
-  -webkit-filter: blur(10px);
-  -moz-filter: blur(10px);
-  -o-filter: blur(10px);
-  -ms-filter: blur(10px);
-  filter: blur(10px);
   z-index: -10;
   position: fixed;
-  width: calc(100% + 20px);
-  height: calc(100% + 20px);
-  margin-top: -10px;
+  width: 100%;
+  height: 100%;
 }
 .main {
   padding: 20px 40px;
@@ -132,13 +126,16 @@ body {
   background-color: #fff;
   display: inline-block;
 }
-.main .page-header h1 {
+.main .page-header .left-header h1 {
   font-weight: 100;
   font-size: 72px;
   margin: 0;
   display: inline-block;
   position: relative;
   top: 5px;
+  padding-top: 12%;
+  padding-left: 5%;
+  padding-right: 10%;
 }
 .main .page-header-right {
   float: right;
