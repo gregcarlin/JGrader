@@ -135,11 +135,6 @@ body {
 .main .page-header .right-header .name {
   color: #fff;
   margin: 0;
-  position: relative;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
   padding-left: 22px;
 }
 .main .page-header .left-header {
