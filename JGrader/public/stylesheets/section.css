@@ -147,6 +147,7 @@ body {
 .main table {
   border-collapse: separate;
   border-spacing: 0 14px;
+  font-weight: 300;
 }
 .main table tbody tr {
   height: 61px;
