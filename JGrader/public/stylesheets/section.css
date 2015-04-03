@@ -110,11 +110,12 @@ body {
 .main .page-header {
   margin-top: 22px;
   margin-bottom: 46px;
-  background-color: #FFF;
   padding: 28px 35px;
   border-bottom: none;
-  display: inline-block;
-  height: 157px;
+  background: url(/images/header.svg) no-repeat center center;
+}
+.main .header-pic {
+  position: absolute;
 }
 /* creates background box */
 .main .page-header:before {
@@ -133,18 +134,6 @@ body {
 }
 .main .page-header#header-assignments:before {
   background-color: rgba(233,128,128,0.60);
-}
-/* creates triangle separating background box */
-.main .triangle {
-  display: inline-block;
-  position: relative;
-  top: 62px;
-  left: -3px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 157px 0 0 157px;
-  border-color: transparent transparent transparent #ffffff;
 }
 .main .page-header h1 {
   font-weight: 100;
