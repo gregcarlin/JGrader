@@ -11,8 +11,9 @@
 
     <title>Frequently Asked Questions | jGrader</title>
 
-    <link href="stylesheets/bootstrap.min.css" rel="stylesheet">
-    <link href="stylesheets/faq.css" rel="stylesheet">
+    <link href="stylesheets/reset.css" rel="stylesheet">
+    <link href="stylesheets/landing.css" rel="stylesheet">
+    <link href="stylesheets/shared.css" rel="stylesheet">
     <link href="stylesheets/font-awesome.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
@@ -26,22 +27,26 @@
   </head>
 
   <body>
+    
+    <div class="navbar navbar-inverse">
 
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <a class="navbar-brand" href="/">jGrader</a>
+        <div class="column left navbar-header">
+          <a class="navbar-brand" href="#">jGrader</a>
         </div>
+
+        <div class="column right navbar-right">
+          <a href="#home" id="link-home">Home</a>
+          <a href="#learn" id="link-learn">Learn</a>
+          <a href="/sign-in" id="link-sign-in">Sign In</a>
+        </div>
+
       </div>
-    </nav>
-
     <div class="container">
-
       <div class="starter-template">
         <h1>Frequently Asked Questions</h1>
         <dl class="lead">
           <dt>How much does jGrader cost?</dt>
-          <dd>jGrader is currently free for use until August 1, 2015. After this, it will be $3 per student per year.</dd>
+          <dd>jGrader is currently free for use until August 1, 2015. Our final pricing policy is still under review. </dd>
           <dt>What programming languages are supported?</dt>
           <dd>Currently only Java is supported, because this is the only language tested on the CollegeBoard's AP Computer Science exam. If you have a strong need for another language, please <a href="mailto:contact@jgrader.com" target="_blank">contact us</a>.</dd>
           <dt>Has this system been tested within a real classroom setting?</dt>
