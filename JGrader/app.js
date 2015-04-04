@@ -32,6 +32,7 @@ app.use(useragent.express());
 // alert users with unsupported browsers/devices
 app.use(function(req, res, next) {
   var ua = req.useragent;
+  console.log(ua);
   var nosupport = true;
 
   if(ua) {
