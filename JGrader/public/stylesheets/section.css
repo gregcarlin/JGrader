@@ -336,15 +336,43 @@ body.signin {
   font-size: 26px;
   font-weight: 300;
 }
+.container.signup label {
+  margin-bottom: 0;
+}
 .container input {
   margin-bottom: 47px;
+}
+.container.signup input {
+  margin-bottom: 15px;
+  margin-top: 0;
 }
 .container .btn {
   margin-left: auto;
   margin-right: auto;
 }
+.container.signup .btn {
+  width: 70% !important;
+  margin-top: 20px;
+}
 .sign-form input[type="submit"], .sign-form .btn[type="submit"] {
   padding-top: 7px;
   padding-bottom: 7px;
   display: block;
+}
+.iama {
+  color: #FFF;
+  font-size: 26px;
+  font-weight: 300;
+}
+.iama label {
+  margin-left: 15px;
+}
+.iama label:first-child {
+  margin-left: 30px;
+}
+.iama label input {
+  width: auto;
+  position: relative;
+  top: 14px;
+  margin-right: 10px;
 }
