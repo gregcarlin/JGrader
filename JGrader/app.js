@@ -32,12 +32,11 @@ app.use(useragent.express());
 // alert users with unsupported browsers/devices
 app.use(function(req, res, next) {
   var ua = req.useragent;
-  console.log(ua);
   var nosupport = true;
 
   if(ua) {
     ua.isiOS = ua.isiPad || ua.isiPod || ua.isiPhone;
-    ua.majorVersion = ua.Version ? parseInt(ua.Version.substring(0, ua.Version.indexOf('.'))) : Number.NaN;
+    ua.majorVersion = ua.Version ? (typeof ua.Version == "number" ? ua.Version : parseInt(ua.Version.substring(0, ua.Version.indexOf('.')))) : Number.NaN;
 
     var nosupport = ua.isOpera && (ua.isAndroid || ua.isiOS);
     nosupport = nosupport || (ua.isSafari && ua.isWindows);
