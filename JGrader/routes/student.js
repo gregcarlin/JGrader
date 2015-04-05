@@ -21,6 +21,7 @@ var render = function(page, options, res) {
       options.css = ['feedback'];
       break;
   }
+  page = '../' + page;
   renderGenericStudent(page, options, res);
 }
 
