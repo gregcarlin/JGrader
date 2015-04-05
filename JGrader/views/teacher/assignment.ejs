@@ -6,12 +6,10 @@
     <h1>Assignments</h1>
   </div>
   <div class="right-header">
-    <%= assignment.name %> | <a href="/teacher/section/<%= section.id %>" class="sub-header"><%= section.name %></a>
+    <div class="name">
+      <%= assignment.name %> | <a href="/teacher/section/<%= section.id %>" class="sub-header"><%= section.name %></a>
+    </div>
   </div>
-  <%
-    var due = new Date(assignment.due);
-  %>
-  <h2 class="right" id="dueh2" title="<%= strftime('%b %o %Y @ %l:%M %p', due) %>">Due <span class="edit" data-key="updatedue" data-convert-to-edit="makeEditable" data-convert-to-read="makeReadable"><span><%= strftime('%b %o, %Y at %H:%M', due) %></span><input type="text" class="form-control" id="due" /></span><span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="bottom" title="Edit"></span></h2>
 </div>
 <div class="description">
   <span class="edit" data-key="updatedesc" data-default="No Description"><span><%= assignment.description ? assignment.description : '' %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span>

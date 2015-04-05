@@ -11,7 +11,7 @@
   </span>
 </div>
 <div class="table-responsive">
-  <table class="table table-striped table-linked">
+  <table class="table table-linked">
     <thead>
       <tr>
         <th data-sort="string">Name <a class="fa fa-sort"></th>
@@ -19,7 +19,6 @@
         <th data-sort="int">Due <a class="fa fa-sort"></th>
         <th data-sort="float">Completed <a class="fa fa-sort"></th>
         <th data-sort="float">Graded <a class="fa fa-sort"></th>
-        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -34,12 +33,12 @@
               <td><a href="/teacher/section/<%= rows[i].sid %>"><%= rows[i].sname %></a></td>
               <%
                 var due = new Date(rows[i].due);
-                var dueStr = strftime(due.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', due);
+                var dueStr = strftime('%m-%d-%y', due);
               %>
               <td title="<%= strftime('%b %d %Y, %l:%M %p', due) %>" data-sort-value="<%= due ? due.getTime() : 0 %>"><%= dueStr %></td>
               <td data-sort-value="<%= rows[i].total == 0 ? 0 : (rows[i].complete / rows[i].total) %>"><%= rows[i].complete %> of <%= rows[i].total %></td>
               <td data-sort-value="<%= rows[i].complete == 0 ? 0 : (rows[i].graded / rows[i].complete)%>"><%= rows[i].graded %> of <%= rows[i].complete %></td>
-              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="confirmDelete(<%= rows[i].aid %>)"></span></td>
+              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="left" title="Delete" onclick="confirmDelete(<%= rows[i].aid %>)"></span></td>
             </tr>
        <% }
          } %>
