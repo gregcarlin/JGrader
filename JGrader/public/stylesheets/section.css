@@ -89,14 +89,6 @@ body {
 /*
  * Main content
  */
-.background {
-  background: url('/images/home-blurred.jpg') no-repeat center center;
-  background-size: cover;
-  z-index: -10;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-}
 .main {
   padding: 20px 40px;
 }
@@ -238,6 +230,7 @@ a[onclick]:hover {
 /* assignment complete page */
 .nav-tabs {
   border: none;
+  margin-bottom: -1px;
 }
 .nav-tabs li {
   margin-bottom: 0;
@@ -354,9 +347,10 @@ li .comment .bottom-links .buttons .fa {
 }
 
 /* sign in/up page stuff */
-body.signin {
+body {
   background: url('/images/home-blurred.jpg');
   background-size: cover;
+  background-attachment: fixed;
 }
 .container {
   width: 396px;
