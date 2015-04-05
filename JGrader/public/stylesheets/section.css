@@ -342,6 +342,16 @@ li .comment .bottom-links .buttons .fa {
   margin-top: -3%;
   font-size: 50px !important;
 }
+.nav-tabs li.icon {
+  float: right;
+  color: #FFF;
+  font-size: 22px;
+  margin-left: 4px;
+}
+.nav-tabs li.icon .fa:hover {
+  cursor: pointer;
+  color: #CCC;
+}
 
 /* sign in/up page stuff */
 body.signin {
