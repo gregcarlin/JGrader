@@ -18,7 +18,6 @@ var render = function(page, options, res) {
       break;
     case 'feedback':
       options.title = 'Feedback';
-      options.css = ['feedback'];
       break;
   }
   page = '../' + page;
