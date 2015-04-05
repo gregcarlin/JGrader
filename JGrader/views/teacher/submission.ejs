@@ -2,7 +2,12 @@
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
 <div class="page-header">
-  <h1><a href="/teacher/student/<%= student.id %>"><%= student.fname + ' ' + student.lname %>'s</a> submission to <a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a></h1>
+  <div class="left-header">
+    <h1><a href="/teacher/student/<%= student.id %>"><%= student.fname + ' ' + student.lname %>'s</a> submission to <a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a></h1>
+  </div>
+  <div class="right-header">
+
+  </div>
   <a href="/teacher/submission/<%= submission.id %>/download" class="right"><span class="fa fa-download" data-toggle="tooltip" data-placement="left" title="Download All"></span></a>
 </div>
 <dl class="description">

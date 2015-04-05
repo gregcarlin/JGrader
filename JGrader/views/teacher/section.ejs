@@ -1,8 +1,13 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
-<div class="page-header">
-  <h1><span class="edit" data-key="updatename" data-default="none" id="sec-edit"><span><%= sectionName %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil" data-toggle="tooltip" data-placement="bottom" title="Edit"></span>'s Assignments</h1>
+<div class="page-header" id="header-classes">
+  <div class="left-header">
+    <h1>Classes</h1>
+  </div>
+  <div class="right-header">
+    <span class="edit" data-key="updatename" data-default="none" id="sec-edit"><span><%= sectionName %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil" data-toggle="tooltip" data-placement="bottom" title="Edit"></span>
+  </div>
   <a href="/teacher/assignment/create/<%= sectionID %>" class="right plus-button"><span class="fa fa-plus-circle" data-toggle="tooltip" data-placement="left" title="New Assignment"></span></a>
 </div>
 <dl class="description">
