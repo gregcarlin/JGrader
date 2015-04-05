@@ -358,10 +358,6 @@ li .comment .bottom-links .buttons .fa {
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
 }
-.sign-form h2.form-signin-heading {
-  text-align: center;
-  color: #FFF;
-}
 .sign-form label {
   color: #FFF;
   font-size: 26px;
