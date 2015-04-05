@@ -383,6 +383,10 @@ li .comment .bottom-links .buttons .fa {
 .container.signup .btn {
   margin-top: 20px;
 }
+.sign-form {
+  color: #FFF;
+  text-align: center;
+}
 .sign-form input[type="submit"], .sign-form .btn[type="submit"] {
   padding-top: 7px;
   padding-bottom: 7px;
