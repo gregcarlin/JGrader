@@ -115,10 +115,13 @@ body {
   width: 100%;
 }
 .main .page-header#header-classes {
-  background-color: rgba(89,111,185,0.60);
+  background-color: rgba(89,111,185,0.6);
 }
 .main .page-header#header-assignments {
-  background-color: rgba(233,128,128,0.60);
+  background-color: rgba(233,128,128,0.6);
+}
+.main .page-header#header-students {
+  background-color: rgba(93,180,108,0.6);
 }
 .main .page-header > div {
   vertical-align: middle;
@@ -211,6 +214,9 @@ a.fa:hover {
   text-decoration: none;
 }
 a[onclick]:hover {
+  cursor: pointer;
+}
+.fa-sort:hover {
   cursor: pointer;
 }
 
@@ -321,6 +327,7 @@ li .comment .bottom-links .buttons .fa {
   margin-top: -3%;
   font-size: 50px !important;
 }
+
 /* sign in/up page stuff */
 body.signin {
   background: url('/images/home-blurred.jpg');
@@ -382,4 +389,16 @@ body.signin {
   position: relative;
   top: 14px;
   margin-right: 10px;
+}
+
+/* stuff for editing */
+.edit input {
+  display: none;
+  width: 75px;
+}
+.edit + .fa {
+  font-size: 14px;
+}
+.edit + .fa:hover {
+  cursor: pointer;
 }
