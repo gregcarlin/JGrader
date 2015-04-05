@@ -2,7 +2,12 @@
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
 <div class="page-header">
-  <h1><%= name %></h1>
+  <div class="left-header">
+    <h1>Students</h1>
+  </div>
+  <div class="right-header">
+    <%= name %>
+  </div>
   <a href="/teacher/student/<%= id %>.csv" class="right"><span class="fa fa-table" data-toggle="tooltip" data-placement="left" title="Export"></span></a>
 </div>
 <div class="table-responsive">
@@ -10,7 +15,7 @@
     <thead>
       <tr>
         <th data-sort="string">Assignment <a class="fa fa-sort"></th>
-        <th data-sort="string">Section <a class="fa fa-sort"></th>
+        <th data-sort="string">Class <a class="fa fa-sort"></th>
         <th data-sort="int">Submitted <a class="fa fa-sort"></th>
         <th data-sort="int">Grade <a class="fa fa-sort"></th>
       </tr>

@@ -1,5 +1,6 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
+
 <div class="page-header" id="header-classes">
   <div class="left-header">
     <h1>Classes</h1>
@@ -27,7 +28,7 @@
               <td><a href="/teacher/section/<%= rows[i].id %>"><%= rows[i].name %></a></td>
               <td><%= rows[i].count %></td>
               <td><%- rows[i].aname ? '<a href="/teacher/assignment/' + rows[i].aid + '">' + rows[i].aname + '</a>' : 'None' %></td>
-              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Delete" onclick="confirmDelete(<%= rows[i].id %>)"></span></td>
+              <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="left" title="Delete" onclick="confirmDelete(<%= rows[i].id %>)"></span></td>
             </tr>
        <% }
          } %>

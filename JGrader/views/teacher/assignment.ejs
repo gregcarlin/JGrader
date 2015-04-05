@@ -1,8 +1,13 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
-<div class="page-header">
-  <h1><%= assignment.name %> | <a href="/teacher/section/<%= section.id %>" class="sub-header"><%= section.name %></a></h1>
+<div class="page-header" id="header-assignments">
+  <div class="left-header">
+    <h1>Assignments</h1>
+  </div>
+  <div class="right-header">
+    <%= assignment.name %> | <a href="/teacher/section/<%= section.id %>" class="sub-header"><%= section.name %></a>
+  </div>
   <%
     var due = new Date(assignment.due);
   %>
