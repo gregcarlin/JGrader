@@ -163,14 +163,19 @@ body {
 }
 .main table {
   border-collapse: separate;
-  border-spacing: 0 14px;
   font-weight: 300;
   font-size: 24px;
+}
+.student-main table {
+  border-spacing: 0 14px;
+}
+.teacher-main table {
+  border-spacing: 0 4px;
 }
 .main table thead tr th {
   border-bottom: 0;
   color: #fff;
-  padding: 0 35px;
+  padding: 0 0 0 20px;
   font-weight: 400;
 }
 .main table tbody tr {
@@ -178,9 +183,15 @@ body {
   background-color: #FFF;
   opacity: 0.9;
 }
+.teacher-main .page-header#header-assignments + .table-responsive tbody tr {
+  height: 50px;
+}
+.teacher-main .page-header#header-students + .table-responsive tbody tr {
+  height: 40px;
+}
 .main table tbody tr td {
   vertical-align: middle;
-  padding: 0 35px;
+  padding: 0 20px 0 20px;
   border-top: 0px;
 }
 .main table tbody tr td:last-child:not(:first-child) {
@@ -216,8 +227,12 @@ a.fa:hover {
 a[onclick]:hover {
   cursor: pointer;
 }
+.fa-sort {
+  color: #FFF;
+}
 .fa-sort:hover {
   cursor: pointer;
+  color: #CCC;
 }
 
 /* assignment complete page */
