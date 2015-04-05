@@ -11,6 +11,9 @@ body {
   padding-top: 55px;
   margin-bottom: 60px;
   height: calc(100% - 60px);
+  background: url('/images/home-blurred.jpg');
+  background-size: cover;
+  background-attachment: fixed;
 }
 /*
  * Top navigation
@@ -61,11 +64,11 @@ body {
   overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
   background-color: #efefef;
   z-index: 1034;
+  width: 190px;
 }
 
 /* Sidebar navigation */
 .nav-sidebar {
-  margin-right: -21px; /* 20px padding + 1px border */
   margin-bottom: 20px;
   margin-left: -20px;
 }
@@ -91,6 +94,7 @@ body {
  */
 .main {
   padding: 20px 40px;
+  margin-left: 190px;
 }
 /* creates background box */
 .main .page-header {
@@ -347,11 +351,6 @@ li .comment .bottom-links .buttons .fa {
 }
 
 /* sign in/up page stuff */
-body {
-  background: url('/images/home-blurred.jpg');
-  background-size: cover;
-  background-attachment: fixed;
-}
 .container {
   width: 396px;
   position: relative;
