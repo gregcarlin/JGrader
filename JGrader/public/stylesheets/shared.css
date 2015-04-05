@@ -83,7 +83,6 @@ body {
 .sign-form .button, .sign-form .btn {
   font-size: 30px !important;
   border-radius: 8px !important;
-  width: 60% !important;
   background-color: #BCDAFF;
   border-style: none;
   display: inline-block;
@@ -92,6 +91,9 @@ body {
   padding: 14px 8px;
   margin-bottom: 30px;
   box-sizing: content-box !important;
+  width: auto;
+  padding-left: 20% !important;
+  padding-right: 20% !important;
 }
 .sign-form .button:hover, .sign-form .btn:hover {
   background-color: #A1BADA;
