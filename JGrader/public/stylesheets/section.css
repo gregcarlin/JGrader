@@ -315,7 +315,21 @@ li .comment .bottom-links .buttons {
 }
 li .comment .bottom-links .buttons .fa {
   padding-left: 2px;
-  font-size: 15px;
+  font-size: 17px;
+}
+li .comment-text .fa {
+  font-size: 18px;
+  margin-top: 5px;
+  margin-left: 4px;
+}
+li .comment-text textarea {
+  resize: vertical;
+}
+li .comment-text .fa:first-of-type {
+  margin-left: 2px;
+}
+li .comment-text .fa:last-of-type {
+  float: right;
 }
 #resubmit {
   border: none;
@@ -349,6 +363,13 @@ li .comment .bottom-links .buttons .fa {
 .nav-tabs li.icon .fa:hover {
   cursor: pointer;
   color: #CCC;
+}
+.nav-tabs .tooltip > .tooltip-inner {
+  background-color: #FFF;
+  color: #000;
+}
+.nav-tabs .tooltip > .tooltip-arrow {
+  border-top-color: #FFF !important;
 }
 
 /* sign in/up page stuff */

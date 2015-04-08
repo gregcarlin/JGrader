@@ -24,19 +24,23 @@ var closeComment = function(tab, line) {
 var submitComment = function(tab, line) {
   var lineLi = getLineLi(tab, line);
   var text = $('textarea', lineLi).val();
-  var innerComment = $('.comment-text', lineLi);
-  innerComment.html('<span class="fa fa-spinner fa-spin"></span> Posting');
-  var url = document.URL;
-  if(url.charAt(url.length-1) != '/') url += '/';
-  $.post(url + 'comment', {tab: tab, line: line, text: text}, function(data, textStatus, jqXHR) {
-    if(data.code == 0) {
-      innerComment.remove();
-      delete data.code;
-      appendComment(data);
-    } else {
-      alert('There was an issue posting your comment. Please reload the page and try again.');
-    }
-  });
+  if(text.trim().length <= 0) {
+    alert('You cannot post an empty comment.');
+  } else {
+    var innerComment = $('.comment-text', lineLi);
+    innerComment.html('<span class="fa fa-spinner fa-spin"></span> Posting');
+    var url = document.URL;
+    if(url.charAt(url.length-1) != '/') url += '/';
+    $.post(url + 'comment', {tab: tab, line: line, text: text}, function(data, textStatus, jqXHR) {
+      if(data.code == 0) {
+        innerComment.remove();
+        delete data.code;
+        appendComment(data);
+      } else {
+        alert('There was an issue posting your comment. Please reload the page and try again.');
+      }
+    });
+  }
 };
 
 // displays a comment in UI. comment must have certain fields defined (see GET or POST '/:id/comment' in routes/comments.js)
