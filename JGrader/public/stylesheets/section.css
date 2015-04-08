@@ -419,6 +419,15 @@ li .comment .bottom-links .buttons .fa {
   width: auto !important;
   margin-top: 35px;
 }
+.feedback .report-type > label {
+  margin-top: 20px !important;
+}
+.feedback label:first-child {
+  margin-top: 0;
+}
+.feedback .btn {
+  margin-top: 25px;
+}
 
 /* stuff for editing */
 .edit input {
