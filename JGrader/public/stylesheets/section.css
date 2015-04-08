@@ -300,6 +300,7 @@ li .comment .date {
 li .comment .name {
   font-weight: 700;
   display: inline-block;
+  vertical-align: top;
 }
 li .comment .message {
   display: inline-block;
