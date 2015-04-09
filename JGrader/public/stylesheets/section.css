@@ -227,10 +227,10 @@ a.fa:hover {
 a[onclick]:hover {
   cursor: pointer;
 }
-.fa-sort {
+.fa-sort, .fa-sort-asc, .fa-sort-desc {
   color: #FFF;
 }
-.fa-sort:hover {
+.fa-sort:hover, .fa-sort-asc:hover, .fa-sort-desc:hover {
   cursor: pointer;
   color: #CCC;
 }
@@ -479,6 +479,9 @@ li .comment-text .fa:last-of-type {
 }
 .feedback .btn {
   margin-top: 25px;
+}
+.feedback input[type="radio"] {
+  width: auto;
 }
 .assign-create ul {
   list-style-type: none;
