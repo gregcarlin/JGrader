@@ -60,7 +60,7 @@ router.get('/:id', function(req, res, next) {
         } else {
           var anyCompiled = false;
           for(file in fileData) {
-            fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
+            fileData[file].display = fileData[file].contents.length <= 65536 || fileData[file].compiled;
             if(fileData[file].compiled) anyCompiled = true;
           }
           render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name, student: students[0], fileData: fileData, submission: req.submission, assignment: req.assignment, anyCompiled: anyCompiled}, res);

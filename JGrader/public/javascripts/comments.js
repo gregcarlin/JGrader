@@ -149,6 +149,8 @@ var deleteComment = function(id) {
 
 $(document).ready(function() {
   prettyPrint();
+  $('code').css('white-space', 'nowrap'); // must be added after prettyPrint to not cause interference
+
   $('.tab-pane').each(function(tab, elem) {
     $('ol.linenums li', elem).each(function(index, element) {
       $(element).prepend('<a onclick="addComment(' + tab + ','  + index  + ')" class="fa fa-comment-o"></a>');
