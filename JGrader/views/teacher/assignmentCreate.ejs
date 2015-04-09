@@ -1,10 +1,17 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
-<div class="page-header">
-  <h1>New Assignment</h1>
+<div class="page-header" id="header-assignments">
+  <div class="left-header">
+    <h1>Assignments</h1>
+  </div>
+  <div class="right-header">
+    <div class="name">
+      Create New
+    </div>
+  </div>
 </div>
-<form action="/teacher/assignment/create" method="post">
+<form action="/teacher/assignment/create" method="post" class="form-signin sign-form settings assign-create">
   <input type="text" class="form-control" placeholder="Name" name="name" required autofocus <%- typeof name == 'undefined' ? '' : ('value="' + name + '" ') %>/>
   <textarea class="form-control" placeholder="Description" name="desc"><%- typeof desc == 'undefined' ? '' : desc %></textarea>
   <input type="text" class="form-control" placeholder="Due Date" name="due" id="due" required <%- typeof due == 'undefined' ? '' : ('value="' + due + '" ') %>/>

@@ -130,6 +130,7 @@ body {
   margin-left: auto;
   margin-right: auto;
   width: 100%;
+  font-weight: 300;
 }
 .main .page-header .right-header .name {
   color: #fff;
@@ -254,6 +255,29 @@ a[onclick]:hover {
   background-color: rgba(255, 255, 255, 0.75) !important;
   color: #000 !important;
 }
+.nav-tabs li.icon {
+  float: right;
+  color: #FFF;
+  font-size: 22px;
+  margin-left: 4px;
+}
+.nav-tabs li.icon.disabled {
+  color: #AAA;
+}
+.nav-tabs li.icon:not(.disabled) .fa:hover {
+  cursor: pointer;
+  color: #CCC;
+}
+.nav-tabs li.icon.disabled .fa:hover {
+  color: inherit;
+}
+.nav-tabs .tooltip > .tooltip-inner {
+  background-color: #FFF;
+  color: #000;
+}
+.nav-tabs .tooltip > .tooltip-arrow {
+  border-top-color: #FFF !important;
+}
 ol.linenums li {
   list-style-type: inherit;
   background: inherit;
@@ -354,23 +378,6 @@ li .comment-text .fa:last-of-type {
   margin-top: -3%;
   font-size: 50px !important;
 }
-.nav-tabs li.icon {
-  float: right;
-  color: #FFF;
-  font-size: 22px;
-  margin-left: 4px;
-}
-.nav-tabs li.icon .fa:hover {
-  cursor: pointer;
-  color: #CCC;
-}
-.nav-tabs .tooltip > .tooltip-inner {
-  background-color: #FFF;
-  color: #000;
-}
-.nav-tabs .tooltip > .tooltip-arrow {
-  border-top-color: #FFF !important;
-}
 
 /* sign in/up page stuff */
 .container {
@@ -449,6 +456,20 @@ li .comment-text .fa:last-of-type {
 }
 .feedback .btn {
   margin-top: 25px;
+}
+.assign-create ul {
+  list-style-type: none;
+}
+.assign-create textarea {
+  margin-bottom: 15px;
+}
+.assign-create label {
+  width: 100%;
+  margin-top: 0 !important;
+}
+.assign-create input[type="checkbox"] {
+  margin-bottom: 0;
+  margin-right: 5px;
 }
 
 /* stuff for editing */

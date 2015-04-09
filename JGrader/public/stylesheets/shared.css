@@ -65,7 +65,7 @@ body {
   font-size: 50px;
   font-weight: 300;
 }
-.sign-form input {
+.sign-form input:not([type="checkbox"]), .sign-form textarea {
   width: 100%;
   border-radius: 3px;
   height: 50px;
@@ -76,6 +76,10 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 16px;
   margin-top: 18px;
+}
+.sign-form textarea {
+  height: 100px;
+  resize: vertical;
 }
 .sign-form input[type="submit"], .sign-form .btn[type="submit"] {
   padding: 2px 8px;
