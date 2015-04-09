@@ -92,7 +92,7 @@ router.get('/:id', function(req, res, next) {
     } else {
       var anyCompiled = false;
       for(file in fileData) {
-        fileData[file].display = fileData[file].contents.length <= 4096 || fileData[file].compiled;
+        fileData[file].display = fileData[file].contents.length <= 65536 || fileData[file].compiled;
         if(fileData[file].compiled) anyCompiled = true;
       }
       // Sends file data
