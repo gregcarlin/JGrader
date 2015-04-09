@@ -235,6 +235,18 @@ a[onclick]:hover {
   color: #CCC;
 }
 
+/* stuff for editing */
+.edit input {
+  display: none;
+  width: 75px;
+}
+.edit + .fa {
+  font-size: 14px;
+}
+.edit + .fa:hover {
+  cursor: pointer;
+}
+
 /* assignment complete page */
 .nav-tabs {
   border: none;
@@ -402,7 +414,7 @@ li .comment-text .fa:last-of-type {
   font-size: 50px !important;
 }
 
-/* sign in/up page stuff */
+/* sign in/up page stuff, also used for other forms like feedback and settings */
 .container {
   position: relative;
   top: 50%;
@@ -496,16 +508,4 @@ li .comment-text .fa:last-of-type {
 .assign-create input[type="checkbox"] {
   margin-bottom: 0;
   margin-right: 5px;
-}
-
-/* stuff for editing */
-.edit input {
-  display: none;
-  width: 75px;
-}
-.edit + .fa {
-  font-size: 14px;
-}
-.edit + .fa:hover {
-  cursor: pointer;
 }
