@@ -234,6 +234,20 @@ a[onclick]:hover {
   cursor: pointer;
   color: #CCC;
 }
+.description {
+  background-color: rgba(255,255,255,0.9);
+  min-height: 60px;
+  padding: 20px;
+  font-size: 18px;
+}
+.description .fa {
+  margin-left: 5px;
+}
+dl.description dt {
+  float: left;
+  clear: both;
+  margin-right: 0.3em;
+}
 
 /* stuff for editing */
 .edit input {
@@ -508,10 +522,4 @@ li .comment-text .fa:last-of-type {
 .assign-create input[type="checkbox"] {
   margin-bottom: 0;
   margin-right: 5px;
-}
-dl.description dt {
-  display: inline-block;
-}
-dl.description dd {
-  display: inline-block;
 }
