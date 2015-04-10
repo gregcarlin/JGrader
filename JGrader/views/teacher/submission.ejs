@@ -9,8 +9,8 @@
     <div class="name">
       <a href="/teacher/student/<%= student.id %>"><%= student.fname + ' ' + student.lname %></a> // <a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a>
     </div>
+    <a href="/teacher/submission/<%= submission.id %>/download" class="right"><span class="fa fa-download" data-toggle="tooltip" data-placement="left" title="Download All"></span></a>
   </div>
-  <a href="/teacher/submission/<%= submission.id %>/download" class="right"><span class="fa fa-download" data-toggle="tooltip" data-placement="left" title="Download All"></span></a>
 </div>
 <dl class="description">
   <%

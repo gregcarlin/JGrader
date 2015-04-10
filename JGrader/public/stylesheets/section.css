@@ -136,9 +136,16 @@ body {
   color: #fff;
   margin: 0;
   padding-left: 22px;
+  display: inline-block;
 }
 .main .page-header .right-header .name a {
   color: #FFF;
+}
+.main .page-header .right-header > a > .fa {
+  box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.5);
+  float: right;
+  border: none;
+  font-size: 50px;
 }
 .main .page-header .left-header {
   height: 100%;
@@ -418,14 +425,6 @@ li .comment-text .fa:last-of-type {
 }
 #resubmit:hover {
   background-color: #83D7F7;
-}
-.add-button {
-  box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.5);
-  float: right;
-  border: none;
-  margin-right: 40%;
-  margin-top: -3%;
-  font-size: 50px !important;
 }
 
 /* sign in/up page stuff, also used for other forms like feedback and settings */
