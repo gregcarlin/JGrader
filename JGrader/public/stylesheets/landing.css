@@ -112,6 +112,9 @@ a:hover {
 #home .right {
   background-color: rgba(1,1,1,0.5);
 }
+#home .right .button {
+  width: auto;
+}
 #home .right .table-wrapper li {
   display: table-row;
 }
