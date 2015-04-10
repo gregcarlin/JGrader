@@ -15,6 +15,7 @@ var render = function(page, options, res) {
       break;
     case 'settings':
       options.title = 'Settings';
+      options.shouldReset = res.locals.mustResetPass;
       break;
     case 'feedback':
       options.title = 'Feedback';
@@ -43,7 +44,7 @@ router.use('/section', section);
 
 // settings page
 router.get('/settings', function(req, res) {
-  connection.query("SELECT `fname`,`lname` FROM `students` WHERE `id` = ?", [req.user.id], function(err, rows) {
+  connection.query("SELECT `fname`,`lname`,`pass_reset_hash` FROM `students` WHERE `id` = ?", [req.user.id], function(err, rows) {
     if(err) {
       render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
       throw err;
@@ -63,15 +64,8 @@ router.post('/settings', function(req, res) {
     var oldPass = req.body.oldpass;
     var newPass = req.body.newpass;
     if(isSet(oldPass) || isSet(newPass)) {
-      if(isSet(oldPass) && isSet(newPass)) {
-        connection.query("UPDATE `students` \
-                            SET `fname` = ?, \
-                            `lname` = ?, \
-                            `pass` = AES_ENCRYPT(?, ?), \
-                            `pass_reset_hash` = NULL \
-                          WHERE \
-                            `id` = ? AND \
-                            `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, req.user.id, oldPass, creds.aes_key], function(err, rows) {
+      if((isSet(oldPass) || res.locals.mustResetPass) && isSet(newPass)) {
+        var handler = function(err, rows) {
           if(err) {
             render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
             throw err;
@@ -80,7 +74,25 @@ router.post('/settings', function(req, res) {
           } else {
             render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
           }
-        });
+        };
+        if(res.locals.mustResetPass) {
+          connection.query("UPDATE `students` \
+                              SET `fname` = ?, \
+                              `lname` = ?, \
+                              `pass` = AES_ENCRYPT(?, ?), \
+                              `pass_reset_hash` = NULL \
+                            WHERE \
+                              `id` = ?", [fname, lname, newPass, creds.aes_key, req.user.id], handler);
+        } else {
+          connection.query("UPDATE `students` \
+                              SET `fname` = ?, \
+                              `lname` = ?, \
+                              `pass` = AES_ENCRYPT(?, ?), \
+                              `pass_reset_hash` = NULL \
+                            WHERE \
+                              `id` = ? AND \
+                              `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, req.user.id, oldPass, creds.aes_key], handler);
+        }
       } else {
         render('settings', {fname: fname, lname: lname, error: 'All fields are required to change your password.'}, res);
       }
