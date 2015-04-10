@@ -509,3 +509,9 @@ li .comment-text .fa:last-of-type {
   margin-bottom: 0;
   margin-right: 5px;
 }
+dl.description dt {
+  display: inline-block;
+}
+dl.description dd {
+  display: inline-block;
+}
