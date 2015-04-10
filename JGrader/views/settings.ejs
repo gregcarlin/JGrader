@@ -19,8 +19,10 @@
     <input type="text" name="lname" class="form-control" value="<%= lname %>" id="lname" />
   </div>
   <div>
-    <label for="oldpass">Old Password</label>
-    <input type="password" name="oldpass" class="form-control" id="oldpass" />
+    <% if(!shouldReset) { %>
+      <label for="oldpass">Old Password</label>
+      <input type="password" name="oldpass" class="form-control" id="oldpass" />
+    <% } %>
     <label for="newpass">New Password</label>
     <input type="password" name="newpass" class="form-control" id="newpass" />
   </div>
