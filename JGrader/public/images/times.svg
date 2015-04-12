@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="50px" height="50px" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.2.2 (9983) - http://www.bohemiancoding.com/sketch -->
+    <title>Rectangle 213 + Rectangle 214</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Assignments---User-4" sketch:type="MSArtboardGroup" transform="translate(-1271.000000, -851.000000)" fill="#FFFFFF">
+            <g id="Cancel-Assignment-+-Rectangle-213-+-Rectangle-214" sketch:type="MSLayerGroup" transform="translate(1255.000000, 834.000000)">
+                <g id="Rectangle-213-+-Rectangle-214" transform="translate(16.000000, 17.000000)" sketch:type="MSShapeGroup">
+                    <rect id="Rectangle-213" transform="translate(25.000000, 25.000000) rotate(-45.000000) translate(-25.000000, -25.000000) " x="23" y="-8" width="4" height="66"></rect>
+                    <rect id="Rectangle-214" transform="translate(25.000000, 25.000000) rotate(-315.000000) translate(-25.000000, -25.000000) " x="23" y="-8" width="4" height="66"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

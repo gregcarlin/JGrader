@@ -2,7 +2,8 @@
 // Copyright (c) 2015 JGrader. All rights reserved.
 
 // hide submit button before any files are added
-$('#actions .start').hide();
+$('.submit-assignment').hide();
+$('.prog-total').hide();
 
 // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
 var previewNode = document.querySelector(".file-row");
@@ -56,36 +57,35 @@ myDropzone.on("success", function(file, response) {
 
 // show submit button when a file is added
 myDropzone.on("addedfile", function(file) {
-  $('#actions .start').show();
+  $('.submit-assignment').show();
 });
 
 // hide submit button when all files are removed
 myDropzone.on("removedfile", function(file) {
   if(myDropzone.files.length <= 0) {
-    $('#actions .start').hide();
+    $('.submit-assignment').hide();
   }
 });
 
-// Update the progress bars
-myDropzone.on("uploadprogress", function(file, progress) {
-  $('.progress-bar', $('p.name:contains("' + file.name + '")').parent().parent()).css('width', progress + '%');
+// update total progress bar
+myDropzone.on("totaluploadprogress", function(uploadProgress, totalBytes, totalBytesSent) {
+  $('.prog-total .progress-bar').css('width', uploadProgress + '%');
 });
 
 myDropzone.on("sending", function(file) {
   // Show the total progress bar when upload starts
-  $('#total-progress').show();
+  $('.prog-total').show();
   // And disable the start button
-  $('#actions .buttons').hide();
-  $('#actions .drag-zone').hide();
-  $('button.cancel').hide();
+  $('.submit-assignment').hide();
+  $('.cancel').hide();
 });
 
 // Hide the total progress bar when nothing is uploading anymore
 myDropzone.on("queuecomplete", function(progress) {
   $('.progress').hide();
-  $('#actions').html('<div class="red">Please reload the page in order to try again.</div>');
+  $('#actions').html('<div class="alert alert-danger" role="alert"">Please <a href="">reload</a> the page in order to try again.</div>');
 });
 
-document.querySelector("#actions .start").onclick = function() {
+document.querySelector('button[type="submit"]').onclick = function() {
   myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
 };
