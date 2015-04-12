@@ -51,14 +51,25 @@
 
     <div class="container">
       <h1>Frequently Asked Questions</h1>
-      <ul class="lead">
+      <ul class="left">
         <li>
           <h2>How much does jGrader cost?</h2>
           jGrader is currently free for use until August 1, 2015. Our final pricing policy is still under review.
         </li>
         <li>
           <h2>What programming languages are supported?</h2>
-          Currently only Java is supported, because this is the only language tested on the CollegeBoard's AP Computer Science exam. If you have a strong need for another language, please <a href="mailto:contact@jgrader.com" target="_blank">contact us</a>.
+          Currently only Java is supported, because this is the only language tested on the CollegeBoard's AP Computer Science exam.
+        </li>
+        <li>
+          <h2>What features of Java are supported?</h2>
+          Almost all features of Java are supported, with the exception of a small few. Packages are not supported due to implementation complexities. Additionally, executed code is run with a Security Manager that disables certain features for security reasons.
+          These disabled features include reading and writing files and accessing system information. Most of the Java library, including Scanners and ArrayLists, are supported.
+        </li>
+      </ul>
+      <ul class="middle">
+        <li>
+          <h2>What version of Java is supported?</h2>
+          We currently run code through Java 1.6.
         </li>
         <li>
           <h2>Has this system been tested within a real classroom setting?</h2>
@@ -72,6 +83,8 @@
           <h2>Is there a free trial period?</h2>
           Currently jGrader is free for all users. After August 1, we will offer a 30 day free trial period.
         </li>
+      </ul>
+      <ul class="right">
         <li>
           <h2>How can I add students to my class?</h2>
           On a page for a given class, you can find a class code. If you give this code to your students, they will be able to sign up for your class via their class list.
@@ -84,10 +97,11 @@
           <h2>So how can I sign up?</h2>
           Just fill out the form <a href="/sign-up">here</a>.
         </li>
+        <li>
+          <h2>Still have questions?</h2>
+          Still have questions? Feel free to contact us: <a href="mailto:contact@jgrader.com" target="_blank">contact@jgrader.com</a>.
+        </li>
       </ul>
-      <div id="bottom">
-        Still have questions? Feel free to contact us: <a href="mailto:contact@jgrader.com" target="_blank">contact@jgrader.com</a>.
-      </div>
     </div><!-- /.container -->
 
 

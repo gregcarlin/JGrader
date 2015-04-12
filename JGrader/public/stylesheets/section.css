@@ -742,20 +742,19 @@ li .comment-text .fa:last-of-type {
   padding-top: 55px;
   text-align: center;
 }
-.faq ul.lead {
+.faq .container ul {
   text-align: left;
-  /*column-count: 3;
-  column-gap: 20px;*/
-}
-.faq ul.lead li {
-  color: #000;
-  background-color: #FFF;
-  width: 30%;
+  width: 33%;
   display: inline-block;
   vertical-align: top;
+  list-style-type: none;
+}
+.faq .container ul li {
+  color: #000;
+  background-color: #FFF;
   padding: 20px;
   margin: 15px;
 }
-.faq ul.lead li h2 {
+.faq .container ul li h2 {
   margin-top: 0;
 }
