@@ -385,7 +385,7 @@ dl.description dt {
   border: none;
 }
 .teacher-main .nav-tabs {
-  margin-bottom: -1px;
+  margin-bottom: -6px;
 }
 .nav-tabs li {
   margin-bottom: 0;
@@ -410,16 +410,52 @@ dl.description dt {
   color: #FFF;
   font-size: 22px;
   margin-left: 4px;
+  border-radius: 100%;
+  width: 36px;
+  height: 36px;
+  top: 6px;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+}
+.nav-tabs li.icon > .fa {
+  display: block;
+  text-align: center;
+  margin-top: 20%;
 }
 .nav-tabs li.icon.disabled {
   color: #AAA;
 }
-.nav-tabs li.icon:not(.disabled) .fa:hover {
+.nav-tabs li.icon:not(.disabled):hover {
   cursor: pointer;
+}
+.nav-tabs li.icon:not(.disabled):hover .fa {
   color: #CCC;
 }
-.nav-tabs li.icon.disabled .fa:hover {
+.nav-tabs li.icon.disabled:hover .fa {
   color: inherit;
+}
+.nav-tabs li.icon#execute {
+  background-color: #6B99C3;
+}
+.nav-tabs li.icon#execute:not(.disabled):hover {
+  background-color: #628CB3;
+}
+.nav-tabs li.icon.disabled#execute {
+  background-color: #728BA1;
+}
+.nav-tabs li.icon#test {
+  background-color: #C36B6B;
+}
+.nav-tabs li.icon#test:not(.disabled):hover {
+  background-color: #B66363;
+}
+.nav-tabs li.icon.disabled#test {
+  background-color: #A07979;
+}
+.nav-tabs li.icon#download {
+  background-color: #97C36B;
+}
+.nav-tabs li.icon#download:hover {
+  background-color: #8DB862;
 }
 .nav-tabs .tooltip > .tooltip-inner {
   background-color: #FFF;
@@ -537,6 +573,40 @@ li .comment-text .fa:last-of-type {
 }
 #resubmit:hover {
   background-color: #83D7F7;
+}
+.io {
+  color: #FFF;
+}
+.io #input-text {
+  display: none;
+}
+.io label {
+  font-size: 36px;
+  font-weight: 400;
+  display: block;
+  margin-bottom: -3px;
+  margin-top: 15px;
+}
+.io label .fa {
+  font-size: 24px;
+}
+.io label .fa:hover {
+  cursor: pointer;
+  color: #CCC;
+}
+.io #output-text {
+  height: auto;
+}
+.io #output-text .stderr {
+  color: #F00;
+}
+.io textarea, .io pre {
+  background-color: rgba(255,255,255,0.75) !important;
+  border-radius: 0;
+  color: #000;
+}
+.io textarea {
+  resize: vertical;
 }
 
 /* sign in/up page stuff, also used for other forms like feedback and settings */

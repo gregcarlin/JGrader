@@ -36,9 +36,9 @@
       <% fileData[i].shortName = i; %>
       <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab" data-canrun="<%= fileData[i].compiled ? 'true' : 'false' %>"><%= fileData[i].name %></a></li>
     <% } %>
-    <li role="presentation" id="execute" class="icon"><span class="fa fa-play-circle-o" data-toggle="tooltip" data-placement="top" title="Run"></span></li>
-    <li role="presentation" id="test" class="icon"><span class="fa fa-th-list" data-toggle="tooltip" data-placement="top" title="Run Tests"></span></li>
-    <li role="presentation" id="download" class="icon"><span class="fa fa-download" data-toggle="tooltip" data-placement="top" title="Download"></span></li>
+    <li role="presentation" id="execute" class="icon" data-toggle="tooltip" data-placement="top" title="Run"><span class="fa fa-play-circle-o"></span></li>
+    <li role="presentation" id="test" class="icon" data-toggle="tooltip" data-placement="top" title="Run Tests"><span class="fa fa-th-list"></span></li>
+    <li role="presentation" id="download" class="icon" data-toggle="tooltip" data-placement="top" title="Download"><span class="fa fa-download"></span></li>
   </ul>
 </div>
 <div class="tab-content">
@@ -48,10 +48,12 @@
     </div>
   <% } %>
 </div>
-<div>
-  <span>Input</span>
-  <span class="fa fa-caret-square-o-right" id="input-expand"></span>
+<div class="io">
+  <label for="input-text">
+    Input
+    <span class="fa fa-caret-square-o-right" id="input-expand"></span>
+  </label>
   <textarea class="form-control put-text" id="input-text"></textarea>
-  <span id="output-tag">Output</span>
-  <pre class="form-control put-text" id="output-text" readonly></pre>
+  <label for="output-text">Output</label>
+  <pre class="form-control put-text" id="output-text" readonly>Run a file to view its output here.</pre>
 </div>
