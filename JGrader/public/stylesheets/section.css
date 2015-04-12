@@ -641,7 +641,7 @@ li .comment-text .fa:last-of-type {
 }
 
 /* sign in/up page stuff, also used for other forms like feedback and settings */
-.container {
+.signin .container {
   position: relative;
   top: 50%;
   -webkit-transform: translateY(-50%);
@@ -739,4 +739,23 @@ li .comment-text .fa:last-of-type {
 /* faq page */
 .faq .container {
   color: #FFF;
+  padding-top: 55px;
+  text-align: center;
+}
+.faq ul.lead {
+  text-align: left;
+  /*column-count: 3;
+  column-gap: 20px;*/
+}
+.faq ul.lead li {
+  color: #000;
+  background-color: #FFF;
+  width: 30%;
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px;
+  margin: 15px;
+}
+.faq ul.lead li h2 {
+  margin-top: 0;
 }
