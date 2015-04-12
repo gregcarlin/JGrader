@@ -735,3 +735,8 @@ li .comment-text .fa:last-of-type {
   margin-bottom: 0;
   margin-right: 5px;
 }
+
+/* faq page */
+.faq .container {
+  color: #FFF;
+}
