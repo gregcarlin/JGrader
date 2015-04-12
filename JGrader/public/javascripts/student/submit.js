@@ -7,7 +7,8 @@ $('#actions .start').hide();
 // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
 var previewNode = document.querySelector(".file-row");
 previewNode.id = "";
-var previewTemplate = previewNode.parentNode.innerHTML;
+//var previewTemplate = previewNode.parentNode.innerHTML;
+var previewTemplate = previewNode.outerHTML;
 previewNode.parentNode.removeChild(previewNode);
 
 var myDropzone = new Dropzone(document.querySelector(".tester"), {
@@ -19,7 +20,7 @@ var myDropzone = new Dropzone(document.querySelector(".tester"), {
   previewTemplate: previewTemplate,
   autoQueue: false, // Make sure the files aren't queued until manually added
   previewsContainer: "#previews", // Define the container to display the previews
-  clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+  clickable: ".dz-clickable" // Define the element that should be used as click trigger to select files.
 });
 
 var responded = false;
