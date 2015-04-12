@@ -19,23 +19,23 @@
         <td class="status status-<%= Date.now() > assignment.due ? 'late' : 'notsubmitted' %>">&nbsp;</td>
       </tr>
     </tbody>
-    </table>
+  </table>
 </div>
 
 <div class="drag-zone">
 
   <div class="col-lg-7" id="actions">
     <!-- The fileinput-button span is used to style the file input field as button -->
-    <div class="buttons">
-      <!--<span class="btn btn-success fileinput-button dz-clickable">
+    <!--<div class="buttons">
+      <span class="btn btn-success fileinput-button dz-clickable">
         <span class="fa fa-plus-circle"></span>
         <span>Add files</span>
-      </span>-->
+      </span>
       <button type="submit" class="btn btn-primary start">
         <span class="fa fa-upload"></span>
         <span>Submit</span>
       </button>
-    </div>
+    </div>-->
     <div class="row dz-clickable">
       <div class="outer">
         <div class="inner">
@@ -54,28 +54,26 @@
     <div class="file-row">
       <!-- This is used as the file preview template -->
       <div>
-        <span class="preview"><img data-dz-thumbnail /></span>
-      </div>
-      <div>
         <p class="name" data-dz-name></p>
         <strong class="error text-danger" data-dz-errormessage></strong>
       </div>
-      <div>
-        <p class="size" data-dz-size></p>
-        <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
-        </div>
-      </div>
 
       <div>
-        <button data-dz-remove class="btn btn-warning cancel">
-          <span class="fa fa-ban"></span>
-          <span>Cancel</span>
+        <button data-dz-remove class="svg-btn cancel">
+          <img src="/images/times.svg" />
         </button>
       </div>
     </div>
 
   </div>
 
+</div>
+
+<button type="submit" class="svg-btn submit-assignment">
+  <img src="/images/check.svg" />
+</button>
+
+<div class="progress progress-striped active prog-total" role="progressbar">
+  <div class="progress-bar progress-bar-success" style="width:0%"></div>
 </div>
 

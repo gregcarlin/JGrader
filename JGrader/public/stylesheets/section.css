@@ -95,6 +95,7 @@ body {
 .main {
   padding: 20px 40px;
   margin-left: 190px;
+  min-width: 864px;
 }
 /* creates background box */
 .main .page-header {
@@ -322,6 +323,9 @@ dl.description dt {
 .dz-clickable .message {
   vertical-align: bottom;
 }
+.file-row > div {
+  display: inline-block;
+}
 #previews {
   display: inline-block;
   width: 59%;
@@ -329,8 +333,7 @@ dl.description dt {
   float: right;
   background-color: rgba(255,255,255,0.9);
   height: 0;
-  padding-bottom: 42%;
-  /*padding-bottom: 36.5%;*/
+  padding-bottom: 40%;
   margin-top: 34px;
   overflow: scroll;
   padding-left: 20px;
@@ -340,6 +343,41 @@ dl.description dt {
   font-size: 36px;
   margin-left: 20px;
   margin-right: 20px;
+}
+.svg-btn {
+  border-radius: 100%;
+  border: none;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+}
+.cancel {
+  width: 20px;
+  height: 20px;
+  background-color: #F59F9F;
+  margin-left: 5px;
+  padding-top: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.cancel > img {
+  width: 100%;
+}
+.cancel:hover {
+  background-color: #D78585;
+}
+.submit-assignment {
+  background-color: #9FDBF5;
+  float: right;
+  width: 81px;
+  height: 81px;
+  position: relative;
+  top: -80px;
+  right: -20px;
+}
+.submit-assignment:hover {
+  background-color: #8BC2DA;
+}
+.prog-total {
+  margin-top: 20px;
 }
 
 /* assignment complete page */
