@@ -22,60 +22,55 @@
     </table>
 </div>
 <div class="col-lg-7 tester" id="actions">
-    <!-- The fileinput-button span is used to style the file input field as button -->
-    <div class="buttons">
-      <span class="btn btn-success fileinput-button dz-clickable">
-          <span class="fa fa-plus-circle"></span>
-          <span>Add files</span>
-      </span>
-      <button type="submit" class="btn btn-primary start">
-          <span class="fa fa-upload"></span>
-          <span>Submit</span>
-      </button>
+  <!-- The fileinput-button span is used to style the file input field as button -->
+  <div class="buttons">
+    <!--<span class="btn btn-success fileinput-button dz-clickable">
+      <span class="fa fa-plus-circle"></span>
+      <span>Add files</span>
+    </span>-->
+    <button type="submit" class="btn btn-primary start">
+      <span class="fa fa-upload"></span>
+      <span>Submit</span>
+    </button>
+  </div>
+  <div class="row drag-zone dz-clickable">
+    <div class="outer">
+      <div class="inner">
+        <img src="/images/plus.svg" alt="+" class="plus" />
+      </div>
     </div>
-    <div class="row drag-zone">
-        <div class="message">Drag files here.</div>
-    </div>
+    <div class="message">Click to add files or drag and drop.</div>
+  </div>
 </div>
 
 <!-- HTML heavily inspired by http://blueimp.github.io/jQuery-File-Upload/ -->
 <div class="col-md-7 table table-striped" class="files" id="previews">
 
+  <h3>Selected Files</h3>
+
   <div class="file-row">
     <!-- This is used as the file preview template -->
     <div>
-        <span class="preview"><img data-dz-thumbnail /></span>
+      <span class="preview"><img data-dz-thumbnail /></span>
     </div>
     <div>
-        <p class="name" data-dz-name></p>
-        <strong class="error text-danger" data-dz-errormessage></strong>
+      <p class="name" data-dz-name></p>
+      <strong class="error text-danger" data-dz-errormessage></strong>
     </div>
     <div>
-        <p class="size" data-dz-size></p>
-        <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
-        </div>
+      <p class="size" data-dz-size></p>
+      <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+      </div>
     </div>
 
     <div>
-      <!-- No Individual Start option
-        <button class="btn btn-primary start">
-          <span class="fa fa-upload"></span>
-          <span>Start</span>
-        </button>
-      -->
       <button data-dz-remove class="btn btn-warning cancel">
-          <span class="fa fa-ban"></span>
-          <span>Cancel</span>
+        <span class="fa fa-ban"></span>
+        <span>Cancel</span>
       </button>
-
-      <!-- Feature for delete needs to be implemented on an assignment basis
-        <button data-dz-remove class="btn btn-danger delete">
-          <span class="fa fa-trash-o"></span>
-          <span>Delete</span>
-        </button>
-      -->
     </div>
+
   </div>
 
 </div>
