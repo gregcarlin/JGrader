@@ -119,6 +119,9 @@ body {
 .main .page-header#header-students {
   background-color: rgba(93,180,108,0.6);
 }
+.main .page-header#header-other {
+  background-color: rgba(117,90,185,0.6);
+}
 .main .page-header > div {
   vertical-align: middle;
 }
