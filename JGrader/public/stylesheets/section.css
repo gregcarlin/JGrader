@@ -276,18 +276,18 @@ dl.description dt {
   width: 37%;
   display: inline-block;
 }
-.drag-zone {
+.dz-clickable {
   color: #FFF;
   text-align: center;
   font-size: 20px;
   font-weight: 300;
   margin: 0;
 }
-.drag-zone:hover {
+.dz-clickable:hover {
   cursor: pointer;
   color: #CCC;
 }
-.drag-zone .outer {
+.dz-clickable .outer {
   border: 6px solid #FFF;
   height: 0;
   padding-bottom: 97.8%;
@@ -295,10 +295,10 @@ dl.description dt {
   margin-top: 34px;
   margin-bottom: 34px;
 }
-.drag-zone:hover .outer {
+.dz-clickable:hover .outer {
   border-color: #CCC;
 }
-.drag-zone .inner {
+.dz-clickable .inner {
   background-color: #9CE16C;
   width: 46%;
   height: 0;
@@ -310,16 +310,16 @@ dl.description dt {
   transform: translateY(60%);
   border-radius: 100%;
 }
-.drag-zone:hover .inner {
+.dz-clickable:hover .inner {
   background-color: #85BB60;
 }
-.drag-zone .plus {
+.dz-clickable .plus {
   width: 100%;
 }
-.drag-zone:hover .plus {
+.dz-clickable:hover .plus {
   /* TODO */
 }
-.drag-zone .message {
+.dz-clickable .message {
   vertical-align: bottom;
 }
 #previews {

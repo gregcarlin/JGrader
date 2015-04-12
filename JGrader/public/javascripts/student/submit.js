@@ -11,7 +11,7 @@ previewNode.id = "";
 var previewTemplate = previewNode.outerHTML;
 previewNode.parentNode.removeChild(previewNode);
 
-var myDropzone = new Dropzone(document.querySelector(".tester"), {
+var myDropzone = new Dropzone(document.querySelector(".drag-zone"), {
   url: (document.URL + '/submit'), // Set the url
   thumbnailWidth: 80,
   thumbnailHeight: 80,
