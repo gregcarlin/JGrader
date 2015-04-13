@@ -1,11 +1,16 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
-<div class="page-header">
-  <h1>Join a Class</h1>
+<div class="page-header" id="header-classes">
+  <div class="left-header">
+    <h1>Classes</h1>
+  </div>
+  <div class="right-header">
+    <div class="name">Join New</div>
+  </div>
 </div>
-<form action="/student/section/joinSection" method="post">
-  <input type="text" class="form-control" placeholder="Section Code" name="sectionID" required autofocus />
+<form action="/student/section/joinSection" method="post" class="form-signin sign-form settings">
+  <input type="text" class="form-control" placeholder="Class Code" name="sectionID" required autofocus />
   <input type="submit" class="btn btn-lg btn-primary btn-block" value="Join" />
 </form>
 </div>
