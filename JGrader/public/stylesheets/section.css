@@ -26,7 +26,7 @@ body {
   line-height: 55px;
   padding: 0;
 }
-.navbar-inverse .navbar-brand:hover {
+.navbar-inverse .navbar-brand:hover, .navbar-inverse .navbar-brand:focus {
   color: #727272;
 }
 .navbar-inverse .navbar-nav > li > a {
@@ -79,7 +79,7 @@ body {
   font-size: 20px;
   z-index: 1035;
 }
-.nav-sidebar > li > a:hover {
+.nav-sidebar > li > a:hover, .nav-sidebar > li > a:focus {
   background-color: #e4e4e4;
 }
 .nav-sidebar > .active > a,
@@ -155,7 +155,7 @@ body {
   color: #FFF;
   margin-right: 10px;
 }
-.main .page-header .right-header > a:hover {
+.main .page-header .right-header > a:hover, .main .page-header .right-header > a:focus {
   text-decoration: none;
   color: #CCC;
 }
@@ -167,19 +167,19 @@ body {
 .main .page-header#header-classes .right-header > a {
   background-color: #97C3FA;
 }
-.main .page-header#header-classes .right-header > a:hover {
+.main .page-header#header-classes .right-header > a:hover, .main .page-header#header-classes .right-header > a:focus {
   background-color: #6B99C3;
 }
 .main .page-header#header-assignments .right-header > a {
   background-color: #FFA1A1;
 }
-.main .page-header#header-assignments .right-header > a:hover {
+.main .page-header#header-assignments .right-header > a:hover, .main .page-header#header-assignments .right-header > a:focus {
   background-color: #C36B6B;
 }
 .main .page-header#header-students .right-header > a {
   background-color: #A8F59F;
 }
-.main .page-header#header-students .right-header > a:hover {
+.main .page-header#header-students .right-header > a:hover, .main .page-header#header-students .right-header > a:focus {
   background-color: #97C36B;
 }
 .main .page-header .left-header {
@@ -255,25 +255,25 @@ body {
 }
 
 /* general global style stuff */
-.fa[data-toggle="tooltip"]:hover, .fa[onclick]:hover {
+.fa[data-toggle="tooltip"]:hover, .fa[data-toggle="tooltip"]:focus, .fa[onclick]:hover, .fa[onclick]:focus {
   color: #2a6496;
 }
-.fa-trash-o[data-toggle="tooltip"]:hover, .fa-trash-o[onclick]:hover {
+.fa-trash-o[data-toggle="tooltip"]:hover, .fa-trash-o[data-toggle="tooltip"]:focus, .fa-trash-o[onclick]:hover, .fa-trash-o[onclick]:focus {
   color: #ff5050;
 }
-.fa[onclick]:hover {
+.fa[onclick]:hover, .fa[onclick]:focus {
   cursor: pointer;
 }
-a.fa:hover {
+a.fa:hover, a.fa:focus {
   text-decoration: none;
 }
-a[onclick]:hover {
+a[onclick]:hover, a[onclick]:focus {
   cursor: pointer;
 }
 .fa-sort, .fa-sort-asc, .fa-sort-desc {
   color: #FFF;
 }
-.fa-sort:hover, .fa-sort-asc:hover, .fa-sort-desc:hover {
+.fa-sort:hover, .fa-sort:focus, .fa-sort-asc:hover, .fa-sort-asc:focus, .fa-sort-desc:hover, .fa-sort-desc:focus {
   cursor: pointer;
   color: #CCC;
 }
@@ -300,7 +300,7 @@ dl.description dt {
 .edit + .fa {
   font-size: 14px;
 }
-.edit + .fa:hover {
+.edit + .fa:hover, .edit + .fa:focus {
   cursor: pointer;
 }
 
@@ -316,7 +316,7 @@ dl.description dt {
   font-weight: 300;
   margin: 0;
 }
-.dz-clickable:hover {
+.dz-clickable:hover, .dz-clickable:focus {
   cursor: pointer;
   color: #CCC;
 }
@@ -328,7 +328,7 @@ dl.description dt {
   margin-top: 34px;
   margin-bottom: 34px;
 }
-.dz-clickable:hover .outer {
+.dz-clickable:hover .outer, .dz-clickable:focus .outer {
   border-color: #CCC;
 }
 .dz-clickable .inner {
@@ -343,13 +343,13 @@ dl.description dt {
   transform: translateY(60%);
   border-radius: 100%;
 }
-.dz-clickable:hover .inner {
+.dz-clickable:hover .inner, .dz-clickable:focus .inner {
   background-color: #85BB60;
 }
 .dz-clickable .plus {
   width: 100%;
 }
-.dz-clickable:hover .plus {
+.dz-clickable:hover .plus, .dz-clickable:focus .plus {
   /* TODO */
 }
 .dz-clickable .message {
@@ -400,7 +400,7 @@ dl.description dt {
 .cancel > img {
   width: 100%;
 }
-.cancel:hover {
+.cancel:hover, .cancel:focus {
   background-color: #D78585;
 }
 .submit-assignment {
@@ -412,7 +412,7 @@ dl.description dt {
   top: -80px;
   right: -20px;
 }
-.submit-assignment:hover {
+.submit-assignment:hover, .submit-assignment:focus {
   background-color: #8BC2DA;
 }
 .prog-total {
@@ -436,7 +436,7 @@ dl.description dt {
   background-color: rgba(255, 255, 255, 0.25);
   color: #FFF;
 }
-.nav-tabs a:hover {
+.nav-tabs a:hover, .nav-tabs a:focus {
   background-color: rgba(255, 255, 255, 0.75) !important;
   color: #000;
 }
@@ -463,19 +463,19 @@ dl.description dt {
 .nav-tabs li.icon.disabled {
   color: #AAA;
 }
-.nav-tabs li.icon:not(.disabled):hover {
+.nav-tabs li.icon:not(.disabled):hover, .nav-tabs li.icon:not(.disabled):focus {
   cursor: pointer;
 }
-.nav-tabs li.icon:not(.disabled):hover .fa {
+.nav-tabs li.icon:not(.disabled):hover .fa, .nav-tabs li.icon:not(.disabled):focus .fa {
   color: #CCC;
 }
-.nav-tabs li.icon.disabled:hover .fa {
+.nav-tabs li.icon.disabled:hover .fa, .nav-tabs li.icon.disabled:focus .fa {
   color: inherit;
 }
 .nav-tabs li.icon#execute {
   background-color: #6B99C3;
 }
-.nav-tabs li.icon#execute:not(.disabled):hover {
+.nav-tabs li.icon#execute:not(.disabled):hover, .nav-tabs li.icon#execute:not(.disabled):focus {
   background-color: #628CB3;
 }
 .nav-tabs li.icon.disabled#execute {
@@ -484,7 +484,7 @@ dl.description dt {
 .nav-tabs li.icon#test {
   background-color: #C36B6B;
 }
-.nav-tabs li.icon#test:not(.disabled):hover {
+.nav-tabs li.icon#test:not(.disabled):hover, .nav-tabs li.icon#test:not(.disabled):focus {
   background-color: #B66363;
 }
 .nav-tabs li.icon.disabled#test {
@@ -493,7 +493,7 @@ dl.description dt {
 .nav-tabs li.icon#download {
   background-color: #97C36B;
 }
-.nav-tabs li.icon#download:hover {
+.nav-tabs li.icon#download:hover, .nav-tabs li.icon#download:focus {
   background-color: #8DB862;
 }
 .nav-tabs .tooltip > .tooltip-inner {
@@ -516,7 +516,7 @@ ol.linenums li .fa {
   color: #000;
   margin-right: 5px;
 }
-ol.linenums li:hover .fa {
+ol.linenums li:hover .fa, ol.linenums li:focus .fa {
   visibility: visible;
   text-decoration: none;
 }
@@ -610,7 +610,7 @@ li .comment-text .fa:last-of-type {
   margin-top: -45px;
   margin-right: -12px;
 }
-#resubmit:hover {
+#resubmit:hover, #resubmit:focus {
   background-color: #83D7F7;
 }
 .io {
@@ -629,7 +629,7 @@ li .comment-text .fa:last-of-type {
 .io label .fa {
   font-size: 24px;
 }
-.io label .fa:hover {
+.io label .fa:hover, .io label .fa:focus {
   cursor: pointer;
   color: #CCC;
 }
