@@ -742,6 +742,16 @@ li .comment-text .fa:last-of-type {
   margin-bottom: 0;
   margin-right: 5px;
 }
+#caseCreate .input {
+  margin-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+#caseCreate .output {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
 
 /* faq page */
 .faq .container {
