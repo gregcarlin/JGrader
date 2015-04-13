@@ -11,6 +11,7 @@ var render = function(page, options, res) {
     case 'notFound':
       options.title = 'Student Not Found';
       options.type = 'student';
+      page = '../' + page;
       break;
     case 'studentList':
       options.title = 'Your Students';

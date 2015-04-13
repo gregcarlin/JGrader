@@ -11,6 +11,7 @@ var render = function(page, options, res) {
     case 'notFound':
       options.title = 'Class Not Found';
       options.type = 'section';
+      page = '../' + page;
       break;
     case 'sectionList':
       options.title = 'Your Classes';
