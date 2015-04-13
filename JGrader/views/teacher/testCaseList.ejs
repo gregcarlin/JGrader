@@ -1,9 +1,14 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
 
-<div class="page-header">
-  <h1><a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a></h1>
-  <a href="caseCreate" class="right plus-button"><span class="fa fa-plus-circle" data-toggle="tooltip" data-placement="left" title="" data-original-title="Add Cases"></span></a>
+<div class="page-header" id="header-assignments">
+  <div class="left-header">
+    <h1>Assignments</h1>
+  </div>
+  <div class="right-header">
+    <div class="name"><a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a> // Test Cases</div>
+    <a href="caseCreate" class="right plus-button" data-toggle="tooltip" data-placement="left" title="" data-original-title="Add Cases"><span class="fa fa-plus-circle"></span></a>
+  </div>
 </div>
 
 <div class="table-responsive">
