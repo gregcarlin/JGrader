@@ -9,16 +9,16 @@ var render = function(page, options, res) {
   options.page = 0;
   switch(page) {
     case 'notFound':
-      options.title = 'Section Not Found';
+      options.title = 'Class Not Found';
       options.type = 'section';
       break;
     case 'sectionList':
-      options.title = 'Your Sections';
+      options.title = 'Your Classes';
       options.js = ['tooltip', 'teacher/sectionList', 'stupidtable.min', 'tablesort'];
       options.css = ['font-awesome.min'];
       break;
     case 'sectionCreate':
-      options.title = 'Create a Section';
+      options.title = 'Create a Class';
       break;
     case 'section':
       // title must be set already
