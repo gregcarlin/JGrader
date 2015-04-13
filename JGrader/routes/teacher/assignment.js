@@ -11,6 +11,7 @@ var render = function(page, options, res) {
     case 'notFound':
       options.title = 'Assignment Not Found';
       options.type = 'assignment';
+      page = '../' + page;
       break;
     case 'assignmentList':
       options.title = 'Your Assignments';

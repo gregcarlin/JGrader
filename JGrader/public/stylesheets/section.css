@@ -199,6 +199,7 @@ body {
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
+  white-space: nowrap;
 }
 .table {
   margin-bottom: 0;

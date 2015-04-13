@@ -13,6 +13,7 @@ var render = function(page, options, res) {
     case 'notFound':
       options.title = 'Submission Not Found';
       options.type = 'submission';
+      page = '../' + page;
       break;
     case 'submission':
       // title must be set already

@@ -1,7 +1,14 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
-<div class="page-header">
-  <h1><%= type.charAt(0).toUpperCase() + type.slice(1) %> Not Found</h1>
+<div class="page-header" id="header-other">
+  <div class="left-header">
+    <h1>Not Found</h1>
+  </div>
+  <div class="right-header">
+    <div class="name"><%= type.charAt(0).toUpperCase() + type.slice(1) %></div>
+  </div>
 </div>
-Sorry. The requested <%= type %> could not be found.
+<div class="alert alert-danger" role="alert">
+  Sorry. The requested <%= type %> could not be found.
+</div>
