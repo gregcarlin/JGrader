@@ -36,7 +36,7 @@ body {
   display: table-cell !important;
   text-align: center;
 }
-.navbar-right a:hover {
+.navbar-right a:hover, .navbar-right a:focus {
   color: #EEE !important;
 }
 
@@ -44,19 +44,19 @@ body {
 #link-home {
   background-color: #97C3FA;
 }
-#link-home:hover {
+#link-home:hover, #link-home:focus {
   background-color: #8fb9ed;
 }
 #link-learn {
   background-color: #FFA1A1;
 }
-#link-learn:hover {
+#link-learn:hover, #link-learn:focus {
   background-color: #f49a9a;
 }
 #link-sign-in {
   background-color: #A8F59F;
 }
-#link-sign-in:hover {
+#link-sign-in:hover, #link-sign-in:focus {
   background-color: #a3ed9a;
 }
 
@@ -99,7 +99,7 @@ body {
   padding-left: 20% !important;
   padding-right: 20% !important;
 }
-.sign-form .button:hover, .sign-form .btn:hover {
+.sign-form .button:hover, .sign-form .btn:hover, .sign-form .button:focus, .sign-form .btn:focus {
   background-color: #A1BADA;
   cursor: pointer;
   text-decoration: none;
