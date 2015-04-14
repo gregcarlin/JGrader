@@ -7,11 +7,7 @@ No need to go through the hassle of copying and pasting code from emails.
 
 Can be seen live at http://jgrader.com
 
-Planned features:
+Current Features:
 * Autograding - automatically run test cases, and assign grades based on those test cases
-* Commenting - teachers and TAs can comment on students' code, helping them improve
-* Anti-Plagiarism - check submitted code against what has already been submitted and what is available online, and catch plagiarizers
+* Commenting - teachers can comment on students' code, helping them improve
 
-*Redesign coming very soon!*
-<img src="http://i.imgur.com/A20Qu0s.png" />
-<img src="http://i.imgur.com/IBsSYU5.png" />
