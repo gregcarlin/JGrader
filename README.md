@@ -1,4 +1,4 @@
-# JGrader
+# jGrader
 A tool designed to be used in an AP Computer Science classroom that allows teachers to easily collect and grade work.
 
 Teachers can create assignments, which students can then submit code to.
