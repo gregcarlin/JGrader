@@ -13,6 +13,13 @@
 
 <div class="table-responsive">
   <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Assignment</th>
+        <th>Due</th>
+        <th>Description</th>
+      </tr>
+    </thead>
     <tbody>
       <% if(rows.length == 0) { %>
         <tr>
@@ -22,12 +29,12 @@
           for(i in rows) {%>
             <tr>
               <td><a href="/student/assignment/<%= rows[i].id%>"><%= rows[i].name %></a></td>
-              <td><%- rows[i].description ? rows[i].description : '<em>None</em>' %></td>
               <%
                 var dueString = strftime('%m-%d-%y', new Date(rows[i].due));
               %>
-              <td><%- dueString %></td>
-              <td class="status status-<%= rows[i].submitted ? 'submitted' : (Date.now() > rows[i].due ? 'late' : 'notsubmitted')  %>">&nbsp;</td>
+              <td title="<%= strftime('%b %d %Y, %l:%M %p', new Date(rows[i].due)) %>"><%- dueString %></td>
+              <td><%- rows[i].description ? rows[i].description : '<em>None</em>' %></td>
+              <td class="status status-<%= rows[i].submitted ? 'submitted' : (Date.now() > rows[i].due ? 'late' : 'notsubmitted')  %>" title="<%= rows[i].submitted ? 'Submitted' : (Date.now() > rows[i].due ? 'Overdue' : 'Unsubmitted') %>">&nbsp;</td>
             </tr>
        <% }
        } %>
