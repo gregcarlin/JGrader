@@ -33,13 +33,13 @@
               <%
                 if(rows[i].submitted) {
                   var submitted = new Date(rows[i].submitted);
-                  var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
+                  var submittedStr = strftime('%m-%d-%y', submitted);
                   if(rows[i].submitted > rows[i].due) {
                     submittedStr += ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="right" title="Late"></span>';
                   }
                 }
               %>
-              <td data-sort-value="<%= rows[i].submitted ? submitted.getTime() : 0 %>"><%- rows[i].submitted ? submittedStr : 'Not submitted' %></td>
+              <td data-sort-value="<%= rows[i].submitted ? submitted.getTime() : 0 %>" title="<%= strftime('%b %d %Y, %l:%M %p', submitted) %>"><%- rows[i].submitted ? submittedStr : 'Not submitted' %></td>
               <td data-sort-value="<%= rows[i].grade ? rows[i].grade : 0 %>"><%= rows[i].grade ? rows[i].grade : 'Not graded' %></td>
             </tr>
        <% }
