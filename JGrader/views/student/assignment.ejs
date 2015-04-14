@@ -14,8 +14,8 @@
   <table class="table table-striped">
     <tbody>
       <tr>
-        <td><%- assignment.description ? assignment.description : '<em>None</em>' %></td>
-        <td><strong>Due:</strong> <%= strftime('%m-%d-%y', new Date(assignment.due)); %></td>
+        <td><%- assignment.description ? assignment.description : '<em>No Description</em>' %></td>
+        <td title="<%= strftime('%b %d %Y, %l:%M %p', new Date(assignment.due)) %>"><strong>Due:</strong> <%- strftime('%m-%d-%y', new Date(assignment.due)) + (Date.now() > assignment.due ? ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="right" title="Late"></span>' : '') %></td>
         <td class="status status-<%= Date.now() > assignment.due ? 'late' : 'notsubmitted' %>">&nbsp;</td>
       </tr>
     </tbody>

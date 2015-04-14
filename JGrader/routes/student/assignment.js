@@ -23,13 +23,13 @@ var render = function(page, options, res) {
       break;
     case 'assignment':
       // title should already be set
-      options.js = ['student/dropzone', 'student/submit'];
+      options.js = ['student/dropzone', 'student/submit', 'tooltip'];
       options.css = ['font-awesome.min'];
       options.strftime = strftime;
       break;
     case 'assignmentComplete':
       // title should already be set
-      options.js = ['prettify', 'student/submitted', 'comments'];
+      options.js = ['prettify', 'student/submitted', 'comments', 'tooltip'];
       options.css = ['prettify', 'font-awesome.min'];
       options.strftime = strftime;
       break;
