@@ -29,7 +29,7 @@
     <tbody>
       <% if(rows.length == 0) { %>
         <tr>
-          <td colspan="5">You have not posted any assignments.</td>
+          <td colspan="4">You have not posted any assignments.</td>
         </tr>
       <% } else {
           for(i in rows) {%>
@@ -37,7 +37,7 @@
               <td><a href="/teacher/assignment/<%= rows[i].aid %>"><%= rows[i].aname %></a></td>
               <%
                 var due = new Date(rows[i].due);
-                var dueStr = strftime(due.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', due);
+                var dueStr = strftime('%m-%d-%y', due);
               %>
               <td title="<%= strftime('%b %d %Y, %l:%M %p', due) %>" data-sort-value="<%= due ? due.getTime() : 0 %>"><%= dueStr %></td>
               <td data-sort-value="<%= rows[i].total == 0 ? 0 : (rows[i].complete / rows[i].total) %>"><%= rows[i].complete %> of <%= rows[i].total %></td>

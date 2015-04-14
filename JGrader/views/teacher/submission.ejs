@@ -15,8 +15,8 @@
 <dl class="description">
   <%
     var submitted = new Date(submission.submitted);
-    var submittedStr = strftime(submitted.getYear() == new Date(Date.now()).getYear() ? '%b %d, %l:%M %p' : '%b %d, %Y', submitted);
-    if(submission.submitted > submission.due) {
+    var submittedStr = strftime('%b %d %Y, %l:%M %p', submitted);
+    if(submission.submitted > assignment.due) {
       submittedStr += ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="right" title="Late"></span>';
     }
   %>
