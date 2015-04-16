@@ -679,7 +679,7 @@ li .comment-text .fa:last-of-type {
 .sign-form {
   color: #FFF;
   text-align: center;
-  width: 90%;
+  width: 396px;
 }
 .sign-form input[type="submit"], .sign-form .btn[type="submit"] {
   padding-top: 7px;
@@ -716,6 +716,9 @@ li .comment-text .fa:last-of-type {
 .settings .btn {
   width: auto !important;
   margin-top: 35px;
+}
+.settings.sign-form#setting-form {
+  width: 90% !important;
 }
 .settings.sign-form .name {
   display: inline-block;
