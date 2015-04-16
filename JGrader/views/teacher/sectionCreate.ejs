@@ -1,10 +1,17 @@
 <!-- Created by Brian Singer and Greg Carlin in 2015.
  Copyright (c) 2015 JGrader. All rights reserved. -->
  
-<div class="page-header">
-  <h1>New Class</h1>
+<div class="page-header" id="header-classes">
+  <div class="left-header">
+    <h1>Classes</h1>
+  </div>
+  <div class="right-header">
+    <div class="name">
+      Create New
+    </div>
+  </div>
 </div>
-<form action="/teacher/section/create" method="post">
+<form action="/teacher/section/create" method="post" class="form-signin sign-form settings">
   <input type="text" class="form-control" placeholder="Name" name="name" required autofocus <%- typeof name == 'undefined' ? '' : ('value="' + name + '" ') %>/>
   <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create" />
 </form>
