@@ -63,7 +63,11 @@
         <li>
           <h2>What features of Java are supported?</h2>
           Almost all features of Java are supported, with the exception of a small few. Packages are not supported due to implementation complexities. Additionally, executed code is run with a Security Manager that disables certain features for security reasons.
-          These disabled features include reading and writing files and accessing system information. Most of the Java library, including Scanners and ArrayLists, are supported.
+          These disabled features include writing files and accessing system information. Most of the Java library, including Scanners and ArrayLists, are supported.
+        </li>
+        <li>
+          <h2>Can students' code read files?</h2>
+          Students can submit files along with their submitted code. These files can then be read from their code. References to files should not contain any directory structure, as all uploaded files are placed in the same directory.
         </li>
         <li>
           <h2>Is there a maximum runtime for code execution?</h2>
@@ -76,6 +80,17 @@
           We currently run code through Java 1.6.
         </li>
         <li>
+          <h2>Why can't I execute my student's code?</h2>
+          There are several reasons why this might be the case.
+          Only files submitted with the ".java" extension will be treated as code. If a file is submitted with a different extension, it will not be compiled.
+          If a student submits java files, but there is an error in the compilation of any of the files, you will be unable to execute the code. In this instance, both the student and the teacher will see a warning.
+        </li>
+        <li>
+          <h2>Can students submit non-java files?</h2>
+          Yes, but there must be at least one java file per submission.
+          Non-java files will not be compiled and you will not be able to execute them. You will be able to view and comment on any ASCII files, and all files, including binary files, will be available for download.
+        </li>
+        <li>
           <h2>Has this system been tested within a real classroom setting?</h2>
           jGrader underwent an alpha stage within the AP Computer Science class at Byram Hills High School throughout the 2014-2015 school year. As we approach the end of this school year, we are opening the website up for general use.
         </li>
@@ -83,12 +98,12 @@
           <h2>Why don't you have feature X?</h2>
           Probably because we haven't thought of it. We are still new and are very open to new ideas. Please <a href="mailto:contact@jgrader.com" target="_blank">tell us more</a>!
         </li>
+      </ul>
+      <ul class="right">
         <li>
           <h2>Is there a free trial period?</h2>
           Currently jGrader is free for all users. After August 1, we will offer a 30 day free trial period.
         </li>
-      </ul>
-      <ul class="right">
         <li>
           <h2>How can I add students to my class?</h2>
           On a page for a given class, you can find a class code. If you give this code to your students, they will be able to sign up for your class via their class list.
