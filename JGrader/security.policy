@@ -1,5 +1,5 @@
 /* taken from http://stackoverflow.com/a/5526972/720889 */
 /* anyone can read write and execute within current working dir */
 grant {
-  permission java.io.FilePermission "${user.dir}", "read,write,execute";
+  permission java.io.FilePermission "${user.dir}", "read";
 };
