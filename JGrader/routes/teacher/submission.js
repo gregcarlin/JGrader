@@ -120,6 +120,7 @@ router.post('/:id/run/:fileIndex', function(req, res) {
       connection.query("SELECT \
                           `files`.`id`,\
                           `files`.`name`,\
+                          `files`.`contents`,\
                           `files`.`compiled` \
                         FROM `submissions`,`files` \
                         WHERE \
@@ -134,17 +135,23 @@ router.post('/:id/run/:fileIndex', function(req, res) {
       } else {
         async.each(rows, function(row, cb) {
           var name = row.name;
-          row.className = name.substring(0, name.length - 5);
+          if(row.compiled) {
+            row.className = name.substring(0, name.length - 5);
+            row.writeName = row.className + '.class';
+            row.writeData = row.compiled;
+          } else {
+            row.writeName = name;
+            row.writeData = row.contents;
+          }
           // note: working directory seems to be one with app.js in it
-          fs.writeFile('temp/' + req.params.id + '/' + row.className + '.class', row.compiled, cb);
+          fs.writeFile('temp/' + req.params.id + '/' + row.writeName, row.writeData, cb);
         }, callback);
       }
     },
     function(callback) {
       var fileIndex = req.params.fileIndex;
       if(fileIndex < rows.length) {
-        // note: 'nothing' should refer to an actual policy but it doesn't. referring to something that doesn't exist seems to be the same as referring to a policy that grants nothing.
-        var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
+        var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
           if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
           callback(err, stdout, stderr);
         });
@@ -167,10 +174,11 @@ router.post('/:id/run/:fileIndex', function(req, res) {
           throw err;
         }
       } else {
-        async.each(rows, function(row, cb) {
-          fs.unlink('temp/' + req.params.id + '/' + row.className + '.class', cb);
+        fs.remove('temp/' + req.params.id + '/', function(err) {
+          if(err) {
+            throw err;
+          }
         });
-        fs.rmdir('temp/' + req.params.id + '/');
       }
   });
 });
