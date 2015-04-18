@@ -163,4 +163,12 @@ signIn = function(dbType, userID, res, finish) {
   connection.query('INSERT INTO ?? VALUES(?, ?)', [db, userID, hash], finish);
 };
 
+// adapted from http://stackoverflow.com/a/10360837/720889
+isAscii = function(fileContents) {
+  for(var i=0; i<fileContents.length; i++) {
+    if(fileContents[i] > 127) return false;
+  }
+  return true;
+};
+
 // modules.exports not required because everything needed is global
