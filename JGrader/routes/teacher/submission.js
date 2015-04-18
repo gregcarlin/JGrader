@@ -99,24 +99,14 @@ router.post('/:id/updategrade/:grade', function(req, res, next) {
   }
 });
 
-var mkdir = function(dir, callback) {
-  fs.mkdir(dir, function(err) {
-    if(err && err.code != 'EEXIST') throw err;
-    callback(null);
-  });
-};
-
-// TODO get rid of async and implement proper error handling
 router.post('/:id/run/:fileIndex', function(req, res) {
-  var rows;
-  async.waterfall([
-    function(callback) {
-      mkdir('temp/', callback);
-    },
-    function(callback) {
-      mkdir('temp/' + req.params.id + '/', callback);
-    },
-    function(callback) {
+  fs.ensureDir('temp/' + req.params.id + '/', function(err) {
+    if(err) {
+      res.json({code: -1}); // unknown
+      err.handled = true;
+      next(err);
+    } else {
+      
       connection.query("SELECT \
                           `files`.`id`,\
                           `files`.`name`,\
@@ -126,60 +116,72 @@ router.post('/:id/run/:fileIndex', function(req, res) {
                         WHERE \
                           `submissions`.`id` = ? AND \
                           `files`.`submission_id` = `submissions`.`id` \
-                        ORDER BY `files`.`id`", [req.params.id], callback);
-    },
-    function(results, fields, callback) {
-      rows = results;
-      if(rows.length <= 0) {
-        res.json({code: 2}); // invalid permissions
-      } else {
-        async.each(rows, function(row, cb) {
-          var name = row.name;
-          if(row.compiled) {
-            row.className = name.substring(0, name.length - 5);
-            row.writeName = row.className + '.class';
-            row.writeData = row.compiled;
-          } else {
-            row.writeName = name;
-            row.writeData = row.contents;
-          }
-          // note: working directory seems to be one with app.js in it
-          fs.writeFile('temp/' + req.params.id + '/' + row.writeName, row.writeData, cb);
-        }, callback);
-      }
-    },
-    function(callback) {
-      var fileIndex = req.params.fileIndex;
-      if(fileIndex < rows.length) {
-        var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
-          if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
-          callback(err, stdout, stderr);
-        });
-        if(req.body.stdin) child.stdin.write(req.body.stdin);
-        child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
-      } else {
-        res.json({code: 1}); // invalid input
-      }
-    },
-    function(stdout, stderr, callback) {
-      res.json({code: 0, out: stdout, err: stderr});
-      callback();
-    }
-    ], function(err) {
-      if(err) {
-        if(err.killed) {
-          res.json({code: 0, out: '', err: 'Code took too long to execute! There may be an infinite loop somewhere.'});
+                        ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
+        if(err) {
+          res.json({code: -1}); // unknown
+          err.handled = true;
+          next(err);
         } else {
-          res.json({code: -1});
-          throw err;
-        }
-      } else {
-        fs.remove('temp/' + req.params.id + '/', function(err) {
-          if(err) {
-            throw err;
+
+          if(rows.length <= 0) {
+            res.json({code: 2}); // invalid permissions
+          } else {
+            async.each(rows, function(row, cb) {
+              var name = row.name;
+              if(row.compiled) {
+                row.className = name.substring(0, name.length - 5);
+                row.writeName = row.className + '.class';
+                row.writeData = row.compiled;
+              } else {
+                row.writeName = name;
+                row.writeData = row.contents;
+              }
+              // note: working directory seems to be one with app.js in it
+              fs.writeFile('temp/' + req.params.id + '/' + row.writeName, row.writeData, cb);
+            }, function(err) {
+              if(err) {
+                res.json({code: -1}); // unknown
+                err.handled = true;
+                next(err);
+              } else {
+
+                var fileIndex = req.params.fileIndex;
+                if(fileIndex < rows.length) {
+                  var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
+                    if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
+                    if(err) {
+                      if(err.killed) {
+                        res.json({code: 0, out: '', err: 'Code took too long to execute! There may be an infinite loop somewhere.'});
+                      } else {
+                        res.json({code: -1});
+                        throw err;
+                      }
+                    } else {
+                      res.json({code: 0, out: stdout, err: stderr});
+                    }
+                    // clean up
+                    fs.remove('temp/' + req.params.id + '/', function(err) {
+                      if(err) {
+                        // don't report error to user
+                        err.handled = true;
+                        next(err);
+                      }
+                    });
+                  });
+                  if(req.body.stdin) child.stdin.write(req.body.stdin);
+                  child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
+                } else {
+                  res.json({code: 1}); // invalid input
+                }
+
+              }
+            });
           }
-        });
-      }
+
+        }
+      });
+
+    }
   });
 });
 
