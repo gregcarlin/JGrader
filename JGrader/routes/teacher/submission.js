@@ -296,31 +296,27 @@ router.get('/:id/download', function(req, res, next) {
 });
 
 router.get('/:id/download/:fileIndex', function(req, res, next) {
-  async.waterfall([
-      function(callback) {
-        connection.query("SELECT \
-                            `files`.`id`,\
-                            `files`.`name`,\
-                            `files`.`contents` \
-                          FROM `submissions`,`files` \
-                          WHERE \
-                            `submissions`.`id` = ? AND \
-                            `files`.`submission_id` = `submissions`.`id` \
-                          ORDER BY `files`.`id`", [req.params.id], callback);
-      }
-    ], function(err, rows) {
-      if(err) {
-        next(err);
-      } else if(rows.length <= 0) {
-        res.send('You do not have permission to download this file.');
-      } else if(isNaN(req.params.fileIndex) || req.params.fileIndex >= rows.length) {
-        res.send('Sorry, an error has occurred.');
-      } else {
-        res.setHeader('Content-Disposition', 'attachment; filename=' + rows[req.params.fileIndex].name);
-        res.setHeader('Content-Description', 'File Transfer');
-        res.send(rows[req.params.fileIndex].contents);
-      }
-    });
+  connection.query("SELECT \
+                      `files`.`id`,\
+                      `files`.`name`,\
+                      `files`.`contents` \
+                    FROM `submissions`,`files` \
+                    WHERE \
+                      `submissions`.`id` = ? AND \
+                      `files`.`submission_id` = `submissions`.`id` \
+                    ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
+    if(err) {
+      next(err);
+    } else if(rows.length <= 0) {
+      res.send('You do not have permission to download this file.');
+    } else if(isNaN(req.params.fileIndex) || req.params.fileIndex >= rows.length) {
+      res.send('Sorry, an error has occurred.');
+    } else {
+      res.setHeader('Content-Disposition', 'attachment; filename=' + rows[req.params.fileIndex].name);
+      res.setHeader('Content-Description', 'File Transfer');
+      res.send(rows[req.params.fileIndex].contents);
+    }
+  });
 });
 
 comments.setup(router, 'teacher');
