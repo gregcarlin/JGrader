@@ -146,7 +146,7 @@ router.post('/:id/run/:fileIndex', function(req, res) {
               } else {
 
                 var fileIndex = req.params.fileIndex;
-                if(fileIndex < rows.length) {
+                if(fileIndex < rows.length && rows[req.params.fileIndex].className) {
                   var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
                     if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
                     if(err) {
