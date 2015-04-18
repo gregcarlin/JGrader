@@ -238,7 +238,7 @@ body {
   border-top: 0px;
 }
 .main table tbody tr td:last-child:not(:first-child) {
-  text-align: right;
+  text-align: left;
 }
 .main table tbody tr td.status {
   width: 21px;
