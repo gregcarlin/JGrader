@@ -3,7 +3,6 @@
 
 require('./common');
 var router = express.Router();
-var nodemailer = require('nodemailer');
 var crypto = require('crypto');
 
 /* GET home page. */
@@ -69,13 +68,6 @@ router.post('/forgot', function(req, res) {
         var hash = crypto.randomBytes(20).toString('hex');
         var url = 'http://jgrader.com/forgot/' + db + '/' + hash;
         connection.query("UPDATE `" + db + "` SET `pass_reset_hash` = ? WHERE `id` = ?", [hash, id], function(err, result) {
-          var transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: creds.email_user,
-              pass: creds.email_pass
-            }
-          });
           var mailOptions = {
             from: creds.email_user,
             to: req.body.email,

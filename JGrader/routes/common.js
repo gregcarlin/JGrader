@@ -11,6 +11,7 @@ exec = require('child_process').exec; // for running bash commands
 
 async = require('async');
 var crypto = require('crypto');
+var nodemailer = require('nodemailer');
 
 mysql      = require('mysql');
 connection = mysql.createPool({
@@ -170,5 +171,13 @@ isAscii = function(fileContents) {
   }
   return true;
 };
+
+transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: creds.email_user,
+    pass: creds.email_pass
+  }
+});
 
 // modules.exports not required because everything needed is global

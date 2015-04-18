@@ -3,6 +3,7 @@
 
 require('./common');
 var router = express.Router();
+var nodemailer = require('nodemailer');
 
 var assignment = require('./student/assignment');
 var section    = require('./student/section');
@@ -127,7 +128,21 @@ router.post('/feedback', function(req, res) {
 
     connection.query("INSERT INTO `feedback` VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)", [result[0].user, result[0].fname, result[0].lname, req.headers['user-agent'], type, req.body.feedback], function(err) {
       if(err) throw err;
-      render('feedback', {success: 'Thank you for your feedback!'}, res);
+
+      var html = '';
+      html += 'From: ' + result[0].fname + ' ' + result[0].lname + ' (' + result[0].user + ')<br />';
+      html += 'Type: Student<br />';
+      html += 'Message:<br />';
+      html += req.body.feedback;
+      var mailOptions = {
+        from: creds.email_user,
+        to: creds.email_user,
+        subject: 'Feedback: ' + type,
+        html: html
+      };
+      transporter.sendMail(mailOptions, function(err, info) {
+        render('feedback', {success: 'Thank you for your feedback!'}, res);
+      });
     });
   });
 });
