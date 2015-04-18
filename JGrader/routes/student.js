@@ -3,7 +3,6 @@
 
 require('./common');
 var router = express.Router();
-var nodemailer = require('nodemailer');
 
 var assignment = require('./student/assignment');
 var section    = require('./student/section');
