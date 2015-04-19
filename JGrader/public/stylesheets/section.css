@@ -742,6 +742,21 @@ input + .iama {
 #add-row {
   margin-top: -15px;
 }
+/* Settings page */
+#settings {
+  width: 80% !important;
+}
+#settings .password {
+  display: inline-block;
+  float: right;
+  width: 45%;
+}
+#settings .name {
+  display: inline-block;
+  margin-top: 0px;
+  float: left;
+  width: 45%;
+}
 
 /* faq page */
 .faq .container {
