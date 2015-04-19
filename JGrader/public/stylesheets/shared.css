@@ -61,11 +61,11 @@ body {
 }
 
 /* used in sign in/up forms */
-.sign-form h2 {
+.form h2 {
   font-size: 50px;
   font-weight: 300;
 }
-.sign-form input:not([type="checkbox"]), .sign-form textarea {
+.form input:not([type="checkbox"]):not([type="radio"]), .form textarea {
   width: 100%;
   border-radius: 3px;
   height: 50px;
@@ -75,16 +75,15 @@ body {
   box-sizing: border-box;
   font-family: 'Lato', sans-serif;
   font-size: 16px;
-  margin-top: 18px;
 }
-.sign-form textarea {
+.form textarea {
   height: 100px;
   resize: vertical;
 }
-.sign-form input[type="submit"], .sign-form .btn[type="submit"] {
+.form input[type="submit"], .form .btn[type="submit"] {
   padding: 2px 8px;
 }
-.sign-form .button, .sign-form .btn {
+.form .button, .form .btn {
   font-size: 30px !important;
   border-radius: 8px !important;
   background-color: #BCDAFF;
@@ -99,7 +98,7 @@ body {
   padding-left: 20% !important;
   padding-right: 20% !important;
 }
-.sign-form .button:hover, .sign-form .btn:hover, .sign-form .button:focus, .sign-form .btn:focus {
+.form .button:hover, .form .btn:hover, .form .button:focus, .form .btn:focus {
   background-color: #A1BADA;
   cursor: pointer;
   text-decoration: none;

@@ -648,114 +648,74 @@ li .comment-text .fa:last-of-type {
   resize: vertical;
 }
 
-/* sign in/up page stuff, also used for other forms like feedback and settings */
-.signin .container {
+/* shared between sign in/up, feedback, settings, and other forms (eg add class) */
+.form h2 {
+  margin-bottom: 20px;
+}
+.form h3 {
+  font-size: 32px;
+  font-weight: 300;
+  margin-bottom: 20px;
+}
+.form label {
+  color: #FFF;
+  font-size: 26px;
+  font-weight: 300;
+  margin-bottom: 0;
+}
+.form input, .form textarea {
+  margin-bottom: 47px;
+  margin-top: 0;
+}
+.form .btn {
+  margin-left: auto;
+  margin-right: auto;
+}
+.form {
+  color: #FFF;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 396px;
+}
+.form input[type="submit"], .form .btn[type="submit"] {
+  padding-top: 7px;
+  padding-bottom: 7px;
+  display: block;
+}
+.form ul {
+  list-style-type: none;
+}
+.form > *:first-child {
+  margin-top: 40px;
+}
+
+/* just for sign in/up pages */
+.sign-form {
   position: relative;
   top: 50%;
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
 }
-.sign-form label {
-  color: #FFF;
-  font-size: 26px;
-  font-weight: 300;
-  margin-bottom: 0;
-}
-.sign-form input {
-  margin-bottom: 47px;
-  margin-top: 0;
-}
-.sign-form.signup input {
-  margin-bottom: 15px;
-}
-.sign-form .btn {
-  margin-left: auto;
-  margin-right: auto;
-}
-.sign-form.signup .btn {
-  margin-top: 20px;
-}
-.sign-form {
-  color: #FFF;
-  text-align: center;
-  width: 396px;
-}
-.sign-form input[type="submit"], .sign-form .btn[type="submit"] {
-  padding-top: 7px;
-  padding-bottom: 7px;
-  display: block;
-}
 .iama {
-  color: #FFF;
   font-size: 26px;
   font-weight: 300;
+}
+input + .iama {
+  margin-top: -25px;
 }
 .iama label {
   margin-left: 15px;
 }
-.iama label:first-child {
-  margin-left: 30px;
-}
 .iama label input {
   width: auto;
   position: relative;
-  top: 14px;
+  top: -3px;
   margin-right: 10px;
 }
-.settings {
-  margin-left: auto;
-  margin-right: auto;
-}
-.settings label:first-child {
-  margin-top: 15px;
-}
-.settings input {
-  margin-bottom: 20px;
-}
-.settings .btn {
-  width: auto !important;
-  margin-top: 35px;
-}
-.settings.sign-form#setting-form {
-  width: 90% !important;
-}
-.settings.sign-form .name {
-  display: inline-block;
-  float: left;
-  width: 45%;
-}
-.settings.sign-form .password {
-  display: inline-block;
-  float: right;
-  width: 45%;
-}
-.feedback .report-type > label {
-  margin-top: 20px !important;
-}
-.feedback label:first-child {
-  margin-top: 0;
-}
-.feedback .btn {
-  margin-top: 25px;
-}
-.feedback input[type="radio"] {
-  width: auto;
-}
-.assign-create ul {
-  list-style-type: none;
-}
-.assign-create textarea {
-  margin-bottom: 15px;
-}
-.assign-create label {
-  width: 100%;
-  margin-top: 0 !important;
-}
-.assign-create input[type="checkbox"] {
-  margin-bottom: 0;
-  margin-right: 5px;
-}
+
+/* for other form pages */
 #caseCreate .input {
   margin-bottom: 0;
   border-bottom-left-radius: 0;
@@ -765,6 +725,16 @@ li .comment-text .fa:last-of-type {
   margin-top: 0;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+#assign-create input[type="checkbox"] {
+  margin-bottom: 0;
+  margin-right: 5px;
+}
+#assign-create .section-list {
+  padding-left: 0;
+}
+#add-row {
+  margin-top: -15px;
 }
 
 /* faq page */

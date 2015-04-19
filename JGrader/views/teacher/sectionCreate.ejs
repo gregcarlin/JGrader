@@ -11,7 +11,7 @@
     </div>
   </div>
 </div>
-<form action="/teacher/section/create" method="post" class="form-signin sign-form settings">
+<form action="/teacher/section/create" method="post" class="form">
   <input type="text" class="form-control" placeholder="Name" name="name" required autofocus <%- typeof name == 'undefined' ? '' : ('value="' + name + '" ') %>/>
-  <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create" />
+  <button type="submit" class="btn btn-lg btn-primary btn-block">Create</button>
 </form>

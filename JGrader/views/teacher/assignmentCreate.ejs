@@ -11,11 +11,11 @@
     </div>
   </div>
 </div>
-<form action="/teacher/assignment/create" method="post" class="form-signin sign-form settings assign-create">
+<form action="/teacher/assignment/create" method="post" class="form" id="assign-create">
   <input type="text" class="form-control" placeholder="Name" name="name" required autofocus <%- typeof name == 'undefined' ? '' : ('value="' + name + '" ') %>/>
   <textarea class="form-control" placeholder="Description" name="desc"><%- typeof desc == 'undefined' ? '' : desc %></textarea>
   <input type="text" class="form-control" placeholder="Due Date" name="due" id="due" required <%- typeof due == 'undefined' ? '' : ('value="' + due + '" ') %>/>
-  Assign this to the following sections:
+  <h3>Assign this to the following sections:</h3>
   <ul class="section-list">
     <% if(typeof rows != 'undefined') {
         for(i in rows) { %>
@@ -23,5 +23,5 @@
     <%  }
        } %>
   </ul>
-  <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create" />
+  <button type="submit" class="btn btn-lg btn-primary btn-block">Create</button>
 </form>

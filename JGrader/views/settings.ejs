@@ -11,7 +11,7 @@
     <%= msg %>
   </div>
 <% } %>
-<form class="settings sign-form" id="setting-form" method="post" action="#">
+<form class="form" method="post" action="#">
   <div class="name">
     <label for="fname">First Name</label>
     <input type="text" name="fname" class="form-control" value="<%= fname %>" id="fname" />
@@ -26,5 +26,5 @@
     <label for="newpass">New Password</label>
     <input type="password" name="newpass" class="form-control" id="newpass" />
   </div>
-  <input type="submit" class="btn btn-primary btn-block" value="Save" />
+  <button type="submit" class="btn btn-primary btn-block">Save</button>
 </form>
