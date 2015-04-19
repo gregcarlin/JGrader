@@ -133,6 +133,9 @@ a:hover {
 #home .right label:first-child {
   margin-bottom: 10%;
 }
+#home .right input {
+  margin-top: 18px;
+}
 
 /* stuff for learn 'page' */
 #learn {

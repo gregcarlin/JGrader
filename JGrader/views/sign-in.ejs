@@ -34,7 +34,7 @@
     </script>
   </head>
 
-  <body class="signin">
+  <body>
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
@@ -49,9 +49,9 @@
       </div>
     </nav>
 
-    <div class="container sign-form">
-      <form class="form-signin" role="form" action="/sign-in" method="POST">
-  		  <h2 class="form-signin-heading">Sign in</h2>
+    <div class="container form sign-form">
+      <form role="form" action="/sign-in" method="POST">
+  		  <h2>Sign in</h2>
         <% if(typeof error != 'undefined') { %>
           <div class="alert alert-danger" role="alert"><%- error %></div>
         <% } %>
