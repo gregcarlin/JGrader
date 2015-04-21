@@ -12,9 +12,12 @@
   </div>
 </div>
 <form action="/teacher/assignment/create" method="post" class="form" id="assign-create">
-  <input type="text" class="form-control" placeholder="Name" name="name" required autofocus <%- typeof name == 'undefined' ? '' : ('value="' + name + '" ') %>/>
-  <textarea class="form-control" placeholder="Description" name="desc"><%- typeof desc == 'undefined' ? '' : desc %></textarea>
-  <input type="text" class="form-control" placeholder="Due Date" name="due" id="due" required <%- typeof due == 'undefined' ? '' : ('value="' + due + '" ') %>/>
+  <label for="name">Name</label>
+  <input type="text" class="form-control" id="name" name="name" required autofocus <%- typeof name == 'undefined' ? '' : ('value="' + name + '" ') %>/>
+  <label for="desc">Description</label>
+  <textarea class="form-control" id="desc" name="desc"><%- typeof desc == 'undefined' ? '' : desc %></textarea>
+  <label for="due">Due Date</label>
+  <input type="text" class="form-control" name="due" id="due" required <%- typeof due == 'undefined' ? '' : ('value="' + due + '" ') %>/>
   <h3>Assign this to the following sections:</h3>
   <ul class="section-list">
     <% if(typeof rows != 'undefined') {
