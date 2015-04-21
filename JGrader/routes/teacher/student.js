@@ -83,7 +83,6 @@ router.use('/:id', function(req, res, next) {
       } else if(result.length <= 0) {
         render('notFound', {}, res);
       } else {
-        console.log(result);
         req.student = result[0].students;
         req.sections = [];
         for(i in result) {

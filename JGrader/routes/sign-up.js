@@ -34,9 +34,7 @@ router.post('/', function(req, res, next) {
     exists(user, 'students', res, function() {
       exists(user, 'teachers', res, function() {
         exists(user, 'assistants', res, function() {
-          console.log('hashing');
           bcrypt.hash(user.pass, 10, function(err, hash) {
-            console.log('hash=' + hash);
             if(err) {
               res.render('sign-up', { error: 'An unknown error has occurred. Please try again later.', user: user });
               err.handled = true;

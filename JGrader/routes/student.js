@@ -3,6 +3,7 @@
 
 require('./common');
 var router = express.Router();
+var bcrypt = require('bcrypt');
 
 var assignment = require('./student/assignment');
 var section    = require('./student/section');
@@ -56,7 +57,7 @@ router.get('/settings', function(req, res) {
 
 // This sections recieves the post method from a students setting page. It parses what they wanted to change and changes it
 // in the MySql Database
-router.post('/settings', function(req, res) {
+router.post('/settings', function(req, res, next) {
   // Takes in the users name and last name
   var fname = req.body.fname;
   var lname = req.body.lname;
@@ -68,31 +69,53 @@ router.post('/settings', function(req, res) {
         var handler = function(err, rows) {
           if(err) {
             render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
-            throw err;
+            err.handled = true;
+            next(err);
           } else if(rows.affectedRows <= 0) {
             render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
           } else {
             render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
           }
         };
-        if(res.locals.mustResetPass) {
-          connection.query("UPDATE `students` \
-                              SET `fname` = ?, \
-                              `lname` = ?, \
-                              `pass` = AES_ENCRYPT(?, ?), \
-                              `pass_reset_hash` = NULL \
-                            WHERE \
-                              `id` = ?", [fname, lname, newPass, creds.aes_key, req.user.id], handler);
-        } else {
-          connection.query("UPDATE `students` \
-                              SET `fname` = ?, \
-                              `lname` = ?, \
-                              `pass` = AES_ENCRYPT(?, ?), \
-                              `pass_reset_hash` = NULL \
-                            WHERE \
-                              `id` = ? AND \
-                              `pass` = AES_ENCRYPT(?, ?)", [fname, lname, newPass, creds.aes_key, req.user.id, oldPass, creds.aes_key], handler);
-        }
+        bcrypt.hash(newPass, 10, function(err, hash) {
+          if(res.locals.mustResetPass) {
+            connection.query("UPDATE `students` \
+                                SET `fname` = ?, \
+                                `lname` = ?, \
+                                `pass` = ?, \
+                                `pass_reset_hash` = NULL \
+                              WHERE \
+                                `id` = ?", [fname, lname, hash, req.user.id], handler);
+          } else {
+            connection.query("SELECT `pass` FROM `students` WHERE `id` = ?", [req.user.id], function(err, rows) {
+              if(err) {
+                render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
+                err.handled = true;
+                next(err);
+              } else if(rows.length <= 0) {
+                render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
+              } else {
+                bcrypt.compare(oldPass.toString(), rows[0].pass.toString(), function(err, result) {
+                  if(err) {
+                    render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
+                    err.handled = true;
+                    next(err);
+                  } else if(result) {
+                    connection.query("UPDATE `students` \
+                                        SET `fname` = ?, \
+                                        `lname` = ?, \
+                                        `pass` = ?, \
+                                        `pass_reset_hash` = NULL \
+                                      WHERE \
+                                        `id` = ?", [fname, lname, hash, req.user.id], handler);
+                  } else {
+                    render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
+                  }
+                });
+              }
+            });
+          }
+        });
       } else {
         render('settings', {fname: fname, lname: lname, error: 'All fields are required to change your password.'}, res);
       }
@@ -100,7 +123,8 @@ router.post('/settings', function(req, res) {
       connection.query("UPDATE `students` SET `fname` = ?, `lname` = ? WHERE `id` = ?", [fname, lname, req.user.id], function(err) {
         if(err) {
           render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
-          throw err;
+          err.handled = true;
+          next(err);
         } else {
           render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
         }
