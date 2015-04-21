@@ -21,7 +21,7 @@ var render = function(page, options, res) {
       break;
     case 'assignmentCreate':
       options.title = 'Create an Assignment';
-      options.js = ['teacher/jquery.datetimepicker', 'teacher/datepicker'];
+      options.js = ['teacher/jquery.datetimepicker', 'teacher/datepicker', 'dropzone', 'teacher/upload'];
       options.css = ['jquery.datetimepicker'];
       break;
     case 'assignment':

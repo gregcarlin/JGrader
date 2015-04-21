@@ -310,6 +310,16 @@ dl.description dt {
   cursor: pointer;
 }
 
+/* assignment create page (only for teachers) */
+.files.dropzone-previews .dz-image, .files.dropzone-previews .dz-size, .files.dropzone-previews .dz-success-mark, .files.dropzone-previews .dz-error-mark, .dz-message {
+  display: none;
+}
+.files.dropzone-previews {
+  font-size: 18px;
+  font-weight: 300;
+  margin-top: 15px;
+}
+
 /* assignment not complete page (only for students) */
 #actions {
   width: 37%;

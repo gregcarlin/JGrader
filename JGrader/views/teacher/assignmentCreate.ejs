@@ -11,7 +11,7 @@
     </div>
   </div>
 </div>
-<form action="/teacher/assignment/create" method="post" class="form" id="assign-create">
+<form action="/teacher/assignment/create" method="post" class="form dropzone" id="assign-create">
   <label for="name">Name</label>
   <input type="text" class="form-control" id="name" name="name" required autofocus <%- typeof name == 'undefined' ? '' : ('value="' + name + '" ') %>/>
   <label for="desc">Description</label>
@@ -19,8 +19,8 @@
   <label for="due">Due Date</label>
   <input type="text" class="form-control" name="due" id="due" required <%- typeof due == 'undefined' ? '' : ('value="' + due + '" ') %>/>
   <h3>Include files:</h3>
-  <div class="files">
-    Click to upload or drag files here.
+  <h4 class="clickable">Click to upload or drag files here.</h4>
+  <div class="files dropzone-previews">
   </div>
   <h3>Assign this to the following sections:</h3>
   <ul class="section-list">
