@@ -3,6 +3,7 @@
 
 require('./common');
 var router = express.Router();
+var bcrypt = require('bcrypt');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -22,7 +23,7 @@ var exists = function(user, db, res, finish) {
   });
 }
 
-router.post('/', function(req, res) {
+router.post('/', function(req, res, next) {
   var user = {};
   user.fname = req.body.fname;
   user.lname = req.body.lname;
@@ -33,24 +34,41 @@ router.post('/', function(req, res) {
     exists(user, 'students', res, function() {
       exists(user, 'teachers', res, function() {
         exists(user, 'assistants', res, function() {
-          connection.query("INSERT INTO `" + user.role + "s` VALUES(NULL, ?, AES_ENCRYPT(?, '" + creds.aes_key + "'), ?, ?, NULL)", [user.email, user.pass, user.fname, user.lname], function(err, rows) {
+          console.log('hashing');
+          bcrypt.hash(user.pass, 10, function(err, hash) {
+            console.log('hash=' + hash);
             if(err) {
               res.render('sign-up', { error: 'An unknown error has occurred. Please try again later.', user: user });
-              throw err;
+              err.handled = true;
+              next(err);
             } else {
-              connection.query("SELECT `id` FROM `" + user.role + "s` WHERE `user` = ?", [user.email], function(err, rows) {
-                if(err || rows.length <= 0) {
+
+              connection.query("INSERT INTO `" + user.role + "s` VALUES(NULL, ?, ?, ?, ?, NULL)", [user.email, hash, user.fname, user.lname], function(err, rows) {
+                if(err) {
                   res.render('sign-up', { error: 'An unknown error has occurred. Please try again later.', user: user });
+                  err.handled = true;
+                  next(err);
                 } else {
-                  signIn(user.role + 's', rows[0].id, res, function(err, rows) {
-                    if(err) {
+                  connection.query("SELECT `id` FROM `" + user.role + "s` WHERE `user` = ?", [user.email], function(err, rows) {
+                    if(err || rows.length <= 0) {
                       res.render('sign-up', { error: 'An unknown error has occurred. Please try again later.', user: user });
+                      err.handled = true;
+                      next(err);
                     } else {
-                      res.redirect('/' + user.role);
+                      signIn(user.role + 's', rows[0].id, res, function(err, rows) {
+                        if(err) {
+                          res.render('sign-up', { error: 'An unknown error has occurred. Please try again later.', user: user });
+                          err.handled = true;
+                          next(err);
+                        } else {
+                          res.redirect('/' + user.role);
+                        }
+                      });
                     }
                   });
                 }
               });
+
             }
           });
         });

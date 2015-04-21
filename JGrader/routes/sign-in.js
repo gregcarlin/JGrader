@@ -3,6 +3,7 @@
 
 require('./common');
 var router = express.Router();
+var bcrypt = require('bcrypt');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -10,18 +11,35 @@ router.get('/', function(req, res) {
 });
 
 // attempts to login to website with given database, calls finish() iff login information is incorrect
-var login = function(db, email, pass, res, finish) {
-  connection.query("SELECT * FROM `" + db + "s` WHERE `user` = ? AND `pass` = AES_ENCRYPT(?, '" + creds.aes_key + "')", [email, pass], function(err, rows) {
+var login = function(db, email, pass, res, next, finish) {
+  connection.query("SELECT * FROM `" + db + "s` WHERE `user` = ?", [email], function(err, rows) {
     if(err) {
       res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
-      throw err;
+      err.handled = true;
+      next(err);
     } else {
       if(rows.length > 0) {
-        signIn(db + 's', rows[0].id, res, function(err, rows) {
-          if(err) {
-            res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
+        console.log('pass=' + pass);
+        console.log('rows[0].pass=' + rows[0].pass);
+        bcrypt.compare(pass.toString(), rows[0].pass.toString(), function(err, result) {
+          if(result) {
+            if(err) {
+              res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
+              err.handled = true;
+              next(err);
+            } else {
+              signIn(db + 's', rows[0].id, res, function(err, rows) {
+                if(err) {
+                  res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
+                  err.handled = true;
+                  next(err);
+                } else {
+                  res.redirect('/' + db); // successful login
+                }
+              });
+            }
           } else {
-            res.redirect('/' + db); // successful login
+            finish(); // incorrect pass
           }
         });
       } else {
@@ -31,13 +49,13 @@ var login = function(db, email, pass, res, finish) {
   });
 }
 
-router.post('/', function(req, res) {
+router.post('/', function(req, res, next) {
   var email = req.body.email;
   var pass  = req.body.password;
   if(email && pass) {
-    login('student', email, pass, res, function() {
-      login('teacher', email, pass, res, function() {
-        login('assistant', email, pass, res, function() {
+    login('student', email, pass, res, next, function() {
+      login('teacher', email, pass, res, next, function() {
+        login('assistant', email, pass, res, next, function() {
           res.render('sign-in', { error: 'Incorrect email or password. <a href="/forgot">Forgot your password?</a>', email: email });
         });
       });
