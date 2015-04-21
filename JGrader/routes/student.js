@@ -74,6 +74,7 @@ router.post('/settings', function(req, res, next) {
           } else if(rows.affectedRows <= 0) {
             render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
           } else {
+            res.locals.mustResetPass = false;
             render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
           }
         };
