@@ -24,6 +24,27 @@ connection = mysql.createPool({
   multipleStatements : true
 });
 
+var bcrypt = require('bcrypt');
+var convertPasswords = function(db) {
+  console.log("CONVERTING " + db);
+  connection.query("SELECT `id`,AES_DECRYPT(`pass`,'" + creds.aes_key + "') AS `pass` FROM `" + db + "` WHERE `new_pass` IS NULL", [], function(err, rows) {
+    if(err) throw err;
+    for(i in rows) {
+      if(!rows[i].pass) continue;
+      console.log(rows[i]);
+      var hash = bcrypt.hashSync(rows[i].pass.toString(), 10);
+      console.log('hash=' + hash);
+      connection.query("UPDATE `" + db + "` SET `new_pass` = ? WHERE `id` = ?", [hash, rows[i].id], function(err, result) {
+        if(err) throw err;
+        console.log('converted ' + rows[i].id);
+      });
+      if(i > 30) return;
+    }
+  });
+};
+//convertPasswords('teachers');
+//convertPasswords('students');
+
 process.on('SIGINT', function() { // on ^C
   connection.end(function(err) { // close mysql connection
     process.exit(); // also do normal exit stuff

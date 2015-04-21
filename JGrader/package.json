@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "start": "forever start --minUptime 1000ms --spinSleepTime 5000ms -f -a -l for.log -o out.log -e err.log -c 'nodemon --exitcrash' ./bin/www",
-    "stop" : "forever stopall",
-    "test" : "casperjs test tests.js"
+    "stop": "forever stopall",
+    "test": "casperjs test tests.js"
   },
   "dependencies": {
     "async": "^0.9.0",
+    "bcrypt": "^0.8.2",
     "body-parser": "~1.8.1",
     "cookie-parser": "~1.3.3",
     "crypto": "0.0.3",
