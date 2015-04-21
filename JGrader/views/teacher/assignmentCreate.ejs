@@ -18,6 +18,10 @@
   <textarea class="form-control" id="desc" name="desc"><%- typeof desc == 'undefined' ? '' : desc %></textarea>
   <label for="due">Due Date</label>
   <input type="text" class="form-control" name="due" id="due" required <%- typeof due == 'undefined' ? '' : ('value="' + due + '" ') %>/>
+  <h3>Include files:</h3>
+  <div class="files">
+    Click to upload or drag files here.
+  </div>
   <h3>Assign this to the following sections:</h3>
   <ul class="section-list">
     <% if(typeof rows != 'undefined') {
