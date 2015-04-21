@@ -19,8 +19,6 @@ var login = function(db, email, pass, res, next, finish) {
       next(err);
     } else {
       if(rows.length > 0) {
-        console.log('pass=' + pass);
-        console.log('rows[0].pass=' + rows[0].pass);
         bcrypt.compare(pass.toString(), rows[0].pass.toString(), function(err, result) {
           if(result) {
             if(err) {
