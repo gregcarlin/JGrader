@@ -148,13 +148,13 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due, file
 
         var assignmentID = rows.insertId;
         // insert files into db
-        if(files) {
-          var query = "INSERT INTO `files-teachers` VALUES";
-          var params = [];
-          for(i in files) {
-            query += "(NULL, ?, ?, ?),";
-            params.push(assignmentID, files[i].name, files[i].buffer);
-          }
+        var query = "INSERT INTO `files-teachers` VALUES";
+        var params = [];
+        for(i in files) {
+          query += "(NULL, ?, ?, ?),";
+          params.push(assignmentID, files[i].name, files[i].buffer);
+        }
+        if(params.length > 0) {
           query = query.substring(0, query.length-1);
           connection.query(query, params, function(err, result) {
             if(err) {

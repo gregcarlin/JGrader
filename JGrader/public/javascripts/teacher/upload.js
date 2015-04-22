@@ -10,14 +10,19 @@ $('#assign-create').dropzone({
   autoProcessQueue: false,
   method: 'post',
   uploadMultiple: true,
+  parallelUploads: 100,
   init: function() {
     var myDropzone = this;
 
-    $('#submit').click(function(e) {
+    $('#submit-btn').click(function(e) {
+      console.log('click fired');
       e.preventDefault();
       e.stopPropagation();
-      console.log('procssing queue');
-      myDropzone.processQueue();
+      if(myDropzone.files.length > 0) {
+        myDropzone.processQueue();
+      } else {
+        $('#assign-create').submit();
+      }
     });
 
     this.on('successmultiple', function() {
