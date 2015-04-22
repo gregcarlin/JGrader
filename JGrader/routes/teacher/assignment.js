@@ -4,6 +4,7 @@
 require('../common');
 var router = express.Router();
 var strftime = require('strftime');
+var multer = require('multer');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -96,6 +97,19 @@ router.get('/create', assignmentCreate);
 // same as above but one section is already checked
 router.get('/create/:preselect', assignmentCreate);
 
+router.use('/create', multer({
+  inMemory: true,
+  rename: function(fieldname, filename) {
+    // don't rename
+    return filename;
+  },
+  changeDest: function(dest, req, res) {
+    var directory = './uploads-teacher/' + req.user.id + '/';
+    fs.ensureDirSync(directory);
+    return directory;
+  }
+}));
+
 // handles request to create an assignment
 router.post('/create', function(req, res, next) {
   var name = req.body.name;
@@ -108,18 +122,19 @@ router.post('/create', function(req, res, next) {
     render('assignmentCreate', {error: 'You must select at least one section.', name: name, desc: desc, due: due}, res);
   } else {
     for(i in secs) {
-      createAssignment(req.user.id, secs[i], res, name, desc, due, next);
+      createAssignment(req.user.id, secs[i], res, name, desc, due, req.files, next);
     }
     res.redirect('/teacher/assignment');
   }
 });
 
-var createAssignment = function(teacherID, sectionID, res, name, desc, due, next) {
+var createAssignment = function(teacherID, sectionID, res, name, desc, due, files, next) {
   // verify that teacher owns this section
   connection.query("SELECT (SELECT `teacher_id` FROM `sections` WHERE `id` = ?) = ? AS `result`", [sectionID, teacherID], function(err, rows) {
     if(err) {
       render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
-      throw err;
+      err.handled = true;
+      next(err);
     } else if(!rows[0].result) {
       render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
     } else {
@@ -130,7 +145,26 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due, next
           err.handled = true;
           next(err);
         }
-        // nothing to do here
+
+        var assignmentID = rows.insertId;
+        // insert files into db
+        if(files) {
+          var query = "INSERT INTO `files-teachers` VALUES";
+          var params = [];
+          for(i in files) {
+            query += "(NULL, ?, ?, ?),";
+            params.push(assignmentID, files[i].name, files[i].buffer);
+          }
+          query = query.substring(0, query.length-1);
+          connection.query(query, params, function(err, result) {
+            if(err) {
+              render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
+              err.handled = true;
+              next(err);
+            }
+            // do nothing
+          });
+        }
       });
     }
   });

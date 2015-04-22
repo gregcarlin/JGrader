@@ -1,9 +1,27 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-// "myAwesomeDropzone" is the camelized version of the HTML element's ID
-Dropzone.options.assignCreate = {
+Dropzone.autoDiscover = false;
+$('#assign-create').dropzone({
+  url: '/teacher/assignment/create',
   clickable: '.clickable',
   createImageThumbnails: false,
-  previewsContainer: '.files'
-};
+  previewsContainer: '.files',
+  autoProcessQueue: false,
+  method: 'post',
+  uploadMultiple: true,
+  init: function() {
+    var myDropzone = this;
+
+    $('#submit').click(function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('procssing queue');
+      myDropzone.processQueue();
+    });
+
+    this.on('queuecomplete', function() {
+      window.location.href = document.domain + '/teacher/assignment';
+    });
+  }
+});
