@@ -20,8 +20,8 @@ $('#assign-create').dropzone({
       myDropzone.processQueue();
     });
 
-    this.on('queuecomplete', function() {
-      window.location.href = document.domain + '/teacher/assignment';
+    this.on('successmultiple', function() {
+      window.location.href = '/teacher/assignment';
     });
   }
 });
