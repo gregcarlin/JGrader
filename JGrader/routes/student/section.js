@@ -81,13 +81,23 @@ router.post('/joinSection', function(req, res, next) {
       } else if(rows.length <= 0) {
         render('joinSection', {error: 'That is not a valid class code.'}, res);
       } else {
-        connection.query("INSERT INTO `enrollment` VALUES(?, ?)", [rows[0].id, req.user.id], function(err, result) {
+        connection.query("SELECT * FROM `enrollment` WHERE `student_id` = ? AND `section_id` = ?", [req.user.id, rows[0].id], function(err, result) {
           if(err) {
             render('joinSection', {error: 'An unknown error has occurred.'}, res);
             err.handled = true;
             next(err);
+          } else if(result.length > 0) {
+            render('joinSection', {error: 'You are already enrolled in that class.'}, res);
           } else {
-            res.redirect('/student/section/' + rows[0].id);
+            connection.query("INSERT INTO `enrollment` VALUES(?, ?)", [rows[0].id, req.user.id], function(err, result) {
+              if(err) {
+                render('joinSection', {error: 'An unknown error has occurred.'}, res);
+                err.handled = true;
+                next(err);
+              } else {
+                res.redirect('/student/section/' + rows[0].id);
+              }
+            });
           }
         });
       }

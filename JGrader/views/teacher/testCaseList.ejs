@@ -27,8 +27,8 @@
       <% } else {
           for(i in testCases) { %>
             <tr>
-              <td><%= testCases[i].input %></td>
-              <td><%= testCases[i].output %></td>
+              <td><%- testCases[i].input.replace(/(?:\r\n|\r|\n)/g, '<br />') %></td>
+              <td><%- testCases[i].output.replace(/(?:\r\n|\r|\n)/g, '<br />') %></td>
               <td><span class="fa fa-trash-o" data-toggle="tooltip" data-placement="left" title="Delete" onclick="confirmDelete(<%= assignment.id + ',' + testCases[i].id %>)"></span></td>
             </tr>
        <% }

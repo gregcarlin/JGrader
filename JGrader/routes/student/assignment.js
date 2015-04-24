@@ -78,7 +78,7 @@ router.use('/:id', function(req, res, next) {
 
 // Gets the assignment information based on id
 router.get('/:id', function(req, res, next) {
-  connection.query("SELECT `files`.`name`,`files`.`contents`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
+  connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
                     FROM `files`, `students`, `assignments`, `submissions` \
                     WHERE `submissions`.`assignment_id` = `assignments`.`id` \
                     AND `submissions`.`student_id` = `students`.`id` \
@@ -93,7 +93,7 @@ router.get('/:id', function(req, res, next) {
     } else {
       var anyCompiled = false;
       for(file in fileData) {
-        fileData[file].display = isAscii(fileData[file].contents);
+        fileData[file].display = isAscii(fileData[file].mime);
         if(fileData[file].compiled) anyCompiled = true;
       }
       // Sends file data
@@ -178,11 +178,12 @@ router.post('/:id/submit', function(req, res, next) {
                 var javaData = fs.readFileSync(req.files[file].path);
                 var classData = req.files[file].isJava ? fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class') : null;
 
-                stmt += "(NULL,?,?,?,?),";
+                stmt += "(NULL,?,?,?,?,?),";
                 args.push(result.insertId);
                 args.push(req.files[file].name);
                 args.push(javaData);
                 args.push(classData);
+                args.push(req.files[file].mimetype);
               }
               stmt = stmt.substr(0, stmt.length-1); // remove last character from stmt (extraneous comma)
               connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
