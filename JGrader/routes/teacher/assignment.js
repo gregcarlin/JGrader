@@ -238,8 +238,17 @@ router.get('/:id', function(req, res, next) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
       next(err);
+    } else {
+      connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, files) {
+        if(err) {
+          render('notFound', {error: 'An unexpected error has occurred.'}, res);
+          err.handled = true;
+          next(err);
+        } else {
+          render('assignment', {title: req.assignment.name, assignment: req.assignment, section: req.section, results: results, id: req.params.id, files: files}, res);
+        }
+      });
     }
-    render('assignment', {title: req.assignment.name, assignment: req.assignment, section: req.section, results: results, id: req.params.id}, res);
   });
 });
 
