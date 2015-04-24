@@ -164,8 +164,12 @@ signIn = function(dbType, userID, res, finish) {
   connection.query('INSERT INTO ?? VALUES(?, ?)', [db, userID, hash], finish);
 };
 
-var plainMimes = ['application/octet-stream', 'text/plain'];
+var plainMimePrefixes = ['text'];
+var plainMimes = ['application/octet-stream'];
 isAscii = function(mime) {
+  for(i in plainMimePrefixes) {
+    if(mime.startsWith(plainMimePrefixes[i] + '/')) return true;
+  }
   for(i in plainMimes) {
     if(plainMimes[i] == mime) return true;
   }
