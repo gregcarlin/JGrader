@@ -164,12 +164,12 @@ signIn = function(dbType, userID, res, finish) {
   connection.query('INSERT INTO ?? VALUES(?, ?)', [db, userID, hash], finish);
 };
 
-// adapted from http://stackoverflow.com/a/10360837/720889
-isAscii = function(fileContents) {
-  for(var i=0; i<fileContents.length; i++) {
-    if(fileContents[i] > 127) return false;
+var plainMimes = ['application/octet-stream', 'text/plain'];
+isAscii = function(mime) {
+  for(i in plainMimes) {
+    if(plainMimes[i] == mime) return true;
   }
-  return true;
+  return false;
 };
 
 transporter = nodemailer.createTransport({
