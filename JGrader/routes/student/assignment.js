@@ -103,7 +103,11 @@ router.get('/:id', function(req, res, next) {
             if(fileData[file].compiled) anyCompiled = true;
           }
           // Sends file data
-          render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, teacherFiles: teacherFiles}, res);
+          var teacherNames = [];
+          for(i in teacherFiles) {
+            teacherNames.push(teacherFiles[i].name);
+          }
+          render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, teacherFiles: teacherNames}, res);
         }
       });
     }
@@ -142,83 +146,100 @@ router.post('/:id/submit', function(req, res, next) {
       }
     }
 
-    // now, check to see if this student already submitted this assignment
-    connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
+    // get attached teacher files
+    connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
       if(err) {
-        res.json({code: -1}); // unknown error
+        res.json({code: -1});
         err.handled = true;
         next(err);
-      } else if(submissions.length > 0) {
-        res.json({code: 3}); // already submitted this assignment
       } else {
+        // now, check to see if this student already submitted this assignment
+        connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
+          if(err) {
+            res.json({code: -1}); // unknown error
+            err.handled = true;
+            next(err);
+          } else if(submissions.length > 0) {
+            res.json({code: 3}); // already submitted this assignment
+          } else {
 
-        var toCompile = "";
-        for(file in req.files) {
-          req.files[file].isJava = req.files[file].path.substr(req.files[file].path.length-4).toLowerCase() == 'java';
-          if(req.files[file].isJava) toCompile += req.files[file].path + " ";
-        }
-
-        if(!toCompile) {
-          res.json({code: 4}); // must have at least one java file
-          return; // easier than another if/else
-        }
-
-        // compile the java files
-        exec("javac " + toCompile, function(err, stdout, stderr) {
-          if(err) { // compilation error, treat all files as non-java files
+            var toCompile = "";
             for(file in req.files) {
-              req.files[file].isJava = false;
+              req.files[file].isJava = req.files[file].path.substr(req.files[file].path.length-4).toLowerCase() == 'java';
+              if(req.files[file].isJava) toCompile += req.files[file].path + " ";
             }
-          }
+            for(file in teacherFiles) {
+              teacherFiles[file].path = './uploads/' + req.user.id + '/' + teacherFiles[file].name;
+              fs.writeFileSync(teacherFiles[file].path, teacherFiles[file].contents);
+              teacherFiles[file].isJava = teacherFiles[file].name.substr(teacherFiles[file].name.length-4).toLowerCase() == 'java';
+              if(teacherFiles[file].isJava) toCompile += teacherFiles[file].path + " ";
+              teacherFiles[file].mimetype = teacherFiles[file].mime;
+              req.files[teacherFiles[file].name] = teacherFiles[file];
+            }
 
-          // finally, make necessary changes in database
-          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, result) {
-            if(err) {
-              res.json({code: -1}); // unknown error
-              err.handled = true;
-              next(err);
-            } else {
+            if(!toCompile) {
+              res.json({code: 4}); // must have at least one java file
+              return; // easier than another if/else
+            }
 
-              var args = [];
-              var stmt = "";
-              for(file in req.files) {
-                // read java and class data into variables
-                var javaData = fs.readFileSync(req.files[file].path);
-                var classData = req.files[file].isJava ? fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class') : null;
-
-                stmt += "(NULL,?,?,?,?,?),";
-                args.push(result.insertId);
-                args.push(req.files[file].name);
-                args.push(javaData);
-                args.push(classData);
-                args.push(req.files[file].mimetype);
+            // compile the java files
+            exec("javac " + toCompile, function(err, stdout, stderr) {
+              if(err) { // compilation error, treat all files as non-java files
+                for(file in req.files) {
+                  req.files[file].isJava = false;
+                }
               }
-              stmt = stmt.substr(0, stmt.length-1); // remove last character from stmt (extraneous comma)
-              connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
+
+              // finally, make necessary changes in database
+              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, result) {
                 if(err) {
-                  fs.removeSync('./uploads/' + req.user.id + '/'); // we must cleanup, even on error
                   res.json({code: -1}); // unknown error
                   err.handled = true;
                   next(err);
                 } else {
-                  // clean up files used for compilation
-                  fs.remove('./uploads/' + req.user.id + '/', function(err) {
+
+                  var args = [];
+                  var stmt = "";
+                  for(file in req.files) {
+                    // read java and class data into variables
+                    var javaData = fs.readFileSync(req.files[file].path);
+                    var classData = req.files[file].isJava ? fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class') : null;
+
+                    stmt += "(NULL,?,?,?,?,?),";
+                    args.push(result.insertId);
+                    args.push(req.files[file].name);
+                    args.push(javaData);
+                    args.push(classData);
+                    args.push(req.files[file].mimetype);
+                  }
+                  stmt = stmt.substr(0, stmt.length-1); // remove last character from stmt (extraneous comma)
+                  connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
                     if(err) {
+                      fs.removeSync('./uploads/' + req.user.id + '/'); // we must cleanup, even on error
                       res.json({code: -1}); // unknown error
                       err.handled = true;
                       next(err);
                     } else {
-                      res.json({code: 0});
+                      // clean up files used for compilation
+                      fs.remove('./uploads/' + req.user.id + '/', function(err) {
+                        if(err) {
+                          res.json({code: -1}); // unknown error
+                          err.handled = true;
+                          next(err);
+                        } else {
+                          res.json({code: 0});
+                        }
+                      });
                     }
                   });
+
                 }
               });
 
-            }
-          });
+            });
 
+          }
         });
-
       }
     });
 

@@ -663,6 +663,19 @@ li .comment-text .fa:last-of-type {
 .io textarea {
   resize: vertical;
 }
+a.teacher-file {
+  color: #CCF !important;
+}
+a.teacher-file:hover {
+  color: #44F !important;
+}
+span.teacher-file {
+  color: #44F;
+  font-weight: 700;
+  font-style: italic;
+  font-variant: small-caps;
+  font-size: 15px;
+}
 
 /* shared between sign in/up, feedback, settings, and other forms (eg add class) */
 .form h2 {
