@@ -15,6 +15,16 @@
       <tr>
         <td><%- assignment.description ? assignment.description : '<em>No Description</em>' %></td>
         <td title="<%= strftime('%b %d %Y, %l:%M %p', new Date(assignment.due)) %>"><strong>Due:</strong> <%- strftime('%m-%d-%y', new Date(assignment.due)) + (Date.now() > assignment.due ? ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="right" title="Late"></span>' : '') %></td>
+        <% if(teacherFiles.length > 0) { %>
+          <% 
+            var list = '';
+            for(i in teacherFiles) {
+              list += teacherFiles[i].name + ', ';
+            }
+            list = list.substring(0, list.length - 2);
+          %>
+          <td><strong>Attached:</strong> <%= list %></td>
+        <% } %>
         <td class="status status-<%= Date.now() > assignment.due ? 'late' : 'notsubmitted' %>">&nbsp;</td>
       </tr>
     </tbody>
