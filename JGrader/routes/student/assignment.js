@@ -78,26 +78,34 @@ router.use('/:id', function(req, res, next) {
 
 // Gets the assignment information based on id
 router.get('/:id', function(req, res, next) {
-  connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
-                    FROM `files`, `students`, `assignments`, `submissions` \
-                    WHERE `submissions`.`assignment_id` = `assignments`.`id` \
-                    AND `submissions`.`student_id` = `students`.`id` \
-                    AND `files`.`submission_id`= `submissions`.`id` \
-                    AND `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData){
+  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
       next(err);
-    } else if(fileData.length == 0) {
-      render('assignment', {title: req.assignment.name, assignment: req.assignment}, res);
     } else {
-      var anyCompiled = false;
-      for(file in fileData) {
-        fileData[file].display = isAscii(fileData[file].mime);
-        if(fileData[file].compiled) anyCompiled = true;
-      }
-      // Sends file data
-      render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled}, res);
+      connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
+                        FROM `files`, `students`, `assignments`, `submissions` \
+                        WHERE `submissions`.`assignment_id` = `assignments`.`id` \
+                        AND `submissions`.`student_id` = `students`.`id` \
+                        AND `files`.`submission_id`= `submissions`.`id` \
+                        AND `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData){
+        if(err) {
+          render('notFound', {error: 'An unexpected error has occurred.'}, res);
+          err.handled = true;
+          next(err);
+        } else if(fileData.length == 0) {
+          render('assignment', {title: req.assignment.name, assignment: req.assignment, teacherFiles: teacherFiles}, res);
+        } else {
+          var anyCompiled = false;
+          for(file in fileData) {
+            fileData[file].display = isAscii(fileData[file].mime);
+            if(fileData[file].compiled) anyCompiled = true;
+          }
+          // Sends file data
+          render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, teacherFiles: teacherFiles}, res);
+        }
+      });
     }
   });
 });
