@@ -34,7 +34,7 @@
   <ul class="nav nav-tabs" role="tablist">
     <% for(i in fileData) { %>
       <% fileData[i].shortName = i; %>
-      <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab" data-canrun="<%= fileData[i].compiled ? 'true' : 'false' %>"><%= fileData[i].name %></a></li>
+      <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab" data-canrun="<%= fileData[i].compiled ? 'true' : 'false' %>"<%- teacherFiles.indexOf(fileData[i].name) >= 0 ? ' class="teacher-file"' : '' %>><%= fileData[i].name %></a></li>
     <% } %>
     <li role="presentation" id="execute" class="icon" data-toggle="tooltip" data-placement="top" title="Run"><span class="fa fa-play-circle-o"></span></li>
     <li role="presentation" id="test" class="icon" data-toggle="tooltip" data-placement="top" title="Run Tests"><span class="fa fa-th-list"></span></li>
@@ -44,7 +44,7 @@
 <div class="tab-content">
   <% for (i in fileData) { %>
     <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>">
-      <pre><code class="prettyprint language-java linenums"><%= fileData[i].display ? fileData[i].contents : 'This is a binary file. Download it to view it.' %></code><ol class="comments"></ol></pre>
+      <pre><%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">You uploaded this file.</span>\n' : '' %><code class="prettyprint language-java linenums"><%= fileData[i].display ? fileData[i].contents : 'This is a binary file. Download it to view it.' %></code><ol class="comments"></ol></pre>
     </div>
   <% } %>
 </div>
