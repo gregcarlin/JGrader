@@ -15,16 +15,6 @@
       <tr>
         <td><%- assignment.description ? assignment.description : '<em>No Description</em>' %></td>
         <td title="<%= strftime('%b %d %Y, %l:%M %p', new Date(assignment.due)) %>"><strong>Due:</strong> <%= strftime('%m-%d-%y', new Date(assignment.due)); %><%- fileData[0].submitted > assignment.due ? ' <span class="fa fa-clock-o" data-toggle="tooltip" data-placement="right" title="Late"></span>' : '' %></td>
-        <% if(teacherFiles.length > 0) { %>
-          <% 
-            var list = '';
-            for(i in teacherFiles) {
-              list += teacherFiles[i].name + ', ';
-            }
-            list = list.substring(0, list.length - 2);
-          %>
-          <td><strong>Attached:</strong> <%= list %></td>
-        <% } %>
         <td><strong>Grade:</strong> <%- fileData[0].grade ? fileData[0].grade : '<em>Not graded.</em>' %></td>
         <td class="status status-submitted">&nbsp;</td>
       </tr>
@@ -43,14 +33,14 @@
   <ul class="nav nav-tabs" role="tablist">
     <% for(i in fileData) { %>
       <% fileData[i].shortName = i; %>
-      <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab"><%= fileData[i].name %></a></li>
+      <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab"<%- teacherFiles.indexOf(fileData[i].name) >= 0 ? ' class="teacher-file"' : '' %>><%= fileData[i].name %></a></li>
       <% } %>
   </ul>
 </div>
 <div class="tab-content">
     <% for (i in fileData) { %>
       <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>">
-        <pre><code class="prettyprint language-java linenums"><%= fileData[i].display ? fileData[i].contents : 'This is a binary file and cannot be displayed.' %></code><ol class="comments"></ol></pre>
+        <pre><%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">This file was uploaded by your teacher.</span>\n' : '' %><code class="prettyprint language-java linenums"><%= fileData[i].display ? fileData[i].contents : 'This is a binary file and cannot be displayed.' %></code><ol class="comments"></ol></pre>
       </div>
     <% } %>
 </div>
