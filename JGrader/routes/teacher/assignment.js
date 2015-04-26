@@ -151,8 +151,8 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due, file
         var query = "INSERT INTO `files-teachers` VALUES";
         var params = [];
         for(i in files) {
-          query += "(NULL, ?, ?, ?),";
-          params.push(assignmentID, files[i].name, files[i].buffer);
+          query += "(NULL, ?, ?, ?, ?),";
+          params.push(assignmentID, files[i].name, files[i].buffer, files[i].mimetype);
         }
         if(params.length > 0) {
           query = query.substring(0, query.length-1);
@@ -301,15 +301,7 @@ router.get('/:id/delete', function(req, res, next) {
       err.handled = true;
       next(err);
     } else {
-      connection.query("DELETE FROM `submissions` JOIN `files` ON `files`.`submission_id` = `submissions`.`id` WHERE `submissions`.`assignment_id` = ?", [req.params.id], function(err) {
-        if(err) {
-          render('notFound', {error: 'Unable to delete assignment. Please go back and try again.'}, res);
-          err.handled = true;
-          next(err);
-        } else {
-          res.redirect('/teacher/assignment');
-        }
-      });
+      res.redirect('/teacher/assignment');
     }
   });
 });
