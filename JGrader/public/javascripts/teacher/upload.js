@@ -11,6 +11,8 @@ $('#assign-create').dropzone({
   method: 'post',
   uploadMultiple: true,
   parallelUploads: 100,
+  addRemoveLinks: true,
+  dictRemoveFile: '<img src="/images/times.svg">',
   init: function() {
     var myDropzone = this;
 
