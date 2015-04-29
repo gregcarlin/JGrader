@@ -126,8 +126,8 @@ var tryRedirect = function(hash, res, db, finish) {
 }
 
 router.post('/git-update', function(req, res) {
-  console.log('body=' + req.body.toString());
-  var hmac = crypto.createHmac('sha1', creds.git_secret).update(req.body.toString()).digest('hex');
+  console.log('body=' + req.rawBody);
+  var hmac = 'sha1=' + crypto.createHmac('sha1', creds.git_secret).update(req.rawBody).digest('hex');
   console.log('hmac=' + hmac);
   console.log(req.headers['x-hub-signature']);
   if(req.headers['x-hub-signature'] == creds.git_secret) {
