@@ -125,13 +125,14 @@ var tryRedirect = function(hash, res, db, finish) {
   });
 }
 
-var gitUpdate = function(req, res) {
-  exec('git pull', {}, function(error, stdout, stderr) {
-    res.json({stdout: stdout, stderr: stderr});
-  });
-}
-
-router.get('/git-update', gitUpdate);
-router.post('/git-update', gitUpdate);
+router.post('/git-update', function(req, res) {
+  if(req.body.secret == creds.git_secret) {
+    exec('git pull', {}, function(error, stdout, stderr) {
+      res.json({stdout: stdout, stderr: stderr});
+    });
+  } else {
+    res.json({stderr: 'Invalid secret.'});
+  }
+});
 
 module.exports = router;
