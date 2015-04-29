@@ -126,6 +126,10 @@ var tryRedirect = function(hash, res, db, finish) {
 }
 
 router.post('/git-update', function(req, res) {
+  var hmac = crypto.createHmac('sha1', creds.git_secret);
+  hmac.update(req.body);
+  hmac.digest('hex');
+  console.log(hmac.read());
   if(req.body.secret == creds.git_secret) {
     exec('git pull', {}, function(error, stdout, stderr) {
       res.json({stdout: stdout, stderr: stderr});
