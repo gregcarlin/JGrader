@@ -126,7 +126,7 @@ var tryRedirect = function(hash, res, db, finish) {
 }
 
 var gitUpdate = function(req, res) {
-  exec('git pull && forever stopall && npm install && npm start', {}, function(error, stdout, stderr) {
+  exec('git pull', {}, function(error, stdout, stderr) {
     res.json({stdout: stdout, stderr: stderr});
   });
 }
