@@ -319,6 +319,24 @@ dl.description dt {
   font-weight: 300;
   margin-top: 15px;
 }
+.files.dropzone-previews .dz-remove {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  float: right;
+  position: relative;
+  top: -25px;
+  background-color: #F59F9F;
+  border-radius: 3px;
+}
+.files.dropzone-previews .dz-remove:hover, .files.dropzone-previews .dz-remove:focus {
+  background-color: #D78585;
+}
+.files.dropzone-previews .dz-remove img {
+  width: 100%;
+  position: relative;
+  top: -3px;
+}
 
 /* assignment not complete page (only for students) */
 #actions {
