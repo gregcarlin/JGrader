@@ -129,7 +129,7 @@ router.post('/git-update', function(req, res) {
   console.log('body=' + req.body.toString());
   var hmac = crypto.createHmac('sha1', creds.git_secret).update(req.body.toString()).digest('hex');
   console.log('hmac=' + hmac);
-  console.log('header=' + req.headers['x-hub-signature']);
+  console.log(req.headers['x-hub-signature']);
   if(req.headers['x-hub-signature'] == creds.git_secret) {
     exec('git pull', {}, function(error, stdout, stderr) {
       res.json({stdout: stdout, stderr: stderr});
