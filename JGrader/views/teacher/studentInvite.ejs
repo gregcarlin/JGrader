@@ -9,3 +9,24 @@
     <div class="name">Invite</div>
   </div>
 </div>
+<form class="form" role="form" action="#" method="POST" id="invite">
+  <label>
+    Paste or type a list of emails.
+    <textarea name="emails"></textarea>
+  </label>
+  Separate emails with newlines, semicolons, and/or spaces.
+  Emails are extracted from the text and all other information is ignored.
+  <label>Invite these students to the following sections:</label>
+  <ul class="section-list">
+    <% 
+      if(typeof sections != 'undefined') {
+        for(i in sections) {
+    %>
+    <li><label><input type="checkbox" name="section[]" value="<%= sections[i].id %>" /><%= sections[i].name %></label></li>
+    <%
+        }
+      }
+    %>
+  </ul>
+  <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+</form>
