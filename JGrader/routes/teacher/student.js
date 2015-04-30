@@ -71,11 +71,49 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/invite', function(req, res, next) {
-  render('studentInvite', {}, res);
+  connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [req.user.id], function(err, rows) {
+    if(err) {
+      render('studentInvite', {error: 'An unknown error has occurred.'}, res);
+      err.handled = true;
+      next(err);
+    } else {
+      render('studentInvite', {sections: rows}, res);
+    }
+  });
 });
 
 router.post('/invite', function(req, res, next) {
-  // TODO
+  if(req.body.emails) {
+    connection.query("SELECT `fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, result) {
+      if(err || !result || result.length <= 0) {
+        render('studentInvite', {error: 'An unknown error has occurred.'}, res);
+        err.handled = true;
+        next(err);
+      } else {
+        var emails = req.body.emails.split(/[ ;(\r\n|\n|\r)]/);
+        var sent = '';
+        for(i in emails) {
+          if(emails[i].indexOf('@') > 0) { // @ can't be first character (or last but we don't bother checking for that)
+            sent += emails[i] + ', ';
+            var html = 'Your teacher, ' + result[0].fname + ' ' + result[0].lname + ' has invited you to join his or her class on jGrader, the tool for collecting computer science assignments in the cloud. ';
+            // TODO add class code and work for multiple classes
+            html += 'In order to accept this invitation, please click this link or copy it into your browser: <a href="http://jgrader.com/student/join/">http://jgrader.com/student/join/</a>';
+            var mailOptions = {
+              from: creds.email_user,
+              to: emails[i],
+              subject: result[0].fname + ' ' + result[0].lname + ' has invited you to jGrader',
+              html: html
+            };
+            transporter.sendMail(mailOptions, function(err, info) {}); // hope it works
+          }
+        }
+        sent = sent.substring(0, sent.length - 2);
+        render('studentInvite', {success: 'Invitations have been sent to the following addresses: ' + sent}, res);
+      }
+    });
+  } else {
+    render('studentInvite', {error: 'No emails were specified so no invitations were sent.'}, res);
+  }
 });
 
 router.use('/:id', function(req, res, next) {

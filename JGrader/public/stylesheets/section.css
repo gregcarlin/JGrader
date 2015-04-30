@@ -773,11 +773,11 @@ input + .iama {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-#assign-create input[type="checkbox"] {
+.section-list input[type="checkbox"] {
   margin-bottom: 0;
   margin-right: 5px;
 }
-#assign-create .section-list {
+.section-list {
   padding-left: 0;
 }
 #add-row {
@@ -830,4 +830,15 @@ input + .iama {
 /* privacy policy page */
 .privacy a {
   color: #FFF;
+}
+
+/* invite student page */
+#invite {
+  font-weight: 300;
+}
+#invite textarea {
+  margin-bottom: 5px;
+}
+#invite button {
+  margin-top: 20px;
 }
