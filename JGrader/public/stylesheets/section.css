@@ -801,8 +801,6 @@ input + .iama {
 
 /* faq page */
 .faq .container {
-  color: #FFF;
-  padding-top: 55px;
   text-align: center;
 }
 .faq .container ul {
@@ -820,4 +818,16 @@ input + .iama {
 }
 .faq .container ul li h2 {
   margin-top: 0;
+}
+
+/* general container (used on faq and privacy, maybe more) */
+.container {
+  color: #FFF;
+  padding-top: 55px;
+  padding-bottom: 55px;
+}
+
+/* privacy policy page */
+.privacy a {
+  color: #FFF;
 }
