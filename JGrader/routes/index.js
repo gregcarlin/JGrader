@@ -114,6 +114,10 @@ router.get('/faq', function(req, res) {
   res.render('faq');
 });
 
+router.get('/privacy', function(req, res) {
+  res.render('privacy');
+});
+
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, db, finish) {
   logIn(hash, db + 's', function(id) {
@@ -125,13 +129,15 @@ var tryRedirect = function(hash, res, db, finish) {
   });
 }
 
-var gitUpdate = function(req, res) {
-  exec('git pull', {}, function(error, stdout, stderr) {
-    res.json({stdout: stdout, stderr: stderr});
-  });
-}
-
-router.get('/git-update', gitUpdate);
-router.post('/git-update', gitUpdate);
+router.post('/git-update', function(req, res) {
+  var hmac = 'sha1=' + crypto.createHmac('sha1', creds.git_secret).update(req.rawBody).digest('hex');
+  if(req.headers['x-hub-signature'] == hmac) {
+    exec('git pull', {}, function(error, stdout, stderr) {
+      res.json({stdout: stdout, stderr: stderr});
+    });
+  } else {
+    res.json({stderr: 'Invalid secret.'});
+  }
+});
 
 module.exports = router;

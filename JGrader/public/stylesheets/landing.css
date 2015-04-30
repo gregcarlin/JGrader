@@ -248,3 +248,10 @@ a:hover {
     font-size: 25vw;
   }
 }
+
+/* footer */
+.footer {
+  background-color: #484A6C;
+  padding-bottom: 10px;
+  text-align: center;
+}
