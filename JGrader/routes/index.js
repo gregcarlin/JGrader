@@ -114,6 +114,10 @@ router.get('/faq', function(req, res) {
   res.render('faq');
 });
 
+router.get('/privacy', function(req, res) {
+  res.render('privacy');
+});
+
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, db, finish) {
   logIn(hash, db + 's', function(id) {
