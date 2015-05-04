@@ -207,6 +207,16 @@ body {
   transform: translateY(-50%);
   white-space: nowrap;
 }
+.main .page-header .tooltip > .tooltip-inner {
+  background-color: #FFF;
+  color: #000;
+}
+.main .page-header .tooltip.left > .tooltip-arrow {
+  border-left-color: #FFF !important;
+}
+.main .page-header .tooltip.bottom > .tooltip-arrow {
+  border-bottom-color: #FFF !important;
+}
 .table {
   margin-bottom: 0;
 }
