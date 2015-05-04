@@ -39,8 +39,8 @@
                   }
                 }
               %>
-              <td data-sort-value="<%= rows[i].submitted ? submitted.getTime() : 0 %>" title="<%= strftime('%b %d %Y, %l:%M %p', submitted) %>"><%- rows[i].submitted ? submittedStr : 'Not submitted' %></td>
-              <td data-sort-value="<%= rows[i].grade ? rows[i].grade : 0 %>"><%= rows[i].grade ? rows[i].grade : 'Not graded' %></td>
+              <td data-sort-value="<%= rows[i].submitted ? submitted.getTime() : 0 %>" title="<%= strftime('%b %d %Y, %l:%M %p', submitted) %>"><%- rows[i].submitted ? submittedStr : 'Never' %></td>
+              <td data-sort-value="<%= rows[i].grade ? rows[i].grade : 0 %>"><%- rows[i].grade ? (rows[i].grade + '%') : '<em>Not graded</em>' %></td>
             </tr>
        <% }
          } %>
