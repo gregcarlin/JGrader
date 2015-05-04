@@ -40,8 +40,8 @@
                 var dueStr = strftime('%m-%d-%y', due);
               %>
               <td title="<%= strftime('%b %d %Y, %l:%M %p', due) %>" data-sort-value="<%= due ? due.getTime() : 0 %>"><%= dueStr %></td>
-              <td data-sort-value="<%= rows[i].total == 0 ? 0 : (rows[i].complete / rows[i].total) %>"><%= rows[i].complete %> of <%= rows[i].total %></td>
-              <td data-sort-value="<%= rows[i].complete == 0 ? 0 : (rows[i].graded / rows[i].complete) %>"><%= rows[i].graded %> of <%= rows[i].complete %></td>
+              <td data-sort-value="<%= rows[i].total == 0 ? 0 : (rows[i].complete / rows[i].total) %>"><%= rows[i].complete ? rows[i].complete : 0 %> of <%= rows[i].total ? rows[i].total : 0 %></td>
+              <td data-sort-value="<%= rows[i].complete == 0 ? 0 : (rows[i].graded / rows[i].complete) %>"><%= rows[i].graded ? rows[i].graded : 0 %> of <%= rows[i].complete ? rows[i].complete : 0 %></td>
             </tr>
        <% }
          } %>
