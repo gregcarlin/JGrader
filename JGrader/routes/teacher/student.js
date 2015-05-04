@@ -83,32 +83,58 @@ router.get('/invite', function(req, res, next) {
 });
 
 router.post('/invite', function(req, res, next) {
-  if(req.body.emails) {
+  if(req.body.emails && req.body.section) {
     connection.query("SELECT `fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, result) {
       if(err || !result || result.length <= 0) {
         render('studentInvite', {error: 'An unknown error has occurred.'}, res);
         err.handled = true;
         next(err);
       } else {
-        var emails = req.body.emails.split(/[ ;(\r\n|\n|\r)]/);
-        var sent = '';
-        for(i in emails) {
-          if(emails[i].indexOf('@') > 0) { // @ can't be first character (or last but we don't bother checking for that)
-            sent += emails[i] + ', ';
-            var html = 'Your teacher, ' + result[0].fname + ' ' + result[0].lname + ' has invited you to join his or her class on jGrader, the tool for collecting computer science assignments in the cloud. ';
-            // TODO add class code and work for multiple classes
-            html += 'In order to accept this invitation, please click this link or copy it into your browser: <a href="http://jgrader.com/student/join/">http://jgrader.com/student/join/</a>';
-            var mailOptions = {
-              from: creds.email_user,
-              to: emails[i],
-              subject: result[0].fname + ' ' + result[0].lname + ' has invited you to jGrader',
-              html: html
-            };
-            transporter.sendMail(mailOptions, function(err, info) {}); // hope it works
+        connection.query("SELECT `id`,`name`,`code` FROM `sections` WHERE `teacher_id` = ?", [req.user.id], function(err, mySections) {
+          if(err) {
+            render('studentInvite', {error: 'An unknown error has occurred.'}, res);
+            err.handled = true;
+            next(err);
+          } else {
+            var links = '';
+            var names = '';
+            for(i in req.body.section) {
+              for(j in mySections) {
+                if(mySections[j].id == req.body.section[i]) {
+                  codes.push(mySections[j].code);
+                  links += '<a href="http://jgrader.com/student/join/' + mySections[j].code + '>http://jgrader.com/student/join/' + mySections[j].code + '</a><br />';
+                  names += mySections[j].name + ', ';
+                  break;
+                }
+              }
+            }
+            if(names.length <= 2) {
+              render('studentInvite', {error: 'No invitations were sent because no valid sections were selected.'}, res);
+            } else {
+              names = names.substring(0, names.length - 2);
+
+              var emails = req.body.emails.split(/[ ;(\r\n|\n|\r)]/);
+              var sent = '';
+              for(i in emails) {
+                if(emails[i].indexOf('@') > 0) { // @ can't be first character (or last but we don't bother checking for that)
+                  sent += emails[i] + ', ';
+                  var html = 'Your teacher, ' + result[0].fname + ' ' + result[0].lname + ' has invited you to join his or her class on jGrader, the tool for collecting computer science assignments in the cloud. ';
+                  html += 'In order to accept these invitations, please click the link or links below.<br />';
+                  html += links;
+                  var mailOptions = {
+                    from: creds.email_user,
+                    to: emails[i],
+                    subject: result[0].fname + ' ' + result[0].lname + ' has invited you to jGrader',
+                    html: html
+                  };
+                  transporter.sendMail(mailOptions, function(err, info) {}); // hope it works
+                }
+              }
+              sent = sent.substring(0, sent.length - 2);
+              render('studentInvite', {success: 'Invitations have been sent to the following addresses: ' + sent}, res);
+            }
           }
-        }
-        sent = sent.substring(0, sent.length - 2);
-        render('studentInvite', {success: 'Invitations have been sent to the following addresses: ' + sent}, res);
+        });
       }
     });
   } else {
