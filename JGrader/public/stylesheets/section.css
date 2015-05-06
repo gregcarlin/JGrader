@@ -128,12 +128,10 @@ body {
 }
 .main .page-header .right-header {
   height: 100%;
-  display: table-cell;
   vertical-align: middle;
   font-size: 36px;
   margin-left: auto;
   margin-right: auto;
-  width: 100%;
   font-weight: 300;
 }
 .main .page-header .right-header .name {
@@ -141,9 +139,16 @@ body {
   margin: 0;
   padding-left: 22px;
   display: inline-block;
+  margin-top: 65%;
 }
 .main .page-header .right-header .name a {
   color: #FFF;
+}
+.main .page-header .mid-header {
+  width: 26px;
+}
+.main .page-header .mid-header > a {
+  margin-bottom: 5px;
 }
 .main .page-header .left-header h1 a {
   color: rgb(51, 51, 51);
@@ -151,7 +156,7 @@ body {
 .main .page-header .left-header h1 a:hover {
   text-decoration: none;
 }
-.main .page-header .right-header > a {
+.main .page-header > div > a {
   box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.5);
   float: right;
   font-size: 36px;
@@ -159,38 +164,42 @@ body {
   height: 50px;
   border-radius: 100%;
   color: #FFF;
+}
+.main .page-header > .right-header > a {
   margin-right: 10px;
 }
-.main .page-header .right-header > a:hover, .main .page-header .right-header > a:focus {
+.main .page-header > div > a:hover, .main .page-header > div > a:focus {
   text-decoration: none;
   color: #CCC;
 }
-.main .page-header .right-header > a > .fa {
+.main .page-header > div > a > .fa {
   display: block;
   text-align: center;
   padding-top: 16%;
 }
-.main .page-header#header-classes .right-header > a {
+.main .page-header#header-classes > div > a {
   background-color: #97C3FA;
 }
-.main .page-header#header-classes .right-header > a:hover, .main .page-header#header-classes .right-header > a:focus {
+.main .page-header#header-classes > div > a:hover, .main .page-header#header-classes > div > a:focus {
   background-color: #6B99C3;
 }
-.main .page-header#header-assignments .right-header > a {
+.main .page-header#header-assignments > div > a {
   background-color: #FFA1A1;
 }
-.main .page-header#header-assignments .right-header > a:hover, .main .page-header#header-assignments .right-header > a:focus {
+.main .page-header#header-assignments > div > a:hover, .main .page-header#header-assignments > div > a:focus {
   background-color: #C36B6B;
 }
-.main .page-header#header-students .right-header > a {
+.main .page-header#header-students > div > a {
   background-color: #A8F59F;
 }
-.main .page-header#header-students .right-header > a:hover, .main .page-header#header-students .right-header > a:focus {
+.main .page-header#header-students > div > a:hover, .main .page-header#header-students > div > a:focus {
   background-color: #97C36B;
 }
 .main .page-header .left-header {
   height: 100%;
   background-color: #fff;
+}
+.main .page-header > div {
   display: inline-block;
 }
 .main .page-header .left-header h1 {
@@ -199,7 +208,7 @@ body {
   margin: 0;
   display: inline-block;
   padding-left: 22px;
-  padding-right: 22px;
+  padding-right: 40px;
   position: relative;
   top: 50%;
   -webkit-transform: translateY(-50%);
@@ -216,6 +225,9 @@ body {
 }
 .main .page-header .tooltip.bottom > .tooltip-arrow {
   border-bottom-color: #FFF !important;
+}
+.main .page-header .tooltip.right > .tooltip-arrow {
+  border-right-color: #FFF !important;
 }
 .table {
   margin-bottom: 0;
