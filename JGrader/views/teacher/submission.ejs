@@ -5,11 +5,13 @@
   <div class="left-header">
     <h1><a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a></h1>
   </div>
+  <div class="mid-header">
+    <a href="/teacher/submission/<%= submission.id %>/download" class="right" data-toggle="tooltip" data-placement="right" title="Download All"><span class="fa fa-download"></span></a>
+  </div>
   <div class="right-header">
     <div class="name">
       <a href="/teacher/student/<%= student.id %>"><%= student.fname + ' ' + student.lname %></a> 
     </div>
-    <a href="/teacher/submission/<%= submission.id %>/download" class="right" data-toggle="tooltip" data-placement="left" title="Download All"><span class="fa fa-download"></span></a>
   </div>
 </div>
 <dl class="description">

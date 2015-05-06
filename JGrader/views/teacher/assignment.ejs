@@ -5,12 +5,14 @@
   <div class="left-header">
     <h1><%= assignment.name %></h1>
   </div>
+  <div class="mid-header">
+    <a href="/teacher/assignment/<%= id %>.csv" class="right" data-toggle="tooltip" data-placement="right" title="Export"><span class="fa fa-table"></span></a>
+    <a href="/teacher/assignment/<%= id %>/testCase" class="right" data-toggle="tooltip" data-placement="right" title="Test Cases"><span class="fa fa-th-list"></span></a>
+  </div>
   <div class="right-header">
     <div class="name">
       <a href="/teacher/section/<%= section.id %>" class="sub-header"><%= section.name %></a>
     </div>
-    <a href="/teacher/assignment/<%= id %>.csv" class="right" data-toggle="tooltip" data-placement="bottom" title="Export"><span class="fa fa-table"></span></a>
-    <a href="/teacher/assignment/<%= id %>/testCase" class="right" data-toggle="tooltip" data-placement="bottom" title="Test Cases"><span class="fa fa-th-list"></span></a>
   </div>
 </div>
 <dl class="description">
