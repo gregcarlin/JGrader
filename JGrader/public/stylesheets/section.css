@@ -136,10 +136,11 @@ body {
 }
 .main .page-header .right-header .name {
   color: #fff;
-  margin: 0;
   padding-left: 22px;
   display: inline-block;
-  margin-top: 65%;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
 .main .page-header .right-header .name a {
   color: #FFF;
