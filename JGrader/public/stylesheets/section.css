@@ -148,8 +148,11 @@ body {
   color: #FFF;
 }
 .main .page-header .mid-header {
-  width: 26px;
+  width: 31px;
   height: 100%;
+}
+.main .page-header .mid-header-2 {
+  transform: translateY(-18%);
 }
 .main .page-header .mid-header > a {
   margin-bottom: 5px;
@@ -171,42 +174,54 @@ body {
   height: 50px;
   border-radius: 100%;
   color: #FFF;
+  margin-bottom: 5px;
+  margin-right: 5px;
 }
 .main .page-header > .right-header .nav-chev {
   float: right;
   width: 50px;
 }
-/*.main .page-header > .right-header .nav-chev a {
-  margin-right: 10px;
-}*/
-/*.main .page-header > .right-header > a:last-of-type {
-  margin-left: 100px;
-}*/
-.main .page-header > div > a:hover, .main .page-header > div > a:focus {
+.main .page-header > div > a:hover,
+.main .page-header > div > a:focus,
+.main .page-header > div > .nav-chev > a:hover,
+.main .page-header > div > .nav-chev > a:focus {
   text-decoration: none;
   color: #CCC;
 }
-.main .page-header > div > a  .fa {
+.main .page-header > div > a .fa,
+.main .page-header > div > .nav-chev > a .fa {
   display: block;
   text-align: center;
   padding-top: 16%;
 }
-.main .page-header#header-classes > div > a {
+.main .page-header#header-classes > div > a,
+.main .page-header#header-classes > div > .nav-chev > a {
   background-color: #97C3FA;
 }
-.main .page-header#header-classes > div > a:hover, .main .page-header#header-classes > div > a:focus {
+.main .page-header#header-classes > div > a:hover,
+.main .page-header#header-classes > div > a:focus,
+.main .page-header#header-classes > div > .nav-chev > a:hover,
+.main .page-header#header-classes > div > .nav-chev > a:focus {
   background-color: #6B99C3;
 }
-.main .page-header#header-assignments > div > a {
+.main .page-header#header-assignments > div > a,
+.main .page-header#header-assignments > div > .nav-chev > a {
   background-color: #FFA1A1;
 }
-.main .page-header#header-assignments > div > a:hover, .main .page-header#header-assignments > div > a:focus {
+.main .page-header#header-assignments > div > a:hover,
+.main .page-header#header-assignments > div > a:focus,
+.main .page-header#header-assignments > div > .nav-chev > a:hover,
+.main .page-header#header-assignments > div > .nav-chev > a:focus {
   background-color: #C36B6B;
 }
-.main .page-header#header-students > div > a {
+.main .page-header#header-students > div > a,
+.main .page-header#header-students > div > .nav-chev > a {
   background-color: #A8F59F;
 }
-.main .page-header#header-students > div > a:hover, .main .page-header#header-students > div > a:focus {
+.main .page-header#header-students > div > a:hover,
+.main .page-header#header-students > div > a:focus,
+.main .page-header#header-students > div > .nav-chev > a:hover,
+.main .page-header#header-students > div > .nav-chev > a:focus {
   background-color: #97C36B;
 }
 .main .page-header .left-header {
