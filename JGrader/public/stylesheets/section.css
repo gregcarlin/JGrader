@@ -133,6 +133,8 @@ body {
   margin-left: auto;
   margin-right: auto;
   font-weight: 300;
+  display: table-cell;
+  width: 100%;
 }
 .main .page-header .right-header .name {
   color: #fff;
@@ -147,9 +149,13 @@ body {
 }
 .main .page-header .mid-header {
   width: 26px;
+  height: 100%;
 }
 .main .page-header .mid-header > a {
   margin-bottom: 5px;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
 .main .page-header .left-header h1 a {
   color: rgb(51, 51, 51);
@@ -157,7 +163,7 @@ body {
 .main .page-header .left-header h1 a:hover {
   text-decoration: none;
 }
-.main .page-header > div > a {
+.main .page-header > div > a, .main .page-header > div > .nav-chev > a {
   box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.5);
   float: right;
   font-size: 36px;
@@ -166,14 +172,21 @@ body {
   border-radius: 100%;
   color: #FFF;
 }
-.main .page-header > .right-header > a {
-  margin-right: 10px;
+.main .page-header > .right-header .nav-chev {
+  float: right;
+  width: 50px;
 }
+/*.main .page-header > .right-header .nav-chev a {
+  margin-right: 10px;
+}*/
+/*.main .page-header > .right-header > a:last-of-type {
+  margin-left: 100px;
+}*/
 .main .page-header > div > a:hover, .main .page-header > div > a:focus {
   text-decoration: none;
   color: #CCC;
 }
-.main .page-header > div > a > .fa {
+.main .page-header > div > a  .fa {
   display: block;
   text-align: center;
   padding-top: 16%;
@@ -199,6 +212,7 @@ body {
 .main .page-header .left-header {
   height: 100%;
   background-color: #fff;
+  display: table-cell;
 }
 .main .page-header > div {
   display: inline-block;

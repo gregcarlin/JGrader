@@ -6,11 +6,15 @@
     <h1><a href="/teacher/assignment/<%= assignment.id %>"><%= assignment.name %></a></h1>
   </div>
   <div class="mid-header">
-    <a href="/teacher/submission/<%= submission.id %>/download" class="right" data-toggle="tooltip" data-placement="right" title="Download All"><span class="fa fa-download"></span></a>
+    <a href="/teacher/submission/<%= submission.id %>/download" class="right" data-toggle="tooltip" data-placement="bottom" title="Download All"><span class="fa fa-download"></span></a>
   </div>
   <div class="right-header">
     <div class="name">
       <a href="/teacher/student/<%= student.id %>"><%= student.fname + ' ' + student.lname %></a> 
+    </div>
+    <div class="nav-chev">
+      <a href="" class="right" data-toggle="tooltip" data-placement="bottom" title="Previous"><span class="fa fa-chevron-up"></span></a>
+      <a href="" class="right" data-toggle="tooltip" data-placement="bottom" title="Next"><span class="fa fa-chevron-down"></span></a>
     </div>
   </div>
 </div>
