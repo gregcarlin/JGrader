@@ -5,11 +5,13 @@
   <div class="left-header">
     <h1>Classes</h1>
   </div>
+  <div class="mid-header">
+    <a href="/teacher/assignment/create/<%= sectionID %>" class="right plus-button" data-toggle="tooltip" data-placement="bottom" title="New Assignment"><span class="fa fa-plus"></span></a>
+  </div>
   <div class="right-header">
     <div class="name">
       <span class="edit" data-key="updatename" data-default="none" id="sec-edit"><span><%= sectionName %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil" data-toggle="tooltip" data-placement="bottom" title="Edit"></span>
     </div>
-    <a href="/teacher/assignment/create/<%= sectionID %>" class="right plus-button" data-toggle="tooltip" data-placement="left" title="New Assignment"><span class="fa fa-plus"></span></a>
   </div>
 </div>
 <dl class="description">

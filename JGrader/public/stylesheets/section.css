@@ -194,6 +194,9 @@ body {
   text-align: center;
   padding-top: 16%;
 }
+.main .page-header > div > .nav-chev > a:first-child > span {
+  padding-top: 8%;
+}
 .main .page-header#header-classes > div > a,
 .main .page-header#header-classes > div > .nav-chev > a {
   background-color: #97C3FA;
