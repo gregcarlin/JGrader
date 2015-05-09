@@ -13,8 +13,16 @@
       <a href="/teacher/student/<%= student.id %>"><%= student.fname + ' ' + student.lname %></a> 
     </div>
     <div class="nav-chev">
-      <a href="" class="right" data-toggle="tooltip" data-placement="left" title="Previous"><span class="fa fa-chevron-up"></span></a>
-      <a href="" class="right" data-toggle="tooltip" data-placement="left" title="Next"><span class="fa fa-chevron-down"></span></a>
+      <% if(previous < 0) { %>
+        <a href="#" class="right disabled"><span class="fa fa-chevron-up"></span></a>
+      <% } else { %>
+        <a href="/teacher/submission/<%= previous %>" class="right" data-toggle="tooltip" data-placement="left" title="Previous"><span class="fa fa-chevron-up"></span></a>
+      <% } %>
+      <% if(next < 0) { %>
+        <a href="#" class="right disabled"><span class="fa fa-chevron-down"></span></a>
+      <% } else { %>
+        <a href="/teacher/submission/<%= next %>" class="right" data-toggle="tooltip" data-placement="left" title="Next"><span class="fa fa-chevron-down"></span></a>
+      <% } %>
     </div>
   </div>
 </div>

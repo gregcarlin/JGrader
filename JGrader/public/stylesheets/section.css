@@ -217,6 +217,14 @@ body {
 .main .page-header#header-assignments > div > .nav-chev > a:focus {
   background-color: #C36B6B;
 }
+.main .page-header#header-assignments > div a.disabled,
+.main .page-header#header-assignments > div a.disabled:hover,
+.main .page-header#header-assignments > div a.disabled:focus,
+.main .page-header#header-assignments > div a.disabled:active {
+  background-color: #A07979;
+  color: #AAA;
+  cursor: default;
+}
 .main .page-header#header-students > div > a,
 .main .page-header#header-students > div > .nav-chev > a {
   background-color: #A8F59F;
