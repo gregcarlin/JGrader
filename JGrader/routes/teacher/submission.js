@@ -55,13 +55,29 @@ router.get('/:id', function(req, res, next) {
     } else {
       connection.query("SELECT `id`,`name`,`contents`,`compiled`,`mime` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
         if(err) {
-          render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + req.assignment.name, student: students[0], fileData: [], submission: req.submission, assignment: req.assignment, error: 'Unable to retrieve file data.', anyCompiled: true, teacherFiles: []}, res);
+          render('submission', {
+            title: students[0].fname + ' ' + students[0].lname + "'s submission to " + req.assignment.name,
+            student: students[0],
+            fileData: [],
+            submission: req.submission,
+            assignment: req.assignment,
+            error: 'Unable to retrieve file data.',
+            anyCompiled: true,
+            teacherFiles: []}, res);
           err.handled = true;
           next(err);
         } else {
           connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.assignment.id], function(err, teacherFiles) {
             if(err) {
-              render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + req.assignment.name, student: students[0], fileData: [], submission: req.submission, assignment: req.assignment, error: 'Unable to retrieve file data.', anyCompiled: true, teacherFiles: []}, res);
+              render('submission', {
+                title: students[0].fname + ' ' + students[0].lname + "'s submission to " + req.assignment.name,
+                student: students[0],
+                fileData: [],
+                submission: req.submission,
+                assignment: req.assignment,
+                error: 'Unable to retrieve file data.',
+                anyCompiled: true,
+                teacherFiles: []}, res);
               err.handled = true;
               next(err);
             } else {
@@ -74,7 +90,14 @@ router.get('/:id', function(req, res, next) {
               for(i in teacherFiles) {
                 teacherNames.push(teacherFiles[i].name);
               }
-              render('submission', {title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name, student: students[0], fileData: fileData, submission: req.submission, assignment: req.assignment, anyCompiled: anyCompiled, teacherFiles: teacherNames}, res);
+              render('submission', {
+                title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name,
+                student: students[0],
+                fileData: fileData,
+                submission: req.submission,
+                assignment: req.assignment,
+                anyCompiled: anyCompiled,
+                teacherFiles: teacherNames}, res);
             }
           });
         }
