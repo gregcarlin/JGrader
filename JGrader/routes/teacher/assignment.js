@@ -227,7 +227,8 @@ router.get('/:id', function(req, res, next) {
                       `submissions`.`assignment_id` = ? \
                     WHERE \
                       `enrollment`.`student_id` = `students`.`id` AND \
-                      `enrollment`.`section_id` = ?", [req.params.id, req.section.id], function(err, results) {
+                      `enrollment`.`section_id` = ? \
+                    ORDER BY `students`.`lname`,`students`.`fname`", [req.params.id, req.section.id], function(err, results) {
     if(err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
