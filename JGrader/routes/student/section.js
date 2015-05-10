@@ -66,7 +66,12 @@ var findSectionInfo = function(id, res, next, finish) {
 
 // Asks user for class password
 router.get('/joinSection', function(req, res) {
-  render('joinSection', {}, res);
+  render('joinSection', {code: ''}, res);
+});
+
+// Pre-filled class password
+router.get('/joinSection/:code', function(req, res) {
+  render('joinSection', {code: req.params.code}, res);
 });
 
 // Joins Class

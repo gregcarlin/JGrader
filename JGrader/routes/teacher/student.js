@@ -97,22 +97,17 @@ router.post('/invite', function(req, res, next) {
             next(err);
           } else {
             var links = '';
-            var names = '';
             for(i in req.body.section) {
               for(j in mySections) {
                 if(mySections[j].id == req.body.section[i]) {
-                  codes.push(mySections[j].code);
-                  links += '<a href="http://jgrader.com/student/join/' + mySections[j].code + '>http://jgrader.com/student/join/' + mySections[j].code + '</a><br />';
-                  names += mySections[j].name + ', ';
+                  links += '<a href="http://jgrader.com/student/section/joinSection/' + mySections[j].code + '">' + mySections[j].name + '</a><br />';
                   break;
                 }
               }
             }
-            if(names.length <= 2) {
+            if(links.length <= 2) {
               render('studentInvite', {error: 'No invitations were sent because no valid sections were selected.'}, res);
             } else {
-              names = names.substring(0, names.length - 2);
-
               var emails = req.body.emails.split(/[ ;(\r\n|\n|\r)]/);
               var sent = '';
               for(i in emails) {
