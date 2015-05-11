@@ -166,6 +166,11 @@ a:hover {
 #learn .col-right h3 {
   text-align: right;
 }
+#learn .info-body iframe {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
 #learn .info-body .col {
   width: 45%;
   margin-top: 20px;
