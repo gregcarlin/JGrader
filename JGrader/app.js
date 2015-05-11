@@ -8,6 +8,7 @@ var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
 var useragent    = require('express-useragent');
+var compression  = require('compression');
 
 var index   = require('./routes/index');
 var signIn  = require('./routes/sign-in');
@@ -32,6 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(useragent.express());
+app.use(compression());
 
 // alert users with unsupported browsers/devices
 app.use(function(req, res, next) {
