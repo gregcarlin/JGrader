@@ -56,6 +56,12 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.use(function(req, res, next) {
+  if(req.query.error) res.locals.error = req.query.error;
+  if(req.query.success) res.locals.success = req.query.success;
+  next();
+});
+
 app.use('/', index);
 app.use('/sign-in', signIn);
 app.use('/sign-up', signUp);
