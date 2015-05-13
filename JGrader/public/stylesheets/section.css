@@ -455,19 +455,24 @@ dl.description dt {
 .file-row > div {
   display: inline-block;
 }
+#student-upload {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
 #previews {
   display: inline-block;
   width: 59%;
   vertical-align: top;
-  float: right;
   background-color: rgba(255,255,255,0.9);
-  height: 0;
-  padding-bottom: 40%;
   margin-top: 34px;
   overflow: scroll;
   padding-left: 20px;
   padding-right: 20px;
   font-size: 20px;
+  height: calc(100% - 38px);
+  right: 0;
+  position: absolute;
 }
 #previews h3 {
   font-size: 36px;

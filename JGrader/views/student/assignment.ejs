@@ -31,7 +31,7 @@
   </table>
 </div>
 
-<div class="drag-zone">
+<div class="drag-zone" id="student-upload">
 
   <div class="col-lg-7" id="actions">
     <div class="row dz-clickable">
@@ -47,20 +47,24 @@
   <!-- HTML heavily inspired by http://blueimp.github.io/jQuery-File-Upload/ -->
   <div class="col-md-7 table table-striped" class="files" id="previews">
 
-    <h3>Selected Files</h3>
+    <div id="previews-inner">
 
-    <div class="file-row">
-      <!-- This is used as the file preview template -->
-      <div>
-        <p class="name" data-dz-name></p>
-        <strong class="error text-danger" data-dz-errormessage></strong>
+      <h3>Selected Files</h3>
+
+      <div class="file-row">
+        <!-- This is used as the file preview template -->
+        <div>
+          <p class="name" data-dz-name></p>
+          <strong class="error text-danger" data-dz-errormessage></strong>
+        </div>
+
+        <div>
+          <button data-dz-remove class="svg-btn cancel">
+            <img src="/images/times.svg" />
+          </button>
+        </div>
       </div>
 
-      <div>
-        <button data-dz-remove class="svg-btn cancel">
-          <img src="/images/times.svg" />
-        </button>
-      </div>
     </div>
 
   </div>

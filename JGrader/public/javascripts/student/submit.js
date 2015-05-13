@@ -20,7 +20,7 @@ var myDropzone = new Dropzone(document.querySelector(".drag-zone"), {
   uploadMultiple: true,
   previewTemplate: previewTemplate,
   autoQueue: false, // Make sure the files aren't queued until manually added
-  previewsContainer: "#previews", // Define the container to display the previews
+  previewsContainer: "#previews-inner", // Define the container to display the previews
   clickable: ".dz-clickable" // Define the element that should be used as click trigger to select files.
 });
 
