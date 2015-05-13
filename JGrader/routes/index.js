@@ -5,6 +5,17 @@ require('./common');
 var router = express.Router();
 var crypto = require('crypto');
 
+// if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
+var tryRedirect = function(hash, res, db, finish) {
+  logIn(hash, db + 's', function(id) {
+    if(id) {
+      res.redirect('/' + db);
+    } else {
+      finish();
+    }
+  });
+}
+
 /* GET home page. */
 router.get('/', function(req, res) {
   var hash = req.cookies.hash;
@@ -118,16 +129,9 @@ router.get('/privacy', function(req, res) {
   res.render('privacy');
 });
 
-// if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
-var tryRedirect = function(hash, res, db, finish) {
-  logIn(hash, db + 's', function(id) {
-    if(id) {
-      res.redirect('/' + db);
-    } else {
-      finish();
-    }
-  });
-}
+router.get('/blog', function(req, res, next) {
+  // TODO
+});
 
 router.post('/git-update', function(req, res) {
   var hmac = 'sha1=' + crypto.createHmac('sha1', creds.git_secret).update(req.rawBody).digest('hex');
