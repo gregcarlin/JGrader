@@ -19,20 +19,24 @@
   <dt>Due:</dt>
     <dd><%= strftime('%b %d %Y, %l:%M %p', new Date(assignment.due)) %></dd>
   <dt>Description:</dt>
-    <dd><span class="edit" data-key="updatedesc" data-default="No Description"><span><%= assignment.description ? assignment.description : '' %></span><input type="text" class="form-control" /></span><span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span></dd>
-  <% if(files.length > 0) { %>
-    <dt>Files:</dt>
-      <dd>
-        <% 
-          var list = '';
-          for(i in files) {
-            list += files[i].name + ', ';
-          }
-          list = list.substring(0, list.length -2);
-        %>
-        <%= list %>
-      </dd>
-  <% } %>
+    <dd>
+      <span class="edit" data-key="updatedesc" data-default="No Description">
+        <span><%= assignment.description ? assignment.description : '' %></span>
+        <input type="text" class="form-control" />
+      </span>
+      <span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span>
+    </dd>
+  <dt>Files:</dt>
+    <dd>
+      <% 
+        var list = '';
+        for(i in files) {
+          list += files[i].name + ', ';
+        }
+        list += '<a href="">Add file</a>';
+      %>
+      <%- list %>
+    </dd>
 </dl>
 <div class="table-responsive">
   <table class="table table-striped table-linked">

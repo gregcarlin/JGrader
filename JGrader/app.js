@@ -56,6 +56,7 @@ app.use(function(req, res, next) {
   next();
 });
 
+// takes post variables success and error (in url query) and passes them to ejs for rendering
 app.use(function(req, res, next) {
   if(req.query.error) res.locals.error = req.query.error;
   if(req.query.success) res.locals.success = req.query.success;

@@ -260,6 +260,11 @@ router.get('/:id/remove/:file', function(req, res, next) {
   });
 });
 
+// add a new file to this assignment
+router.post('/:id/add', function(req, res, next) {
+  // TODO
+});
+
 // update description
 router.post('/:id/updatedesc/:desc', function(req, res, next) {
   if(req.params.desc.startsWith('<em>')) {
