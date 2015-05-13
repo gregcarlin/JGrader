@@ -247,6 +247,19 @@ router.get('/:id', function(req, res, next) {
   });
 });
 
+// detach a file from this assignment
+router.get('/:id/remove/:file', function(req, res, next) {
+  connection.query("DELETE FROM `files-teachers` WHERE `assignment_id` = ? AND `name` = ?", [req.params.id, req.params.file], function(err, result) {
+    if(err) {
+      res.redirect('/teacher/assignment/' + req.params.id + '?error=' + req.params.file + ' could not be removed. Please reload the page and try again.');
+      err.handled = true;
+      next(err);
+    } else {
+      res.redirect('/teacher/assignment/' + req.params.id + '?success=' + req.params.file + ' has been removed.');
+    }
+  });
+});
+
 // update description
 router.post('/:id/updatedesc/:desc', function(req, res, next) {
   if(req.params.desc.startsWith('<em>')) {
