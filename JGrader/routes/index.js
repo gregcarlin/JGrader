@@ -140,7 +140,15 @@ router.get('/privacy', function(req, res) {
 });
 
 router.get('/blog', function(req, res, next) {
-  // TODO
+  connection.query("SELECT `timestamp`,`title`,`author`,`contents` FROM `blog` ORDER BY `timestamp` DESC", [], function(err, rows) {
+    if(err) {
+      res.render('blog', {error: 'An unknown error has occurred.', posts: []});
+      err.handled = true;
+      next(err);
+    } else {
+      res.render('blog', {posts: rows});
+    }
+  });
 });
 
 router.post('/git-update', function(req, res, next) {
