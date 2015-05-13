@@ -139,6 +139,39 @@ router.get('/privacy', function(req, res) {
   res.render('privacy');
 });
 
+router.get('/blog.rss', function(req, res, next) {
+  connection.query("SELECT `id`,`timestamp`,`title`,`author`,`contents` FROM `blog` ORDER BY `timestamp` DESC", [], function(err, rows) {
+    if(err) {
+      res.send('An unknown error has occurred.');
+      err.handled = true;
+      next(err);
+    } else {
+      var o = '';
+      o += '<rss version="2.0">';
+      o += '<channel>';
+      o += '<title>jGrader Blog</title>';
+      o += '<link>http://jgrader.com/blog</link>';
+      o += '<description>jGrader news, feature additions, and bug fixes.</description>';
+      o += '<language>en-us</language>';
+      o += '<copyright>Copyright 2015 Greg Carlin and Brian Singer</copyright>';
+      o += '<managingEditor>contact@jgrader.com</managingEditor>';
+      o += '<webMaster>contact@jgrader.com</webMaster>';
+      for(i in rows) {
+        o += '<item>';
+        o += '<title>' + rows[i].title + '</title>';
+        o += '<link>http://jgrader.com/blog/' + rows[i].id + '</link>';
+        o += '<description>' + rows[i].contents + '</description>';
+        o += '<guid isPermaLink="true">http://jgrader.com/blog/' + rows[i].id + '</link>';
+        o += '<pubDate>' + 'TODO' + '</pubDate>';
+        o += '</item>';
+      }
+      o += '</channel>';
+      o += '</rss>';
+      res.send(o);
+    }
+  });
+});
+
 router.get('/blog', function(req, res, next) {
   connection.query("SELECT `timestamp`,`title`,`author`,`contents` FROM `blog` ORDER BY `timestamp` DESC", [], function(err, rows) {
     if(err) {
