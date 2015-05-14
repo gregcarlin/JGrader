@@ -17,6 +17,9 @@
     <!-- Custom styles for this template -->
     <link href="/stylesheets/shared.css" rel="stylesheet">
     <link href="/stylesheets/section.css" rel="stylesheet">
+    <link href="/stylesheets/font-awesome.min.css" rel="stylesheet">
+
+    <link rel="alternate" type="application/rss+xml" href="/blog.rss" title="jGrader Blog">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -51,11 +54,11 @@
     </nav>
 
     <div class="container">
-      <h1>Blog</h1>
+      <h1>Blog<a href="/blog.rss" class="fa fa-rss-square"></a></h1>
       <% for(i in posts) { %>
         <p>
           <h3><%= posts[i].title %></h3>
-          <h5>By <%= posts[i].author %></h5>
+          <h5>Posted by <%= posts[i].author %> on <%= strftime('%B %e, %Y at %l:%M %P %Z', posts[i].timestamp)%></h5>
           <%= posts[i].contents %>
         </p>
       <% } %>

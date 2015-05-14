@@ -177,11 +177,11 @@ router.get('/blog.rss', function(req, res, next) {
 router.get('/blog', function(req, res, next) {
   connection.query("SELECT `timestamp`,`title`,`author`,`contents` FROM `blog` ORDER BY `timestamp` DESC", [], function(err, rows) {
     if(err) {
-      res.render('blog', {error: 'An unknown error has occurred.', posts: []});
+      res.render('blog', {error: 'An unknown error has occurred.', posts: [], strftime: strftime});
       err.handled = true;
       next(err);
     } else {
-      res.render('blog', {posts: rows});
+      res.render('blog', {posts: rows, strftime: strftime});
     }
   });
 });
