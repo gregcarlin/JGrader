@@ -4,6 +4,7 @@
 require('./common');
 var router = express.Router();
 var crypto = require('crypto');
+var strftime = require('strftime');
 
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, db, finish) {
@@ -147,6 +148,7 @@ router.get('/blog.rss', function(req, res, next) {
       next(err);
     } else {
       var o = '';
+      o += '<?xml version="1.0" ?>\n';
       o += '<rss version="2.0">';
       o += '<channel>';
       o += '<title>jGrader Blog</title>';
@@ -162,7 +164,7 @@ router.get('/blog.rss', function(req, res, next) {
         o += '<link>http://jgrader.com/blog/' + rows[i].id + '</link>';
         o += '<description>' + rows[i].contents + '</description>';
         o += '<guid isPermaLink="true">http://jgrader.com/blog/' + rows[i].id + '</link>';
-        o += '<pubDate>' + 'TODO' + '</pubDate>';
+        o += '<pubDate>' + strftime('%a, %d %b %Y %H:%M:%S %Z', rows[i].timestamp) + '</pubDate>';
         o += '</item>';
       }
       o += '</channel>';
