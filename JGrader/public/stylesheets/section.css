@@ -910,3 +910,12 @@ input + .iama {
 #invite button {
   margin-top: 20px;
 }
+
+/* used on blog page */
+.fa-rss-square {
+  margin-left: 10px;
+  color: #FFF;
+}
+.fa-rss-square:hover {
+  color: #AAA;
+}
