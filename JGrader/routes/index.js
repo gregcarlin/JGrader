@@ -4,6 +4,7 @@
 require('./common');
 var router = express.Router();
 var crypto = require('crypto');
+var strftime = require('strftime');
 
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, db, finish) {
@@ -137,6 +138,52 @@ router.get('/faq', function(req, res) {
 
 router.get('/privacy', function(req, res) {
   res.render('privacy');
+});
+
+router.get('/blog.rss', function(req, res, next) {
+  connection.query("SELECT `id`,`timestamp`,`title`,`author`,`contents` FROM `blog` ORDER BY `timestamp` DESC", [], function(err, rows) {
+    if(err) {
+      res.send('An unknown error has occurred.');
+      err.handled = true;
+      next(err);
+    } else {
+      var o = '';
+      o += '<?xml version="1.0" ?>\n';
+      o += '<rss version="2.0">';
+      o += '<channel>';
+      o += '<title>jGrader Blog</title>';
+      o += '<link>http://jgrader.com/blog</link>';
+      o += '<description>jGrader news, feature additions, and bug fixes.</description>';
+      o += '<language>en-us</language>';
+      o += '<copyright>Copyright 2015 Greg Carlin and Brian Singer</copyright>';
+      o += '<managingEditor>contact@jgrader.com</managingEditor>';
+      o += '<webMaster>contact@jgrader.com</webMaster>';
+      for(i in rows) {
+        o += '<item>';
+        o += '<title>' + rows[i].title + '</title>';
+        o += '<link>http://jgrader.com/blog/' + rows[i].id + '</link>';
+        o += '<description>' + rows[i].contents + '</description>';
+        o += '<guid isPermaLink="true">http://jgrader.com/blog/' + rows[i].id + '</link>';
+        o += '<pubDate>' + strftime('%a, %d %b %Y %H:%M:%S %Z', rows[i].timestamp) + '</pubDate>';
+        o += '</item>';
+      }
+      o += '</channel>';
+      o += '</rss>';
+      res.send(o);
+    }
+  });
+});
+
+router.get('/blog', function(req, res, next) {
+  connection.query("SELECT `timestamp`,`title`,`author`,`contents` FROM `blog` ORDER BY `timestamp` DESC", [], function(err, rows) {
+    if(err) {
+      res.render('blog', {error: 'An unknown error has occurred.', posts: [], strftime: strftime});
+      err.handled = true;
+      next(err);
+    } else {
+      res.render('blog', {posts: rows, strftime: strftime});
+    }
+  });
 });
 
 router.post('/git-update', function(req, res, next) {
