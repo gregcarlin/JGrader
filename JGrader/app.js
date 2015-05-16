@@ -34,7 +34,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compression());
 app.use(minify());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {maxAge: 21600000})); // 6-hr cache
 app.use(useragent.express());
 
 // alert users with unsupported browsers/devices

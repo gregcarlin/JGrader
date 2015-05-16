@@ -153,7 +153,7 @@ router.post('/:id/updategrade/:grade', function(req, res, next) {
   }
 });
 
-router.post('/:id/run/:fileIndex', function(req, res) {
+router.post('/:id/run/:fileIndex', function(req, res, next) {
   fs.ensureDir('temp/' + req.params.id + '/', function(err) {
     if(err) {
       res.json({code: -1}); // unknown
