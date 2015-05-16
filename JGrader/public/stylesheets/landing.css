@@ -260,3 +260,9 @@ a:hover {
   padding-bottom: 10px;
   text-align: center;
 }
+.footer a {
+  margin-right: 20px;
+}
+.footer a:last-child {
+  margin-right: 0;
+}
