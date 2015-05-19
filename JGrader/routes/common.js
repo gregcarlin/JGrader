@@ -66,35 +66,36 @@ logIn = function(hash, db, finish) {
 
 // attempt to authenticate user. calls finish(id, mustResetPass) if id is found, otherwise redirects user to sign in page.
 // mustResetPass is a flag to indicate whether or not a message should be displayed asking the user to reset his or her password.
-var authenticate = function(hash, res, db, finish) {
+var authenticate = function(hash, req, res, next, db, finish) {
   logIn(hash, db, function(id) {
     if(id) {
       connection.query("SELECT `pass_reset_hash` FROM `" + db + "` WHERE `id` = ?", [id], function(err, rows) {
         if(err) {
-          res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.');
-          throw err;
+          res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.&redirect=' + req.originalUrl);
+          err.handled = true;
+          next(err);
         } else if(rows.length <= 0) {
-          res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.');
+          res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.&redirect=' + req.originalUrl);
         } else {
           finish(id, rows[0].pass_reset_hash == null ? false : true);
         }
       });
     } else {
-      res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.');
+      res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.&redirect=' + req.originalUrl);
     }
   });
 }
 
-authTeacher = function(hash, res, finish) {
-  authenticate(hash, res, 'teachers', finish);
+authTeacher = function(hash, req, res, next, finish) {
+  authenticate(hash, req, res, next, 'teachers', finish);
 }
 
-authStudent = function(hash, res, finish) {
-  authenticate(hash, res, 'students', finish);
+authStudent = function(hash, req, res, next, finish) {
+  authenticate(hash, req, res, next, 'students', finish);
 }
 
-authTA = function(hash, res, finish) {
-  authenticate(hash, res, 'assistants', finish);
+authTA = function(hash, req, res, next, finish) {
+  authenticate(hash, req, res, next, 'assistants', finish);
 }
 
 // retrieves the first and last names of a user
