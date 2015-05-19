@@ -52,6 +52,7 @@
 
     <div class="container form sign-form">
       <form role="form" action="/sign-in" method="POST">
+        <input type="hidden" name="redirect" value="<%= typeof redirect == 'undefined' ? '' : redirect %>">
   		  <h2>Sign in</h2>
         <% if(typeof error != 'undefined') { %>
           <div class="alert alert-danger" role="alert"><%- error %></div>

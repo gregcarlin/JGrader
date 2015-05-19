@@ -7,11 +7,11 @@ var bcrypt = require('bcrypt');
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('sign-in', {error: req.query.error});
+  res.render('sign-in', {error: req.query.error, redirect: req.query.redirect});
 });
 
 // attempts to login to website with given database, calls finish() iff login information is incorrect
-var login = function(db, email, pass, res, next, finish) {
+var login = function(db, email, pass, req, res, next, finish) {
   connection.query("SELECT * FROM `" + db + "s` WHERE `user` = ?", [email], function(err, rows) {
     if(err) {
       res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
@@ -32,7 +32,7 @@ var login = function(db, email, pass, res, next, finish) {
                   err.handled = true;
                   next(err);
                 } else {
-                  res.redirect('/' + db); // successful login
+                  res.redirect(req.body.redirect ? req.body.redirect : ('/' + db)); // successful login
                 }
               });
             }
@@ -51,9 +51,9 @@ router.post('/', function(req, res, next) {
   var email = req.body.email;
   var pass  = req.body.password;
   if(email && pass) {
-    login('student', email, pass, res, next, function() {
-      login('teacher', email, pass, res, next, function() {
-        login('assistant', email, pass, res, next, function() {
+    login('student', email, pass, req, res, next, function() {
+      login('teacher', email, pass, req, res, next, function() {
+        login('assistant', email, pass, req, res, next, function() {
           res.render('sign-in', { error: 'Incorrect email or password. <a href="/forgot">Forgot your password?</a>', email: email });
         });
       });

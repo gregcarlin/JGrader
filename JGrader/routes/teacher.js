@@ -31,7 +31,7 @@ var render = function(page, options, res) {
 
 // automatically authenticate teacher for every page in this section
 router.use(function(req, res, next) {
-  authTeacher(req.cookies.hash, res, function(id, mustResetPass) {
+  authTeacher(req.cookies.hash, req, res, next, function(id, mustResetPass) {
     req.user = {id: id};
     res.locals.mustResetPass = mustResetPass; // variable is accessible in ejs
     next();
