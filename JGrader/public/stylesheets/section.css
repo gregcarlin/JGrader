@@ -360,12 +360,6 @@ dl.description dt {
   clear: both;
   margin-right: 0.3em;
 }
-a {
-  color: #FFF;
-}
-a:hover {
-  color: #AAA;
-}
 body {
   font-size: 18px;
 }
@@ -821,6 +815,12 @@ span.teacher-file {
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
+}
+.sign-form a {
+  color: #FFF;
+}
+.sign-form a:hover {
+  color: #AAA;
 }
 .iama {
   font-size: 26px;
