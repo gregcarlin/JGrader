@@ -360,6 +360,15 @@ dl.description dt {
   clear: both;
   margin-right: 0.3em;
 }
+a {
+  color: #FFF;
+}
+a:hover {
+  color: #AAA;
+}
+body {
+  font-size: 18px;
+}
 
 /* stuff for editing */
 .edit input {
