@@ -31,7 +31,9 @@
       <% 
         var list = '';
         for(var i=0; i<files.length; i++) {
-          list += files[i].name + ', ';
+          list += files[i].name;
+          if(submitted <= 0) list += '<a class="fa fa-times-circle" href="/teacher/assignment/' + id + '/remove/' + files[i].name + '" data-toggle="tooltip" data-placement="bottom" title="Remove"></a>';
+          list += ', ';
         }
         if(submitted <= 0) {
           list += '<a href="">Add file</a>';
