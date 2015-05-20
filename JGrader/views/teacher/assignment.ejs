@@ -30,10 +30,19 @@
     <dd>
       <% 
         var list = '';
-        for(i in files) {
+        for(var i=0; i<files.length; i++) {
           list += files[i].name + ', ';
         }
-        list += '<a href="">Add file</a>';
+        if(submitted <= 0) {
+          list += '<a href="">Add file</a>';
+        } else {
+          if(list.length > 2) {
+            list = list.substring(0, list.length - 2);
+          } else {
+            list += 'None';
+          }
+          list += '<span class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="You cannot modify files once students have submitted their work."></span>';
+        }
       %>
       <%- list %>
     </dd>

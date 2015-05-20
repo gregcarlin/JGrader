@@ -240,7 +240,11 @@ router.get('/:id', function(req, res, next) {
           err.handled = true;
           next(err);
         } else {
-          render('assignment', {title: req.assignment.name, assignment: req.assignment, section: req.section, results: results, id: req.params.id, files: files}, res);
+          var submitted = 0;
+          for(var i=0; i<results.length; i++) {
+            if(results[i].submitted) submitted++;
+          }
+          render('assignment', {title: req.assignment.name, assignment: req.assignment, section: req.section, results: results, id: req.params.id, files: files, submitted: submitted}, res);
         }
       });
     }
