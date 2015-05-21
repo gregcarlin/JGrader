@@ -36,7 +36,7 @@
           list += ', ';
         }
         if(submitted <= 0) {
-          list += '<a href="">Add file</a>';
+          list += '<form id="dropzone" action="/teacher/assignment/' + id + '/add"><a href="#">Add file</a></form>';
         } else {
           if(list.length > 2) {
             list = list.substring(0, list.length - 2);

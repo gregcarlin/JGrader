@@ -17,7 +17,6 @@ $('#assign-create').dropzone({
     var myDropzone = this;
 
     $('#submit-btn').click(function(e) {
-      console.log('click fired');
       e.preventDefault();
       e.stopPropagation();
       if(myDropzone.files.length > 0) {
