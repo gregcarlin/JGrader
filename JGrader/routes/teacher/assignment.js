@@ -27,7 +27,7 @@ var render = function(page, options, res) {
       break;
     case 'assignment':
       // title must be set already
-      options.js = ['tooltip', 'strftime-min', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker', 'stupidtable.min', 'tablesort'];
+      options.js = ['tooltip', 'strftime-min', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker', 'stupidtable.min', 'tablesort', 'dropzone', 'assignment'];
       options.css = ['jquery.datetimepicker', 'font-awesome.min'];
       options.strftime = strftime;
       break;
@@ -267,6 +267,7 @@ router.get('/:id/remove/:file', function(req, res, next) {
 // add a new file to this assignment
 router.post('/:id/add', function(req, res, next) {
   // TODO
+  console.log('received add request');
 });
 
 // update description

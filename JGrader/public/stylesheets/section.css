@@ -376,6 +376,11 @@ body {
   cursor: pointer;
 }
 
+/* teacher assignment list page */
+/*#dropzone .loading {
+  
+}*/
+
 /* assignment create page (only for teachers) */
 .files.dropzone-previews .dz-image, .files.dropzone-previews .dz-size, .files.dropzone-previews .dz-success-mark, .files.dropzone-previews .dz-error-mark, .dz-message {
   display: none;
@@ -409,18 +414,18 @@ body {
   width: 37%;
   display: inline-block;
 }
-.dz-clickable {
+#student-upload .dz-clickable {
   color: #FFF;
   text-align: center;
   font-size: 20px;
   font-weight: 300;
   margin: 0;
 }
-.dz-clickable:hover, .dz-clickable:focus {
+#student-upload .dz-clickable:hover, #student-upload .dz-clickable:focus {
   cursor: pointer;
   color: #CCC;
 }
-.dz-clickable .outer {
+#student-upload .dz-clickable .outer {
   border: 6px solid #FFF;
   height: 0;
   padding-bottom: 97.8%;
@@ -428,10 +433,10 @@ body {
   margin-top: 34px;
   margin-bottom: 34px;
 }
-.dz-clickable:hover .outer, .dz-clickable:focus .outer {
+#student-upload .dz-clickable:hover .outer, #student-upload .dz-clickable:focus .outer {
   border-color: #CCC;
 }
-.dz-clickable .inner {
+#student-upload .dz-clickable .inner {
   background-color: #9CE16C;
   width: 46%;
   height: 0;
@@ -443,16 +448,16 @@ body {
   transform: translateY(60%);
   border-radius: 100%;
 }
-.dz-clickable:hover .inner, .dz-clickable:focus .inner {
+#student-upload .dz-clickable:hover .inner, #student-upload .dz-clickable:focus .inner {
   background-color: #85BB60;
 }
-.dz-clickable .plus {
+#student-upload .dz-clickable .plus {
   width: 100%;
 }
-.dz-clickable:hover .plus, .dz-clickable:focus .plus {
+#student-upload .dz-clickable:hover .plus, #student-upload .dz-clickable:focus .plus {
   /* TODO */
 }
-.dz-clickable .message {
+#student-upload .dz-clickable .message {
   vertical-align: bottom;
 }
 .file-row > div {
