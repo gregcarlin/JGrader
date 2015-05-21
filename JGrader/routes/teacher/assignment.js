@@ -253,6 +253,7 @@ router.get('/:id', function(req, res, next) {
 
 // detach a file from this assignment
 router.get('/:id/remove/:file', function(req, res, next) {
+  // TODO ensure no students have submitted this already
   connection.query("DELETE FROM `files-teachers` WHERE `assignment_id` = ? AND `name` = ?", [req.params.id, req.params.file], function(err, result) {
     if(err) {
       res.redirect('/teacher/assignment/' + req.params.id + '?error=' + req.params.file + ' could not be removed. Please reload the page and try again.');
@@ -264,10 +265,24 @@ router.get('/:id/remove/:file', function(req, res, next) {
   });
 });
 
+router.use('/:id/add', multer({
+  inMemory: true,
+  rename: function(fieldname, filename) {
+    // don't rename
+    return filename;
+  }
+}));
+
 // add a new file to this assignment
 router.post('/:id/add', function(req, res, next) {
-  // TODO
-  console.log('received add request');
+  // TODO ensure no students have submitted this already and there are no naming conflicts
+  connection.query("INSERT INTO `files-teachers` VALUES(NULL,?,?,?,?)", [req.params.id, req.files['file'].name, req.files['file'].buffer, req.files['file'].mimetype], function(err, result) {
+    if(err) {
+      next(err);
+    } else {
+      res.json({code: 0});
+    }
+  });
 });
 
 // update description

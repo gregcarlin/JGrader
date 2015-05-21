@@ -8,5 +8,17 @@ if(lastChar == '#') {
 $('#dropzone').dropzone({
   url: url + 'add',
   clickable: '#dropzone a',
-  previewTemplate: '<span class="fa fa-spinner fa-spin"></span>'
+  previewTemplate: '<span class="fa fa-spinner fa-spin"></span>',
+  init: function() {
+    this.on('success', function(file, response) {
+      switch(response.code) {
+        case 0:
+          window.location.reload();
+          break;
+        default:
+          alert('An unknown error has occurred. Please reload the page and try again.');
+          break;
+      }
+    });
+  }
 });
