@@ -377,9 +377,9 @@ body {
 }
 
 /* teacher assignment list page */
-/*#dropzone .loading {
-  
-}*/
+#dropzone {
+  display: inline;
+}
 
 /* assignment create page (only for teachers) */
 .files.dropzone-previews .dz-image, .files.dropzone-previews .dz-size, .files.dropzone-previews .dz-success-mark, .files.dropzone-previews .dz-error-mark, .dz-message {
