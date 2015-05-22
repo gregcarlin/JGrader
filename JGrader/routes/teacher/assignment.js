@@ -27,7 +27,7 @@ var render = function(page, options, res) {
       break;
     case 'assignment':
       // title must be set already
-      options.js = ['tooltip', 'strftime-min', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker', 'stupidtable.min', 'tablesort', 'dropzone', 'assignment'];
+      options.js = ['tooltip', 'strftime-min', 'teacher/edit', 'teacher/jquery.datetimepicker', 'teacher/datepicker', 'stupidtable.min', 'tablesort', 'dropzone', 'teacher/assignment'];
       options.css = ['jquery.datetimepicker', 'font-awesome.min'];
       options.strftime = strftime;
       break;
@@ -253,14 +253,23 @@ router.get('/:id', function(req, res, next) {
 
 // detach a file from this assignment
 router.get('/:id/remove/:file', function(req, res, next) {
-  // TODO ensure no students have submitted this already
-  connection.query("DELETE FROM `files-teachers` WHERE `assignment_id` = ? AND `name` = ?", [req.params.id, req.params.file], function(err, result) {
+  connection.query("SELECT COUNT(*) as `count` FROM `submissions` WHERE `assignment_id` = ?", [req.params.id], function(err, result) {
     if(err) {
       res.redirect('/teacher/assignment/' + req.params.id + '?error=' + req.params.file + ' could not be removed. Please reload the page and try again.');
       err.handled = true;
       next(err);
+    } else if(result[0].count > 0) {
+      res.redirect('/teacher/assignment/' + req.params.id + '?error=You cannot remove files after students have already submitted code.');
     } else {
-      res.redirect('/teacher/assignment/' + req.params.id + '?success=' + req.params.file + ' has been removed.');
+      connection.query("DELETE FROM `files-teachers` WHERE `assignment_id` = ? AND `name` = ?", [req.params.id, req.params.file], function(err, result) {
+        if(err) {
+          res.redirect('/teacher/assignment/' + req.params.id + '?error=' + req.params.file + ' could not be removed. Please reload the page and try again.');
+          err.handled = true;
+          next(err);
+        } else {
+          res.redirect('/teacher/assignment/' + req.params.id + '?success=' + req.params.file + ' has been removed.');
+        }
+      });
     }
   });
 });
@@ -275,12 +284,37 @@ router.use('/:id/add', multer({
 
 // add a new file to this assignment
 router.post('/:id/add', function(req, res, next) {
-  // TODO ensure no students have submitted this already and there are no naming conflicts
-  connection.query("INSERT INTO `files-teachers` VALUES(NULL,?,?,?,?)", [req.params.id, req.files['file'].name, req.files['file'].buffer, req.files['file'].mimetype], function(err, result) {
+  connection.query("SELECT COUNT(*) as `count` FROM `submissions` WHERE `assignment_id` = ?", [req.params.id], function(err, result) {
     if(err) {
+      res.json({code: -1});
+      err.handled = true;
       next(err);
+    } else if(result[0].count > 0) {
+      res.json({code: 1});
     } else {
-      res.json({code: 0});
+      connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, result) {
+        if(err) {
+          res.json({code: -1});
+          err.handled = true;
+          next(err);
+        } else {
+          for(var i=0; i<result.length; i++) {
+            if(result[i].name == req.files['file'].name) {
+              res.json({code: 2});
+              return;
+            }
+          }
+          connection.query("INSERT INTO `files-teachers` VALUES(NULL,?,?,?,?)", [req.params.id, req.files['file'].name, req.files['file'].buffer, req.files['file'].mimetype], function(err, result) {
+            if(err) {
+              res.json({code: -1});
+              err.handled = true;
+              next(err);
+            } else {
+              res.json({code: 0});
+            }
+          });
+        }
+      });
     }
   });
 });

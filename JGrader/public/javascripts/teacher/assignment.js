@@ -15,6 +15,13 @@ $('#dropzone').dropzone({
         case 0:
           window.location.reload();
           break;
+        case 1:
+          alert('You cannot add files after students have already submitted code.');
+          break;
+        case 2:
+          alert('A file with that name already exists.');
+          break;
+        case -1:
         default:
           alert('An unknown error has occurred. Please reload the page and try again.');
           break;

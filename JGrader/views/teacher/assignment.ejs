@@ -33,13 +33,13 @@
         for(var i=0; i<files.length; i++) {
           list += files[i].name;
           if(submitted <= 0) list += '<a class="fa fa-times-circle" href="/teacher/assignment/' + id + '/remove/' + files[i].name + '" data-toggle="tooltip" data-placement="bottom" title="Remove"></a>';
-          list += ', ';
+          list += ' &nbsp; ';
         }
         if(submitted <= 0) {
           list += '<form id="dropzone" action="/teacher/assignment/' + id + '/add"><a href="#">Add file</a></form>';
         } else {
-          if(list.length > 2) {
-            list = list.substring(0, list.length - 2);
+          if(list.length > 8) {
+            list = list.substring(0, list.length - 8);
           } else {
             list += 'None';
           }
