@@ -482,6 +482,11 @@ body {
   margin-left: 20px;
   margin-right: 20px;
 }
+#previews h4 {
+  font-size: 18px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
 #previews .file-row {
   margin-left: 20px;
   margin-right: 20px;
