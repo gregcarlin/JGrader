@@ -51,6 +51,9 @@ myDropzone.on("success", function(file, response) {
     case 5: // duplicate names
       alert('No two files can share the same name.');
       break;
+    case 6:
+      alert('You must designate one of the files as the main file.');
+      break;
   }
   responded = true;
 });
@@ -58,6 +61,11 @@ myDropzone.on("success", function(file, response) {
 // show submit button when a file is added
 myDropzone.on("addedfile", function(file) {
   $('.submit-assignment').show();
+  $('input[name="main"]').change(function() {
+    var mainFile = $('.name', $(this).parent()).text();
+    if(!myDropzone.options.headers) myDropzone.options.headers = {};
+    myDropzone.options.headers['main-file'] = mainFile;
+  });
 });
 
 // hide submit button when all files are removed
@@ -89,3 +97,4 @@ myDropzone.on("queuecomplete", function(progress) {
 document.querySelector('button[type="submit"]').onclick = function() {
   myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
 };
+
