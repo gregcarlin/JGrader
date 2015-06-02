@@ -191,7 +191,7 @@ router.post('/:id/submit', function(req, res, next) {
               }
 
               // finally, make necessary changes in database
-              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, result) {
+              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, NULL)", [req.params.id, req.user.id], function(err, result) {
                 if(err) {
                   res.json({code: -1}); // unknown error
                   err.handled = true;
