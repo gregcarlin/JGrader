@@ -6,6 +6,7 @@ var router = express.Router();
 var multer = require('multer');
 var strftime = require('strftime');
 var comments = require('../comments');
+var async = require('async');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -184,9 +185,26 @@ router.post('/:id/submit', function(req, res, next) {
 
             // compile the java files
             exec("javac " + toCompile, function(err, stdout, stderr) {
+              var main = null;
               if(err) { // compilation error, treat all files as non-java files
                 for(file in req.files) {
                   req.files[file].isJava = false;
+                }
+              } else if(req.files.length == 1) { // only 1 file was submitted, so we mark it as containing the main
+                main = req.files['file[0]'].name;
+              } else { // we must search for the main
+                for(file in req.files) {
+                  if(req.files[file].isJava) {
+                    var data = fs.readFileSync(req.files[file].path).toString();
+                    if(data.indexOf('main') >= 0) {
+                      if(main) { // multiple mains found, set to null, student must pick later
+                        main = null;
+                        break;
+                      } else {
+                        main = req.files[file].name;
+                      }
+                    }
+                  }
                 }
               }
 
