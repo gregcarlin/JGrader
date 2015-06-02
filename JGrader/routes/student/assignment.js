@@ -6,7 +6,6 @@ var router = express.Router();
 var multer = require('multer');
 var strftime = require('strftime');
 var comments = require('../comments');
-var async = require('async');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -209,8 +208,7 @@ router.post('/:id/submit', function(req, res, next) {
               }
 
               // finally, make necessary changes in database
-              // TODO store which file was designated as main
-              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL)", [req.params.id, req.user.id], function(err, result) {
+              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, ?)", [req.params.id, req.user.id, main], function(err, result) {
                 if(err) {
                   res.json({code: -1}); // unknown error
                   err.handled = true;
