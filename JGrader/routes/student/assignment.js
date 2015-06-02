@@ -131,11 +131,6 @@ router.use('/:id/submit', multer({
 router.post('/:id/submit', function(req, res, next) {
   if(req.files) {
 
-    if(!req.headers['main-file']) { // a main must be designated
-      res.json({code: 6});
-      return;
-    }
-
     // first, check all the file names for legality
     for(file in req.files) {
       if(!/^[a-zA-Z0-9.]+$/.test(req.files[file].name) || req.files[file].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
