@@ -201,14 +201,16 @@ router.post('/:id/run/:fileIndex', function(req, res, next) {
 
                 var fileIndex = req.params.fileIndex;
                 if(fileIndex < rows.length && rows[req.params.fileIndex].className) {
-                  var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
+                  var child = exec('java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */, cwd: 'temp/' + req.params.id + '/'}, function(err, stdout, stderr) {
                     if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
                     if(err) {
                       if(err.killed) {
                         res.json({code: 0, out: '', err: 'Code took too long to execute! There may be an infinite loop somewhere.'});
                       } else {
+                        child.kill();
                         res.json({code: -1});
-                        throw err;
+                        err.handled = true;
+                        next(err);
                       }
                     } else {
                       res.json({code: 0, out: stdout, err: stderr});
