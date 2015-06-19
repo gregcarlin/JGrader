@@ -16,7 +16,7 @@ var render = function(page, options, res) {
     case 'sectionList':
       options.title = 'Your Classes';
       options.js = ['tooltip', 'student/sectionList'];
-      options.css = ['font-awesome.min'];
+      options.css = ['font-awesome.min', 'material-icons'];
       break;
     case 'section':
       // title should already be set
