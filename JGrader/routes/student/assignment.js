@@ -90,22 +90,24 @@ router.get('/:id', function(req, res, next) {
                         AND `submissions`.`student_id` = `students`.`id` \
                         AND `files`.`submission_id`= `submissions`.`id` \
                         AND `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData){
-        if(err) {
+        if (err) {
           render('notFound', {error: 'An unexpected error has occurred.'}, res);
           err.handled = true;
           next(err);
-        } else if(fileData.length == 0) {
+        } else if (fileData.length == 0) {
           render('assignment', {title: req.assignment.name, assignment: req.assignment, teacherFiles: teacherFiles}, res);
         } else {
           var anyCompiled = false;
-          for(file in fileData) {
+          var anyMain = false;
+          for (var file in fileData) {
             fileData[file].display = isAscii(fileData[file].mime);
-            if(fileData[file].compiled) anyCompiled = true;
+            if (fileData[file].compiled) anyCompiled = true;
             fileData[file].isMain = fileData[file].main == fileData[file].name;
+            if (fileData[file].isMain) anyMain = true;
           }
           // Sends file data
           var teacherNames = [];
-          for(i in teacherFiles) {
+          for (var i in teacherFiles) {
             teacherNames.push(teacherFiles[i].name);
           }
           render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, teacherFiles: teacherNames}, res);
