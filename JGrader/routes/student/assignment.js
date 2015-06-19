@@ -110,7 +110,7 @@ router.get('/:id', function(req, res, next) {
           for (var i in teacherFiles) {
             teacherNames.push(teacherFiles[i].name);
           }
-          render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, teacherFiles: teacherNames}, res);
+          render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, anyMain: anyMain, teacherFiles: teacherNames}, res);
         }
       });
     }
