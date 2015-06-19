@@ -84,7 +84,7 @@ router.get('/:id', function(req, res, next) {
       err.handled = true;
       next(err);
     } else {
-      connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
+      connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled`,`submissions`.`main` \
                         FROM `files`, `students`, `assignments`, `submissions` \
                         WHERE `submissions`.`assignment_id` = `assignments`.`id` \
                         AND `submissions`.`student_id` = `students`.`id` \
@@ -101,6 +101,7 @@ router.get('/:id', function(req, res, next) {
           for(file in fileData) {
             fileData[file].display = isAscii(fileData[file].mime);
             if(fileData[file].compiled) anyCompiled = true;
+            fileData[file].isMain = fileData[file].main == fileData[file].name;
           }
           // Sends file data
           var teacherNames = [];
@@ -265,7 +266,7 @@ router.post('/:id/submit', function(req, res, next) {
   }
 });
 
-router.get('/:id/resubmit', function(req,res) {
+router.get('/:id/resubmit', function(req, res, next) {
   connection.query("SELECT `submissions`.`id` \
                     FROM `submissions` \
                     WHERE `submissions`.`student_id` = ? \
@@ -293,6 +294,18 @@ router.get('/:id/resubmit', function(req,res) {
           res.redirect('/student/assignment/' + req.params.id);
         }
       });
+    }
+  });
+});
+
+router.get('/:id/chooseMain/:file', function(req, res, next) {
+  connection.query("UPDATE `submissions` SET `main` = ? WHERE `assignment_id` = ? AND `student_id` = ?", [req.params.file, req.params.id, req.user.id], function(err) {
+    if (err) {
+      res.redirect('/student/assignment/' + req.params.id + '?error=Unable to set main, please reload and try again.');
+      err.handled = true;
+      next(err);
+    } else {
+      res.redirect('/student/assignment/' + req.params.id);
     }
   });
 });

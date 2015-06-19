@@ -12,3 +12,6 @@ $(document).ready(function() {
   });
 });
 
+var chooseMain = function(fileName) {
+  document.location = document.URL + '/chooseMain/' + fileName;
+};

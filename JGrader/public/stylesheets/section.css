@@ -542,7 +542,7 @@ body {
 .nav-tabs a {
   border: none !important;
   border-radius: 0 !important;
-  padding: 5px 15px !important;
+  padding: 5px 15px 5px 7px !important;
   background-color: rgba(255, 255, 255, 0.25);
   color: #FFF;
 }
@@ -708,11 +708,11 @@ li .comment-text .fa:first-of-type {
 li .comment-text .fa:last-of-type {
   float: right;
 }
-#resubmit {
+.student-btn {
   border: none;
   font-size: 20px;
   background-color: #B3EBFF;
-  color: #000;
+  color: #000 !important;
   box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.5);
   border-radius: 3px;
   padding: 10px 20px;
@@ -720,7 +720,7 @@ li .comment-text .fa:last-of-type {
   margin-top: -45px;
   margin-right: -12px;
 }
-#resubmit:hover, #resubmit:focus {
+.student-btn:hover, .student-btn:focus {
   background-color: #83D7F7;
 }
 .io {
