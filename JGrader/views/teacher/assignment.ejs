@@ -56,6 +56,7 @@
         <th data-sort="string">Student <a class="fa fa-sort"></a></th>
         <th data-sort="int">Submitted <a class="fa fa-sort"></a></th>
         <th data-sort="int">Grade <a class="fa fa-sort"></a></th>
+        <th data-sort="int">Tests Passed <a class="fa fa-sort"></a></th>
       </tr>
     </thead>
     <tbody>
@@ -76,6 +77,7 @@
               %>
               <td data-sort-value="<%= submitted ? submitted.getTime() : 0 %>" title="<%= strftime('%b %d %Y, %l:%M %p', submitted)%>"><%- submittedStr %></td>
               <td data-sort-value="<%= results[i].grade ? results[i].grade : 0  %>"><%- results[i].grade ? (results[i].grade + '%') : '<em>Not graded.</em>' %></td>
+              <td data-sort-value="<%= %>"></td>
             </tr>
        <% }
          } %>
