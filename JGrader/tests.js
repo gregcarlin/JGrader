@@ -44,7 +44,7 @@ const testLoad = function(name, path) {
 
 casper.test.begin('Homepage and Failed Sign In', function(test) {
   casper.start(url, function() {
-    test.assertTitle('jGrader');
+    test.assertTitle('jGrader | A Cloud-Based Grading System for AP Computer Science');
     test.assertExists('input[name="email"]');
     test.assertExists('input[name="password"]');
 
@@ -71,7 +71,7 @@ casper.test.begin('Teacher Sign In', function(test) {
   });
 
   casper.then(function() {
-    test.assertTitle('Your Sections | jGrader');
+    test.assertTitle('Your Classes | jGrader');
     test.assertUrlMatch(/\/teacher\/section/);
   });
 
@@ -80,7 +80,7 @@ casper.test.begin('Teacher Sign In', function(test) {
   });
 });
 
-testTitle('Teacher Section List', 'teacher/section', 'Your Sections | jGrader');
+testTitle('Teacher Class List', 'teacher/section', 'Your Classes | jGrader');
 // there is no csv for section list
 testTitle('Teacher Assignment List', 'teacher/assignment', 'Your Assignments | jGrader');
 testLoad('Teacher Assignment List CSV', 'teacher/assignment.csv');
@@ -92,7 +92,7 @@ casper.test.begin('Sign Out', function(test) {
   casper.start(url + 'log-out/', function() {});
 
   casper.then(function() {
-    test.assertTitle('jGrader');
+    test.assertTitle('jGrader | A Cloud-Based Grading System for AP Computer Science');
   });
 
   casper.run(function() {
@@ -106,7 +106,7 @@ casper.test.begin('Student Sign In', function(test) {
   });
 
   casper.then(function() {
-    test.assertTitle('Your Sections | jGrader');
+    test.assertTitle('Your Classes | jGrader');
     test.assertUrlMatch(/\/student\/section/);
   });
 
@@ -115,7 +115,7 @@ casper.test.begin('Student Sign In', function(test) {
   });
 });
 
-testTitle('Student Section List', 'student/section', 'Your Sections | jGrader');
+testTitle('Student Class List', 'student/section', 'Your Classes | jGrader');
 testTitle('Student Assignment List', 'student/assignment', 'Your Assignments | jGrader');
 
 var hello = fs.read('./test_files/Hello.java');
