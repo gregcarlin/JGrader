@@ -447,4 +447,41 @@ router.post('/:id/caseCreate', function(req, res, next) {
   }
 });
 
+var runAllTests = function(req) { 
+  connection.query('SELECT `enrollment`.`student_id` FROM `enrollment` WHERE `enrollment`.`section_id`=?', [req.params.id], function(err, students) {
+    for(var studentId in students) {
+      createTestingDir(req.params.id, studentId, function() {
+        
+      });
+    }
+  });
+}
+
+var createTestingDir = function(assignmentId, studentId, cb) {
+  fs.ensureDir('temp/' + req.params.id + '/', function(err) { 
+    connection.query("SELECT \
+                    `files`.`id`,\
+                    `files`.`name`,\
+                    `files`.`compiled` \
+                  FROM `submissions`,`assignments`,`sections`,`files` \
+                  WHERE \
+                    `submissions`.`assignment_id` = `assignments`.`id` AND \
+                    `assignments`.`section_id` = `sections`.`id` AND \
+                    `submissions`.`id` = ? AND \
+                    `sections`.`teacher_id` = ? AND \
+                    `files`.`submission_id` = `submissions`.`id` \
+                  ORDER BY `files`.`id`", [assignmentId, studentId], function(err, files) {
+      for(var i in files) {
+        files[i].className = files[i].name.substring(0, files[i].name.length - 5);
+        fs.writeFileSync('temp/' + req.params.id + '/' + files[i].className + '.class', files[i].compiled);
+      }
+      cb();
+    });
+  }); 
+}
+
+var runTests = function(assignmentId, cb) {
+  connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [assignmentId], function(err, tests) {
+  });
+}
 module.exports = router;
