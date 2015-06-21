@@ -1,6 +1,12 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
+var URL = function() {
+  var base = location.protocol + '//' + location.host + location.pathname;
+  if (base.substring(base.length - 1) != '/') base += '/';
+  return base;
+};
+
 // hide submit button before any files are added
 $('.submit-assignment').hide();
 $('.prog-total').hide();
@@ -13,7 +19,7 @@ var previewTemplate = previewNode.outerHTML;
 previewNode.parentNode.removeChild(previewNode);
 
 var myDropzone = new Dropzone(document.querySelector(".drag-zone"), {
-  url: (document.URL + '/submit'), // Set the url
+  url: (URL() + 'submit'), // Set the url
   thumbnailWidth: 80,
   thumbnailHeight: 80,
   parallelUploads: 20,
@@ -21,7 +27,13 @@ var myDropzone = new Dropzone(document.querySelector(".drag-zone"), {
   previewTemplate: previewTemplate,
   autoQueue: false, // Make sure the files aren't queued until manually added
   previewsContainer: "#previews-inner", // Define the container to display the previews
-  clickable: ".dz-clickable" // Define the element that should be used as click trigger to select files.
+  clickable: ".dz-clickable", // Define the element that should be used as click trigger to select files.
+  fallback: function() {
+    $('.dz-clickable').hide();
+    $('#previews').hide();
+    $('.fallback').show();
+    $('.fallback').attr('action', URL() + 'submit');
+  }
 });
 
 var responded = false;

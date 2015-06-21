@@ -5,6 +5,7 @@ require('../common');
 var router = express.Router();
 var multer = require('multer');
 var strftime = require('strftime');
+var _ = require('lodash');
 var comments = require('../comments');
 
 var render = function(page, options, res) {
@@ -127,40 +128,78 @@ router.use('/:id/submit', multer({
   }
 }));
 
-// Submits the file into the mysql database
 router.post('/:id/submit', function(req, res, next) {
-  if(req.files) {
+  submit(req, res, function(err, data) {
+    if (err) {
+      if (req.body.fallback) {
+        res.redirect('/student/assignment/' + req.params.id + '?error=An unknown error has occurred.');
+      } else {
+        res.json({ code: -1 }); // unknown
+      }
+      err.handled = true;
+      return next(err);
+    }
+    if (req.body.fallback) {
+      if (data == 0) {
+        res.redirect('/student/assignment/' + req.params.id);
+      } else {
+        var msg = '';
+        switch (data) {
+          case -1:
+            msg = 'An unknown error has occurred.';
+            break;
+          case 1:
+            msg = 'Your code could not be compiled.';
+            break;
+          case 2:
+            msg = 'Some of your files have invalid names. Only alphanumeric characters and periods are allowed, and names must contain at least 6 characters.';
+            break;
+          case 3:
+            msg = 'You already submitted this!';
+            break;
+          case 4:
+            msg = 'You must submit at least one java file. Make sure they end in .java';
+            break;
+          case 5:
+            msg = 'No two files can share the same name.';
+            break;
+        }
+        res.redirect('/student/assignment/' + req.params.id + '?error=' + msg);
+      }
+    } else {
+      res.json({ code: data });
+    }
+  });
+});
+
+// Submits the file into the mysql database
+var submit = function(req, res, next) {
+  if (req.files && !_.isEmpty(req.files)) {
 
     // first, check all the file names for legality
     for(file in req.files) {
       if(!/^[a-zA-Z0-9.]+$/.test(req.files[file].name) || req.files[file].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
-        res.json({code: 2}); // invalid name
-        return; // just stop
+        return next(null, 2); // invalid name
       }
       for(file2 in req.files) {
         if(file2 == file) continue;
         if(req.files[file].name == req.files[file2].name) {
-          res.json({code: 5}); // duplicate names
-          return; // just stop
+          return next(null, 5); // duplicate names
         }
       }
     }
 
     // get attached teacher files
     connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
-      if(err) {
-        res.json({code: -1});
-        err.handled = true;
-        next(err);
+      if (err) {
+        next(err, -1);
       } else {
         // now, check to see if this student already submitted this assignment
         connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
-          if(err) {
-            res.json({code: -1}); // unknown error
-            err.handled = true;
-            next(err);
+          if (err) {
+            next(err, -1);
           } else if(submissions.length > 0) {
-            res.json({code: 3}); // already submitted this assignment
+            next(null, 3);
           } else {
 
             var toCompile = "";
@@ -178,13 +217,12 @@ router.post('/:id/submit', function(req, res, next) {
             }
 
             if(!toCompile) {
-              res.json({code: 4}); // must have at least one java file
-              return; // easier than another if/else
+              return next(null, 4); // must have at least one java file
             }
 
             // compile the java files
             exec("javac " + toCompile, function(err, stdout, stderr) {
-              if(err) { // compilation error, treat all files as non-java files
+              if (err) { // compilation error, treat all files as non-java files
                 for(file in req.files) {
                   req.files[file].isJava = false;
                 }
@@ -192,10 +230,8 @@ router.post('/:id/submit', function(req, res, next) {
 
               // finally, make necessary changes in database
               connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, NULL)", [req.params.id, req.user.id], function(err, result) {
-                if(err) {
-                  res.json({code: -1}); // unknown error
-                  err.handled = true;
-                  next(err);
+                if (err) {
+                  next(err, -1);
                 } else {
 
                   var args = [];
@@ -216,18 +252,14 @@ router.post('/:id/submit', function(req, res, next) {
                   connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
                     if(err) {
                       fs.removeSync('./uploads/' + req.user.id + '/'); // we must cleanup, even on error
-                      res.json({code: -1}); // unknown error
-                      err.handled = true;
-                      next(err);
+                      next(err, -1);
                     } else {
                       // clean up files used for compilation
                       fs.remove('./uploads/' + req.user.id + '/', function(err) {
-                        if(err) {
-                          res.json({code: -1}); // unknown error
-                          err.handled = true;
-                          next(err);
+                        if (err) {
+                          next(err, -1);
                         } else {
-                          res.json({code: 0});
+                          next(null, 0);
                         }
                       });
                     }
@@ -244,9 +276,9 @@ router.post('/:id/submit', function(req, res, next) {
     });
 
   } else {
-    res.json({code: 1}); // no files submitted
+    next(null, 1); // no files submitted
   }
-});
+};
 
 router.get('/:id/resubmit', function(req,res) {
   connection.query("SELECT `submissions`.`id` \
