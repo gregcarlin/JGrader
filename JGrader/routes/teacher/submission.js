@@ -155,89 +155,102 @@ router.post('/:id/updategrade/:grade', function(req, res, next) {
 
 router.post('/:id/run/:fileIndex', function(req, res, next) {
   fs.ensureDir('temp/' + req.params.id + '/', function(err) {
-    if(err) {
-      res.json({code: -1}); // unknown
+    if (err) {
+      res.json({ code: -1 }); // unknown
       err.handled = true;
-      next(err);
-    } else {
-      
-      connection.query("SELECT \
-                          `files`.`id`,\
-                          `files`.`name`,\
-                          `files`.`contents`,\
-                          `files`.`compiled` \
-                        FROM `submissions`,`files` \
-                        WHERE \
-                          `submissions`.`id` = ? AND \
-                          `files`.`submission_id` = `submissions`.`id` \
-                        ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
-        if(err) {
+      return next(err);
+    }
+
+    connection.query("SELECT \
+                        `files`.`id`,\
+                        `files`.`name`,\
+                        `files`.`contents`,\
+                        `files`.`compiled` \
+                      FROM `submissions`,`files` \
+                      WHERE \
+                        `submissions`.`id` = ? AND \
+                        `files`.`submission_id` = `submissions`.`id` \
+                      ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
+      if (err) {
+        res.json({ code: -1 }); // unknown
+        err.handled = true;
+        return next(err);
+      }
+
+      if (rows.length <= 0) {
+        return res.json({ code: 2 }); // invalid permissions
+      }
+
+      async.each(rows, function(row, cb) {
+        var name = row.name;
+        if (row.compiled) {
+          row.className = name.substring(0, name.length - 5);
+          row.writeName = row.className + '.class';
+          row.writeData = row.compiled;
+        } else {
+          row.writeName = name;
+          row.writeData = row.contents;
+        }
+        // note: working directory seems to be one with app.js in it
+        fs.writeFile('temp/' + req.params.id + '/' + row.writeName, row.writeData, cb);
+      }, function(err) {
+        if (err) {
           res.json({code: -1}); // unknown
           err.handled = true;
-          next(err);
-        } else {
+          return next(err);
+        }
 
-          if(rows.length <= 0) {
-            res.json({code: 2}); // invalid permissions
-          } else {
-            async.each(rows, function(row, cb) {
-              var name = row.name;
-              if(row.compiled) {
-                row.className = name.substring(0, name.length - 5);
-                row.writeName = row.className + '.class';
-                row.writeData = row.compiled;
+        var fileIndex = req.params.fileIndex;
+        if (fileIndex >= rows.length || !rows[req.params.fileIndex].className) {
+          return res.json({ code: 1 }); // invalid input
+        }
+
+        var command = 'java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className;
+        var options = {
+          timeout: 10000, // 10 seconds
+          cwd: 'temp/' + req.params.id + '/'
+        };
+        var child = exec(command, options, function(err, stdout, stderr) {
+          if (err && stderr) err = null; // suppress error if stderr is set (indicates user error)
+
+          // clean up
+          fs.remove('temp/' + req.params.id + '/', function(err0) {
+            if (err) {
+              if (err.killed) {
+                res.json({
+                  code: 0,
+                  out: '',
+                  err: 'Code took too long to execute! There may be an infinite loop somewhere.'
+                });
               } else {
-                row.writeName = name;
-                row.writeData = row.contents;
-              }
-              // note: working directory seems to be one with app.js in it
-              fs.writeFile('temp/' + req.params.id + '/' + row.writeName, row.writeData, cb);
-            }, function(err) {
-              if(err) {
-                res.json({code: -1}); // unknown
+                child.kill();
+                res.json({ code: -1 });
                 err.handled = true;
                 next(err);
-              } else {
-
-                var fileIndex = req.params.fileIndex;
-                if(fileIndex < rows.length && rows[req.params.fileIndex].className) {
-                  var child = exec('java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */, cwd: 'temp/' + req.params.id + '/'}, function(err, stdout, stderr) {
-                    if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
-                    if(err) {
-                      if(err.killed) {
-                        res.json({code: 0, out: '', err: 'Code took too long to execute! There may be an infinite loop somewhere.'});
-                      } else {
-                        child.kill();
-                        res.json({code: -1});
-                        err.handled = true;
-                        next(err);
-                      }
-                    } else {
-                      res.json({code: 0, out: stdout, err: stderr});
-                    }
-                    // clean up
-                    fs.remove('temp/' + req.params.id + '/', function(err) {
-                      if(err) {
-                        // don't report error to user
-                        err.handled = true;
-                        next(err);
-                      }
-                    });
-                  });
-                  if(req.body.stdin) child.stdin.write(req.body.stdin);
-                  child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
-                } else {
-                  res.json({code: 1}); // invalid input
-                }
-
               }
-            });
-          }
+              return;
+            }
+            if (err0) {
+              res.json({ code: -1 });
+              err0.handled = true;
+              return next(err0);
+            }
 
-        }
+            res.json({
+              code: 0,
+              out: stdout,
+              err: stderr
+            });
+          });
+
+        });
+        if (req.body.stdin) child.stdin.write(req.body.stdin);
+        child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
+
       });
 
-    }
+    });
+
   });
 });
 
@@ -283,9 +296,10 @@ router.get('/:id/test/:fileIndex', function(req, res, next) {
           }
 
           async.mapSeries(tests, function(test, callback) {
-            var command = 'cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + files[req.params.fileIndex].className;
+            var command = 'java -Djava.security.manager -Djava.security.policy==security.policy ' + files[req.params.fileIndex].className;
             var options = {
-              timeout: 10000 /* 10 seconds */
+              timeout: 10000, // 10 seconds
+              cwd: 'temp/' + req.params.id + '/'
             };
             var child = exec(command, options, function(err, stdout, stderr) {
               if (err && stderr) err = null; // suppress error if stderr is set (indicates user error)
