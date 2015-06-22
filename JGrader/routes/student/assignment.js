@@ -175,116 +175,116 @@ router.post('/:id/submit', function(req, res, next) {
 
 // Submits the file into the mysql database
 var submit = function(req, res, next) {
+
+  // normalize file uploads into this files array
   var files = [];
   for (var key in req.files) {
     for (var i=0; i<req.files[key].length; i++) {
       files.push(req.files[key][i]);
     }
   }
-  if (!_.isEmpty(files)) {
 
-    // first, check all the file names for legality
-    for(var i in files) {
-      if(!/^[a-zA-Z0-9.]+$/.test(files[i].name) || files[i].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
-        return next(null, 2); // invalid name
-      }
-      for(var j in files) {
-        if(i == j) continue;
-        if(files[i].name == files[j].name) {
-          return next(null, 5); // duplicate names
-        }
+  if (_.isEmpty(files)) return next(null, 1); // no files submitted
+
+  // first, check all the file names for legality
+  for(var i=0; i<files.length; i++) {
+    if(!/^[a-zA-Z0-9.]+$/.test(files[i].name) || files[i].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
+      return next(null, 2); // invalid name
+    }
+    for(var j=0; j<files.length; j++) {
+      if(i == j) continue;
+      if(files[i].name == files[j].name) {
+        return next(null, 5); // duplicate names
       }
     }
+  }
 
-    // get attached teacher files
-    connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
-      if (err) {
-        next(err, -1);
-      } else {
-        // now, check to see if this student already submitted this assignment
-        connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
-          if (err) {
-            next(err, -1);
-          } else if(submissions.length > 0) {
-            next(null, 3);
-          } else {
+  // get attached teacher files
+  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
+    if (err) return next(err, -1);
 
-            var toCompile = "";
-            for(file in files) {
-              files[file].isJava = files[file].path.substr(files[file].path.length-4).toLowerCase() == 'java';
-              if(files[file].isJava) toCompile += files[file].path + " ";
+    // now, check to see if this student already submitted this assignment
+    connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
+      if (err) return next(err, -1);
+      if (submissions.length > 0) return next(null, 3);
+
+      var toCompile = "";
+      for(var i=0; i<files.length; i++) {
+        files[i].isJava = files[i].path.substr(files[i].path.length-4).toLowerCase() == 'java';
+        if(files[i].isJava) toCompile += files[i].path + " ";
+      }
+
+      async.each(teacherFiles, function(teacherFile, cb) {
+        teacherFile.path = './uploads/' + req.user.id + '/' + teacherFile.name;
+        teacherFile.isJava = teacherFile.name.substr(teacherFile.name.length-4).toLowerCase() == 'java';
+        if(teacherFile.isJava) toCompile += teacherFile.path + " ";
+        teacherFile.mimetype = teacherFile.mime;
+        files.push(teacherFile);
+        fs.writeFile(teacherFile.path, teacherFile.contents, cb);
+      }, function(err) {
+        if (err) return next(err);
+
+        if(!toCompile) return next(null, 4); // must have at least one java file
+
+        // compile the java files
+        exec("javac " + toCompile, function(err, stdout, stderr) {
+          if (err) { // compilation error, treat all files as non-java files
+            for(var i=0; i<files.length; i++) {
+              files[i].isJava = false;
             }
-            for(file in teacherFiles) {
-              teacherFiles[file].path = './uploads/' + req.user.id + '/' + teacherFiles[file].name;
-              fs.writeFileSync(teacherFiles[file].path, teacherFiles[file].contents);
-              teacherFiles[file].isJava = teacherFiles[file].name.substr(teacherFiles[file].name.length-4).toLowerCase() == 'java';
-              if(teacherFiles[file].isJava) toCompile += teacherFiles[file].path + " ";
-              teacherFiles[file].mimetype = teacherFiles[file].mime;
-              files[teacherFiles[file].name] = teacherFiles[file];
-            }
+          }
 
-            if(!toCompile) {
-              return next(null, 4); // must have at least one java file
-            }
+          // finally, make necessary changes in database
+          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, NULL)", [req.params.id, req.user.id], function(err, result) {
+            if (err) return next(err, -1);
 
-            // compile the java files
-            exec("javac " + toCompile, function(err, stdout, stderr) {
-              if (err) { // compilation error, treat all files as non-java files
-                for(file in files) {
-                  files[file].isJava = false;
-                }
-              }
+            var args = [];
+            var stmt = "";
+            async.map(files, function(file, cb) {
+              fs.readFile(file.path, cb);
+            }, function(err, javaResults) {
+              if (err) return next(err, -1);
 
-              // finally, make necessary changes in database
-              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, NULL)", [req.params.id, req.user.id], function(err, result) {
-                if (err) {
-                  next(err, -1);
+              async.map(files, function(file, cb) {
+                if (file.isJava) {
+                  fs.readFile(file.path.substr(0, file.path.length - 4) + 'class', cb);
                 } else {
-
-                  var args = [];
-                  var stmt = "";
-                  for(file in files) {
-                    // read java and class data into variables
-                    var javaData = fs.readFileSync(files[file].path);
-                    var classData = files[file].isJava ? fs.readFileSync(files[file].path.substr(0, files[file].path.length-4) + 'class') : null;
-
-                    stmt += "(NULL,?,?,?,?,?),";
-                    args.push(result.insertId);
-                    args.push(files[file].name);
-                    args.push(javaData);
-                    args.push(classData);
-                    args.push(files[file].mimetype);
-                  }
-                  stmt = stmt.substr(0, stmt.length-1); // remove last character from stmt (extraneous comma)
-                  connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
-                    if(err) {
-                      fs.removeSync('./uploads/' + req.user.id + '/'); // we must cleanup, even on error
-                      next(err, -1);
-                    } else {
-                      // clean up files used for compilation
-                      fs.remove('./uploads/' + req.user.id + '/', function(err) {
-                        if (err) {
-                          next(err, -1);
-                        } else {
-                          next(null, 0);
-                        }
-                      });
-                    }
-                  });
-
+                  cb(null, null);
                 }
-              });
+              }, function(err, classResults) {
+                if (err) return next(err, -1);
 
+                for (var i=0; i<files.length; i++) {
+                  stmt += "(NULL,?,?,?,?,?),";
+                  args.push(result.insertId);
+                  args.push(files[i].name);
+                  args.push(javaResults[i]);
+                  args.push(classResults[i]);
+                  args.push(files[i].mimetype);
+                }
+                stmt = stmt.substr(0, stmt.length - 1); // remove last character from stmt (extraneous comma)
+
+                connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
+                  fs.remove('./uploads/' + req.user.id + '/', function(err2) {
+                    if (err) return next(err, -1);
+                    if (err2) return next(err2, -1);
+
+                    next(null, 0);
+                  });
+                });
+              });
             });
 
-          }
+          });
+
         });
-      }
+
+      });
+
     });
 
-  } else {
-    next(null, 1); // no files submitted
-  }
+  });
+
 };
 
 router.get('/:id/resubmit', function(req,res) {
