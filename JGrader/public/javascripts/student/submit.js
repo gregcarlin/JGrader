@@ -6,6 +6,21 @@ var URL = function() {
   if (base.substring(base.length - 1) != '/') base += '/';
   return base;
 };
+// http://stackoverflow.com/a/1099670/720889
+var queryParams = function() {
+  var qs = document.location.search;
+  qs = qs.split('+').join(' ');
+
+  var params = {};
+  var tokens;
+  var re = /[?&]?([^=]+)=([^&]*)/g;
+
+  while (tokens = re.exec(qs)) {
+    params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+  }
+
+  return params;
+}
 
 // hide submit button before any files are added
 $('.submit-assignment').hide();
@@ -28,6 +43,7 @@ var myDropzone = new Dropzone(document.querySelector(".drag-zone"), {
   autoQueue: false, // Make sure the files aren't queued until manually added
   previewsContainer: "#previews-inner", // Define the container to display the previews
   clickable: ".dz-clickable", // Define the element that should be used as click trigger to select files.
+  forceFallback: queryParams().forceFallback || false,
   fallback: function() {
     $('.dz-clickable').hide();
     $('#previews').hide();

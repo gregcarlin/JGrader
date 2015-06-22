@@ -118,21 +118,28 @@ casper.test.begin('Student Sign In', function(test) {
 testTitle('Student Class List', 'student/section', 'Your Classes | jGrader');
 testTitle('Student Assignment List', 'student/assignment', 'Your Assignments | jGrader');
 
-var hello = fs.read('./test_files/Hello.java');
 casper.test.begin('Simple Submission', function(test) {
-  /*casper.start(url + 'student/assignment/34', function() {
-  });*/
-  casper.start();
+  casper.start(url + 'student/assignment/34?forceFallback=true', function() {
+    this.page.uploadFile('input[type="file"]', './test_files/Hello.java');
+    this.click('input[type="submit"]');
+  });
   
-  casper.open(url + 'student/assignment/34/submit', {
-    method: 'post',
-    data: hello,
-    contentType: false,
-    headers: {'Content-type' : 'multipart/form-data'}
+  casper.then(function() {
+    test.assertTitle('AssignmentA | jGrader');
+    this.each(this.getElementsInfo('.alert-warning'), function(self, item) {
+      // this is the only allowed warning
+      test.assert(item.text.indexOf('Your browser is not supported. Consider upgrading to a newer one.') > -1);
+    });
   });
 
   casper.then(function() {
-    casper.debugHTML();
+    this.click('#resubmit');
+    this.click('.btn-danger');
+    this.wait(1000);
+  });
+
+  casper.then(function() {
+    test.assertExists('#student-upload');
   });
 
   casper.run(function() {
