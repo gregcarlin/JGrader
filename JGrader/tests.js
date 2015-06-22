@@ -130,6 +130,9 @@ casper.test.begin('Simple Submission', function(test) {
       // this is the only allowed warning
       test.assert(item.text.indexOf('Your browser is not supported. Consider upgrading to a newer one.') > -1);
     });
+    var tabs = this.getElementsInfo('.nav-tabs li[role="presentation"]');
+    test.assertEquals(tabs.length, 1);
+    test.assertEquals(tabs[0].text, 'Hello.java');
   });
 
   casper.then(function() {
@@ -146,3 +149,4 @@ casper.test.begin('Simple Submission', function(test) {
     test.done();
   });
 });
+
