@@ -255,69 +255,89 @@ router.get('/:id/test/:fileIndex', function(req, res, next) {
                         `sections`.`teacher_id` = ? AND \
                         `files`.`submission_id` = `submissions`.`id` \
                       ORDER BY `files`.`id`", [req.params.id, req.user.id], function(err, files) {
-      if(err) {
+      if (err) {
         res.json({code: -1});
         err.handled = true;
-        next(err);
-      } else {
-        connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.assignment.id], function(err, tests) {
-          if(err) {
-            res.json({code: -1});
-            err.handled = true;
-            next(err);
-          } else {
-            for(var i in files) {
-              files[i].className = files[i].name.substring(0, files[i].name.length - 5);
-              fs.writeFileSync('temp/' + req.params.id + '/' + files[i].className + '.class', files[i].compiled);
-            }
-            if(req.params.fileIndex < files.length) {
-              async.mapSeries(tests, function(test, callback) {
-                var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + files[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
-                  if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
-                  if(err) {
-                    if(err.killed) {
-                      res.json({code: 2}); // code took too long to execute
-                    } else {
-                      res.json({code: -1});
-                      fs.removeSync('temp/' + req.params.id + '/'); // cleanup
-                      err.handled = true;
-                      next(err);
-                    }
-                  } else {
-                    if(stdout.length >= 1) {
-                      // truncate last new line character
-                      stdout = stdout.substring(0, stdout.length - 1);
-                    }
-                    callback(null, [stdout, stderr]);
-                  }
-                });
-                child.stdin.write(test.input);
-                child.stdin.end();
-              }, function(err0, results) {
-                fs.remove('temp/' + req.params.id + '/', function(err1) {
-                  if(err0) {
-                    res.json({code: -1});
-                    err0.handled = true;
-                    next(err0);
-                  } else if(err1) {
-                    res.json({code: -1});
-                    err1.handled = true;
-                    next(err1);
-                  } else {
-                    var data = [];
-                    for(var i in results) {
-                      data.push({input: tests[i].input, expected: tests[i].output, result: results[i][0]});
-                    }
-                    res.json({code: 0, results: data});
-                  }
-                });
-              });
-            } else {
-              res.json({code: 1}); // invalid input
-            }
-          }
-        });
+        return next(err);
       }
+
+      connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.assignment.id], function(err, tests) {
+        if (err) {
+          res.json({code: -1});
+          err.handled = true;
+          return next(err);
+        }
+
+        async.each(files, function(file, cb) {
+          file.className = file.name.substring(0, file.name.length - 5);
+          fs.writeFile('temp/' + req.params.id + '/' + file.className + '.class', file.compiled, cb);
+        }, function(err) {
+          if (err) {
+            res.json({ code: -1 });
+            err.handled = true;
+            return next(err);
+          }
+
+          if (req.params.fileIndex >= files.length) {
+            return res.json({ code: 1 }); // invalid input
+          }
+
+          async.mapSeries(tests, function(test, callback) {
+            var command = 'cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + files[req.params.fileIndex].className;
+            var options = {
+              timeout: 10000 /* 10 seconds */
+            };
+            var child = exec(command, options, function(err, stdout, stderr) {
+              if (err && stderr) err = null; // suppress error if stderr is set (indicates user error)
+              if (err) {
+                if (err.killed) {
+                  res.json({ code: 2 }); // code took too long to execute
+                } else {
+                  res.json({ code: -1 });
+                  fs.remove('temp/' + req.params.id + '/', function(err2) { // cleanup
+                    err.handled = true;
+                    next(err);
+                  });
+                }
+              } else {
+                if (stdout.length >= 1) {
+                  // truncate last new line character
+                  stdout = stdout.substring(0, stdout.length - 1);
+                }
+                callback(null, [stdout, stderr]);
+              }
+            });
+            child.stdin.write(test.input);
+            child.stdin.end();
+          }, function(err0, results) {
+            fs.remove('temp/' + req.params.id + '/', function(err1) {
+              if (err0) {
+                res.json({code: -1});
+                err0.handled = true;
+                return next(err0);
+              }
+              if (err1) {
+                res.json({code: -1});
+                err1.handled = true;
+                return next(err1);
+              }
+
+              var data = [];
+              for(var i in results) {
+                data.push({
+                  input: tests[i].input,
+                  expected: tests[i].output,
+                  result: results[i][0]
+                });
+              }
+              res.json({ code: 0, results: data });
+            });
+          });
+
+        });
+
+      });
+
     });
   });
 });
