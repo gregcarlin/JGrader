@@ -118,9 +118,13 @@ casper.test.begin('Student Sign In', function(test) {
 testTitle('Student Class List', 'student/section', 'Your Classes | jGrader');
 testTitle('Student Assignment List', 'student/assignment', 'Your Assignments | jGrader');
 
-casper.test.begin('Simple Submission', function(test) {
+const submitFiles = function(test, files) {
   casper.start(url + 'student/assignment/34?forceFallback=true', function() {
-    this.page.uploadFile('input[type="file"]', './test_files/Hello.java');
+    var paths = [];
+    for (var i=0; i<files.length; i++) {
+      paths.push('./test_files/' + files[i]);
+    }
+    this.page.uploadFile('input[type="file"]', paths);
     this.click('input[type="submit"]');
   });
   
@@ -131,8 +135,10 @@ casper.test.begin('Simple Submission', function(test) {
       test.assert(item.text.indexOf('Your browser is not supported. Consider upgrading to a newer one.') > -1);
     });
     var tabs = this.getElementsInfo('.nav-tabs li[role="presentation"]');
-    test.assertEquals(tabs.length, 1);
-    test.assertEquals(tabs[0].text, 'Hello.java');
+    test.assertEquals(tabs.length, files.length);
+    for (var i=0; i<tabs.length; i++) {
+      test.assertEquals(tabs[i].text, files[i]);
+    }
   });
 
   casper.then(function() {
@@ -148,5 +154,12 @@ casper.test.begin('Simple Submission', function(test) {
   casper.run(function() {
     test.done();
   });
+};
+
+casper.test.begin('Simple Submission', function(test) {
+  submitFiles(test, ['Hello.java']);
 });
 
+casper.test.begin('Two File Submission', function(test) {
+  submitFiles(test, ['DependA.java', 'DependB.java']);
+});

@@ -117,6 +117,7 @@ router.get('/:id', function(req, res, next) {
 
 router.use('/:id/submit', multer({
   inMemory: false,
+  putSingleFilesInArray: true,
   rename: function(fieldname, filename) {
     // don't rename
     return filename;
@@ -174,16 +175,22 @@ router.post('/:id/submit', function(req, res, next) {
 
 // Submits the file into the mysql database
 var submit = function(req, res, next) {
-  if (req.files && !_.isEmpty(req.files)) {
+  var files = [];
+  for (var key in req.files) {
+    for (var i=0; i<req.files[key].length; i++) {
+      files.push(req.files[key][i]);
+    }
+  }
+  if (!_.isEmpty(files)) {
 
     // first, check all the file names for legality
-    for(file in req.files) {
-      if(!/^[a-zA-Z0-9.]+$/.test(req.files[file].name) || req.files[file].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
+    for(var i in files) {
+      if(!/^[a-zA-Z0-9.]+$/.test(files[i].name) || files[i].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
         return next(null, 2); // invalid name
       }
-      for(file2 in req.files) {
-        if(file2 == file) continue;
-        if(req.files[file].name == req.files[file2].name) {
+      for(var j in files) {
+        if(i == j) continue;
+        if(files[i].name == files[j].name) {
           return next(null, 5); // duplicate names
         }
       }
@@ -203,9 +210,9 @@ var submit = function(req, res, next) {
           } else {
 
             var toCompile = "";
-            for(file in req.files) {
-              req.files[file].isJava = req.files[file].path.substr(req.files[file].path.length-4).toLowerCase() == 'java';
-              if(req.files[file].isJava) toCompile += req.files[file].path + " ";
+            for(file in files) {
+              files[file].isJava = files[file].path.substr(files[file].path.length-4).toLowerCase() == 'java';
+              if(files[file].isJava) toCompile += files[file].path + " ";
             }
             for(file in teacherFiles) {
               teacherFiles[file].path = './uploads/' + req.user.id + '/' + teacherFiles[file].name;
@@ -213,7 +220,7 @@ var submit = function(req, res, next) {
               teacherFiles[file].isJava = teacherFiles[file].name.substr(teacherFiles[file].name.length-4).toLowerCase() == 'java';
               if(teacherFiles[file].isJava) toCompile += teacherFiles[file].path + " ";
               teacherFiles[file].mimetype = teacherFiles[file].mime;
-              req.files[teacherFiles[file].name] = teacherFiles[file];
+              files[teacherFiles[file].name] = teacherFiles[file];
             }
 
             if(!toCompile) {
@@ -223,8 +230,8 @@ var submit = function(req, res, next) {
             // compile the java files
             exec("javac " + toCompile, function(err, stdout, stderr) {
               if (err) { // compilation error, treat all files as non-java files
-                for(file in req.files) {
-                  req.files[file].isJava = false;
+                for(file in files) {
+                  files[file].isJava = false;
                 }
               }
 
@@ -236,17 +243,17 @@ var submit = function(req, res, next) {
 
                   var args = [];
                   var stmt = "";
-                  for(file in req.files) {
+                  for(file in files) {
                     // read java and class data into variables
-                    var javaData = fs.readFileSync(req.files[file].path);
-                    var classData = req.files[file].isJava ? fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class') : null;
+                    var javaData = fs.readFileSync(files[file].path);
+                    var classData = files[file].isJava ? fs.readFileSync(files[file].path.substr(0, files[file].path.length-4) + 'class') : null;
 
                     stmt += "(NULL,?,?,?,?,?),";
                     args.push(result.insertId);
-                    args.push(req.files[file].name);
+                    args.push(files[file].name);
                     args.push(javaData);
                     args.push(classData);
-                    args.push(req.files[file].mimetype);
+                    args.push(files[file].mimetype);
                   }
                   stmt = stmt.substr(0, stmt.length-1); // remove last character from stmt (extraneous comma)
                   connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
