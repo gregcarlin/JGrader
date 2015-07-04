@@ -58,7 +58,7 @@
 <div class="tab-content">
   <% for (i in fileData) { %>
     <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>">
-      <pre><%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">You uploaded this file.</span>\n' : '' %><code class="prettyprint language-java linenums"><%= fileData[i].display ? fileData[i].contents : 'This is a binary file. Download it to view it.' %></code><ol class="comments"></ol></pre>
+      <pre><%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">You uploaded this file.</span>\n' : '' %><code class="prettyprint language-java linenums"><%= fileData[i].display %></code><ol class="comments"></ol></pre>
     </div>
   <% } %>
 </div>

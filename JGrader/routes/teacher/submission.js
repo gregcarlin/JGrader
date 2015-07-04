@@ -64,64 +64,63 @@ var handle = function(err, req, student, res, next) {
 
 router.get('/:id', function(req, res, next) {
   connection.query("SELECT `id`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.submission.student_id], function(err, students) {
-    if(err) {
+    if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      connection.query("SELECT `id`,`name`,`contents`,`compiled`,`mime` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
-        if(err) {
-          handle(err, req, students[0], res, next);
-        } else {
-          connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.assignment.id], function(err, teacherFiles) {
-            if(err) {
-              handle(err, req, students[0], res, next);
-            } else {
-              var anyCompiled = false;
-              for(var file in fileData) {
-                fileData[file].display = isAscii(fileData[file].mime);
-                if(fileData[file].compiled) anyCompiled = true;
-              }
-              var teacherNames = [];
-              for(var i in teacherFiles) {
-                teacherNames.push(teacherFiles[i].name);
-              }
-              connection.query("SELECT \
-                                  `submissions`.`id` \
-                                FROM \
-                                  `submissions` \
-                                  JOIN `students` ON `submissions`.`student_id` = `students`.`id` \
-                                WHERE `submissions`.`assignment_id` = ? \
-                                ORDER BY `students`.`lname`,`students`.`fname`", [req.assignment.id], function(err, others) {
-                if(err) {
-                  handle(err, req, students[0], res, next);
-                } else {
-                  var previous = -1;
-                  var next = -1;
-                  for(var i=0; i<others.length; i++) {
-                    if(others[i].id == req.params.id) {
-                      if(i > 0) previous = others[i-1].id;
-                      if(i < others.length - 1) next = others[i+1].id;
-                      break;
-                    }
-                  }
-                  render('submission', {
-                    title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name,
-                    student: students[0],
-                    fileData: fileData,
-                    submission: req.submission,
-                    assignment: req.assignment,
-                    anyCompiled: anyCompiled,
-                    teacherFiles: teacherNames,
-                    previous: previous,
-                    next: next}, res);
-                }
-              });
-            }
-          });
-        }
-      });
+      return next(err);
     }
+
+    connection.query("SELECT `id`,`name`,`contents`,`compiled`,`mime` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
+      if (err) return handle(err, req, students[0], res, next);
+
+      connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.assignment.id], function(err, teacherFiles) {
+        if (err) return handle(err, req, students[0], res, next);
+
+        var anyCompiled = false;
+        for (var file in fileData) {
+          fileData[file].display = isAscii(fileData[file].mime) ? fileData[file].contents : 'This is a binary file. Download it to view it.';
+          if (fileData[file].compiled) anyCompiled = true;
+        }
+        var teacherNames = [];
+        for (var i in teacherFiles) {
+          teacherNames.push(teacherFiles[i].name);
+        }
+        connection.query("SELECT \
+                            `submissions`.`id` \
+                          FROM \
+                            `submissions` \
+                            JOIN `students` ON `submissions`.`student_id` = `students`.`id` \
+                          WHERE `submissions`.`assignment_id` = ? \
+                          ORDER BY `students`.`lname`,`students`.`fname`", [req.assignment.id], function(err, others) {
+          if (err) return handle(err, req, students[0], res, next);
+
+          var previous = -1;
+          var next = -1;
+          for (var i=0; i<others.length; i++) {
+            if (others[i].id == req.params.id) {
+              if (i > 0) previous = others[i-1].id;
+              if (i < others.length - 1) next = others[i+1].id;
+              break;
+            }
+          }
+          render('submission', {
+            title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name,
+            student: students[0],
+            fileData: fileData,
+            submission: req.submission,
+            assignment: req.assignment,
+            anyCompiled: anyCompiled,
+            teacherFiles: teacherNames,
+            previous: previous,
+            next: next
+          }, res);
+
+        });
+
+      });
+
+    });
+
   });
 });
 
