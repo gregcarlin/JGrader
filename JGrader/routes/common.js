@@ -16,11 +16,11 @@ var nodemailer = require('nodemailer');
 mysql      = require('mysql');
 connection = mysql.createPool({
   connectionLimit    : 10,
-  host               : creds.mysql_host,
-  port               : creds.mysql_port,
-  database           : creds.mysql_db,
-  user               : creds.mysql_user,
-  password           : creds.mysql_pass,
+  host               : process.env.SQL_HOST || creds.mysql_host,
+  port               : process.env.SQL_PORT || creds.mysql_port,
+  database           : process.env.SQL_DB || creds.mysql_db,
+  user               : process.env.SQL_USER || creds.mysql_user,
+  password           : process.env.SQL_PASS || creds.mysql_pass,
   multipleStatements : true
 });
 
