@@ -77,12 +77,24 @@ router.get('/:id', function(req, res, next) {
         if (err) return handle(err, req, students[0], res, next);
 
         var anyCompiled = false;
-        for (var file in fileData) {
-          fileData[file].display = isAscii(fileData[file].mime) ? fileData[file].contents : 'This is a binary file. Download it to view it.';
-          if (fileData[file].compiled) anyCompiled = true;
+        for (var i = 0; i < fileData.length; i++) {
+          fileData[i].display = isAscii(fileData[i].mime) ? fileData[i].contents : 'This is a binary file. Download it to view it.';
+          if (fileData[i].compiled) anyCompiled = true;
+
+          var lastDot = fileData[i].name.lastIndexOf('.') + 1;
+          fileData[i].extension = fileData[i].name.substring(lastDot >= fileData[i].name.length ? 0 : lastDot);
+          var imageExtensions = ['png', 'jpg', 'jpeg', 'gif'];
+          if (imageExtensions.indexOf(fileData[i].extension) >= 0) {
+            fileData[i].text = false;
+            fileData[i].display = '<img src="data:image/' + fileData[i].extension + ';base64,';
+            fileData[i].display += new Buffer(fileData[i].contents).toString('base64');
+            fileData[i].display += '" alt="' + fileData[i].name + '">';
+          } else {
+            fileData[i].text = true;
+          }
         }
         var teacherNames = [];
-        for (var i in teacherFiles) {
+        for (var i = 0; i < teacherFiles.length; i++) {
           teacherNames.push(teacherFiles[i].name);
         }
         connection.query("SELECT \

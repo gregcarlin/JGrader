@@ -56,9 +56,14 @@
   </ul>
 </div>
 <div class="tab-content">
-  <% for (i in fileData) { %>
+  <% for (var i = 0; i < fileData.length; i++) { %>
     <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>">
-      <pre><%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">You uploaded this file.</span>\n' : '' %><code class="prettyprint language-java linenums"><%= fileData[i].display %></code><ol class="comments"></ol></pre>
+      <% if (fileData[i].text) { %>
+        <pre><%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">You uploaded this file.</span>\n' : '' %><code class="prettyprint language-java linenums"><%= fileData[i].display %></code><ol class="comments"></ol></pre>
+      <% } else { %>
+        <%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">You uploaded this file.</span>\n' : '' %>
+        <%- fileData[i].display %>
+      <% } %>
     </div>
   <% } %>
 </div>
