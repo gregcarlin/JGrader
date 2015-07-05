@@ -26,7 +26,7 @@
   <ul class="section-list">
     <% if(typeof rows != 'undefined') {
         for(i in rows) { %>
-          <li><label><input type="checkbox" name="section[]" value="<%= rows[i].id %>"<%= preselect == rows[i].id ? ' checked' : '' %> /><%= rows[i].name %></label></li>
+          <li><label><input type="checkbox" name="section[]" value="<%= rows[i].id %>"<%= (typeof preselect !== 'undefined' && preselect == rows[i].id) ? ' checked' : '' %> /><%= rows[i].name %></label></li>
     <%  }
        } %>
   </ul>

@@ -111,9 +111,13 @@ router.post('/create', function(req, res, next) {
   var due  = req.body.due;
   var secs = req.body.section;
   if(!name || name.length <= 0 || !due || due.length <= 0) {
-    render('assignmentCreate', {error: 'Name and due date must both be filled out.', name: name, desc: desc, due: due}, res);
+    connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [req.user.id], function(err, rows) {
+      render('assignmentCreate', {error: 'Name and due date must both be filled out.', rows: rows, name: name, desc: desc, due: due}, res);
+    });
   } else if(!secs || secs.length <= 0) {
-    render('assignmentCreate', {error: 'You must select at least one section.', name: name, desc: desc, due: due}, res);
+    connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [req.user.id], function(err, rows) {
+      render('assignmentCreate', {error: 'You must select at least one section.', rows: rows, name: name, desc: desc, due: due}, res);
+    });
   } else {
     for(i in secs) {
       createAssignment(req.user.id, secs[i], res, name, desc, due, req.files, next);
