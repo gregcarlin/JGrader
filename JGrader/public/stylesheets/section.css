@@ -714,6 +714,7 @@ li .comment-text .fa:last-of-type {
   float: right;
   margin-top: -45px;
   margin-right: -12px;
+  position: relative;
 }
 #resubmit:hover, #resubmit:focus {
   background-color: #83D7F7;

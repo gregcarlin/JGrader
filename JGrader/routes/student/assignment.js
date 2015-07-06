@@ -80,38 +80,58 @@ router.use('/:id', function(req, res, next) {
 // Gets the assignment information based on id
 router.get('/:id', function(req, res, next) {
   connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
-    if(err) {
+    if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
-                        FROM `files`, `students`, `assignments`, `submissions` \
-                        WHERE `submissions`.`assignment_id` = `assignments`.`id` \
-                        AND `submissions`.`student_id` = `students`.`id` \
-                        AND `files`.`submission_id`= `submissions`.`id` \
-                        AND `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData){
-        if(err) {
-          render('notFound', {error: 'An unexpected error has occurred.'}, res);
-          err.handled = true;
-          next(err);
-        } else if(fileData.length == 0) {
-          render('assignment', {title: req.assignment.name, assignment: req.assignment, teacherFiles: teacherFiles}, res);
-        } else {
-          var anyCompiled = false;
-          for(file in fileData) {
-            fileData[file].display = isAscii(fileData[file].mime);
-            if(fileData[file].compiled) anyCompiled = true;
-          }
-          // Sends file data
-          var teacherNames = [];
-          for(i in teacherFiles) {
-            teacherNames.push(teacherFiles[i].name);
-          }
-          render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, teacherFiles: teacherNames}, res);
-        }
-      });
+      return next(err);
     }
+
+    connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled` \
+                      FROM `files`, `students`, `assignments`, `submissions` \
+                      WHERE `submissions`.`assignment_id` = `assignments`.`id` \
+                      AND `submissions`.`student_id` = `students`.`id` \
+                      AND `files`.`submission_id`= `submissions`.`id` \
+                      AND `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData) {
+      if (err) {
+        render('notFound', {error: 'An unexpected error has occurred.'}, res);
+        err.handled = true;
+        return next(err);
+      }
+
+      if (fileData.length == 0) {
+        render('assignment', {
+          title: req.assignment.name,
+          assignment: req.assignment,
+          teacherFiles: teacherFiles
+        }, res);
+      } else {
+        var anyCompiled = false;
+        for (var i = 0; i < fileData.length; i++) {
+          fileData[i].display = isAscii(fileData[i].mime) ? fileData[i].contents : 'This is a binary file. Download it to view it.';
+          if (fileData[i].compiled) anyCompiled = true;
+
+          var lastDot = fileData[i].name.lastIndexOf('.') + 1;
+          fileData[i].extension = fileData[i].name.substring(lastDot >= fileData[i].name.length ? 0 : lastDot);
+          var imageExtensions = ['png', 'jpg', 'jpeg', 'gif'];
+          if (imageExtensions.indexOf(fileData[i].extension) >= 0) {
+            fileData[i].text = false;
+            fileData[i].display = '<img src="data:image/' + fileData[i].extension + ';base64,';
+            fileData[i].display += new Buffer(fileData[i].contents).toString('base64');
+            fileData[i].display += '" alt="' + fileData[i].name + '">';
+          } else {
+            fileData[i].text = true;
+          }
+        }
+        // Sends file data
+        var teacherNames = [];
+        for(var i = 0; i < teacherFiles.length; i++) {
+          teacherNames.push(teacherFiles[i].name);
+        }
+        render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, teacherFiles: teacherNames}, res);
+      }
+
+    });
+
   });
 });
 
