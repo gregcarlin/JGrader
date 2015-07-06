@@ -622,11 +622,14 @@ ol.linenums li:hover .fa, ol.linenums li:focus .fa {
   visibility: visible;
   text-decoration: none;
 }
-pre {
+.tab-body {
   border-radius: 0;
   border: none;
   background-color: rgba(255, 255, 255, 0.75);
   padding-bottom: 35px;
+}
+div.tab-body {
+  overflow: scroll;
 }
 code {
   vertical-align: top;
