@@ -126,7 +126,6 @@ router.post('/invite', function(req, res, next) {
                       html += 'In order to accept these invitations, please click the link or links below.<br />';
                       html += links;
                       var mailOptions = {
-                        from: creds.email_user,
                         to: emails[i],
                         subject: result[0].fname + ' ' + result[0].lname + ' has invited you to jGrader',
                         html: html

@@ -223,8 +223,6 @@ router.post('/feedback', function(req, res) {
       html += 'Message:<br />';
       html += req.body.feedback;
       var mailOptions = {
-        from: creds.email_user,
-        to: creds.email_user,
         subject: 'Feedback: ' + type,
         html: html
       };

@@ -11,7 +11,10 @@ exec = require('child_process').exec; // for running bash commands
 
 async = require('async');
 var crypto = require('crypto');
-var nodemailer = require('nodemailer');
+var mailgun = require('mailgun-js')({
+  apiKey: creds.mailgun_key,
+  domain: 'mg.jgrader.com'
+});
 
 mysql      = require('mysql');
 connection = mysql.createPool({
@@ -177,12 +180,12 @@ isAscii = function(mime) {
   return false;
 };
 
-transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: creds.email_user,
-    pass: creds.email_pass
+transporter = {
+  sendMail: function(options, callback) {
+    options.from = options.from || 'no-reply@jgrader.com';
+    options.to = options.to || 'contact@jgrader.com';
+    mailgun.messages().send(options, callback);
   }
-});
+};
 
 // modules.exports not required because everything needed is global

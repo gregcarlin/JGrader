@@ -87,7 +87,6 @@ router.post('/forgot', function(req, res, next) {
             next(err);
           } else {
             var mailOptions = {
-              from: creds.email_user,
               to: req.body.email,
               subject: 'Password Recovery',
               html: 'Your password reset request has been received. If you would like to reset your password, please go to <a href="' + url + '">' + url + '</a>. If you did not want to reset your password, you can safely ignore this message.'
