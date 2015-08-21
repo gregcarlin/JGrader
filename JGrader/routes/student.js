@@ -142,16 +142,16 @@ router.get('/feedback', function(req, res) {
   render('feedback', {}, res);
 });
 
-router.post('/feedback', function(req, res) {
+router.post('/feedback', function(req, res, next) {
   var type = req.body.type;
   if(!type || (type != 'question' && type != 'comment' && type != 'complaint' && type != 'other')) {
     type = 'other';
   }
   connection.query("SELECT `user`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.user.id], function(err, result) {
-    if(err) throw err;
+    if (err) return next(err);
 
     connection.query("INSERT INTO `feedback` VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)", [result[0].user, result[0].fname, result[0].lname, req.headers['user-agent'], type, req.body.feedback], function(err) {
-      if(err) throw err;
+      if (err) return next(err);
 
       var html = '';
       html += 'From: ' + result[0].fname + ' ' + result[0].lname + ' (' + result[0].user + ')<br />';
@@ -160,6 +160,7 @@ router.post('/feedback', function(req, res) {
       html += req.body.feedback;
       var mailOptions = {
         subject: 'Feedback: ' + type,
+        'h:Reply-To': result[0].user,
         html: html
       };
       transporter.sendMail(mailOptions, function(err, info) {
