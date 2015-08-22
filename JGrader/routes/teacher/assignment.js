@@ -509,7 +509,7 @@ var runAllTests = function(assignmentId, callback) {
                     AND `submissions`.`assignment_id` = ?", [assignmentId], function(err, files) {
     if (err) return callback(err);
 
-    codeRunner.setupDirectory(assignmentId, files, function(err) {
+    codeRunner.setupDirectory(assignmentId, files, function(err, uniqueIds) {
       if (err) return callback(err);
 
       // TODO other stuff

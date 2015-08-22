@@ -5,7 +5,8 @@ var fs = require('fs-extra');
 
 module.exports.setupDirectory = function(files, callback) {
   var grouped = _.groupBy(files, 'student_id');
-  async.map(_.keys(grouped), function(studentId, studentCb) {
+  var studentIds = _.keys(grouped);
+  async.map(studentIds, function(studentId, studentCb) {
     var studentFiles = grouped[studentId];
     var uniqueId = _.uniqueId();
     var folder = 'temp/' + uniqueId + '/';
@@ -27,7 +28,15 @@ module.exports.setupDirectory = function(files, callback) {
         studentCb(err, uniqueId);
       });
     });
-  }, callback);
+  }, function(err, results) {
+    if (err) return callback(err);
+
+    var rt = {};
+    _.each(results, function(uniqueId, index) {
+      rt[studentIds[index]] = uniqueId;
+    });
+    callback(null, rt);
+  });
 };
 
 module.exports.execute = function(uniqueId, toExecute, input, callback) {

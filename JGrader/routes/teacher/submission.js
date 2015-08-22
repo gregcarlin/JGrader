@@ -174,7 +174,8 @@ router.post('/:id/run/:fileIndex', function(req, res, next) {
                       `files`.`id`,\
                       `files`.`name`,\
                       `files`.`contents`,\
-                      `files`.`compiled` \
+                      `files`.`compiled`,\
+                      `submissions`.`student_id` \
                     FROM `submissions`,`files` \
                     WHERE \
                       `submissions`.`id` = ? AND \
@@ -197,7 +198,7 @@ router.post('/:id/run/:fileIndex', function(req, res, next) {
         return next(err);
       }
 
-      var uniqueId = uniqueIds[0];
+      var uniqueId = uniqueIds[rows[0].student_id];
 
       var fileIndex = req.params.fileIndex;
       if (fileIndex >= rows.length || !rows[fileIndex].className) {
@@ -237,7 +238,8 @@ router.get('/:id/test/:fileIndex', function(req, res, next) {
   connection.query("SELECT \
                       `files`.`id`,\
                       `files`.`name`,\
-                      `files`.`compiled` \
+                      `files`.`compiled`,\
+                      `submissions`.`student_id` \
                     FROM `submissions`,`assignments`,`sections`,`files` \
                     WHERE \
                       `submissions`.`assignment_id` = `assignments`.`id` AND \
@@ -270,8 +272,9 @@ router.get('/:id/test/:fileIndex', function(req, res, next) {
           return res.json({ code: 1 }); // invalid input
         }
 
+        var uniqueId = uniqueIds[files[0].student_id];
         async.mapSeries(tests, function(test, callback) {
-          codeRunner.execute(uniqueIds[0], files[req.params.fileIndex].className, test.input, function(err, stdout, stderr, overTime) {
+          codeRunner.execute(uniqueId, files[req.params.fileIndex].className, test.input, function(err, stdout, stderr, overTime) {
             if (err) {
               res.json({ code: -1 });
               err.handled = true;
@@ -289,7 +292,7 @@ router.get('/:id/test/:fileIndex', function(req, res, next) {
             callback(null, [stdout, stderr]);
           });
         }, function(err0, results) {
-          codeRunner.cleanup(uniqueIds[0], function(err1) {
+          codeRunner.cleanup(uniqueId, function(err1) {
             var err = err0 || err1;
             if (err) {
               res.json({code: -1});
