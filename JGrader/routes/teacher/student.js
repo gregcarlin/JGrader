@@ -123,9 +123,8 @@ router.post('/invite', function(req, res, next) {
           } else {
             var emails = req.body.emails.split(/[ ;(\r\n|\n|\r)]/);
             var sent = '';
-            for (i in emails) {
             _.each(emails, function(email) {
-              if(email.indexOf('@') > 0) { // @ can't be first character (or last but we don't bother checking for that)
+              if (email.indexOf('@') > 0) { // @ can't be first character (or last but we don't bother checking for that)
                 sent += email + ', ';
                 var html = 'Your teacher, ' + result[0].fname + ' ' + result[0].lname + ' has invited you to join his or her class on jGrader, the tool for collecting computer science assignments in the cloud. ';
                 html += 'In order to accept these invitations, please click the link or links below.<br />';
