@@ -6,7 +6,7 @@ var router = express.Router();
 var multer = require('multer');
 var strftime = require('strftime');
 var _ = require('lodash');
-var comments = require('../comments');
+var comments = require('../../controllers/comments');
 var async = require('async');
 
 var render = function(page, options, res) {

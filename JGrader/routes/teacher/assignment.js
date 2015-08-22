@@ -8,6 +8,8 @@ var multer = require('multer');
 var async = require('async');
 var _ = require('lodash');
 
+var codeRunner = require('../../controllers/teacher/codeRunner');
+
 var render = function(page, options, res) {
   options.page = 1;
   switch(page) {
@@ -500,33 +502,25 @@ router.get('/:id/runTestCases', function(req, res, next) {
 });
 
 var runAllTests = function(assignmentId, callback) { 
-  createTestingDir(assignmentId, function(err) {
+  connection.query("SELECT \
+                      `files`.`name`,`files`.`contents`,`files.compiled`,`files`.`mime`,`submissions`.`student_id` \
+                    FROM `submissions`,`files` \
+                    WHERE `submissions`.`id` = `files`.`submission_id` \
+                    AND `submissions`.`assignment_id` = ?", [assignmentId], function(err, files) {
     if (err) return callback(err);
 
-    // TODO other stuff
-    callback();
+    codeRunner.setupDirectory(assignmentId, files, function(err) {
+      if (err) return callback(err);
+
+      // TODO other stuff
+      callback();
+    });
   });
 }
 
-var createTestingDir = function(assignmentId, cb) {
-  fs.ensureDir('temp/' + req.params.id + '/', function(err) { 
-    connection.query("SELECT \
-                        `files`.`name`,`files`.`contents`,`files.compiled`,`files`.`mime` \
-                      FROM `submissions`,`files` \
-                      WHERE `submissions`.`id` = `files`.`submission_id` \
-                      AND `submissions`.`assignment_id` = ?", [assignmentId], function(err, files) {
-      if (err) return cb(err);
-
-      async.each(files, function(file, callback) {
-        file.className = file.name.substring(0, file.name.length - 5);
-        fs.writeFile('temp/' + req.params.id + '/' + file.className + '.class', file.compiled);
-      }, cb);
-    });
-  }); 
-}
-
-var runTests = function(assignmentId, cb) {
+/*var runTests = function(assignmentId, cb) {
   connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [assignmentId], function(err, tests) {
   });
-}
+}*/
+
 module.exports = router;

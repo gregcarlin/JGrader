@@ -5,7 +5,9 @@ require('../common');
 var router = express.Router();
 var strftime = require('strftime');
 var JSZip = require('jszip');
-var comments = require('../comments');
+
+var comments = require('../../controllers/comments');
+var codeRunner = require('../../controllers/teacher/codeRunner');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -168,98 +170,61 @@ router.post('/:id/updategrade/:grade', function(req, res, next) {
 });
 
 router.post('/:id/run/:fileIndex', function(req, res, next) {
-  fs.ensureDir('temp/' + req.params.id + '/', function(err) {
+  connection.query("SELECT \
+                      `files`.`id`,\
+                      `files`.`name`,\
+                      `files`.`contents`,\
+                      `files`.`compiled` \
+                    FROM `submissions`,`files` \
+                    WHERE \
+                      `submissions`.`id` = ? AND \
+                      `files`.`submission_id` = `submissions`.`id` \
+                    ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
     if (err) {
       res.json({ code: -1 }); // unknown
       err.handled = true;
       return next(err);
     }
 
-    connection.query("SELECT \
-                        `files`.`id`,\
-                        `files`.`name`,\
-                        `files`.`contents`,\
-                        `files`.`compiled` \
-                      FROM `submissions`,`files` \
-                      WHERE \
-                        `submissions`.`id` = ? AND \
-                        `files`.`submission_id` = `submissions`.`id` \
-                      ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
+    if (rows.length <= 0) {
+      return res.json({ code: 2 }); // invalid permissions
+    }
+
+    codeRunner.setupDirectory(rows, function(err, uniqueIds) {
       if (err) {
-        res.json({ code: -1 }); // unknown
+        res.json({code: -1}); // unknown
         err.handled = true;
         return next(err);
       }
 
-      if (rows.length <= 0) {
-        return res.json({ code: 2 }); // invalid permissions
+      var uniqueId = uniqueIds[0];
+
+      var fileIndex = req.params.fileIndex;
+      if (fileIndex >= rows.length || !rows[fileIndex].className) {
+        return res.json({ code: 1 }); // invalid input
       }
 
-      async.each(rows, function(row, cb) {
-        var name = row.name;
-        if (row.compiled) {
-          row.className = name.substring(0, name.length - 5);
-          row.writeName = row.className + '.class';
-          row.writeData = row.compiled;
-        } else {
-          row.writeName = name;
-          row.writeData = row.contents;
-        }
-        // note: working directory seems to be one with app.js in it
-        fs.writeFile('temp/' + req.params.id + '/' + row.writeName, row.writeData, cb);
-      }, function(err) {
-        if (err) {
-          res.json({code: -1}); // unknown
-          err.handled = true;
-          return next(err);
-        }
+      codeRunner.execute(uniqueId, rows[fileIndex].className, req.body.stdin, function(err, stdout, stderr, overTime) {
 
-        var fileIndex = req.params.fileIndex;
-        if (fileIndex >= rows.length || !rows[req.params.fileIndex].className) {
-          return res.json({ code: 1 }); // invalid input
-        }
+        codeRunner.cleanup(uniqueId, function(err0) {
+          var error = err || err0;
+          if (error) {
+            res.json({ code: -1 });
+            error.handled = true;
+            return next(error);
+          }
 
-        var command = 'java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className;
-        var options = {
-          timeout: 10000, // 10 seconds
-          cwd: 'temp/' + req.params.id + '/'
-        };
-        var child = exec(command, options, function(err, stdout, stderr) {
-          if (err && stderr) err = null; // suppress error if stderr is set (indicates user error)
+          if (overTime) {
+            stdout = '';
+            stderr = 'Code took too long to execute! There may be an infinite loop somewhere.';
+          }
 
-          // clean up
-          fs.remove('temp/' + req.params.id + '/', function(err0) {
-            if (err) {
-              if (err.killed) {
-                res.json({
-                  code: 0,
-                  out: '',
-                  err: 'Code took too long to execute! There may be an infinite loop somewhere.'
-                });
-              } else {
-                child.kill();
-                res.json({ code: -1 });
-                err.handled = true;
-                next(err);
-              }
-              return;
-            }
-            if (err0) {
-              res.json({ code: -1 });
-              err0.handled = true;
-              return next(err0);
-            }
-
-            res.json({
-              code: 0,
-              out: stdout,
-              err: stderr
-            });
+          res.json({
+            code: 0,
+            out: stdout,
+            err: stderr
           });
-
         });
-        if (req.body.stdin) child.stdin.write(req.body.stdin);
-        child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
 
       });
 
