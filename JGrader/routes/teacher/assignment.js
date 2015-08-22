@@ -5,6 +5,7 @@ require('../common');
 var router = express.Router();
 var strftime = require('strftime');
 var multer = require('multer');
+var async = require('async');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -451,10 +452,11 @@ router.post('/:id/caseCreate', function(req, res, next) {
   }
 });
 
-var runAllTests = function(req) { 
+var runAllTests = function(req, res, next) { 
   connection.query('SELECT `enrollment`.`student_id` FROM `enrollment` WHERE `enrollment`.`section_id`=?', [req.params.id], function(err, students) {
     for(var studentId in students) {
-      createTestingDir(req.params.id, studentId, function() {
+      createTestingDir(req.params.id, studentId, function(err) {
+        if (err) return next(err);
         
       });
     }
@@ -475,11 +477,12 @@ var createTestingDir = function(assignmentId, studentId, cb) {
                     `sections`.`teacher_id` = ? AND \
                     `files`.`submission_id` = `submissions`.`id` \
                   ORDER BY `files`.`id`", [assignmentId, studentId], function(err, files) {
-      for(var i in files) {
-        files[i].className = files[i].name.substring(0, files[i].name.length - 5);
-        fs.writeFileSync('temp/' + req.params.id + '/' + files[i].className + '.class', files[i].compiled);
-      }
-      cb();
+      if (err) return cb(err);
+
+      async.each(files, function(file, callback) {
+        file.className = file.name.substring(0, file.name.length - 5);
+        fs.writeFile('temp/' + req.params.id + '/' + file.className + '.class', file.compiled);
+      }, cb);
     });
   }); 
 }

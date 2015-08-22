@@ -7,6 +7,7 @@ var multer = require('multer');
 var strftime = require('strftime');
 var _ = require('lodash');
 var comments = require('../comments');
+var async = require('async');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -198,6 +199,46 @@ router.post('/:id/submit', function(req, res, next) {
   });
 });
 
+var findMain = function(err, files, callback) {
+  if (err) { // compilation error, treat all files as non-java files
+    _.each(files, function(file) {
+      file.isJava = false;
+    });
+    callback(null, null);
+  } else if (files.length == 1) { // only 1 file was submitted, so we mark it as containing the main
+    callback(null, files[0].name);
+  } else { // we must search for the main
+    async.map(files, function(file, cb) {
+      if (!file.isJava) return cb();
+
+      fs.readFile(file, function(err, data) {
+        if (err) return cb(err);
+
+        if (data.indexOf('main') >= 0) {
+          cb(null, file.name);
+        } else {
+          cb();
+        }
+      });
+    }, function(err, results) {
+      if (err) return callback(err);
+
+      var main = null;
+      for (var i = 0; i < results.length; i++) {
+        if (results[i]) {
+          if (main) { // multiple mains found
+            main = null;
+            break;
+          } else {
+            main = results[i];
+          }
+        }
+      }
+      callback(null, main);
+    });
+  }
+};
+
 // Submits the file into the mysql database
 var submit = function(req, res, next) {
 
@@ -253,72 +294,53 @@ var submit = function(req, res, next) {
 
         // compile the java files
         exec("javac " + toCompile, function(err, stdout, stderr) {
-          var main = null;
-          if (err) { // compilation error, treat all files as non-java files
-            for(var i=0; i<files.length; i++) {
-              files[i].isJava = false;
-            }
-          } else if (files.length == 1) { // only 1 file was submitted, so we mark it as containing the main
-            main = files[0].name;
-          } else { // we must search for the main
-            for(var i = 0; i < files.length; i++) {
-              if(files[i].isJava) {
-                var data = fs.readFileSync(files[i].path).toString();
-                if(data.indexOf('main') >= 0) {
-                  if(main) { // multiple mains found, set to null, student must pick later
-                    main = null;
-                    break;
-                  } else {
-                    main = files[i].name;
-                  }
-                }
-              }
-            }
-          }
-
-          // finally, make necessary changes in database
-          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, ?)", [req.params.id, req.user.id, main], function(err, result) {
+          findMain(err, files, function(err, main) {
             if (err) return next(err, -1);
 
-            var args = [];
-            var stmt = "";
-            async.map(files, function(file, cb) {
-              fs.readFile(file.path, cb);
-            }, function(err, javaResults) {
+            // finally, make necessary changes in database
+            connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, ?)", [req.params.id, req.user.id, main], function(err, result) {
               if (err) return next(err, -1);
 
+              var args = [];
+              var stmt = "";
               async.map(files, function(file, cb) {
-                if (file.isJava) {
-                  fs.readFile(file.path.substr(0, file.path.length - 4) + 'class', cb);
-                } else {
-                  cb(null, null);
-                }
-              }, function(err, classResults) {
+                fs.readFile(file.path, cb);
+              }, function(err, javaResults) {
                 if (err) return next(err, -1);
 
-                for (var i=0; i<files.length; i++) {
-                  stmt += "(NULL,?,?,?,?,?),";
-                  args.push(result.insertId);
-                  args.push(files[i].name);
-                  args.push(javaResults[i]);
-                  args.push(classResults[i]);
-                  args.push(files[i].mimetype);
-                }
-                stmt = stmt.substr(0, stmt.length - 1); // remove last character from stmt (extraneous comma)
+                async.map(files, function(file, cb) {
+                  if (file.isJava) {
+                    fs.readFile(file.path.substr(0, file.path.length - 4) + 'class', cb);
+                  } else {
+                    cb(null, null);
+                  }
+                }, function(err, classResults) {
+                  if (err) return next(err, -1);
 
-                connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
-                  fs.remove('./uploads/' + req.user.id + '/', function(err2) {
-                    if (err) return next(err, -1);
-                    if (err2) return next(err2, -1);
+                  for (var i=0; i<files.length; i++) {
+                    stmt += "(NULL,?,?,?,?,?),";
+                    args.push(result.insertId);
+                    args.push(files[i].name);
+                    args.push(javaResults[i]);
+                    args.push(classResults[i]);
+                    args.push(files[i].mimetype);
+                  }
+                  stmt = stmt.substr(0, stmt.length - 1); // remove last character from stmt (extraneous comma)
 
-                    next(null, 0);
+                  connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
+                    fs.remove('./uploads/' + req.user.id + '/', function(err2) {
+                      if (err) return next(err, -1);
+                      if (err2) return next(err2, -1);
+
+                      next(null, 0);
+                    });
                   });
                 });
               });
+
             });
 
           });
-
         });
 
       });
