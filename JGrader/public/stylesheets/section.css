@@ -140,9 +140,6 @@ body {
   color: #fff;
   padding-left: 22px;
   display: inline-block;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
 }
 .main .page-header .right-header .name a {
   color: #FFF;
@@ -534,7 +531,7 @@ body {
   border: none;
 }
 .teacher-main .nav-tabs {
-  margin-bottom: -6px;
+  margin-bottom: -1px;
 }
 .nav-tabs li {
   margin-bottom: 0;
@@ -630,11 +627,14 @@ ol.linenums li:hover .fa, ol.linenums li:focus .fa {
   visibility: visible;
   text-decoration: none;
 }
-pre {
+.tab-body {
   border-radius: 0;
   border: none;
   background-color: rgba(255, 255, 255, 0.75);
   padding-bottom: 35px;
+}
+div.tab-body {
+  overflow: scroll;
 }
 code {
   vertical-align: top;
@@ -719,6 +719,7 @@ li .comment-text .fa:last-of-type {
   float: right;
   margin-top: -45px;
   margin-right: -12px;
+  position: relative;
 }
 .student-btn:hover, .student-btn:focus {
   background-color: #83D7F7;

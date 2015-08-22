@@ -51,11 +51,18 @@
   </ul>
 </div>
 <div class="tab-content">
-    <% for (i in fileData) { %>
-      <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>">
-        <pre><%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">This file was uploaded by your teacher.</span>\n' : '' %><code class="prettyprint language-java linenums"><%= fileData[i].display ? fileData[i].contents : 'This is a binary file and cannot be displayed.' %></code><ol class="comments"></ol></pre>
-      </div>
-    <% } %>
+  <% for (var i = 0; i < fileData.length; i++) { %>
+    <div role="tabpanel" class="tab-pane<%= i == 0 ? ' first active' : '' %>" id="<%= fileData[i].shortName %>">
+      <% if (fileData[i].text) { %>
+        <pre class="tab-body"><%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">This file was uploaded by your teacher.</span>\n' : '' %><code class="prettyprint language-java linenums"><%= fileData[i].display ? fileData[i].contents : 'This is a binary file and cannot be displayed.' %></code><ol class="comments"></ol></pre>
+      <% } else { %>
+        <div class="tab-body">
+          <%- teacherFiles.indexOf(fileData[i].name) >= 0 ? '\t<span class="teacher-file">You uploaded this file.</span>\n' : '' %>
+          <%- fileData[i].display %>
+        </div>
+      <% } %>
+    </div>
+  <% } %>
 </div>
 <div class"row">
   <button class="btn btn-primary start student-btn" href="resubmit/" role="button" id="resubmit">Resubmit</button>

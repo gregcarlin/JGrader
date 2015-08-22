@@ -64,64 +64,75 @@ var handle = function(err, req, student, res, next) {
 
 router.get('/:id', function(req, res, next) {
   connection.query("SELECT `id`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.submission.student_id], function(err, students) {
-    if(err) {
+    if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      connection.query("SELECT `id`,`name`,`contents`,`compiled`,`mime` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
-        if(err) {
-          handle(err, req, students[0], res, next);
-        } else {
-          connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.assignment.id], function(err, teacherFiles) {
-            if(err) {
-              handle(err, req, students[0], res, next);
-            } else {
-              var anyCompiled = false;
-              for(var file in fileData) {
-                fileData[file].display = isAscii(fileData[file].mime);
-                if(fileData[file].compiled) anyCompiled = true;
-              }
-              var teacherNames = [];
-              for(var i in teacherFiles) {
-                teacherNames.push(teacherFiles[i].name);
-              }
-              connection.query("SELECT \
-                                  `submissions`.`id` \
-                                FROM \
-                                  `submissions` \
-                                  JOIN `students` ON `submissions`.`student_id` = `students`.`id` \
-                                WHERE `submissions`.`assignment_id` = ? \
-                                ORDER BY `students`.`lname`,`students`.`fname`", [req.assignment.id], function(err, others) {
-                if(err) {
-                  handle(err, req, students[0], res, next);
-                } else {
-                  var previous = -1;
-                  var next = -1;
-                  for(var i=0; i<others.length; i++) {
-                    if(others[i].id == req.params.id) {
-                      if(i > 0) previous = others[i-1].id;
-                      if(i < others.length - 1) next = others[i+1].id;
-                      break;
-                    }
-                  }
-                  render('submission', {
-                    title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name,
-                    student: students[0],
-                    fileData: fileData,
-                    submission: req.submission,
-                    assignment: req.assignment,
-                    anyCompiled: anyCompiled,
-                    teacherFiles: teacherNames,
-                    previous: previous,
-                    next: next}, res);
-                }
-              });
-            }
-          });
-        }
-      });
+      return next(err);
     }
+
+    connection.query("SELECT `id`,`name`,`contents`,`compiled`,`mime` FROM `files` WHERE `submission_id` = ? ORDER BY `id`", [req.params.id], function(err, fileData) {
+      if (err) return handle(err, req, students[0], res, next);
+
+      connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.assignment.id], function(err, teacherFiles) {
+        if (err) return handle(err, req, students[0], res, next);
+
+        var anyCompiled = false;
+        for (var i = 0; i < fileData.length; i++) {
+          fileData[i].display = isAscii(fileData[i].mime) ? fileData[i].contents : 'This is a binary file. Download it to view it.';
+          if (fileData[i].compiled) anyCompiled = true;
+
+          var lastDot = fileData[i].name.lastIndexOf('.') + 1;
+          fileData[i].extension = fileData[i].name.substring(lastDot >= fileData[i].name.length ? 0 : lastDot);
+          var imageExtensions = ['png', 'jpg', 'jpeg', 'gif'];
+          if (imageExtensions.indexOf(fileData[i].extension) >= 0) {
+            fileData[i].text = false;
+            fileData[i].display = '<img src="data:image/' + fileData[i].extension + ';base64,';
+            fileData[i].display += new Buffer(fileData[i].contents).toString('base64');
+            fileData[i].display += '" alt="' + fileData[i].name + '">';
+          } else {
+            fileData[i].text = true;
+          }
+        }
+        var teacherNames = [];
+        for (var i = 0; i < teacherFiles.length; i++) {
+          teacherNames.push(teacherFiles[i].name);
+        }
+        connection.query("SELECT \
+                            `submissions`.`id` \
+                          FROM \
+                            `submissions` \
+                            JOIN `students` ON `submissions`.`student_id` = `students`.`id` \
+                          WHERE `submissions`.`assignment_id` = ? \
+                          ORDER BY `students`.`lname`,`students`.`fname`", [req.assignment.id], function(err, others) {
+          if (err) return handle(err, req, students[0], res, next);
+
+          var previous = -1;
+          var next = -1;
+          for (var i=0; i<others.length; i++) {
+            if (others[i].id == req.params.id) {
+              if (i > 0) previous = others[i-1].id;
+              if (i < others.length - 1) next = others[i+1].id;
+              break;
+            }
+          }
+          render('submission', {
+            title: students[0].fname + ' ' + students[0].lname + "'s submission to " + students[0].name,
+            student: students[0],
+            fileData: fileData,
+            submission: req.submission,
+            assignment: req.assignment,
+            anyCompiled: anyCompiled,
+            teacherFiles: teacherNames,
+            previous: previous,
+            next: next
+          }, res);
+
+        });
+
+      });
+
+    });
+
   });
 });
 
@@ -155,87 +166,102 @@ router.post('/:id/updategrade/:grade', function(req, res, next) {
 
 router.post('/:id/run/:fileIndex', function(req, res, next) {
   fs.ensureDir('temp/' + req.params.id + '/', function(err) {
-    if(err) {
-      res.json({code: -1}); // unknown
+    if (err) {
+      res.json({ code: -1 }); // unknown
       err.handled = true;
-      next(err);
-    } else {
-      
-      connection.query("SELECT \
-                          `files`.`id`,\
-                          `files`.`name`,\
-                          `files`.`contents`,\
-                          `files`.`compiled` \
-                        FROM `submissions`,`files` \
-                        WHERE \
-                          `submissions`.`id` = ? AND \
-                          `files`.`submission_id` = `submissions`.`id` \
-                        ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
-        if(err) {
+      return next(err);
+    }
+
+    connection.query("SELECT \
+                        `files`.`id`,\
+                        `files`.`name`,\
+                        `files`.`contents`,\
+                        `files`.`compiled` \
+                      FROM `submissions`,`files` \
+                      WHERE \
+                        `submissions`.`id` = ? AND \
+                        `files`.`submission_id` = `submissions`.`id` \
+                      ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
+      if (err) {
+        res.json({ code: -1 }); // unknown
+        err.handled = true;
+        return next(err);
+      }
+
+      if (rows.length <= 0) {
+        return res.json({ code: 2 }); // invalid permissions
+      }
+
+      async.each(rows, function(row, cb) {
+        var name = row.name;
+        if (row.compiled) {
+          row.className = name.substring(0, name.length - 5);
+          row.writeName = row.className + '.class';
+          row.writeData = row.compiled;
+        } else {
+          row.writeName = name;
+          row.writeData = row.contents;
+        }
+        // note: working directory seems to be one with app.js in it
+        fs.writeFile('temp/' + req.params.id + '/' + row.writeName, row.writeData, cb);
+      }, function(err) {
+        if (err) {
           res.json({code: -1}); // unknown
           err.handled = true;
-          next(err);
-        } else {
+          return next(err);
+        }
 
-          if(rows.length <= 0) {
-            res.json({code: 2}); // invalid permissions
-          } else {
-            async.each(rows, function(row, cb) {
-              var name = row.name;
-              if(row.compiled) {
-                row.className = name.substring(0, name.length - 5);
-                row.writeName = row.className + '.class';
-                row.writeData = row.compiled;
+        var fileIndex = req.params.fileIndex;
+        if (fileIndex >= rows.length || !rows[req.params.fileIndex].className) {
+          return res.json({ code: 1 }); // invalid input
+        }
+
+        var command = 'java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className;
+        var options = {
+          timeout: 10000, // 10 seconds
+          cwd: 'temp/' + req.params.id + '/'
+        };
+        var child = exec(command, options, function(err, stdout, stderr) {
+          if (err && stderr) err = null; // suppress error if stderr is set (indicates user error)
+
+          // clean up
+          fs.remove('temp/' + req.params.id + '/', function(err0) {
+            if (err) {
+              if (err.killed) {
+                res.json({
+                  code: 0,
+                  out: '',
+                  err: 'Code took too long to execute! There may be an infinite loop somewhere.'
+                });
               } else {
-                row.writeName = name;
-                row.writeData = row.contents;
-              }
-              // note: working directory seems to be one with app.js in it
-              fs.writeFile('temp/' + req.params.id + '/' + row.writeName, row.writeData, cb);
-            }, function(err) {
-              if(err) {
-                res.json({code: -1}); // unknown
+                child.kill();
+                res.json({ code: -1 });
                 err.handled = true;
                 next(err);
-              } else {
-
-                var fileIndex = req.params.fileIndex;
-                if(fileIndex < rows.length && rows[req.params.fileIndex].className) {
-                  var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
-                    if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
-                    if(err) {
-                      if(err.killed) {
-                        res.json({code: 0, out: '', err: 'Code took too long to execute! There may be an infinite loop somewhere.'});
-                      } else {
-                        res.json({code: -1});
-                        throw err;
-                      }
-                    } else {
-                      res.json({code: 0, out: stdout, err: stderr});
-                    }
-                    // clean up
-                    fs.remove('temp/' + req.params.id + '/', function(err) {
-                      if(err) {
-                        // don't report error to user
-                        err.handled = true;
-                        next(err);
-                      }
-                    });
-                  });
-                  if(req.body.stdin) child.stdin.write(req.body.stdin);
-                  child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
-                } else {
-                  res.json({code: 1}); // invalid input
-                }
-
               }
-            });
-          }
+              return;
+            }
+            if (err0) {
+              res.json({ code: -1 });
+              err0.handled = true;
+              return next(err0);
+            }
 
-        }
+            res.json({
+              code: 0,
+              out: stdout,
+              err: stderr
+            });
+          });
+
+        });
+        if (req.body.stdin) child.stdin.write(req.body.stdin);
+        child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
+
       });
 
-    }
+    });
+
   });
 });
 
@@ -253,69 +279,90 @@ router.get('/:id/test/:fileIndex', function(req, res, next) {
                         `sections`.`teacher_id` = ? AND \
                         `files`.`submission_id` = `submissions`.`id` \
                       ORDER BY `files`.`id`", [req.params.id, req.user.id], function(err, files) {
-      if(err) {
+      if (err) {
         res.json({code: -1});
         err.handled = true;
-        next(err);
-      } else {
-        connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.assignment.id], function(err, tests) {
-          if(err) {
-            res.json({code: -1});
-            err.handled = true;
-            next(err);
-          } else {
-            for(var i in files) {
-              files[i].className = files[i].name.substring(0, files[i].name.length - 5);
-              fs.writeFileSync('temp/' + req.params.id + '/' + files[i].className + '.class', files[i].compiled);
-            }
-            if(req.params.fileIndex < files.length) {
-              async.mapSeries(tests, function(test, callback) {
-                var child = exec('cd temp/' + req.params.id  + '/ && java -Djava.security.manager -Djava.security.policy==nothing ' + files[req.params.fileIndex].className, {timeout: 10000 /* 10 seconds */}, function(err, stdout, stderr) {
-                  if(err && stderr) err = null; // suppress error if stderr is set (indicates user error)
-                  if(err) {
-                    if(err.killed) {
-                      res.json({code: 2}); // code took too long to execute
-                    } else {
-                      res.json({code: -1});
-                      fs.removeSync('temp/' + req.params.id + '/'); // cleanup
-                      err.handled = true;
-                      next(err);
-                    }
-                  } else {
-                    if(stdout.length >= 1) {
-                      // truncate last new line character
-                      stdout = stdout.substring(0, stdout.length - 1);
-                    }
-                    callback(null, [stdout, stderr]);
-                  }
-                });
-                child.stdin.write(test.input);
-                child.stdin.end();
-              }, function(err0, results) {
-                fs.remove('temp/' + req.params.id + '/', function(err1) {
-                  if(err0) {
-                    res.json({code: -1});
-                    err0.handled = true;
-                    next(err0);
-                  } else if(err1) {
-                    res.json({code: -1});
-                    err1.handled = true;
-                    next(err1);
-                  } else {
-                    var data = [];
-                    for(var i in results) {
-                      data.push({input: tests[i].input, expected: tests[i].output, result: results[i][0]});
-                    }
-                    res.json({code: 0, results: data});
-                  }
-                });
-              });
-            } else {
-              res.json({code: 1}); // invalid input
-            }
-          }
-        });
+        return next(err);
       }
+
+      connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.assignment.id], function(err, tests) {
+        if (err) {
+          res.json({code: -1});
+          err.handled = true;
+          return next(err);
+        }
+
+        async.each(files, function(file, cb) {
+          file.className = file.name.substring(0, file.name.length - 5);
+          fs.writeFile('temp/' + req.params.id + '/' + file.className + '.class', file.compiled, cb);
+        }, function(err) {
+          if (err) {
+            res.json({ code: -1 });
+            err.handled = true;
+            return next(err);
+          }
+
+          if (req.params.fileIndex >= files.length) {
+            return res.json({ code: 1 }); // invalid input
+          }
+
+          async.mapSeries(tests, function(test, callback) {
+            var command = 'java -Djava.security.manager -Djava.security.policy==security.policy ' + files[req.params.fileIndex].className;
+            var options = {
+              timeout: 10000, // 10 seconds
+              cwd: 'temp/' + req.params.id + '/'
+            };
+            var child = exec(command, options, function(err, stdout, stderr) {
+              if (err && stderr) err = null; // suppress error if stderr is set (indicates user error)
+              if (err) {
+                if (err.killed) {
+                  res.json({ code: 2 }); // code took too long to execute
+                } else {
+                  res.json({ code: -1 });
+                  fs.remove('temp/' + req.params.id + '/', function(err2) { // cleanup
+                    err.handled = true;
+                    next(err);
+                  });
+                }
+              } else {
+                if (stdout.length >= 1) {
+                  // truncate last new line character
+                  stdout = stdout.substring(0, stdout.length - 1);
+                }
+                callback(null, [stdout, stderr]);
+              }
+            });
+            child.stdin.write(test.input);
+            child.stdin.end();
+          }, function(err0, results) {
+            fs.remove('temp/' + req.params.id + '/', function(err1) {
+              if (err0) {
+                res.json({code: -1});
+                err0.handled = true;
+                return next(err0);
+              }
+              if (err1) {
+                res.json({code: -1});
+                err1.handled = true;
+                return next(err1);
+              }
+
+              var data = [];
+              for(var i in results) {
+                data.push({
+                  input: tests[i].input,
+                  expected: tests[i].output,
+                  result: results[i][0]
+                });
+              }
+              res.json({ code: 0, results: data });
+            });
+          });
+
+        });
+
+      });
+
     });
   });
 });

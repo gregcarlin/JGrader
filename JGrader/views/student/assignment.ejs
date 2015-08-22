@@ -42,6 +42,11 @@
       </div>
       <div class="message">Click to add files or drag and drop.</div>
     </div>
+    <form action="submit" class="fallback" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="fallback" value="1" />
+      <input type="file" name="file" multiple />
+      <input type="submit" />
+    </form>
   </div>
 
   <!-- HTML heavily inspired by http://blueimp.github.io/jQuery-File-Upload/ -->

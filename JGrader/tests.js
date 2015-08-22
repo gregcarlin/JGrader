@@ -44,7 +44,7 @@ const testLoad = function(name, path) {
 
 casper.test.begin('Homepage and Failed Sign In', function(test) {
   casper.start(url, function() {
-    test.assertTitle('jGrader');
+    test.assertTitle('jGrader | A Cloud-Based Grading System for AP Computer Science');
     test.assertExists('input[name="email"]');
     test.assertExists('input[name="password"]');
 
@@ -71,7 +71,7 @@ casper.test.begin('Teacher Sign In', function(test) {
   });
 
   casper.then(function() {
-    test.assertTitle('Your Sections | jGrader');
+    test.assertTitle('Your Classes | jGrader');
     test.assertUrlMatch(/\/teacher\/section/);
   });
 
@@ -80,7 +80,7 @@ casper.test.begin('Teacher Sign In', function(test) {
   });
 });
 
-testTitle('Teacher Section List', 'teacher/section', 'Your Sections | jGrader');
+testTitle('Teacher Class List', 'teacher/section', 'Your Classes | jGrader');
 // there is no csv for section list
 testTitle('Teacher Assignment List', 'teacher/assignment', 'Your Assignments | jGrader');
 testLoad('Teacher Assignment List CSV', 'teacher/assignment.csv');
@@ -92,7 +92,7 @@ casper.test.begin('Sign Out', function(test) {
   casper.start(url + 'log-out/', function() {});
 
   casper.then(function() {
-    test.assertTitle('jGrader');
+    test.assertTitle('jGrader | A Cloud-Based Grading System for AP Computer Science');
   });
 
   casper.run(function() {
@@ -106,7 +106,7 @@ casper.test.begin('Student Sign In', function(test) {
   });
 
   casper.then(function() {
-    test.assertTitle('Your Sections | jGrader');
+    test.assertTitle('Your Classes | jGrader');
     test.assertUrlMatch(/\/student\/section/);
   });
 
@@ -115,27 +115,51 @@ casper.test.begin('Student Sign In', function(test) {
   });
 });
 
-testTitle('Student Section List', 'student/section', 'Your Sections | jGrader');
+testTitle('Student Class List', 'student/section', 'Your Classes | jGrader');
 testTitle('Student Assignment List', 'student/assignment', 'Your Assignments | jGrader');
 
-var hello = fs.read('./test_files/Hello.java');
-casper.test.begin('Simple Submission', function(test) {
-  /*casper.start(url + 'student/assignment/34', function() {
-  });*/
-  casper.start();
+const submitFiles = function(test, files) {
+  casper.start(url + 'student/assignment/34?forceFallback=true', function() {
+    var paths = [];
+    for (var i=0; i<files.length; i++) {
+      paths.push('./test_files/' + files[i]);
+    }
+    this.page.uploadFile('input[type="file"]', paths);
+    this.click('input[type="submit"]');
+  });
   
-  casper.open(url + 'student/assignment/34/submit', {
-    method: 'post',
-    data: hello,
-    contentType: false,
-    headers: {'Content-type' : 'multipart/form-data'}
+  casper.then(function() {
+    test.assertTitle('AssignmentA | jGrader');
+    this.each(this.getElementsInfo('.alert-warning'), function(self, item) {
+      // this is the only allowed warning
+      test.assert(item.text.indexOf('Your browser is not supported. Consider upgrading to a newer one.') > -1);
+    });
+    var tabs = this.getElementsInfo('.nav-tabs li[role="presentation"]');
+    test.assertEquals(tabs.length, files.length);
+    for (var i=0; i<tabs.length; i++) {
+      test.assertEquals(tabs[i].text, files[i]);
+    }
   });
 
   casper.then(function() {
-    casper.debugHTML();
+    this.click('#resubmit');
+    this.click('.btn-danger');
+    this.wait(1000);
+  });
+
+  casper.then(function() {
+    test.assertExists('#student-upload');
   });
 
   casper.run(function() {
     test.done();
   });
+};
+
+casper.test.begin('Simple Submission', function(test) {
+  submitFiles(test, ['Hello.java']);
+});
+
+casper.test.begin('Two File Submission', function(test) {
+  submitFiles(test, ['DependA.java', 'DependB.java']);
 });

@@ -5,6 +5,7 @@ require('../common');
 var router = express.Router();
 var multer = require('multer');
 var strftime = require('strftime');
+var _ = require('lodash');
 var comments = require('../comments');
 
 var render = function(page, options, res) {
@@ -79,46 +80,69 @@ router.use('/:id', function(req, res, next) {
 // Gets the assignment information based on id
 router.get('/:id', function(req, res, next) {
   connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
-    if(err) {
+    if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled`,`submissions`.`main` \
-                        FROM `files`, `students`, `assignments`, `submissions` \
-                        WHERE `submissions`.`assignment_id` = `assignments`.`id` \
-                        AND `submissions`.`student_id` = `students`.`id` \
-                        AND `files`.`submission_id`= `submissions`.`id` \
-                        AND `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData){
-        if (err) {
-          render('notFound', {error: 'An unexpected error has occurred.'}, res);
-          err.handled = true;
-          next(err);
-        } else if (fileData.length == 0) {
-          render('assignment', {title: req.assignment.name, assignment: req.assignment, teacherFiles: teacherFiles}, res);
-        } else {
-          var anyCompiled = false;
-          var anyMain = false;
-          for (var file in fileData) {
-            fileData[file].display = isAscii(fileData[file].mime);
-            if (fileData[file].compiled) anyCompiled = true;
-            fileData[file].isMain = fileData[file].main == fileData[file].name;
-            if (fileData[file].isMain) anyMain = true;
-          }
-          // Sends file data
-          var teacherNames = [];
-          for (var i in teacherFiles) {
-            teacherNames.push(teacherFiles[i].name);
-          }
-          render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, anyMain: anyMain, teacherFiles: teacherNames}, res);
-        }
-      });
+      return next(err);
     }
+
+    connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled`,`submissions`.`main` \
+                      FROM `files`, `students`, `assignments`, `submissions` \
+                      WHERE `submissions`.`assignment_id` = `assignments`.`id` \
+                      AND `submissions`.`student_id` = `students`.`id` \
+                      AND `files`.`submission_id`= `submissions`.`id` \
+                      AND `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData) {
+      if (err) {
+        render('notFound', {error: 'An unexpected error has occurred.'}, res);
+        err.handled = true;
+        return next(err);
+      }
+
+      if (fileData.length == 0) {
+        render('assignment', {
+          title: req.assignment.name,
+          assignment: req.assignment,
+          teacherFiles: teacherFiles
+        }, res);
+      } else {
+        var anyCompiled = false;
+        var anyMain = false;
+        for (var i = 0; i < fileData.length; i++) {
+          fileData[i].display = isAscii(fileData[i].mime) ? fileData[i].contents : 'This is a binary file. Download it to view it.';
+          if (fileData[i].compiled) anyCompiled = true;
+
+          fileData[i].isMain = fileData[i].main == fileData[i].name;
+          if (fileData[i].isMain) anyMain = true;
+
+          var lastDot = fileData[i].name.lastIndexOf('.') + 1;
+          fileData[i].extension = fileData[i].name.substring(lastDot >= fileData[i].name.length ? 0 : lastDot);
+          var imageExtensions = ['png', 'jpg', 'jpeg', 'gif'];
+          if (imageExtensions.indexOf(fileData[i].extension) >= 0) {
+            fileData[i].text = false;
+            fileData[i].display = '<img src="data:image/' + fileData[i].extension + ';base64,';
+            fileData[i].display += new Buffer(fileData[i].contents).toString('base64');
+            fileData[i].display += '" alt="' + fileData[i].name + '">';
+          } else {
+            fileData[i].text = true;
+          }
+        }
+
+        // Sends file data
+        var teacherNames = [];
+        for(var i = 0; i < teacherFiles.length; i++) {
+          teacherNames.push(teacherFiles[i].name);
+        }
+        render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, anyMain: anyMain, teacherFiles: teacherNames}, res);
+      }
+
+    });
+
   });
 });
 
 router.use('/:id/submit', multer({
   inMemory: false,
+  putSingleFilesInArray: true,
   rename: function(fieldname, filename) {
     // don't rename
     return filename;
@@ -130,143 +154,180 @@ router.use('/:id/submit', multer({
   }
 }));
 
-// Submits the file into the mysql database
 router.post('/:id/submit', function(req, res, next) {
-  if(req.files) {
-
-    // first, check all the file names for legality
-    for(file in req.files) {
-      if(!/^[a-zA-Z0-9.]+$/.test(req.files[file].name) || req.files[file].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
-        res.json({code: 2}); // invalid name
-        return; // just stop
+  submit(req, res, function(err, data) {
+    if (err) {
+      if (req.body.fallback) {
+        res.redirect('/student/assignment/' + req.params.id + '?error=An unknown error has occurred.');
+      } else {
+        res.json({ code: -1 }); // unknown
       }
-      for(file2 in req.files) {
-        if(file2 == file) continue;
-        if(req.files[file].name == req.files[file2].name) {
-          res.json({code: 5}); // duplicate names
-          return; // just stop
+      err.handled = true;
+      return next(err);
+    }
+    if (req.body.fallback) {
+      if (data == 0) {
+        res.redirect('/student/assignment/' + req.params.id);
+      } else {
+        var msg = '';
+        switch (data) {
+          case -1:
+            msg = 'An unknown error has occurred.';
+            break;
+          case 1:
+            msg = 'Your code could not be compiled.';
+            break;
+          case 2:
+            msg = 'Some of your files have invalid names. Only alphanumeric characters and periods are allowed, and names must contain at least 6 characters.';
+            break;
+          case 3:
+            msg = 'You already submitted this!';
+            break;
+          case 4:
+            msg = 'You must submit at least one java file. Make sure they end in .java';
+            break;
+          case 5:
+            msg = 'No two files can share the same name.';
+            break;
         }
+        res.redirect('/student/assignment/' + req.params.id + '?error=' + msg);
+      }
+    } else {
+      res.json({ code: data });
+    }
+  });
+});
+
+// Submits the file into the mysql database
+var submit = function(req, res, next) {
+
+  // normalize file uploads into this files array
+  var files = [];
+  for (var key in req.files) {
+    for (var i=0; i<req.files[key].length; i++) {
+      files.push(req.files[key][i]);
+    }
+  }
+
+  if (_.isEmpty(files)) return next(null, 1); // no files submitted
+
+  // first, check all the file names for legality
+  for(var i=0; i<files.length; i++) {
+    if(!/^[a-zA-Z0-9.]+$/.test(files[i].name) || files[i].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
+      return next(null, 2); // invalid name
+    }
+    for(var j=0; j<files.length; j++) {
+      if(i == j) continue;
+      if(files[i].name == files[j].name) {
+        return next(null, 5); // duplicate names
       }
     }
+  }
 
-    // get attached teacher files
-    connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
-      if(err) {
-        res.json({code: -1});
-        err.handled = true;
-        next(err);
-      } else {
-        // now, check to see if this student already submitted this assignment
-        connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
-          if(err) {
-            res.json({code: -1}); // unknown error
-            err.handled = true;
-            next(err);
-          } else if(submissions.length > 0) {
-            res.json({code: 3}); // already submitted this assignment
-          } else {
+  // get attached teacher files
+  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
+    if (err) return next(err, -1);
 
-            var toCompile = "";
-            for(file in req.files) {
-              req.files[file].isJava = req.files[file].path.substr(req.files[file].path.length-4).toLowerCase() == 'java';
-              if(req.files[file].isJava) toCompile += req.files[file].path + " ";
+    // now, check to see if this student already submitted this assignment
+    connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
+      if (err) return next(err, -1);
+      if (submissions.length > 0) return next(null, 3);
+
+      var toCompile = "";
+      for(var i=0; i<files.length; i++) {
+        files[i].isJava = files[i].path.substr(files[i].path.length-4).toLowerCase() == 'java';
+        if(files[i].isJava) toCompile += files[i].path + " ";
+      }
+
+      async.each(teacherFiles, function(teacherFile, cb) {
+        teacherFile.path = './uploads/' + req.user.id + '/' + teacherFile.name;
+        teacherFile.isJava = teacherFile.name.substr(teacherFile.name.length-4).toLowerCase() == 'java';
+        if(teacherFile.isJava) toCompile += teacherFile.path + " ";
+        teacherFile.mimetype = teacherFile.mime;
+        files.push(teacherFile);
+        fs.writeFile(teacherFile.path, teacherFile.contents, cb);
+      }, function(err) {
+        if (err) return next(err);
+
+        if (!toCompile) return next(null, 4); // must have at least one java file
+
+        // compile the java files
+        exec("javac " + toCompile, function(err, stdout, stderr) {
+          var main = null;
+          if (err) { // compilation error, treat all files as non-java files
+            for(var i=0; i<files.length; i++) {
+              files[i].isJava = false;
             }
-            for(file in teacherFiles) {
-              teacherFiles[file].path = './uploads/' + req.user.id + '/' + teacherFiles[file].name;
-              fs.writeFileSync(teacherFiles[file].path, teacherFiles[file].contents);
-              teacherFiles[file].isJava = teacherFiles[file].name.substr(teacherFiles[file].name.length-4).toLowerCase() == 'java';
-              if(teacherFiles[file].isJava) toCompile += teacherFiles[file].path + " ";
-              teacherFiles[file].mimetype = teacherFiles[file].mime;
-              req.files[teacherFiles[file].name] = teacherFiles[file];
-            }
-
-            if(!toCompile) {
-              res.json({code: 4}); // must have at least one java file
-              return; // easier than another if/else
-            }
-
-            // compile the java files
-            exec("javac " + toCompile, function(err, stdout, stderr) {
-              var main = null;
-              if(err) { // compilation error, treat all files as non-java files
-                for(file in req.files) {
-                  req.files[file].isJava = false;
-                }
-              } else if(req.files.length == 1) { // only 1 file was submitted, so we mark it as containing the main
-                main = req.files['file[0]'].name;
-              } else { // we must search for the main
-                for(file in req.files) {
-                  if(req.files[file].isJava) {
-                    var data = fs.readFileSync(req.files[file].path).toString();
-                    if(data.indexOf('main') >= 0) {
-                      if(main) { // multiple mains found, set to null, student must pick later
-                        main = null;
-                        break;
-                      } else {
-                        main = req.files[file].name;
-                      }
-                    }
+          } else if (files.length == 1) { // only 1 file was submitted, so we mark it as containing the main
+            main = files[0].name;
+          } else { // we must search for the main
+            for(var i = 0; i < files.length; i++) {
+              if(files[i].isJava) {
+                var data = fs.readFileSync(files[i].path).toString();
+                if(data.indexOf('main') >= 0) {
+                  if(main) { // multiple mains found, set to null, student must pick later
+                    main = null;
+                    break;
+                  } else {
+                    main = files[i].name;
                   }
                 }
               }
+            }
+          }
 
-              // finally, make necessary changes in database
-              connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, ?)", [req.params.id, req.user.id, main], function(err, result) {
-                if(err) {
-                  res.json({code: -1}); // unknown error
-                  err.handled = true;
-                  next(err);
+          // finally, make necessary changes in database
+          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, ?)", [req.params.id, req.user.id, main], function(err, result) {
+            if (err) return next(err, -1);
+
+            var args = [];
+            var stmt = "";
+            async.map(files, function(file, cb) {
+              fs.readFile(file.path, cb);
+            }, function(err, javaResults) {
+              if (err) return next(err, -1);
+
+              async.map(files, function(file, cb) {
+                if (file.isJava) {
+                  fs.readFile(file.path.substr(0, file.path.length - 4) + 'class', cb);
                 } else {
-
-                  var args = [];
-                  var stmt = "";
-                  for(file in req.files) {
-                    // read java and class data into variables
-                    var javaData = fs.readFileSync(req.files[file].path);
-                    var classData = req.files[file].isJava ? fs.readFileSync(req.files[file].path.substr(0, req.files[file].path.length-4) + 'class') : null;
-
-                    stmt += "(NULL,?,?,?,?,?),";
-                    args.push(result.insertId);
-                    args.push(req.files[file].name);
-                    args.push(javaData);
-                    args.push(classData);
-                    args.push(req.files[file].mimetype);
-                  }
-                  stmt = stmt.substr(0, stmt.length-1); // remove last character from stmt (extraneous comma)
-                  connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
-                    if(err) {
-                      fs.removeSync('./uploads/' + req.user.id + '/'); // we must cleanup, even on error
-                      res.json({code: -1}); // unknown error
-                      err.handled = true;
-                      next(err);
-                    } else {
-                      // clean up files used for compilation
-                      fs.remove('./uploads/' + req.user.id + '/', function(err) {
-                        if(err) {
-                          res.json({code: -1}); // unknown error
-                          err.handled = true;
-                          next(err);
-                        } else {
-                          res.json({code: 0});
-                        }
-                      });
-                    }
-                  });
-
+                  cb(null, null);
                 }
-              });
+              }, function(err, classResults) {
+                if (err) return next(err, -1);
 
+                for (var i=0; i<files.length; i++) {
+                  stmt += "(NULL,?,?,?,?,?),";
+                  args.push(result.insertId);
+                  args.push(files[i].name);
+                  args.push(javaResults[i]);
+                  args.push(classResults[i]);
+                  args.push(files[i].mimetype);
+                }
+                stmt = stmt.substr(0, stmt.length - 1); // remove last character from stmt (extraneous comma)
+
+                connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, result) {
+                  fs.remove('./uploads/' + req.user.id + '/', function(err2) {
+                    if (err) return next(err, -1);
+                    if (err2) return next(err2, -1);
+
+                    next(null, 0);
+                  });
+                });
+              });
             });
 
-          }
+          });
+
         });
-      }
+
+      });
+
     });
 
-  } else {
-    res.json({code: 1}); // no files submitted
-  }
-});
+  });
+
+};
 
 router.get('/:id/resubmit', function(req, res, next) {
   connection.query("SELECT `submissions`.`id` \
