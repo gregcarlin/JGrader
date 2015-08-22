@@ -47,13 +47,13 @@ router.get('/', function(req, res, next) {
                     AND `enrollment`.`section_id` = `assignments`.`section_id` \
                     AND `sections`.`id` = `enrollment`.`section_id` \
                     AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id, req.user.id], function(err, rows) {
-    if(err) {
+    if (err) {
       render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      render('assignmentList', {rows: rows}, res);
+      return next(err);
     }
+
+    render('assignmentList', {rows: rows}, res);
   });
 });
 
@@ -63,11 +63,13 @@ router.use('/:id', function(req, res, next) {
       nestTables: true,
       values: [req.params.id, req.user.id]
     }, function(err, result) {
-      if(err) {
+      if (err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         err.handled = true;
-        next(err);
-      } else if(result.length <= 0) {
+        return next(err);
+      }
+
+      if (result.length <= 0) {
         render('notFound', {}, res);
       } else {
         req.assignment = result[0].assignments;
@@ -208,12 +210,12 @@ var submit = function(req, res, next) {
 
   // first, check all the file names for legality
   for(var i=0; i<files.length; i++) {
-    if(!/^[a-zA-Z0-9.]+$/.test(files[i].name) || files[i].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
+    if (!/^[a-zA-Z0-9.]+$/.test(files[i].name) || files[i].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
       return next(null, 2); // invalid name
     }
     for(var j=0; j<files.length; j++) {
-      if(i == j) continue;
-      if(files[i].name == files[j].name) {
+      if (i == j) continue;
+      if (files[i].name == files[j].name) {
         return next(null, 5); // duplicate names
       }
     }
@@ -237,14 +239,14 @@ var submit = function(req, res, next) {
       async.each(teacherFiles, function(teacherFile, cb) {
         teacherFile.path = './uploads/' + req.user.id + '/' + teacherFile.name;
         teacherFile.isJava = teacherFile.name.substr(teacherFile.name.length-4).toLowerCase() == 'java';
-        if(teacherFile.isJava) toCompile += teacherFile.path + " ";
+        if (teacherFile.isJava) toCompile += teacherFile.path + " ";
         teacherFile.mimetype = teacherFile.mime;
         files.push(teacherFile);
         fs.writeFile(teacherFile.path, teacherFile.contents, cb);
       }, function(err) {
         if (err) return next(err);
 
-        if(!toCompile) return next(null, 4); // must have at least one java file
+        if (!toCompile) return next(null, 4); // must have at least one java file
 
         // compile the java files
         exec("javac " + toCompile, function(err, stdout, stderr) {
@@ -312,11 +314,13 @@ router.get('/:id/resubmit', function(req,res) {
                     FROM `submissions` \
                     WHERE `submissions`.`student_id` = ? \
                     AND `submissions`.`assignment_id` = ?", [req.user.id, req.params.id], function(err, rows) {
-    if(err) {
+    if (err) {
       res.redirect('/student/assignment');
       err.handled = true;
-      next(err);
-    } else if (rows.length == 0) {
+      return next(err);
+    }
+
+    if (rows.length == 0) {
       // User has not submitted so cannot resubmit
       console.error('USER ' + req.user.id + ' IS TRYING TO RESUBMIT BUT SHOULDNT BE');
       res.redirect('/student/assignment');
@@ -327,13 +331,13 @@ router.get('/:id/resubmit', function(req,res) {
                             WHERE `assignment_id` = ? \
                             AND `student_id` = ?; \
                         DELETE FROM `comments` WHERE `submission_id` = ?", [rows[0].id, req.params.id, req.user.id, rows[0].id], function(err, rows) {
-        if(err) {
+        if (err) {
           res.redirect('/student/assignment/');
           err.handled = true;
-          next(err);
-        } else {
-          res.redirect('/student/assignment/' + req.params.id);
+          return next(err);
         }
+
+        res.redirect('/student/assignment/' + req.params.id);
       });
     }
   });

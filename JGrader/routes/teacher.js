@@ -5,6 +5,7 @@ require('./common');
 var router = express.Router();
 var strftime = require('strftime');
 var bcrypt = require('bcrypt');
+var _ = require('lodash');
 
 var section    = require('./teacher/section');
 var assignment = require('./teacher/assignment');
@@ -45,7 +46,7 @@ router.get('/', function(req, res) {
 
 router.use('/section', section);
 
-router.get('/assignment.csv', function(req, res) {
+router.get('/assignment.csv', function(req, res, next) {
   connection.query("SELECT \
                       `assignments`.`name`,\
                       `sections`.`name` AS `sname`,\
@@ -68,9 +69,9 @@ router.get('/assignment.csv', function(req, res) {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Descrption', 'File Transfer');
     var output = 'Assignment,Section,Student,Grade\n';
-    for(i in rows) {
-      output += rows[i].name + ',' + rows[i].sname + ',' + rows[i].fname + ' ' + rows[i].lname + ',' + (rows[i].grade ? rows[i].grade : 'None') + '\n';
-    }
+    _.each(rows, function(row) {
+      output += row.name + ',' + row.sname + ',' + row.fname + ' ' + row.lname + ',' + (row.grade ? row.grade : 'None') + '\n';
+    });
     res.send(output);
   });
 });
@@ -78,7 +79,7 @@ router.use('/assignment', assignment);
 
 router.use('/submission', submission);
 
-router.get('/student.csv', function(req, res) {
+router.get('/student.csv', function(req, res, next) {
   connection.query("SELECT \
                       `assignments`.`name`,\
                       `sections`.`name` AS `sname`,\
@@ -102,48 +103,52 @@ router.get('/student.csv', function(req, res) {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Descrption', 'File Transfer');
     var output = 'Student,Section,Assignment,Grade\n';
-    for(i in rows) {
-      output += rows[i].fname + ' ' + rows[i].lname + ',' + rows[i].sname + ',' + rows[i].name + ',' + (rows[i].grade ? rows[i].grade : (rows[i].id ? 'Not Graded' : 'Not Submitted')) + '\n';
-    }
+    _.each(rows, function(row) {
+      output += row.fname + ' ' + row.lname + ',' + row.sname + ',' + row.name + ',' + (row.grade ? row.grade : (row.id ? 'Not Graded' : 'Not Submitted')) + '\n';
+    });
     res.send(output);
   });
 });
 router.use('/student', student);
 
 // settings page
-router.get('/settings', function(req, res) {
+router.get('/settings', function(req, res, next) {
   connection.query("SELECT `fname`,`lname`,`pass_reset_hash` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, rows) {
-    if(err) {
+    if (err) {
       render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
-      throw err;
-    } else {
-      render('settings', {fname: rows[0].fname, lname: rows[0].lname}, res);
+      err.handled = true;
+      return next(err);
     }
+
+    render('settings', {fname: rows[0].fname, lname: rows[0].lname}, res);
   });
 });
 
 router.post('/settings', function(req, res, next) {
   var fname = req.body.fname;
   var lname = req.body.lname;
-  if(isSet(fname) && isSet(lname)) {
+  if (isSet(fname) && isSet(lname)) {
     var oldPass = req.body.oldpass;
     var newPass = req.body.newpass;
-    if(isSet(oldPass) || isSet(newPass)) {
-      if((isSet(oldPass) || res.locals.mustResetPass) && isSet(newPass)) {
+    if (isSet(oldPass) || isSet(newPass)) {
+      if ((isSet(oldPass) || res.locals.mustResetPass) && isSet(newPass)) {
         var handler = function(err, rows) {
-          if(err) {
+          if (err) {
             render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
             err.handled = true;
-            next(err);
-          } else if(rows.affectedRows <= 0) {
+            return next(err);
+          }
+
+          if (rows.affectedRows <= 0) {
             render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
           } else {
             res.locals.mustResetPass = false;
             render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
           }
         };
+
         bcrypt.hash(newPass, 10, function(err, hash) {
-          if(res.locals.mustResetPass) {
+          if (res.locals.mustResetPass) {
             connection.query("UPDATE `teachers` \
                                 SET `fname` = ?, \
                                 `lname` = ?, \
@@ -153,19 +158,23 @@ router.post('/settings', function(req, res, next) {
                                 `id` = ?", [fname, lname, hash, req.user.id], handler);
           } else {
             connection.query("SELECT `pass` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, rows) {
-              if(err) {
+              if (err) {
                 render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
                 err.handled = true;
-                next(err);
-              } else if(rows.length <= 0) {
+                return next(err);
+              }
+
+              if (rows.length <= 0) {
                 render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
               } else {
                 bcrypt.compare(oldPass.toString(), rows[0].pass.toString(), function(err, result) {
-                  if(err) {
+                  if (err) {
                     render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
                     err.handled = true;
-                    next(err);
-                  } else if(result) {
+                    return next(err);
+                  }
+
+                  if (result) {
                     connection.query("UPDATE `teachers` \
                                         SET `fname` = ?, \
                                         `lname` = ?, \
@@ -186,31 +195,32 @@ router.post('/settings', function(req, res, next) {
       }
     } else {
       connection.query("UPDATE `teachers` SET `fname` = ?, `lname` = ? WHERE `id` = ?", [fname, lname, req.user.id], function(err) {
-        if(err) {
+        if (err) {
           render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
           err.handled = true;
-          next(err);
-        } else {
-          render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
+          return next(err);
         }
+
+        render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
       });
     }
   } else {
-    if(!fname) fname = '';
-    if(!lname) lname = '';
+    if (!fname) fname = '';
+    if (!lname) lname = '';
     render('settings', {fname: fname, lname: lname, error: 'You must set a valid name.'}, res);
   }
 });
 
-router.get('/feedback', function(req, res) {
+router.get('/feedback', function(req, res, next) {
   render('feedback', {}, res);
 });
 
 router.post('/feedback', function(req, res, next) {
   var type = req.body.type;
-  if(!type || (type != 'question' && type != 'comment' && type != 'complaint' && type != 'other')) {
+  if (!type || (type != 'question' && type != 'comment' && type != 'complaint' && type != 'other')) {
     type = 'other';
   }
+
   connection.query("SELECT `user`,`fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, result) {
     if (err) return next(err);
 
