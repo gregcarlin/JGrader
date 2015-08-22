@@ -4,6 +4,7 @@
 require('../common');
 var router = express.Router();
 var strftime = require('strftime');
+var _ = require('lodash');
 
 var render = function(page, options, res) {
   options.page = 2;
@@ -63,86 +64,86 @@ router.get('/', function(req, res, next) {
                           GROUP BY `student_id`,`section_id`) AS `temp4` \
                       ON `students`.`id` = `temp4`.`student_id` AND `sections`.`id` = `temp4`.`section_id` \
                     WHERE `sections`.`teacher_id` = ?", [req.user.id, req.user.id, req.user.id], function(err, rows) {
-    if(err) {
+    if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      render('studentList', {rows: rows}, res);
+      return next(err);
     }
+
+    render('studentList', {rows: rows}, res);
   });
 });
 
 router.get('/invite', function(req, res, next) {
   connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [req.user.id], function(err, rows) {
-    if(err) {
+    if (err) {
       render('studentInvite', {error: 'An unknown error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      render('studentInvite', {sections: rows}, res);
+      return next(err);
     }
+
+    render('studentInvite', {sections: rows}, res);
   });
 });
 
 router.post('/invite', function(req, res, next) {
   connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? ORDER BY `name` ASC", [req.user.id], function(err, rows) {
-    if(err) {
+    if (err) {
       render('studentInvite', {error: 'An unknown error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      if(req.body.emails && req.body.section) {
-        connection.query("SELECT `fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, result) {
-          if(err || !result || result.length <= 0) {
+      return next(err);
+    }
+
+    if (req.body.emails && req.body.section) {
+      connection.query("SELECT `fname`,`lname` FROM `teachers` WHERE `id` = ?", [req.user.id], function(err, result) {
+        if (err || !result || result.length <= 0) {
+          render('studentInvite', {error: 'An unknown error has occurred.', sections: rows}, res);
+          err.handled = true;
+          return next(err);
+        }
+
+        connection.query("SELECT `id`,`name`,`code` FROM `sections` WHERE `teacher_id` = ?", [req.user.id], function(err, mySections) {
+          if (err) {
             render('studentInvite', {error: 'An unknown error has occurred.', sections: rows}, res);
             err.handled = true;
-            next(err);
+            return next(err);
+          }
+
+          var links = '';
+          for (var i in req.body.section) {
+            for (var j = 0; j < mySections.length; j++) {
+              if (mySections[j].id == req.body.section[i]) {
+                links += '<a href="http://jgrader.com/student/section/joinSection/' + mySections[j].code + '">' + mySections[j].name + '</a><br />';
+                break;
+              }
+            }
+          }
+          if (links.length <= 2) {
+            render('studentInvite', {error: 'No invitations were sent because no valid sections were selected.', sections: rows}, res);
           } else {
-            connection.query("SELECT `id`,`name`,`code` FROM `sections` WHERE `teacher_id` = ?", [req.user.id], function(err, mySections) {
-              if(err) {
-                render('studentInvite', {error: 'An unknown error has occurred.', sections: rows}, res);
-                err.handled = true;
-                next(err);
-              } else {
-                var links = '';
-                for(i in req.body.section) {
-                  for(j in mySections) {
-                    if(mySections[j].id == req.body.section[i]) {
-                      links += '<a href="http://jgrader.com/student/section/joinSection/' + mySections[j].code + '">' + mySections[j].name + '</a><br />';
-                      break;
-                    }
-                  }
-                }
-                if(links.length <= 2) {
-                  render('studentInvite', {error: 'No invitations were sent because no valid sections were selected.', sections: rows}, res);
-                } else {
-                  var emails = req.body.emails.split(/[ ;(\r\n|\n|\r)]/);
-                  var sent = '';
-                  for(i in emails) {
-                    if(emails[i].indexOf('@') > 0) { // @ can't be first character (or last but we don't bother checking for that)
-                      sent += emails[i] + ', ';
-                      var html = 'Your teacher, ' + result[0].fname + ' ' + result[0].lname + ' has invited you to join his or her class on jGrader, the tool for collecting computer science assignments in the cloud. ';
-                      html += 'In order to accept these invitations, please click the link or links below.<br />';
-                      html += links;
-                      var mailOptions = {
-                        to: emails[i],
-                        subject: result[0].fname + ' ' + result[0].lname + ' has invited you to jGrader',
-                        html: html
-                      };
-                      transporter.sendMail(mailOptions, function(err, info) {}); // hope it works
-                    }
-                  }
-                  sent = sent.substring(0, sent.length - 2);
-                  render('studentInvite', {success: 'Invitations have been sent to the following addresses: ' + sent, sections: rows}, res);
-                }
+            var emails = req.body.emails.split(/[ ;(\r\n|\n|\r)]/);
+            var sent = '';
+            _.each(emails, function(email) {
+              if (email.indexOf('@') > 0) { // @ can't be first character (or last but we don't bother checking for that)
+                sent += email + ', ';
+                var html = 'Your teacher, ' + result[0].fname + ' ' + result[0].lname + ' has invited you to join his or her class on jGrader, the tool for collecting computer science assignments in the cloud. ';
+                html += 'In order to accept these invitations, please click the link or links below.<br />';
+                html += links;
+                var mailOptions = {
+                  to: email,
+                  subject: result[0].fname + ' ' + result[0].lname + ' has invited you to jGrader',
+                  html: html
+                };
+                transporter.sendMail(mailOptions, function(err, info) {}); // hope it works
               }
             });
+            sent = sent.substring(0, sent.length - 2);
+            render('studentInvite', {success: 'Invitations have been sent to the following addresses: ' + sent, sections: rows}, res);
           }
         });
-      } else {
-        render('studentInvite', {error: 'No emails were specified so no invitations were sent.', sections: rows}, res);
-      }
+      });
+    } else {
+      render('studentInvite', {error: 'No emails were specified so no invitations were sent.', sections: rows}, res);
     }
   });
 });
@@ -153,18 +154,20 @@ router.use('/:id', function(req, res, next) {
       nestTables: true,
       values: [req.params.id, req.user.id]
     }, function(err, result) {
-      if(err) {
+      if (err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         err.handled = true;
-        next(err);
-      } else if(result.length <= 0) {
+        return next(err);
+      }
+
+      if (result.length <= 0) {
         render('notFound', {}, res);
       } else {
         req.student = result[0].students;
         req.sections = [];
-        for(i in result) {
-          req.sections[i] = result[i].sections;
-        }
+        _.each(result, function(r) {
+          req.sections[i] = r.sections;
+        });
         next();
       }
     });
@@ -182,18 +185,16 @@ router.get('/:id.csv', function(req, res, next) {
                       JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` \
                       LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = `enrollment`.`student_id` \
                     WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
-    if(err) {
-      next(err);
-    } else {
-      res.setHeader('Content-Disposition', 'attachment; filename=student_' + req.params.id + '.csv');
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Descrption', 'File Transfer');
-      var output = 'Assignment,Section,Grade\n';
-      for(i in rows) {
-        output += rows[i].name + ',' + rows[i].sname + ',' + (rows[i].grade ? rows[i].grade : (rows[i].id ? 'Not Graded' : 'Not Submitted')) + '\n';
-      }
-      res.send(output);
-    }
+    if (err) return next(err);
+
+    res.setHeader('Content-Disposition', 'attachment; filename=student_' + req.params.id + '.csv');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Descrption', 'File Transfer');
+    var output = 'Assignment,Section,Grade\n';
+    _.each(rows, function(row) {
+      output += row.name + ',' + row.sname + ',' + (row.grade ? row.grade : (row.id ? 'Not Graded' : 'Not Submitted')) + '\n';
+    });
+    res.send(output);
   });
 });
 
@@ -212,14 +213,14 @@ router.get('/:id', function(req, res, next) {
                       JOIN `enrollment` ON `enrollment`.`section_id` = `sections`.`id` \
                       LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = `enrollment`.`student_id` \
                     WHERE `enrollment`.`student_id` = ? AND `sections`.`teacher_id` = ?", [req.params.id, req.user.id], function(err, rows) {
-    if(err) {
+    if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      var name = req.student.fname + ' ' + req.student.lname;
-      render('student', {title: name, name: name, rows: rows, id: req.params.id}, res);
+      return next(err);
     }
+
+    var name = req.student.fname + ' ' + req.student.lname;
+    render('student', {title: name, name: name, rows: rows, id: req.params.id}, res);
   });
 });
 
@@ -235,13 +236,13 @@ router.get('/:id/:section/delete', function(req, res, next) {
                       `enrollment`.`student_id` = ? AND \
                       `enrollment`.`section_id` = ? AND \
                       `sections`.`teacher_id` = ?", [req.params.id, req.params.section, req.user.id], function(err, result) {
-    if(err) {
+    if (err) {
       render('notFound', {error: 'Unable to remove student. Please go back and try again.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      res.redirect('/teacher/student');
+      return next(err);
     }
+
+    res.redirect('/teacher/student');
   });
 });
 

@@ -35,7 +35,7 @@ process.on('SIGINT', function() { // on ^C
 
 var renderGeneric = function(page, vars, group, res) {
   express().render(page + '.ejs', vars, function(err, html) {
-    if(err) {
+    if (err) {
       console.log(err);
     } else {
       vars.content = html;
@@ -73,11 +73,13 @@ var authenticate = function(hash, req, res, next, db, finish) {
   logIn(hash, db, function(id) {
     if(id) {
       connection.query("SELECT `pass_reset_hash` FROM `" + db + "` WHERE `id` = ?", [id], function(err, rows) {
-        if(err) {
+        if (err) {
           res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.&redirect=' + req.originalUrl);
           err.handled = true;
-          next(err);
-        } else if(rows.length <= 0) {
+          return next(err);
+        }
+
+        if (rows.length <= 0) {
           res.redirect('/sign-in?error=There was an error authenticating your information. Please sign in again.&redirect=' + req.originalUrl);
         } else {
           finish(id, rows[0].pass_reset_hash == null ? false : true);
@@ -104,7 +106,7 @@ authTA = function(hash, req, res, next, finish) {
 // retrieves the first and last names of a user
 var getInfo = function(id, db, finish) {
   connection.query("SELECT `fname`,`lname` FROM `" + db + "` WHERE `id` = ?", [id], function(err, rows) {
-    if(err) {
+    if (err) {
       finish(null, null);
     } else {
       finish(rows[0].fname, rows[0].lname);

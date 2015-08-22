@@ -31,11 +31,13 @@ router.use('/:id', function(req, res, next) {
       nestTables: true,
       values: [req.params.id, req.user.id]
     }, function(err, result) {
-      if(err) {
+      if (err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         err.handled = true;
-        next(err);
-      } else if(result.length <= 0) {
+        return next(err);
+      }
+
+      if (result.length <= 0) {
         render('notFound', {}, res);
       } else {
         req.submission = result[0].submissions;
@@ -57,7 +59,8 @@ var handle = function(err, req, student, res, next) {
     anyCompiled: true,
     teacherFiles: [],
     previous: -1,
-    next: -1}, res);
+    next: -1
+  }, res);
   err.handled = true;
   next(err);
 };
@@ -138,30 +141,30 @@ router.get('/:id', function(req, res, next) {
 
 router.post('/:id/updategrade', function(req, res, next) {
   connection.query("UPDATE `submissions` SET `grade` = NULL WHERE `id` = ?", [req.params.id], function(err) {
-    if(err) {
+    if (err) {
       res.json({code: -1});
       err.handled = true;
-      next(err);
-    } else {
-      res.json({code: 0, newValue: '<em>Not graded.</em>'});
+      return next(err);
     }
+
+    res.json({code: 0, newValue: '<em>Not graded.</em>'});
   });
 });
 
 router.post('/:id/updategrade/:grade', function(req, res, next) {
-  if(isNaN(req.params.grade)) {
-    res.json({code: 1}); // invalid input
-  } else {
-    connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
-      if(err) {
-        res.json({code: -1}); // unknown error
-        err.handled = true;
-        next(err);
-      } else {
-        res.json({code: 0, newValue: req.params.grade}); // success
-      }
-    });
+  if (isNaN(req.params.grade)) {
+    return res.json({code: 1}); // invalid input
   }
+
+  connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?", [req.params.grade, req.params.id], function(err) {
+    if (err) {
+      res.json({code: -1}); // unknown error
+      err.handled = true;
+      return next(err);
+    }
+
+    res.json({code: 0, newValue: req.params.grade}); // success
+  });
 });
 
 router.post('/:id/run/:fileIndex', function(req, res, next) {
@@ -377,15 +380,15 @@ router.get('/:id/download', function(req, res, next) {
                       `submissions`.`id` = ? AND \
                       `files`.`submission_id` = `submissions`.`id` \
                     ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
-    if(err) {
-      next(err);
-    } else if(rows.length <= 0) {
+    if (err) return next(err);
+
+    if (rows.length <= 0) {
       res.send('Sorry, an error has occurred.');
     } else {
       var zip = new JSZip();
-      for(i in rows) {
-        zip.file(rows[i].name, rows[i].contents);
-      }
+      _.each(rows, function(row) {
+        zip.file(row.name, row.contents);
+      });
       var content = zip.generate({type: 'nodebuffer'});
 
       res.setHeader('Content-Disposition', 'attachment; filename=' + req.params.id + '.zip');
@@ -406,9 +409,9 @@ router.get('/:id/download/:fileIndex', function(req, res, next) {
                       `submissions`.`id` = ? AND \
                       `files`.`submission_id` = `submissions`.`id` \
                     ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
-    if(err) {
-      next(err);
-    } else if(rows.length <= 0) {
+    if (err) return next(err);
+
+    if (rows.length <= 0) {
       res.send('You do not have permission to download this file.');
     } else if(isNaN(req.params.fileIndex) || req.params.fileIndex >= rows.length) {
       res.send('Sorry, an error has occurred.');

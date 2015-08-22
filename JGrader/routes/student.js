@@ -44,14 +44,15 @@ router.use('/assignment', assignment);
 router.use('/section', section);
 
 // settings page
-router.get('/settings', function(req, res) {
+router.get('/settings', function(req, res, next) {
   connection.query("SELECT `fname`,`lname`,`pass_reset_hash` FROM `students` WHERE `id` = ?", [req.user.id], function(err, rows) {
-    if(err) {
+    if (err) {
       render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
-      throw err;
-    } else {
-      render('settings', {fname: rows[0].fname, lname: rows[0].lname}, res);
+      err.handled = true;
+      return next(err);
     }
+
+    render('settings', {fname: rows[0].fname, lname: rows[0].lname}, res);
   });
 });
 
@@ -61,25 +62,28 @@ router.post('/settings', function(req, res, next) {
   // Takes in the users name and last name
   var fname = req.body.fname;
   var lname = req.body.lname;
-  if(isSet(fname) && isSet(lname)) {
+  if (isSet(fname) && isSet(lname)) {
     var oldPass = req.body.oldpass;
     var newPass = req.body.newpass;
-    if(isSet(oldPass) || isSet(newPass)) {
-      if((isSet(oldPass) || res.locals.mustResetPass) && isSet(newPass)) {
+    if (isSet(oldPass) || isSet(newPass)) {
+      if ((isSet(oldPass) || res.locals.mustResetPass) && isSet(newPass)) {
         var handler = function(err, rows) {
-          if(err) {
+          if (err) {
             render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
             err.handled = true;
-            next(err);
-          } else if(rows.affectedRows <= 0) {
+            return next(err);
+          }
+
+          if (rows.affectedRows <= 0) {
             render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
           } else {
             res.locals.mustResetPass = false;
             render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
           }
         };
+
         bcrypt.hash(newPass, 10, function(err, hash) {
-          if(res.locals.mustResetPass) {
+          if (res.locals.mustResetPass) {
             connection.query("UPDATE `students` \
                                 SET `fname` = ?, \
                                 `lname` = ?, \
@@ -89,19 +93,23 @@ router.post('/settings', function(req, res, next) {
                                 `id` = ?", [fname, lname, hash, req.user.id], handler);
           } else {
             connection.query("SELECT `pass` FROM `students` WHERE `id` = ?", [req.user.id], function(err, rows) {
-              if(err) {
+              if (err) {
                 render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
                 err.handled = true;
-                next(err);
-              } else if(rows.length <= 0) {
+                return next(err);
+              }
+
+              if (rows.length <= 0) {
                 render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
               } else {
                 bcrypt.compare(oldPass.toString(), rows[0].pass.toString(), function(err, result) {
-                  if(err) {
+                  if (err) {
                     render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
                     err.handled = true;
-                    next(err);
-                  } else if(result) {
+                    return next(err);
+                  }
+
+                  if (result) {
                     connection.query("UPDATE `students` \
                                         SET `fname` = ?, \
                                         `lname` = ?, \
@@ -122,31 +130,32 @@ router.post('/settings', function(req, res, next) {
       }
     } else {
       connection.query("UPDATE `students` SET `fname` = ?, `lname` = ? WHERE `id` = ?", [fname, lname, req.user.id], function(err) {
-        if(err) {
+        if (err) {
           render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
           err.handled = true;
-          next(err);
-        } else {
-          render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
+          return next(err);
         }
+
+        render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
       });
     }
   } else {
-    if(!fname) fname = '';
-    if(!lname) lname = '';
+    if (!fname) fname = '';
+    if (!lname) lname = '';
     render('settings', {fname: fname, lname: lname, error: 'You must set a valid name.'}, res);
   }
 });
 
-router.get('/feedback', function(req, res) {
+router.get('/feedback', function(req, res, next) {
   render('feedback', {}, res);
 });
 
 router.post('/feedback', function(req, res, next) {
   var type = req.body.type;
-  if(!type || (type != 'question' && type != 'comment' && type != 'complaint' && type != 'other')) {
+  if (!type || (type != 'question' && type != 'comment' && type != 'complaint' && type != 'other')) {
     type = 'other';
   }
+
   connection.query("SELECT `user`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.user.id], function(err, result) {
     if (err) return next(err);
 

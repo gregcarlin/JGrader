@@ -13,36 +13,36 @@ router.get('/', function(req, res) {
 // attempts to login to website with given database, calls finish() iff login information is incorrect
 var login = function(db, email, pass, req, res, next, finish) {
   connection.query("SELECT * FROM `" + db + "s` WHERE `user` = ?", [email], function(err, rows) {
-    if(err) {
+    if (err) {
       res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
       err.handled = true;
-      next(err);
-    } else {
-      if(rows.length > 0) {
-        bcrypt.compare(pass.toString(), rows[0].pass.toString(), function(err, result) {
-          if(result) {
-            if(err) {
+      return next(err);
+    }
+
+    if (rows.length > 0) {
+      bcrypt.compare(pass.toString(), rows[0].pass.toString(), function(err, result) {
+        if (result) {
+          if (err) {
+            res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
+            err.handled = true;
+            return next(err);
+          }
+
+          signIn(db + 's', rows[0].id, res, function(err, rows) {
+            if (err) {
               res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
               err.handled = true;
-              next(err);
-            } else {
-              signIn(db + 's', rows[0].id, res, function(err, rows) {
-                if(err) {
-                  res.render('sign-in', { error: 'An unknown error has occurred. Please try again later.', email: email });
-                  err.handled = true;
-                  next(err);
-                } else {
-                  res.redirect(req.body.redirect ? req.body.redirect : ('/' + db)); // successful login
-                }
-              });
+              return next(err);
             }
-          } else {
-            finish(); // incorrect pass
-          }
-        });
-      } else {
-        finish(); // incorrect login info
-      }
+
+            res.redirect(req.body.redirect ? req.body.redirect : ('/' + db)); // successful login
+          });
+        } else {
+          finish(); // incorrect pass
+        }
+      });
+    } else {
+      finish(); // incorrect login info
     }
   });
 }

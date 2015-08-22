@@ -39,7 +39,7 @@ router.get('/', function(req, res, next) {
 });
 
 var findSectionInfo = function(id, res, next, finish) {
-  if(id){
+  if (id) {
     connection.query("SELECT \
                         `sections`.`name`,\
                         `teachers`.`fname`,\
@@ -53,55 +53,59 @@ var findSectionInfo = function(id, res, next, finish) {
                         `enrollment`.`section_id` = `sections`.`id` AND \
                         `sections`.`teacher_id` = `teachers`.`id` AND \
                         `enrollment`.`student_id` = ?", [id], function(err, rows) {
-      if(err) {
+      if (err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         err.handled = true;
-        next(err);
-      } else {
-        finish(rows);
+        return next(err);
       }
+
+      finish(rows);
     });
   }
 }
 
 // Asks user for class password
-router.get('/joinSection', function(req, res) {
+router.get('/joinSection', function(req, res, next) {
   render('joinSection', {code: ''}, res);
 });
 
 // Pre-filled class password
-router.get('/joinSection/:code', function(req, res) {
+router.get('/joinSection/:code', function(req, res, next) {
   render('joinSection', {code: req.params.code}, res);
 });
 
 // Joins Class
 router.post('/joinSection', function(req, res, next) {
   var sectionID = req.body.sectionID;
-  if(isSet(sectionID)) {
+  if (isSet(sectionID)) {
     connection.query("SELECT `id` FROM `sections` WHERE `code` = ?", [sectionID], function(err, rows) {
-      if(err) {
+      if (err) {
         render('joinSection', {error: 'An unknown error has occurred.'}, res);
         err.handled = true;
-        next(err);
-      } else if(rows.length <= 0) {
+        return next(err);
+      }
+
+      if (rows.length <= 0) {
         render('joinSection', {error: 'That is not a valid class code.'}, res);
       } else {
         connection.query("SELECT * FROM `enrollment` WHERE `student_id` = ? AND `section_id` = ?", [req.user.id, rows[0].id], function(err, result) {
-          if(err) {
+          if (err) {
             render('joinSection', {error: 'An unknown error has occurred.'}, res);
             err.handled = true;
-            next(err);
-          } else if(result.length > 0) {
+            return next(err);
+          }
+
+          if (result.length > 0) {
             render('joinSection', {error: 'You are already enrolled in that class.'}, res);
           } else {
             connection.query("INSERT INTO `enrollment` VALUES(?, ?)", [rows[0].id, req.user.id], function(err, result) {
-              if(err) {
+              if (err) {
                 render('joinSection', {error: 'An unknown error has occurred.'}, res);
                 err.handled = true;
-                next(err);
-              } else {
-                res.redirect('/student/section/' + rows[0].id);
+                return next(err);
               }
+
+              res.redirect('/student/section/' + rows[0].id);
             });
           }
         });
@@ -114,11 +118,13 @@ router.post('/joinSection', function(req, res, next) {
 
 router.use('/:id', function(req, res, next) {
   connection.query("SELECT `sections`.* FROM `sections` JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`id` = ? AND `enrollment`.`student_id` = ?", [req.params.id, req.user.id], function(err, result) {
-    if(err) {
+    if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else if(result.length <= 0) {
+      return next(err);
+    }
+
+    if (result.length <= 0) {
       render('notFound', {}, res);
     } else {
       req.section = result[0];
@@ -139,13 +145,13 @@ router.get('/:id', function(req, res, next) {
                       `assignments` \
                       LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = ? \
                     WHERE `assignments`.`section_id` = ?", [req.user.id, req.params.id], function(err, rows) {
-    if(err) {
+    if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
-      next(err);
-    } else {
-      render('section', {name: req.section.name, rows: rows, id: req.params.id}, res);
+      return next(err);
     }
+
+    render('section', {name: req.section.name, rows: rows, id: req.params.id}, res);
   });
 });
 
@@ -158,11 +164,9 @@ router.get('/:id/delete', function(req, res, next) {
                       `submissions` \
                       JOIN `files` ON `submissions`.`id` = `files`.`submission_id` \
                     WHERE `student_id` = ?", [req.params.id, req.user.id, req.user.id], function(err) {
-    if(err) {
-      next(err);
-    } else {
-      res.redirect('/student/section');
-    }
+    if (err) return next(err);
+
+    res.redirect('/student/section');
   });
 });
 
