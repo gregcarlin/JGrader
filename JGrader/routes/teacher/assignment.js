@@ -188,17 +188,18 @@ router.use('/:id', function(req, res, next) {
       nestTables: true,
       values: [req.params.id, req.user.id]
     }, function(err, result) {
-      if(err) {
+      if (err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         err.handled = true;
-        next(err);
-      } else if(result.length <= 0) {
-        render('notFound', {}, res);
-      } else {
-        req.assignment = result[0].assignments;
-        req.section = result[0].sections;
-        next();
+        return next(err);
       }
+      if (result.length <= 0) {
+        return render('notFound', {}, res);
+      }
+
+      req.assignment = result[0].assignments;
+      req.section = result[0].sections;
+      next();
   });
 });
 
@@ -264,9 +265,27 @@ router.get('/:id', function(req, res, next) {
 
       var submitted = 0;
       _.each(results, function(result) {
-        if(result.submitted) submitted++;
+        if (result.submitted) submitted++;
       });
-      render('assignment', {title: req.assignment.name, assignment: req.assignment, section: req.section, results: results, id: req.params.id, files: files, submitted: submitted}, res);
+
+      connection.query("SELECT COUNT(*) AS `count` FROM `test-cases` WHERE `assignment_id` = ?", [req.params.id], function(err, tests) {
+        if (err) {
+          render('notFound', {error: 'An unexpected error has occurred.'}, res);
+          err.handled = true;
+          return next(err);
+        }
+
+        render('assignment', {
+          title: req.assignment.name,
+          assignment: req.assignment,
+          section: req.section,
+          results: results,
+          id: req.params.id,
+          files: files,
+          submitted: submitted,
+          tests: tests[0].count
+        }, res);
+      });
     });
   });
 });
