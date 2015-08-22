@@ -456,31 +456,30 @@ router.post('/:id/caseCreate', function(req, res, next) {
   }
 });
 
-var runAllTests = function(req, res, next) { 
-  connection.query('SELECT `enrollment`.`student_id` FROM `enrollment` WHERE `enrollment`.`section_id`=?', [req.params.id], function(err, students) {
-    for(var studentId in students) {
-      createTestingDir(req.params.id, studentId, function(err) {
-        if (err) return next(err);
-        
-      });
-    }
+router.get('/:id/runTestCases', function(req, res, next) {
+  runAllTests(req.params.id, function(err) {
+    if (err) return next(err);
+
+    res.redirect('/teacher/assignment/' + req.params.id);
+  });
+});
+
+var runAllTests = function(assignmentId, callback) { 
+  createTestingDir(assignmentId, function(err) {
+    if (err) return callback(err);
+
+    // TODO other stuff
+    callback();
   });
 }
 
-var createTestingDir = function(assignmentId, studentId, cb) {
+var createTestingDir = function(assignmentId, cb) {
   fs.ensureDir('temp/' + req.params.id + '/', function(err) { 
     connection.query("SELECT \
-                    `files`.`id`,\
-                    `files`.`name`,\
-                    `files`.`compiled` \
-                  FROM `submissions`,`assignments`,`sections`,`files` \
-                  WHERE \
-                    `submissions`.`assignment_id` = `assignments`.`id` AND \
-                    `assignments`.`section_id` = `sections`.`id` AND \
-                    `submissions`.`id` = ? AND \
-                    `sections`.`teacher_id` = ? AND \
-                    `files`.`submission_id` = `submissions`.`id` \
-                  ORDER BY `files`.`id`", [assignmentId, studentId], function(err, files) {
+                        `files`.`name`,`files`.`contents`,`files.compiled`,`files`.`mime` \
+                      FROM `submissions`,`files` \
+                      WHERE `submissions`.`id` = `files`.`submission_id` \
+                      AND `submissions`.`assignment_id` = ?", [assignmentId], function(err, files) {
       if (err) return cb(err);
 
       async.each(files, function(file, callback) {
