@@ -225,11 +225,15 @@ router.get('/:id', function(req, res, next) {
                       `students`.`lname`,\
                       `submissions`.`id` AS `subID`,\
                       `submissions`.`submitted`,\
-                      `submissions`.`grade` \
+                      `submissions`.`grade`,\
+                      `temp`.`count` \
                     FROM `enrollment`,`students` \
                     LEFT JOIN \
                       `submissions` ON `submissions`.`student_id` = `students`.`id` AND \
                       `submissions`.`assignment_id` = ? \
+                    LEFT JOIN \
+                      (SELECT `submission_id`,COUNT(*) AS `count` FROM `test-case-results` GROUP BY `submission_id`) AS `temp` \
+                      ON `temp`.`submission_id` = `submissions`.`id` \
                     WHERE \
                       `enrollment`.`student_id` = `students`.`id` AND \
                       `enrollment`.`section_id` = ? \
