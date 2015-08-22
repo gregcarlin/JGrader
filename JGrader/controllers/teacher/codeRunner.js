@@ -1,5 +1,7 @@
 var _ = require('lodash');
 var async = require('async');
+var exec = require('child_process').exec; // for running bash commands
+var fs = require('fs-extra');
 
 module.exports.setupDirectory = function(files, callback) {
   var grouped = _.groupBy(files, 'student_id');

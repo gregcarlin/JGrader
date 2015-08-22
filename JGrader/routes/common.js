@@ -5,10 +5,6 @@ express = require('express');
 creds   = require('./credentials');
 // router must be required separately otherwise routers will interfere with each other
 
-// used in compiling and executing code
-fs   = require('fs-extra'); // for file IO
-exec = require('child_process').exec; // for running bash commands
-
 async = require('async');
 var crypto = require('crypto');
 var mailgun = require('mailgun-js')({

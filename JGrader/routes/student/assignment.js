@@ -8,6 +8,8 @@ var strftime = require('strftime');
 var _ = require('lodash');
 var comments = require('../../controllers/comments');
 var async = require('async');
+var exec = require('child_process').exec;
+var fs = require('fs-extra');
 
 var render = function(page, options, res) {
   options.page = 1;
