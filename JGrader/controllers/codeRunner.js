@@ -39,7 +39,7 @@ module.exports.setupDirectory = function(files, callback) {
   });
 };
 
-module.exports.execute = function(uniqueId, toExecute, input, callback) {
+var execute = module.exports.execute = function(uniqueId, toExecute, input, callback) {
   var command = 'java -Djava.security.manager -Djava.security.policy==security.policy ' + toExecute;
   var options = {
     timeout: 10000, // 10 seconds
@@ -67,4 +67,23 @@ module.exports.execute = function(uniqueId, toExecute, input, callback) {
 
 module.exports.cleanup = function(uniqueId, callback) {
   fs.remove('temp/' + uniqueId + '/', callback);
+};
+
+module.exports.runTests = function(uniqueId, main, submissionId, tests, callback) {
+  connection.query("DELETE FROM `test-case-results` WHERE `submission_id` = ?", [submissionId], function(err) {
+    if (err) return callback(err);
+
+    async.eachSeries(tests, function(test, testCb) {
+      execute(uniqueId, main, test.input, function(err, stdout, stderr, overTime) {
+        if (err) return testCb(err);
+
+        var match = stdout === test.output;
+        if (!match && stdout.length && stdout.charAt(stdout.length-1) === '\n') {
+          stdout = stdout.substring(0, stdout.length - 1);
+          match = stdout === test.output;
+        }
+        connection.query("INSERT INTO `test-case-results` VALUES(NULL, ?, ?, ?, ?)", [submissionId, test.id, stdout, match], testCb);
+      });
+    }, callback);
+  });
 };

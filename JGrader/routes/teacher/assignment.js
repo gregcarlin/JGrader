@@ -524,22 +524,7 @@ var runAllTests = function(assignmentId, callback) {
           main = main.substring(0, main.length - 5);
           var submissionId = grouped[studentId][0].subId;
 
-          connection.query("DELETE FROM `test-case-results` WHERE `submission_id` = ?", [submissionId], function(err) {
-            if (err) return cb(err);
-
-            async.eachSeries(tests, function(test, testCb) {
-              codeRunner.execute(uniqueId, main, test.input, function(err, stdout, stderr, overTime) {
-                if (err) return testCb(err);
-
-                var match = stdout === test.output;
-                if (!match && stdout.length && stdout.charAt(stdout.length-1) === '\n') {
-                  stdout = stdout.substring(0, stdout.length - 1);
-                  match = stdout === test.output;
-                }
-                connection.query("INSERT INTO `test-case-results` VALUES(NULL, ?, ?, ?, ?)", [submissionId, test.id, stdout, match], testCb);
-              });
-            }, cb);
-          });
+          codeRunner.runTests(uniqueId, main, submissionId, tests, cb);
         }, callback);
       });
     });

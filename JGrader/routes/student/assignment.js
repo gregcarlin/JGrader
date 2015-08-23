@@ -170,36 +170,35 @@ router.post('/:id/submit', function(req, res, next) {
       err.handled = true;
       return next(err);
     }
-    if (req.body.fallback) {
-      if (data == 0) {
-        res.redirect('/student/assignment/' + req.params.id);
-      } else {
-        var msg = '';
-        switch (data) {
-          case -1:
-            msg = 'An unknown error has occurred.';
-            break;
-          case 1:
-            msg = 'Your code could not be compiled.';
-            break;
-          case 2:
-            msg = 'Some of your files have invalid names. Only alphanumeric characters and periods are allowed, and names must contain at least 6 characters.';
-            break;
-          case 3:
-            msg = 'You already submitted this!';
-            break;
-          case 4:
-            msg = 'You must submit at least one java file. Make sure they end in .java';
-            break;
-          case 5:
-            msg = 'No two files can share the same name.';
-            break;
-        }
-        res.redirect('/student/assignment/' + req.params.id + '?error=' + msg);
-      }
-    } else {
-      res.json({ code: data });
+
+    if (!req.body.fallback) {
+      return res.json({ code: data });
+    } else if (data === 0) {
+      return res.redirect('/student/assignment/' + req.params.id);
     }
+
+    var msg = '';
+    switch (data) {
+      case -1:
+        msg = 'An unknown error has occurred.';
+        break;
+      case 1:
+        msg = 'Your code could not be compiled.';
+        break;
+      case 2:
+        msg = 'Some of your files have invalid names. Only alphanumeric characters and periods are allowed, and names must contain at least 6 characters.';
+        break;
+      case 3:
+        msg = 'You already submitted this!';
+        break;
+      case 4:
+        msg = 'You must submit at least one java file. Make sure they end in .java';
+        break;
+      case 5:
+        msg = 'No two files can share the same name.';
+        break;
+    }
+    res.redirect('/student/assignment/' + req.params.id + '?error=' + msg);
   });
 });
 
