@@ -240,6 +240,7 @@ router.get('/:id', function(req, res, next) {
                       `submissions`.`id` AS `subID`,\
                       `submissions`.`submitted`,\
                       `submissions`.`grade`,\
+                      `submissions`.`main`,\
                       `failed-tests`.`count` AS `failed_tests`,\
                       `passed-tests`.`count` AS `passed_tests` \
                     FROM `enrollment`,`students` \
