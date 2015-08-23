@@ -13,7 +13,7 @@ async = require('async');
 var crypto = require('crypto');
 var mailgun = require('mailgun-js')({
   apiKey: creds.mailgun_key,
-  domain: 'mg.jgrader.com'
+  domain: 'jgrader.com'
 });
 
 mysql      = require('mysql');
