@@ -828,6 +828,12 @@ span.teacher-file {
 .sign-form a:hover {
   color: #AAA;
 }
+.sign-form .alert a {
+  color: #428bca;
+}
+.sign-form .alert a:hover {
+  color: #2a6496;
+}
 .iama {
   font-size: 26px;
   font-weight: 300;

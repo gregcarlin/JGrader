@@ -525,7 +525,11 @@ var runAllTests = function(assignmentId, callback) {
           var submissionId = grouped[studentId][0].subId;
 
           codeRunner.runTests(uniqueId, main, submissionId, tests, cb);
-        }, callback);
+        }, function(err) {
+          if (err) return callback(err);
+
+          codeRunner.cleanup(uniqueId, callback);
+        });
       });
     });
   });
