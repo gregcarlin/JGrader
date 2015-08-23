@@ -240,14 +240,18 @@ router.get('/:id', function(req, res, next) {
                       `submissions`.`id` AS `subID`,\
                       `submissions`.`submitted`,\
                       `submissions`.`grade`,\
-                      `temp`.`count` \
+                      `failed-tests`.`count` AS `failed_tests`,\
+                      `passed-tests`.`count` AS `passed_tests` \
                     FROM `enrollment`,`students` \
                     LEFT JOIN \
                       `submissions` ON `submissions`.`student_id` = `students`.`id` AND \
                       `submissions`.`assignment_id` = ? \
                     LEFT JOIN \
-                      (SELECT `submission_id`,COUNT(*) AS `count` FROM `test-case-results` GROUP BY `submission_id`) AS `temp` \
-                      ON `temp`.`submission_id` = `submissions`.`id` \
+                      (SELECT `submission_id`,COUNT(*) AS `count` FROM `test-case-results` WHERE `pass` = 0 GROUP BY `submission_id`) AS `failed-tests` \
+                      ON `failed-tests`.`submission_id` = `submissions`.`id` \
+                    LEFT JOIN \
+                      (SELECT `submission_id`,COUNT(*) AS `count` FROM `test-case-results` WHERE `pass` = 1 GROUP BY `submission_id`) AS `passed-tests` \
+                      ON `passed-tests`.`submission_id` = `submissions`.`id` \
                     WHERE \
                       `enrollment`.`student_id` = `students`.`id` AND \
                       `enrollment`.`section_id` = ? \
@@ -257,6 +261,10 @@ router.get('/:id', function(req, res, next) {
       err.handled = true;
       return next(err);
     }
+    _.each(results, function(result) {
+      result.passed_tests = result.passed_tests || 0;
+      result.failed_tests = result.failed_tests || 0;
+    });
 
     connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, files) {
       if (err) {
@@ -270,24 +278,15 @@ router.get('/:id', function(req, res, next) {
         if (result.submitted) submitted++;
       });
 
-      connection.query("SELECT COUNT(*) AS `count` FROM `test-cases` WHERE `assignment_id` = ?", [req.params.id], function(err, tests) {
-        if (err) {
-          render('notFound', {error: 'An unexpected error has occurred.'}, res);
-          err.handled = true;
-          return next(err);
-        }
-
-        render('assignment', {
-          title: req.assignment.name,
-          assignment: req.assignment,
-          section: req.section,
-          results: results,
-          id: req.params.id,
-          files: files,
-          submitted: submitted,
-          tests: tests[0].count
-        }, res);
-      });
+      render('assignment', {
+        title: req.assignment.name,
+        assignment: req.assignment,
+        section: req.section,
+        results: results,
+        id: req.params.id,
+        files: files,
+        submitted: submitted
+      }, res);
     });
   });
 });
@@ -503,17 +502,45 @@ router.get('/:id/runTestCases', function(req, res, next) {
 
 var runAllTests = function(assignmentId, callback) { 
   connection.query("SELECT \
-                      `files`.`name`,`files`.`contents`,`files.compiled`,`files`.`mime`,`submissions`.`student_id` \
+                      `files`.`name`,`files`.`contents`,`files`.`compiled`,`files`.`mime`,`submissions`.`student_id`,`submissions`.`main`,`submissions`.`id` AS `subId` \
                     FROM `submissions`,`files` \
                     WHERE `submissions`.`id` = `files`.`submission_id` \
                     AND `submissions`.`assignment_id` = ?", [assignmentId], function(err, files) {
     if (err) return callback(err);
 
-    codeRunner.setupDirectory(assignmentId, files, function(err, uniqueIds) {
+    connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [assignmentId], function(err, tests) {
       if (err) return callback(err);
 
-      // TODO other stuff
-      callback();
+      codeRunner.setupDirectory(files, function(err, uniqueIds) {
+        if (err) return callback(err);
+
+        var grouped = _.groupBy(files, 'student_id');
+        async.forEachOf(uniqueIds, function(uniqueId, studentId, cb) {
+          var main = grouped[studentId][0].main;
+          if (!main) {
+            return codeRunner.cleanup(uniqueId, cb);
+          }
+          main = main.substring(0, main.length - 5);
+          var submissionId = grouped[studentId][0].subId;
+
+          connection.query("DELETE FROM `test-case-results` WHERE `submission_id` = ?", [submissionId], function(err) {
+            if (err) return cb(err);
+
+            async.eachSeries(tests, function(test, testCb) {
+              codeRunner.execute(uniqueId, main, test.input, function(err, stdout, stderr, overTime) {
+                if (err) return testCb(err);
+
+                var match = stdout === test.output;
+                if (!match && stdout.length && stdout.charAt(stdout.length-1) === '\n') {
+                  stdout = stdout.substring(0, stdout.length - 1);
+                  match = stdout === test.output;
+                }
+                connection.query("INSERT INTO `test-case-results` VALUES(NULL, ?, ?, ?, ?)", [submissionId, test.id, stdout, match], testCb);
+              });
+            }, cb);
+          });
+        }, callback);
+      });
     });
   });
 }
