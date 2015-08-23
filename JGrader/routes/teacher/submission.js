@@ -7,7 +7,7 @@ var strftime = require('strftime');
 var JSZip = require('jszip');
 
 var comments = require('../../controllers/comments');
-var codeRunner = require('../../controllers/teacher/codeRunner');
+var codeRunner = require('../../controllers/codeRunner');
 
 var render = function(page, options, res) {
   options.page = 1;

@@ -8,7 +8,7 @@ var multer = require('multer');
 var async = require('async');
 var _ = require('lodash');
 
-var codeRunner = require('../../controllers/teacher/codeRunner');
+var codeRunner = require('../../controllers/codeRunner');
 
 var render = function(page, options, res) {
   options.page = 1;
