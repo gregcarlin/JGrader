@@ -524,12 +524,12 @@ var runAllTests = function(assignmentId, callback) {
           main = main.substring(0, main.length - 5);
           var submissionId = grouped[studentId][0].subId;
 
-          codeRunner.runTests(uniqueId, main, submissionId, tests, cb);
-        }, function(err) {
-          if (err) return callback(err);
+          codeRunner.runTests(uniqueId, main, submissionId, tests, function(err) {
+            if (err) return cb(err);
 
-          codeRunner.cleanup(uniqueId, callback);
-        });
+            codeRunner.cleanup(uniqueId, cb);
+          });
+        }, callback);
       });
     });
   });

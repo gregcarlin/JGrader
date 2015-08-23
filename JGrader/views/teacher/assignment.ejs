@@ -81,7 +81,7 @@
               <td data-sort-value="<%= submitted ? submitted.getTime() : 0 %>" title="<%= strftime('%b %d %Y, %l:%M %p', submitted)%>"><%- submittedStr %></td>
               <td data-sort-value="<%= results[i].grade ? results[i].grade : 0 %>"><%- results[i].grade ? (results[i].grade + '%') : '<em>Not graded</em>' %></td>
               <td data-sort-value="<%= results[i].passed_tests ? results[i].passed_tests : 0 %>">
-                <%- results[i].submitted ? (results[i].main ? ((results[i].passed_tests || results[i].failed_tests) ? (results[i].passed_tests + ' of ' + (results[i].passed_tests + results[i].failed_tests)) : '<em>Unknown</em>') : '<em>No main</em>') : '<em>Not submitted</em>' %>
+                <%- results[i].submitted ? (results[i].main ? ((results[i].passed_tests || results[i].failed_tests) ? (results[i].passed_tests + ' of ' + (results[i].passed_tests + results[i].failed_tests)) : '<em>Unknown</em>') : '<em>No main selected</em>') : '<em>Not submitted</em>' %>
               </td>
             </tr>
        <% }

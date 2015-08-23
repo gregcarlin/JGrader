@@ -217,9 +217,10 @@ var findMain = function(err, files, callback) {
     async.map(files, function(file, cb) {
       if (!file.isJava) return cb();
 
-      fs.readFile(file, function(err, data) {
+      fs.readFile(file.path, function(err, data) {
         if (err) return cb(err);
 
+        data = data.toString();
         if (data.indexOf('main') >= 0) {
           cb(null, file.name);
         } else {
@@ -401,15 +402,53 @@ router.get('/:id/resubmit', function(req, res, next) {
   });
 });
 
+var handle = function(err, req, res, next) {
+  res.redirect('/student/assignment/' + req.params.id + '?error=Unable to set main, please reload and try again.');
+  err.handled = true;
+  next(err);
+};
+
 router.get('/:id/chooseMain/:file', function(req, res, next) {
-  connection.query("UPDATE `submissions` SET `main` = ? WHERE `assignment_id` = ? AND `student_id` = ?", [req.params.file, req.params.id, req.user.id], function(err) {
+  connection.query("UPDATE `submissions` SET `main` = ? WHERE `assignment_id` = ? AND `student_id` = ?", [req.params.file, req.params.id, req.user.id], function(err, result) {
     if (err) {
-      res.redirect('/student/assignment/' + req.params.id + '?error=Unable to set main, please reload and try again.');
-      err.handled = true;
-      next(err);
-    } else {
-      res.redirect('/student/assignment/' + req.params.id);
+      return handle(err, req, res, next);
     }
+
+    connection.query("SELECT `id` FROM `submissions` WHERE `assignment_id` = ? AND `student_id` = ?", [req.params.id, req.user.id], function(err, result) {
+      if (err) return handle(err, req, res, next);
+
+      connection.query("SELECT \
+                          `files`.`id`,\
+                          `files`.`name`,\
+                          `files`.`contents`,\
+                          `files`.`compiled`,\
+                          `submissions`.`student_id` \
+                        FROM `files`,`submissions` \
+                        WHERE `files`.`submission_id` = `submissions`.`id` AND `submissions`.`id` = ?", [result[0].id], function(err, files) {
+        if (err) return handle(err, req, res, next);
+
+        codeRunner.setupDirectory(files, function(err, uniqueIds) {
+          if (err) return handle(err, req, res, next);
+
+          var uniqueId = uniqueIds[files[0].student_id];
+          var main = req.params.file.substring(0, req.params.file.length - 5);
+
+          connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.params.id], function(err, tests) {
+            if (err) return handle(err, req, res, next);
+
+            codeRunner.runTests(uniqueId, main, result[0].id, tests, function(err) {
+              if (err) return handle(err, req, res, next);
+
+              codeRunner.cleanup(uniqueId, function(err) {
+                if (err) return handle(err, req, res, next);
+
+                res.redirect('/student/assignment/' + req.params.id);
+              });
+            });
+          });
+        });
+      });
+    });
   });
 });
 
