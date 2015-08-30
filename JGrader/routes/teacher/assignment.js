@@ -128,8 +128,13 @@ router.post('/create', function(req, res, next) {
     });
   } else {
     async.each(secs, function(sec, cb) {
-      createAssignment(req.user.id, secs[i], res, name, desc, due, req.files, cb);
+      createAssignment(req.user.id, sec, res, name, desc, due, req.files, function() {
+        console.log('callback 1');
+        cb();
+      });
     }, function(err) {
+      console.log('callback 2');
+      console.log(err);
       if (err) return next(err);
 
       res.redirect('/teacher/assignment');
@@ -176,6 +181,8 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due, file
 
             next();
           });
+        } else {
+          next();
         }
       });
     }
@@ -184,7 +191,7 @@ var createAssignment = function(teacherID, sectionID, res, name, desc, due, file
 
 router.use('/:id', function(req, res, next) {
   connection.query({
-      sql: "SELECT * FROM `assignments` JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` WHERE `assignments`.`id` = ? AND `sections`.`teacher_id` = ?", 
+      sql: "SELECT * FROM `assignments` JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` WHERE `assignments`.`id` = ? AND `sections`.`teacher_id` = ?",
       nestTables: true,
       values: [req.params.id, req.user.id]
     }, function(err, result) {
