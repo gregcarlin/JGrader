@@ -128,13 +128,8 @@ router.post('/create', function(req, res, next) {
     });
   } else {
     async.each(secs, function(sec, cb) {
-      createAssignment(req.user.id, sec, res, name, desc, due, req.files, function() {
-        console.log('callback 1');
-        cb();
-      });
+      createAssignment(req.user.id, sec, res, name, desc, due, req.files, cb);
     }, function(err) {
-      console.log('callback 2');
-      console.log(err);
       if (err) return next(err);
 
       res.redirect('/teacher/assignment');
