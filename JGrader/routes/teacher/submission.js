@@ -5,7 +5,9 @@ require('../common');
 var router = express.Router();
 var strftime = require('strftime');
 var JSZip = require('jszip');
-var comments = require('../comments');
+
+var comments = require('../../controllers/comments');
+var codeRunner = require('../../controllers/codeRunner');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -168,98 +170,62 @@ router.post('/:id/updategrade/:grade', function(req, res, next) {
 });
 
 router.post('/:id/run/:fileIndex', function(req, res, next) {
-  fs.ensureDir('temp/' + req.params.id + '/', function(err) {
+  connection.query("SELECT \
+                      `files`.`id`,\
+                      `files`.`name`,\
+                      `files`.`contents`,\
+                      `files`.`compiled`,\
+                      `submissions`.`student_id` \
+                    FROM `submissions`,`files` \
+                    WHERE \
+                      `submissions`.`id` = ? AND \
+                      `files`.`submission_id` = `submissions`.`id` \
+                    ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
     if (err) {
       res.json({ code: -1 }); // unknown
       err.handled = true;
       return next(err);
     }
 
-    connection.query("SELECT \
-                        `files`.`id`,\
-                        `files`.`name`,\
-                        `files`.`contents`,\
-                        `files`.`compiled` \
-                      FROM `submissions`,`files` \
-                      WHERE \
-                        `submissions`.`id` = ? AND \
-                        `files`.`submission_id` = `submissions`.`id` \
-                      ORDER BY `files`.`id`", [req.params.id], function(err, rows) {
+    if (rows.length <= 0) {
+      return res.json({ code: 2 }); // invalid permissions
+    }
+
+    codeRunner.setupDirectory(rows, function(err, uniqueIds) {
       if (err) {
-        res.json({ code: -1 }); // unknown
+        res.json({code: -1}); // unknown
         err.handled = true;
         return next(err);
       }
 
-      if (rows.length <= 0) {
-        return res.json({ code: 2 }); // invalid permissions
+      var uniqueId = uniqueIds[rows[0].student_id];
+
+      var fileIndex = req.params.fileIndex;
+      if (fileIndex >= rows.length || !rows[fileIndex].className) {
+        return res.json({ code: 1 }); // invalid input
       }
 
-      async.each(rows, function(row, cb) {
-        var name = row.name;
-        if (row.compiled) {
-          row.className = name.substring(0, name.length - 5);
-          row.writeName = row.className + '.class';
-          row.writeData = row.compiled;
-        } else {
-          row.writeName = name;
-          row.writeData = row.contents;
-        }
-        // note: working directory seems to be one with app.js in it
-        fs.writeFile('temp/' + req.params.id + '/' + row.writeName, row.writeData, cb);
-      }, function(err) {
-        if (err) {
-          res.json({code: -1}); // unknown
-          err.handled = true;
-          return next(err);
-        }
+      codeRunner.execute(uniqueId, rows[fileIndex].className, req.body.stdin, function(err, stdout, stderr, overTime) {
 
-        var fileIndex = req.params.fileIndex;
-        if (fileIndex >= rows.length || !rows[req.params.fileIndex].className) {
-          return res.json({ code: 1 }); // invalid input
-        }
+        codeRunner.cleanup(uniqueId, function(err0) {
+          var error = err || err0;
+          if (error) {
+            res.json({ code: -1 });
+            error.handled = true;
+            return next(error);
+          }
 
-        var command = 'java -Djava.security.manager -Djava.security.policy==security.policy ' + rows[req.params.fileIndex].className;
-        var options = {
-          timeout: 10000, // 10 seconds
-          cwd: 'temp/' + req.params.id + '/'
-        };
-        var child = exec(command, options, function(err, stdout, stderr) {
-          if (err && stderr) err = null; // suppress error if stderr is set (indicates user error)
+          if (overTime) {
+            stdout = '';
+            stderr = 'Code took too long to execute! There may be an infinite loop somewhere.';
+          }
 
-          // clean up
-          fs.remove('temp/' + req.params.id + '/', function(err0) {
-            if (err) {
-              if (err.killed) {
-                res.json({
-                  code: 0,
-                  out: '',
-                  err: 'Code took too long to execute! There may be an infinite loop somewhere.'
-                });
-              } else {
-                child.kill();
-                res.json({ code: -1 });
-                err.handled = true;
-                next(err);
-              }
-              return;
-            }
-            if (err0) {
-              res.json({ code: -1 });
-              err0.handled = true;
-              return next(err0);
-            }
-
-            res.json({
-              code: 0,
-              out: stdout,
-              err: stderr
-            });
+          res.json({
+            code: 0,
+            out: stdout,
+            err: stderr
           });
-
         });
-        if (req.body.stdin) child.stdin.write(req.body.stdin);
-        child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
 
       });
 
@@ -269,104 +235,87 @@ router.post('/:id/run/:fileIndex', function(req, res, next) {
 });
 
 router.get('/:id/test/:fileIndex', function(req, res, next) {
-  fs.ensureDir('temp/' + req.params.id + '/', function(err) {
-    connection.query("SELECT \
-                        `files`.`id`,\
-                        `files`.`name`,\
-                        `files`.`compiled` \
-                      FROM `submissions`,`assignments`,`sections`,`files` \
-                      WHERE \
-                        `submissions`.`assignment_id` = `assignments`.`id` AND \
-                        `assignments`.`section_id` = `sections`.`id` AND \
-                        `submissions`.`id` = ? AND \
-                        `sections`.`teacher_id` = ? AND \
-                        `files`.`submission_id` = `submissions`.`id` \
-                      ORDER BY `files`.`id`", [req.params.id, req.user.id], function(err, files) {
+  connection.query("SELECT \
+                      `files`.`id`,\
+                      `files`.`name`,\
+                      `files`.`compiled`,\
+                      `submissions`.`student_id` \
+                    FROM `submissions`,`assignments`,`sections`,`files` \
+                    WHERE \
+                      `submissions`.`assignment_id` = `assignments`.`id` AND \
+                      `assignments`.`section_id` = `sections`.`id` AND \
+                      `submissions`.`id` = ? AND \
+                      `sections`.`teacher_id` = ? AND \
+                      `files`.`submission_id` = `submissions`.`id` \
+                    ORDER BY `files`.`id`", [req.params.id, req.user.id], function(err, files) {
+    if (err) {
+      res.json({code: -1});
+      err.handled = true;
+      return next(err);
+    }
+
+    connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.assignment.id], function(err, tests) {
       if (err) {
         res.json({code: -1});
         err.handled = true;
         return next(err);
       }
 
-      connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.assignment.id], function(err, tests) {
+      codeRunner.setupDirectory(files, function(err, uniqueIds) {
         if (err) {
-          res.json({code: -1});
+          res.json({ code: -1 });
           err.handled = true;
           return next(err);
         }
 
-        async.each(files, function(file, cb) {
-          file.className = file.name.substring(0, file.name.length - 5);
-          fs.writeFile('temp/' + req.params.id + '/' + file.className + '.class', file.compiled, cb);
-        }, function(err) {
-          if (err) {
-            res.json({ code: -1 });
-            err.handled = true;
-            return next(err);
-          }
+        if (req.params.fileIndex >= files.length) {
+          return res.json({ code: 1 }); // invalid input
+        }
 
-          if (req.params.fileIndex >= files.length) {
-            return res.json({ code: 1 }); // invalid input
-          }
+        var uniqueId = uniqueIds[files[0].student_id];
+        async.mapSeries(tests, function(test, callback) {
+          codeRunner.execute(uniqueId, files[req.params.fileIndex].className, test.input, function(err, stdout, stderr, overTime) {
+            if (err) {
+              res.json({ code: -1 });
+              err.handled = true;
+              return callback(err);
+            }
 
-          async.mapSeries(tests, function(test, callback) {
-            var command = 'java -Djava.security.manager -Djava.security.policy==security.policy ' + files[req.params.fileIndex].className;
-            var options = {
-              timeout: 10000, // 10 seconds
-              cwd: 'temp/' + req.params.id + '/'
-            };
-            var child = exec(command, options, function(err, stdout, stderr) {
-              if (err && stderr) err = null; // suppress error if stderr is set (indicates user error)
-              if (err) {
-                if (err.killed) {
-                  res.json({ code: 2 }); // code took too long to execute
-                } else {
-                  res.json({ code: -1 });
-                  fs.remove('temp/' + req.params.id + '/', function(err2) { // cleanup
-                    err.handled = true;
-                    next(err);
-                  });
-                }
-              } else {
-                if (stdout.length >= 1) {
-                  // truncate last new line character
-                  stdout = stdout.substring(0, stdout.length - 1);
-                }
-                callback(null, [stdout, stderr]);
-              }
-            });
-            child.stdin.write(test.input);
-            child.stdin.end();
-          }, function(err0, results) {
-            fs.remove('temp/' + req.params.id + '/', function(err1) {
-              if (err0) {
-                res.json({code: -1});
-                err0.handled = true;
-                return next(err0);
-              }
-              if (err1) {
-                res.json({code: -1});
-                err1.handled = true;
-                return next(err1);
-              }
+            if (overTime) {
+              res.json({ code: 2 }); // code took too long to execute
+            }
 
-              var data = [];
-              for(var i in results) {
-                data.push({
-                  input: tests[i].input,
-                  expected: tests[i].output,
-                  result: results[i][0]
-                });
-              }
-              res.json({ code: 0, results: data });
-            });
+            if (stdout.length >= 1 && stdout.charAt(stdout.length - 1) === '\n') {
+              // truncate last new line character
+              stdout = stdout.substring(0, stdout.length - 1);
+            }
+            callback(null, [stdout, stderr]);
           });
+        }, function(err0, results) {
+          codeRunner.cleanup(uniqueId, function(err1) {
+            var err = err0 || err1;
+            if (err) {
+              res.json({code: -1});
+              err.handled = true;
+              return next(err);
+            }
 
+            var data = [];
+            for(var i = 0; i < results.length; i++) {
+              data.push({
+                input: tests[i].input,
+                expected: tests[i].output,
+                result: results[i][0]
+              });
+            }
+            res.json({ code: 0, results: data });
+          });
         });
 
       });
 
     });
+
   });
 });
 

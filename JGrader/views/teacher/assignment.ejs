@@ -7,11 +7,14 @@
   </div>
   <div class="mid-header mid-header-2">
     <a href="/teacher/assignment/<%= id %>.csv" class="right" data-toggle="tooltip" data-placement="right" title="Export"><span class="fa fa-table"></span></a>
-    <a href="/teacher/assignment/<%= id %>/testCase" class="right" data-toggle="tooltip" data-placement="right" title="Test Cases"><span class="fa fa-th-list"></span></a>
+    <a href="/teacher/assignment/<%= id %>/testCase" class="right" data-toggle="tooltip" data-placement="right" title="Edit Test Cases"><span class="fa fa-th-list"></span></a>
   </div>
   <div class="right-header">
     <div class="name">
       <a href="/teacher/section/<%= section.id %>" class="sub-header"><%= section.name %></a>
+    </div>
+    <div class="nav-chev">
+      <a href="/teacher/assignment/<%= id %>/runTestCases" class="right" data-toggle="tooltip" data-placement="left" title="Run all test cases"><span class="fa fa-play-circle-o"></span></a>
     </div>
   </div>
 </div>
@@ -56,6 +59,7 @@
         <th data-sort="string">Student <a class="fa fa-sort"></a></th>
         <th data-sort="int">Submitted <a class="fa fa-sort"></a></th>
         <th data-sort="int">Grade <a class="fa fa-sort"></a></th>
+        <th data-sort="int">Tests Passed <a class="fa fa-sort"></a></th>
       </tr>
     </thead>
     <tbody>
@@ -75,7 +79,10 @@
                 }
               %>
               <td data-sort-value="<%= submitted ? submitted.getTime() : 0 %>" title="<%= strftime('%b %d %Y, %l:%M %p', submitted)%>"><%- submittedStr %></td>
-              <td data-sort-value="<%= results[i].grade ? results[i].grade : 0  %>"><%- results[i].grade ? (results[i].grade + '%') : '<em>Not graded.</em>' %></td>
+              <td data-sort-value="<%= results[i].grade ? results[i].grade : 0 %>"><%- results[i].grade ? (results[i].grade + '%') : '<em>Not graded</em>' %></td>
+              <td data-sort-value="<%= results[i].passed_tests ? results[i].passed_tests : 0 %>">
+                <%- results[i].submitted ? (results[i].main ? ((results[i].passed_tests || results[i].failed_tests) ? (results[i].passed_tests + ' of ' + (results[i].passed_tests + results[i].failed_tests)) : '<em>Unknown</em>') : '<em>No main selected</em>') : '<em>Not submitted</em>' %>
+              </td>
             </tr>
        <% }
          } %>

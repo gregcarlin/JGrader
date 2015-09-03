@@ -22,9 +22,13 @@
     </table>
 </div>
 
-<% if(!anyCompiled) { %>
+<% if (!anyCompiled) { %>
   <div class="alert alert-warning" role="alert">
     WARNING: This code could not successfully be compiled. Your teacher will not be able to run it.
+  </div>
+<% } else if (!anyMain) { %>
+  <div class="alert alert-warning" role="alert">
+    WARNING: You have not selected a main file. Your teacher will not be able to run tests against this code. To fix this, select a main file below.
   </div>
 <% } %>
 
@@ -33,8 +37,17 @@
   <ul class="nav nav-tabs" role="tablist">
     <% for(i in fileData) { %>
       <% fileData[i].shortName = i; %>
-      <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>><a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab"<%- teacherFiles.indexOf(fileData[i].name) >= 0 ? ' class="teacher-file"' : '' %>><%= fileData[i].name %></a></li>
-      <% } %>
+      <li role="presentation"<%- i == 0 ? ' class="active"' : '' %>>
+        <a href="#<%= fileData[i].shortName %>" role="tab" data-toggle="tab"<%- teacherFiles.indexOf(fileData[i].name) >= 0 ? ' class="teacher-file"' : '' %>>
+          <% if (fileData[i].isMain) { %>
+            <span class="fa fa-circle" data-toggle="tooltip" title="This is the main file." onclick="chooseMain('<%= fileData[i].name %>')"></span>
+          <% } else { %>
+            <span class="fa fa-circle-thin" data-toggle="tooltip" title="Choose this file as the main." onclick="chooseMain('<%= fileData[i].name %>')"></span>
+          <% } %>
+          <%= fileData[i].name %>
+        </a>
+      </li>
+    <% } %>
   </ul>
 </div>
 <div class="tab-content">
@@ -52,7 +65,7 @@
   <% } %>
 </div>
 <div class"row">
-  <button class="btn btn-primary start" href="resubmit/" role="button" id="resubmit">Resubmit</button>
+  <button class="btn btn-primary start student-btn" href="resubmit/" role="button" id="resubmit">Resubmit</button>
 </div>
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

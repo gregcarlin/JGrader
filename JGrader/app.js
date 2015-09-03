@@ -42,8 +42,9 @@ app.use(function(req, res, next) {
   var ua = req.useragent;
   var nosupport = true;
 
-  if(ua) {
+  if (ua) {
     ua.isiOS = ua.isiPad || ua.isiPod || ua.isiPhone;
+    ua.Version = ua.Version || ua.version;
     ua.majorVersion = ua.Version ? (typeof ua.Version == "number" ? ua.Version : parseInt(ua.Version.substring(0, ua.Version.indexOf('.')))) : Number.NaN;
 
     var nosupport = ua.isOpera && (ua.isAndroid || ua.isiOS);

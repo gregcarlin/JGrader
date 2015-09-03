@@ -8,6 +8,8 @@ var multer = require('multer');
 var async = require('async');
 var _ = require('lodash');
 
+var codeRunner = require('../../controllers/codeRunner');
+
 var render = function(page, options, res) {
   options.page = 1;
   switch(page) {
@@ -190,17 +192,18 @@ router.use('/:id', function(req, res, next) {
       nestTables: true,
       values: [req.params.id, req.user.id]
     }, function(err, result) {
-      if(err) {
+      if (err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         err.handled = true;
-        next(err);
-      } else if(result.length <= 0) {
-        render('notFound', {}, res);
-      } else {
-        req.assignment = result[0].assignments;
-        req.section = result[0].sections;
-        next();
+        return next(err);
       }
+      if (result.length <= 0) {
+        return render('notFound', {}, res);
+      }
+
+      req.assignment = result[0].assignments;
+      req.section = result[0].sections;
+      next();
   });
 });
 
@@ -238,11 +241,20 @@ router.get('/:id', function(req, res, next) {
                       `students`.`lname`,\
                       `submissions`.`id` AS `subID`,\
                       `submissions`.`submitted`,\
-                      `submissions`.`grade` \
+                      `submissions`.`grade`,\
+                      `submissions`.`main`,\
+                      `failed-tests`.`count` AS `failed_tests`,\
+                      `passed-tests`.`count` AS `passed_tests` \
                     FROM `enrollment`,`students` \
                     LEFT JOIN \
                       `submissions` ON `submissions`.`student_id` = `students`.`id` AND \
                       `submissions`.`assignment_id` = ? \
+                    LEFT JOIN \
+                      (SELECT `submission_id`,COUNT(*) AS `count` FROM `test-case-results` WHERE `pass` = 0 GROUP BY `submission_id`) AS `failed-tests` \
+                      ON `failed-tests`.`submission_id` = `submissions`.`id` \
+                    LEFT JOIN \
+                      (SELECT `submission_id`,COUNT(*) AS `count` FROM `test-case-results` WHERE `pass` = 1 GROUP BY `submission_id`) AS `passed-tests` \
+                      ON `passed-tests`.`submission_id` = `submissions`.`id` \
                     WHERE \
                       `enrollment`.`student_id` = `students`.`id` AND \
                       `enrollment`.`section_id` = ? \
@@ -252,6 +264,10 @@ router.get('/:id', function(req, res, next) {
       err.handled = true;
       return next(err);
     }
+    _.each(results, function(result) {
+      result.passed_tests = result.passed_tests || 0;
+      result.failed_tests = result.failed_tests || 0;
+    });
 
     connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, files) {
       if (err) {
@@ -262,9 +278,18 @@ router.get('/:id', function(req, res, next) {
 
       var submitted = 0;
       _.each(results, function(result) {
-        if(result.submitted) submitted++;
+        if (result.submitted) submitted++;
       });
-      render('assignment', {title: req.assignment.name, assignment: req.assignment, section: req.section, results: results, id: req.params.id, files: files, submitted: submitted}, res);
+
+      render('assignment', {
+        title: req.assignment.name,
+        assignment: req.assignment,
+        section: req.section,
+        results: results,
+        id: req.params.id,
+        files: files,
+        submitted: submitted
+      }, res);
     });
   });
 });
@@ -429,7 +454,15 @@ router.get('/:id/testCase/delete/:testID', function(req, res, next) {
       return next(err);
     }
 
-    res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+    codeRunner.runTestsForAssignment(req.params.id, function(err) {
+      if (err) {
+        render('notFound', {error: 'The server was unable to delete the test case. Please try again.'}, res);
+        err.handled = true;
+        return next(err);
+      }
+
+      res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+    });
   });
 });
 
@@ -458,7 +491,15 @@ router.post('/:id/caseCreate', function(req, res, next) {
           return next(err);
         }
 
-        res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+        codeRunner.runTestsForAssignment(req.params.id, function(err) {
+          if (err) {
+            render('notFound', {error: 'The server was unable to create the test case. Please try again.'}, res);
+            err.handled = true;
+            return next(err);
+          }
+
+          res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+        });
       });
     } else {
       // not enough data sent, don't add any cases and just redirect
@@ -468,6 +509,14 @@ router.post('/:id/caseCreate', function(req, res, next) {
     // no data sent, don't add any cases and just redirect
     res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
   }
+});
+
+router.get('/:id/runTestCases', function(req, res, next) {
+  codeRunner.runTestsForAssignment(req.params.id, function(err) {
+    if (err) return next(err);
+
+    res.redirect('/teacher/assignment/' + req.params.id);
+  });
 });
 
 module.exports = router;

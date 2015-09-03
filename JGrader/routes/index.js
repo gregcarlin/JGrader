@@ -5,6 +5,7 @@ require('./common');
 var router = express.Router();
 var crypto = require('crypto');
 var strftime = require('strftime');
+var exec = require('child_process').exec;
 
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, db, finish) {

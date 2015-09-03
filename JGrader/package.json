@@ -8,7 +8,7 @@
     "test": "casperjs test tests.js"
   },
   "dependencies": {
-    "async": "^0.9.0",
+    "async": "1.4.2",
     "bcrypt": "^0.8.2",
     "body-parser": "~1.8.1",
     "compression": "^1.4.3",

@@ -117,3 +117,4 @@ myDropzone.on("queuecomplete", function(progress) {
 document.querySelector('button[type="submit"]').onclick = function() {
   myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
 };
+
