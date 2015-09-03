@@ -1,4 +1,4 @@
-const creds = require('./test_credentials');
+const creds = require('../credentials');
 const url   = creds.url;
 const fs    = require('fs');
 

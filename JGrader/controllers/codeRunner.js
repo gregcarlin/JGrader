@@ -90,7 +90,13 @@ var runTests = module.exports.runTests = function(uniqueId, main, submissionId, 
 
 module.exports.runTestsForAssignment = function(assignmentId, callback) { 
   connection.query("SELECT \
-                      `files`.`name`,`files`.`contents`,`files`.`compiled`,`files`.`mime`,`submissions`.`student_id`,`submissions`.`main`,`submissions`.`id` AS `subId` \
+                      `files`.`name`,\
+                      `files`.`contents`,\
+                      `files`.`compiled`,\
+                      `files`.`mime`,\
+                      `submissions`.`student_id`,\
+                      `submissions`.`main`,\
+                      `submissions`.`id` AS `subId` \
                     FROM `submissions`,`files` \
                     WHERE `submissions`.`id` = `files`.`submission_id` \
                     AND `submissions`.`assignment_id` = ?", [assignmentId], function(err, files) {

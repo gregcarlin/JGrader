@@ -1,13 +1,21 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+
+
 DELIMITER $$
+DROP FUNCTION IF EXISTS `SECTIONS_WITH_STUDENT`$$
 CREATE DEFINER=`root`@`localhost` FUNCTION `SECTIONS_WITH_STUDENT`(`teacher_id` INT, `student_id` INT) RETURNS int(10) unsigned
     READS SQL DATA
     DETERMINISTIC
     COMMENT 'How many sections a given teacher has with a given student'
 RETURN (SELECT COUNT(*) FROM `sections`,`enrollment` WHERE `enrollment`.`section_id` = `sections`.`id` AND `enrollment`.`student_id` = student_id AND `sections`.`teacher_id` = teacher_id)$$
 
+DROP FUNCTION IF EXISTS `TEACHER_OWNS_ASSIGNMENT`$$
 CREATE DEFINER=`root`@`localhost` FUNCTION `TEACHER_OWNS_ASSIGNMENT`(`teacher_id` INT UNSIGNED, `assignment_id` INT UNSIGNED) RETURNS tinyint(1)
     READS SQL DATA
     DETERMINISTIC
@@ -16,6 +24,7 @@ RETURN (SELECT COUNT(*) FROM `assignments`,`sections` WHERE `assignments`.`secti
 
 DELIMITER ;
 
+DROP TABLE IF EXISTS `assignments`;
 CREATE TABLE IF NOT EXISTS `assignments` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `section_id` int(10) unsigned NOT NULL,
@@ -24,8 +33,9 @@ CREATE TABLE IF NOT EXISTS `assignments` (
   `due` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `section_id` (`section_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=269 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=301 ;
 
+DROP TABLE IF EXISTS `assistants`;
 CREATE TABLE IF NOT EXISTS `assistants` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user` varchar(255) NOT NULL,
@@ -37,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `assistants` (
   UNIQUE KEY `user` (`user`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
+DROP TABLE IF EXISTS `blog`;
 CREATE TABLE IF NOT EXISTS `blog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -46,6 +57,7 @@ CREATE TABLE IF NOT EXISTS `blog` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
+DROP TABLE IF EXISTS `comments`;
 CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `submission_id` int(10) unsigned NOT NULL,
@@ -57,14 +69,16 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `message` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `submission_id` (`submission_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=213 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=251 ;
 
+DROP TABLE IF EXISTS `enrollment`;
 CREATE TABLE IF NOT EXISTS `enrollment` (
   `section_id` int(10) unsigned NOT NULL,
   `student_id` int(10) unsigned NOT NULL,
   KEY `section_id` (`section_id`,`student_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `feedback`;
 CREATE TABLE IF NOT EXISTS `feedback` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user` varchar(255) NOT NULL,
@@ -76,8 +90,9 @@ CREATE TABLE IF NOT EXISTS `feedback` (
   `text` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user` (`user`,`user_type`,`report_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=49 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=57 ;
 
+DROP TABLE IF EXISTS `files`;
 CREATE TABLE IF NOT EXISTS `files` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `submission_id` int(10) unsigned NOT NULL,
@@ -87,8 +102,9 @@ CREATE TABLE IF NOT EXISTS `files` (
   `mime` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `submission_id` (`submission_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1978 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2129 ;
 
+DROP TABLE IF EXISTS `files-teachers`;
 CREATE TABLE IF NOT EXISTS `files-teachers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `assignment_id` int(10) unsigned NOT NULL,
@@ -97,8 +113,9 @@ CREATE TABLE IF NOT EXISTS `files-teachers` (
   `mime` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `assignment_id` (`assignment_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=39 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=59 ;
 
+DROP TABLE IF EXISTS `results`;
 CREATE TABLE IF NOT EXISTS `results` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `submission_id` int(11) NOT NULL,
@@ -107,6 +124,7 @@ CREATE TABLE IF NOT EXISTS `results` (
   UNIQUE KEY `id` (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
+DROP TABLE IF EXISTS `sections`;
 CREATE TABLE IF NOT EXISTS `sections` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `teacher_id` int(10) unsigned NOT NULL,
@@ -115,26 +133,30 @@ CREATE TABLE IF NOT EXISTS `sections` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
   KEY `teacher_id` (`teacher_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=125 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=130 ;
 
+DROP TABLE IF EXISTS `sessions-assistants`;
 CREATE TABLE IF NOT EXISTS `sessions-assistants` (
   `id` int(10) unsigned NOT NULL,
   `hash` varchar(40) NOT NULL,
   UNIQUE KEY `hash` (`hash`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `sessions-students`;
 CREATE TABLE IF NOT EXISTS `sessions-students` (
   `id` int(10) unsigned NOT NULL,
   `hash` varchar(40) NOT NULL,
   UNIQUE KEY `hash` (`hash`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `sessions-teachers`;
 CREATE TABLE IF NOT EXISTS `sessions-teachers` (
   `id` int(10) unsigned NOT NULL,
   `hash` varchar(40) NOT NULL,
   UNIQUE KEY `hash` (`hash`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `students`;
 CREATE TABLE IF NOT EXISTS `students` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user` varchar(255) NOT NULL,
@@ -144,8 +166,9 @@ CREATE TABLE IF NOT EXISTS `students` (
   `pass_reset_hash` varchar(40) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user` (`user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=342 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=382 ;
 
+DROP TABLE IF EXISTS `submissions`;
 CREATE TABLE IF NOT EXISTS `submissions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `assignment_id` int(10) unsigned NOT NULL,
@@ -155,8 +178,9 @@ CREATE TABLE IF NOT EXISTS `submissions` (
   `main` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `assignment_id` (`assignment_id`,`student_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1103 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1187 ;
 
+DROP TABLE IF EXISTS `teachers`;
 CREATE TABLE IF NOT EXISTS `teachers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user` varchar(255) NOT NULL,
@@ -166,8 +190,9 @@ CREATE TABLE IF NOT EXISTS `teachers` (
   `pass_reset_hash` varchar(40) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user` (`user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=119 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=126 ;
 
+DROP TABLE IF EXISTS `test-case-results`;
 CREATE TABLE IF NOT EXISTS `test-case-results` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `submission_id` int(10) unsigned NOT NULL,
@@ -175,8 +200,9 @@ CREATE TABLE IF NOT EXISTS `test-case-results` (
   `result` text NOT NULL,
   `pass` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=155 ;
 
+DROP TABLE IF EXISTS `test-cases`;
 CREATE TABLE IF NOT EXISTS `test-cases` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `assignment_id` int(11) NOT NULL,
@@ -184,5 +210,8 @@ CREATE TABLE IF NOT EXISTS `test-cases` (
   `output` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=150 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=182 ;
 
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
