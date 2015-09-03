@@ -3,7 +3,7 @@ var async = require('async');
 var exec = require('child_process').exec; // for running bash commands
 var fs = require('fs-extra');
 
-module.exports.setupDirectory = function(files, callback) {
+var setupDirectory = module.exports.setupDirectory = function(files, callback) {
   var grouped = _.groupBy(files, 'student_id');
   var studentIds = _.keys(grouped);
   async.map(studentIds, function(studentId, studentCb) {
@@ -65,11 +65,11 @@ var execute = module.exports.execute = function(uniqueId, toExecute, input, call
   child.stdin.end(); // forces java process to end at end of stdin (otherwise it would just wait if more input was needed)
 };
 
-module.exports.cleanup = function(uniqueId, callback) {
+var cleanup = module.exports.cleanup = function(uniqueId, callback) {
   fs.remove('temp/' + uniqueId + '/', callback);
 };
 
-module.exports.runTests = function(uniqueId, main, submissionId, tests, callback) {
+var runTests = module.exports.runTests = function(uniqueId, main, submissionId, tests, callback) {
   connection.query("DELETE FROM `test-case-results` WHERE `submission_id` = ?", [submissionId], function(err) {
     if (err) return callback(err);
 
@@ -87,3 +87,37 @@ module.exports.runTests = function(uniqueId, main, submissionId, tests, callback
     }, callback);
   });
 };
+
+module.exports.runTestsForAssignment = function(assignmentId, callback) { 
+  connection.query("SELECT \
+                      `files`.`name`,`files`.`contents`,`files`.`compiled`,`files`.`mime`,`submissions`.`student_id`,`submissions`.`main`,`submissions`.`id` AS `subId` \
+                    FROM `submissions`,`files` \
+                    WHERE `submissions`.`id` = `files`.`submission_id` \
+                    AND `submissions`.`assignment_id` = ?", [assignmentId], function(err, files) {
+    if (err) return callback(err);
+
+    connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [assignmentId], function(err, tests) {
+      if (err) return callback(err);
+
+      setupDirectory(files, function(err, uniqueIds) {
+        if (err) return callback(err);
+
+        var grouped = _.groupBy(files, 'student_id');
+        async.forEachOf(uniqueIds, function(uniqueId, studentId, cb) {
+          var main = grouped[studentId][0].main;
+          if (!main) {
+            return cleanup(uniqueId, cb);
+          }
+          main = main.substring(0, main.length - 5);
+          var submissionId = grouped[studentId][0].subId;
+
+          runTests(uniqueId, main, submissionId, tests, function(err) {
+            if (err) return cb(err);
+
+            cleanup(uniqueId, cb);
+          });
+        }, callback);
+      });
+    });
+  });
+}

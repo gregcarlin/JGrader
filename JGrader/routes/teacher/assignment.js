@@ -452,7 +452,15 @@ router.get('/:id/testCase/delete/:testID', function(req, res, next) {
       return next(err);
     }
 
-    res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+    codeRunner.runTestsForAssignment(req.params.id, function(err) {
+      if (err) {
+        render('notFound', {error: 'The server was unable to delete the test case. Please try again.'}, res);
+        err.handled = true;
+        return next(err);
+      }
+
+      res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+    });
   });
 });
 
@@ -481,7 +489,15 @@ router.post('/:id/caseCreate', function(req, res, next) {
           return next(err);
         }
 
-        res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+        codeRunner.runTestsForAssignment(req.params.id, function(err) {
+          if (err) {
+            render('notFound', {error: 'The server was unable to create the test case. Please try again.'}, res);
+            err.handled = true;
+            return next(err);
+          }
+
+          res.redirect('/teacher/assignment/' + req.params.id + '/testCase');
+        });
       });
     } else {
       // not enough data sent, don't add any cases and just redirect
@@ -494,50 +510,11 @@ router.post('/:id/caseCreate', function(req, res, next) {
 });
 
 router.get('/:id/runTestCases', function(req, res, next) {
-  runAllTests(req.params.id, function(err) {
+  codeRunner.runTestsForAssignment(req.params.id, function(err) {
     if (err) return next(err);
 
     res.redirect('/teacher/assignment/' + req.params.id);
   });
 });
-
-var runAllTests = function(assignmentId, callback) { 
-  connection.query("SELECT \
-                      `files`.`name`,`files`.`contents`,`files`.`compiled`,`files`.`mime`,`submissions`.`student_id`,`submissions`.`main`,`submissions`.`id` AS `subId` \
-                    FROM `submissions`,`files` \
-                    WHERE `submissions`.`id` = `files`.`submission_id` \
-                    AND `submissions`.`assignment_id` = ?", [assignmentId], function(err, files) {
-    if (err) return callback(err);
-
-    connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [assignmentId], function(err, tests) {
-      if (err) return callback(err);
-
-      codeRunner.setupDirectory(files, function(err, uniqueIds) {
-        if (err) return callback(err);
-
-        var grouped = _.groupBy(files, 'student_id');
-        async.forEachOf(uniqueIds, function(uniqueId, studentId, cb) {
-          var main = grouped[studentId][0].main;
-          if (!main) {
-            return codeRunner.cleanup(uniqueId, cb);
-          }
-          main = main.substring(0, main.length - 5);
-          var submissionId = grouped[studentId][0].subId;
-
-          codeRunner.runTests(uniqueId, main, submissionId, tests, function(err) {
-            if (err) return cb(err);
-
-            codeRunner.cleanup(uniqueId, cb);
-          });
-        }, callback);
-      });
-    });
-  });
-}
-
-/*var runTests = function(assignmentId, cb) {
-  connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [assignmentId], function(err, tests) {
-  });
-}*/
 
 module.exports = router;
