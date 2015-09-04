@@ -1,12 +1,11 @@
-var url = document.URL;
-var lastChar = url.charAt(url.length-1);
-if(lastChar == '#') {
-  url = url.substring(0, url.length - 1) + '/';
-} else if(lastChar != '/') {
-  url += '/';
-}
+var URL = function() {
+  var base = location.protocol + '//' + location.host + location.pathname;
+  if (base.substring(base.length - 1) != '/') base += '/';
+  return base;
+};
+
 $('#dropzone').dropzone({
-  url: url + 'add',
+  url: URL() + 'add',
   clickable: '#dropzone a',
   previewTemplate: '<span class="fa fa-spinner fa-spin"></span>',
   init: function() {

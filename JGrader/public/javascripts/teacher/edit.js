@@ -1,6 +1,12 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
+var URL = function() {
+  var base = location.protocol + '//' + location.host + location.pathname;
+  if (base.substring(base.length - 1) != '/') base += '/';
+  return base;
+};
+
 // http://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string
 if (typeof String.prototype.startsWith != 'function') {
   String.prototype.startsWith = function (str){
@@ -61,9 +67,7 @@ $('.edit').each(function(index, element) {
 
     var text = input.val();
     if(par.attr('data-default') != 'none' || text.length > 0) {
-      var url = document.URL;
-      if(url.charAt(url.length-1) != '/') url += '/';
-      $.post(url + par.attr('data-key') + '/' + text.replace(new RegExp('/', 'g'), '-'), '', function(data, textStatus, jqXHR) {
+      $.post(URL() + par.attr('data-key') + '/' + text.replace(new RegExp('/', 'g'), '-'), '', function(data, textStatus, jqXHR) {
         var code = data.code;
         if(code == 0) {
           // success, update text

@@ -1,3 +1,9 @@
+var URL = function() {
+  var base = location.protocol + '//' + location.host + location.pathname;
+  if (base.substring(base.length - 1) != '/') base += '/';
+  return base;
+};
+
 var getLineLi = function(tab, line) {
   return $($('ol.comments li', $('.tab-pane').get(tab)).get(line));
 };
@@ -29,9 +35,7 @@ var submitComment = function(tab, line) {
   } else {
     var innerComment = $('.comment-text', lineLi);
     innerComment.html('<span class="fa fa-spinner fa-spin"></span> Posting');
-    var url = document.URL;
-    if(url.charAt(url.length-1) != '/') url += '/';
-    $.post(url + 'comment', {tab: tab, line: line, text: text}, function(data, textStatus, jqXHR) {
+    $.post(URL() + 'comment', {tab: tab, line: line, text: text}, function(data, textStatus, jqXHR) {
       if(data.code == 0) {
         innerComment.remove();
         delete data.code;
@@ -121,9 +125,7 @@ var submitEditComment = function(id) {
   $('#comment-' + id).append('<span class="fa fa-spinner fa-spin"></span>');
   var text = $('#comment-' + id + ' .edit textarea').val();
   $('#comment-' + id + ' .edit').remove(); // remove text area and stuff
-  var url = document.URL;
-  if(url.charAt(url.length-1) != '/') url += '/';
-  $.post(url + 'comment/' + id + '/edit', {text: text}, function(data, textStatus, jqXHR) {
+  $.post(URL() + 'comment/' + id + '/edit', {text: text}, function(data, textStatus, jqXHR) {
     if(data.code != 0) {
       alert('An error has occurred. Please reload the page.');
     } else {
@@ -135,10 +137,8 @@ var submitEditComment = function(id) {
 };
 
 var deleteComment = function(id) {
-  var url = document.URL;
-  if(url.charAt(url.length-1) != '/') url += '/';
   $('#comment-' + id).html('<span class="fa fa-spinner fa-spin"></span>');
-  $.post(url + 'comment/' + id + '/delete', '', function(data, textStatus, jqXHR) {
+  $.post(URL() + 'comment/' + id + '/delete', '', function(data, textStatus, jqXHR) {
     if(data.code == -1) {
       alert('An error has occurred. Please reload the page.');
     } else {
@@ -159,9 +159,7 @@ $(document).ready(function() {
   });
 
   // retrieve and display comments
-  var url = document.URL;
-  if(url.charAt(url.length-1) != '/') url += '/';
-  $.get(url + 'comment/', {}, function(data, textStatus, jqXHR) {
+  $.get(URL() + 'comment/', {}, function(data, textStatus, jqXHR) {
     if(data.code != 0) {
       var lio = getLineLi(0,0);
       lio.append('<div class="comment">Error retrieving comments</div>');

@@ -1,6 +1,12 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
+var URL = function() {
+  var base = location.protocol + '//' + location.host + location.pathname;
+  if (base.substring(base.length - 1) != '/') base += '/';
+  return base;
+};
+
 $('#input-expand').click(function() {
   var inputExpand = $('#input-expand');
   inputExpand.toggleClass('fa-caret-square-o-right');
@@ -13,9 +19,7 @@ $('#execute').click(function() {
   if(!disabled) {
     $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>');
     var fileID = $('.tab-content .active').attr('id');
-    var url = document.URL;
-    if(url.charAt(url.length-1) != '/') url += '/';
-    $.post(url + 'run/' + fileID, {stdin: $('#input-text').val()}, function(data, textStatus, jqXHR) {
+    $.post(URL() + 'run/' + fileID, {stdin: $('#input-text').val()}, function(data, textStatus, jqXHR) {
       if(data.code == 0) {
         $('#output-text').html(data.out + '\n\n<span class="stderr">' + data.err + '</span>');
       } else {
@@ -27,9 +31,7 @@ $('#execute').click(function() {
 
 $('#download').click(function() {
   var fileID = $('.tab-content .active').attr('id');
-  var url = document.URL;
-  if(url.charAt(url.length-1) != '/') url += '/';
-  var win = window.open(url + 'download/' + fileID, '_blank');
+  var win = window.open(URL() + 'download/' + fileID, '_blank');
   win.focus();
 });
 
@@ -37,9 +39,7 @@ $('#test').click(function() {
   if(!disabled) {
     $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>');
     var fileID = $('.tab-content .active').attr('id');
-    var url = document.URL;
-    if(url.charAt(url.length-1) != '/') url += '/';
-    $.get(url + 'test/' + fileID, {}, function(data, textStatus, jqXHR) {
+    $.get(URL() + 'test/' + fileID, {}, function(data, textStatus, jqXHR) {
       switch(data.code) {
         case -1:
         case 1:
