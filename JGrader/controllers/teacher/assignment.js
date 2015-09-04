@@ -32,7 +32,11 @@ module.exports.create = function(teacherId, sectionId, name, desc, due, files, n
       connection.query(query, params, next);
     });
   });
-}
+};
+
+module.exports.remove = function(assignmentId, callback) {
+  connection.query('DELETE FROM `assignments` WHERE `id` = ? LIMIT 1', [assignmentId], callback);
+};
 
 module.exports.addFile = function(assignmentId, file, callback) {
   connection.query("SELECT COUNT(*) as `count` FROM `submissions` WHERE `assignment_id` = ?", [assignmentId], function(err, result) {

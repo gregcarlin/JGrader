@@ -330,7 +330,7 @@ router.post('/:id/updatedue/:due', function(req, res, next) {
 });
 
 router.get('/:id/delete', function(req, res, next) {
-  connection.query('DELETE FROM `assignments` WHERE `id` = ? LIMIT 1', [req.params.id], function(err, rows) {
+  assignment.remove(req.params.id, function(err) {
     if (err) {
       render('notFound', {error: 'Unable to delete assignment. Please go back and try again.'}, res);
       err.handled = true;

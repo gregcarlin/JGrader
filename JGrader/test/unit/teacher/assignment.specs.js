@@ -171,4 +171,53 @@ describe('Assignment', function() {
       assert.equal(due.getSeconds(), 0);
     });
   });
+
+  describe('Remove', function() {
+    var teacherId = _.uniqueId();
+    var sectionId;
+    var assignmentId;
+    var preAssignment;
+    var postAssignment;
+
+    before(function(done) {
+      async.series([
+        function(cb) {
+          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test Class', 'abcde'], function(err, result) {
+            if (err) return cb(err);
+            sectionId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, NULL)", [sectionId, 'Blah assignment'], function(err, result) {
+            if (err) return cb(err);
+            assignmentId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          connection.query("SELECT * FROM `assignments` WHERE `id` = ?", [assignmentId], function(err, assignments) {
+            preAssignment = assignments;
+            cb(err);
+          });
+        },
+        function(cb) {
+          assignment.remove(assignmentId, cb);
+        },
+        function(cb) {
+          connection.query("SELECT * FROM `assignments` WHERE `id` = ?", [assignmentId], function(err, assignments) {
+            postAssignment = assignments;
+            cb(err);
+          });
+        }
+      ], done);
+    });
+
+    it('should remove the created assignment', function() {
+      assert(preAssignment);
+      assert.equal(preAssignment.length, 1);
+      assert(postAssignment);
+      assert.equal(postAssignment.length, 0);
+    });
+  });
 });
