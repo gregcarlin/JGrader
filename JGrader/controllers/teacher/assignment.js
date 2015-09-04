@@ -73,3 +73,13 @@ module.exports.removeFile = function(assignmentId, file, callback) {
     }
   });
 };
+
+module.exports.setDescription = function(assignmentId, description, callback) {
+  if (description.startsWith('<em>')) {
+    var err = new Error();
+    err.code = 1; // invalid input
+    return callback(err);
+  }
+
+  connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ?", [description, assignmentId], callback);
+};

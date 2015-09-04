@@ -113,4 +113,45 @@ describe('Assignment', function() {
       assert.equal(postFiles.length, 0);
     });
   });
+
+  describe('Set description', function() {
+    var teacherId = _.uniqueId();
+    var sectionId;
+    var assignmentId;
+    var assignmentData;
+
+    before(function(done) {
+      async.series([
+        function(cb) {
+          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test Class', '19q3a'], function(err, result) {
+            if (err) return cb(err);
+            sectionId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, NULL)", [sectionId, 'Blah assignment'], function(err, result) {
+            if (err) return cb(err);
+            assignmentId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          assignment.setDescription(assignmentId, 'new description', cb);
+        },
+        function(cb) {
+          connection.query("SELECT * FROM `assignments` WHERE `id` = ?", [assignmentId], function(err, _assignment) {
+            assignmentData = _assignment;
+            cb(err);
+          });
+        }
+      ], done);
+    });
+
+    it('should set the assignment\'s description', function() {
+      assert(assignmentData);
+      assert.equal(assignmentData.length, 1);
+      assert.equal(assignmentData[0].description, 'new description');
+    });
+  });
 });

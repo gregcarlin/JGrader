@@ -293,18 +293,14 @@ router.post('/:id/add', function(req, res, next) {
 
 // update description
 router.post('/:id/updatedesc/:desc', function(req, res, next) {
-  if (req.params.desc.startsWith('<em>')) {
-    return res.json({code: 1}); // invalid input
-  }
-
-  connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ?", [req.params.desc, req.params.id], function(err, rows) {
+  assignment.setDescription(req.params.id, req.params.desc, function(err) {
     if (err) {
-      res.json({code: -1}); // unknown error
+      res.json({code: (err.code || -1)});
       err.handled = true;
       return next(err);
     }
 
-    res.json({code: 0, newValue: req.params.desc}); // success
+    res.json({code: 0, newValue: req.params.desc});
   });
 });
 
