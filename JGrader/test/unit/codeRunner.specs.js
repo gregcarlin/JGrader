@@ -1,12 +1,9 @@
-var creds = require('../../routes/credentials');
-creds.mysql_db = 'Jgrader-test';
-require('../../routes/common');
 var codeRunner = require('../../controllers/codeRunner');
 var fs = require('fs-extra');
 var assert = require('assert');
 var _ = require('lodash');
 
-describe('codeRunner unit tests', function() {
+describe('codeRunner', function() {
   describe('setupDirectory and cleanup', function() {
     var files = require('../data/files');
     var uniqueId;

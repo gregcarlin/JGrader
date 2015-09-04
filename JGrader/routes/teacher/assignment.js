@@ -9,6 +9,7 @@ var async = require('async');
 var _ = require('lodash');
 
 var codeRunner = require('../../controllers/codeRunner');
+var assignment = require('../../controllers/teacher/assignment');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -130,61 +131,20 @@ router.post('/create', function(req, res, next) {
     });
   } else {
     async.each(secs, function(sec, cb) {
-      createAssignment(req.user.id, sec, res, name, desc, due, req.files, cb);
+      assignment.create(req.user.id, sec, name, desc, due, req.files, cb);
     }, function(err) {
-      if (err) return next(err);
+      if (err && !err.userMessage) return next(err);
+
+      if (err) {
+        render('assignmentCreate', {error: err.userMessage, name: name, desc: desc, due: due}, res);
+        err.handled = true;
+        return next(err);
+      }
 
       res.redirect('/teacher/assignment');
     });
   }
 });
-
-var createAssignment = function(teacherID, sectionID, res, name, desc, due, files, next) {
-  // verify that teacher owns this section
-  connection.query("SELECT (SELECT `teacher_id` FROM `sections` WHERE `id` = ?) = ? AS `result`", [sectionID, teacherID], function(err, rows) {
-    if (err) {
-      render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
-      err.handled = true;
-      return next(err);
-    }
-
-    if (!rows[0].result) {
-      render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
-    } else {
-      if (!desc || desc.length <= 0) desc = null;
-      connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)", [sectionID, name, desc, due], function(err, rows) {
-        if (err) {
-          render('assignmentCreate', {error: 'Invalid due date.', name: name, desc: desc, due: due}, res); // probably an invalid due date. i think.
-          err.handled = true;
-          return next(err);
-        }
-
-        var assignmentID = rows.insertId;
-        // insert files into db
-        var query = "INSERT INTO `files-teachers` VALUES";
-        var params = [];
-        for (var i in files) {
-          query += "(NULL, ?, ?, ?, ?),";
-          params.push(assignmentID, files[i].name, files[i].buffer, files[i].mimetype);
-        }
-        if (params.length > 0) {
-          query = query.substring(0, query.length-1);
-          connection.query(query, params, function(err, result) {
-            if (err) {
-              render('assignmentCreate', {error: 'An unexpected error has occurred.', name: name, desc: desc, due: due}, res);
-              err.handled = true;
-              return next(err);
-            }
-
-            next();
-          });
-        } else {
-          next();
-        }
-      });
-    }
-  });
-}
 
 router.use('/:id', function(req, res, next) {
   connection.query({
