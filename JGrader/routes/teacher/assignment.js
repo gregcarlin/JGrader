@@ -318,9 +318,9 @@ router.post('/:id/updatedesc', function(req, res, next) {
 });
 
 router.post('/:id/updatedue/:due', function(req, res, next) {
-  connection.query("UPDATE `assignments` SET `due` = ? WHERE `id` = ?", [req.params.due, req.params.id], function(err, rows) {
+  assignment.setDue(req.params.id, req.params.due, function(err) {
     if (err) {
-      res.json({code: -1}); // unknown error
+      res.json({code: (err.code || -1)}); // unknown error
       err.handled = true;
       return next(err);
     }

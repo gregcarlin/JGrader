@@ -83,3 +83,7 @@ module.exports.setDescription = function(assignmentId, description, callback) {
 
   connection.query("UPDATE `assignments` SET `description` = ? WHERE `id` = ?", [description, assignmentId], callback);
 };
+
+module.exports.setDue = function(assignmentId, due, callback) {
+  connection.query("UPDATE `assignments` SET `due` = ? WHERE `id` = ?", [due, assignmentId], callback);
+};

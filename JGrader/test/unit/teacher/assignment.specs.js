@@ -114,7 +114,7 @@ describe('Assignment', function() {
     });
   });
 
-  describe('Set description', function() {
+  describe('Set description and due date', function() {
     var teacherId = _.uniqueId();
     var sectionId;
     var assignmentId;
@@ -140,6 +140,9 @@ describe('Assignment', function() {
           assignment.setDescription(assignmentId, 'new description', cb);
         },
         function(cb) {
+          assignment.setDue(assignmentId, '2015/09/17 21:23', cb);
+        },
+        function(cb) {
           connection.query("SELECT * FROM `assignments` WHERE `id` = ?", [assignmentId], function(err, _assignment) {
             assignmentData = _assignment;
             cb(err);
@@ -148,10 +151,24 @@ describe('Assignment', function() {
       ], done);
     });
 
-    it('should set the assignment\'s description', function() {
+    it('should not encounter issues', function() {
       assert(assignmentData);
       assert.equal(assignmentData.length, 1);
+    });
+
+    it('should set the assignment\'s description', function() {
       assert.equal(assignmentData[0].description, 'new description');
+    });
+
+    it('should set the assignment\'s due date', function() {
+      var due = assignmentData[0].due;
+      assert(due);
+      assert.equal(due.getDate(), 17);
+      assert.equal(due.getDay(), 4);
+      assert.equal(due.getFullYear(), 2015);
+      assert.equal(due.getHours(), 21);
+      assert.equal(due.getMinutes(), 23);
+      assert.equal(due.getSeconds(), 0);
     });
   });
 });
