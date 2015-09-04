@@ -256,26 +256,17 @@ router.get('/:id', function(req, res, next) {
 
 // detach a file from this assignment
 router.get('/:id/remove/:file', function(req, res, next) {
-  connection.query("SELECT COUNT(*) as `count` FROM `submissions` WHERE `assignment_id` = ?", [req.params.id], function(err, result) {
+  assignment.removeFile(req.params.id, req.params.file, function(err) {
     if (err) {
-      res.redirect('/teacher/assignment/' + req.params.id + '?error=' + req.params.file + ' could not be removed. Please reload the page and try again.');
+      if (!err.userMessage) {
+        err.userMessage = req.params.file + ' could not be removed. Please reload the page and try again.';
+      }
+      res.redirect('/teacher/assignment/' + req.params.id + '?error=' + err.userMessage);
       err.handled = true;
       return next(err);
     }
 
-    if (result[0].count > 0) {
-      res.redirect('/teacher/assignment/' + req.params.id + '?error=You cannot remove files after students have already submitted code.');
-    } else {
-      connection.query("DELETE FROM `files-teachers` WHERE `assignment_id` = ? AND `name` = ?", [req.params.id, req.params.file], function(err, result) {
-        if (err) {
-          res.redirect('/teacher/assignment/' + req.params.id + '?error=' + req.params.file + ' could not be removed. Please reload the page and try again.');
-          err.handled = true;
-          return next(err);
-        }
-
-        res.redirect('/teacher/assignment/' + req.params.id + '?success=' + req.params.file + ' has been removed.');
-      });
-    }
+    res.redirect('/teacher/assignment/' + req.params.id + '?success=' + req.params.file + ' has been removed.');
   });
 });
 
@@ -289,41 +280,14 @@ router.use('/:id/add', multer({
 
 // add a new file to this assignment
 router.post('/:id/add', function(req, res, next) {
-  connection.query("SELECT COUNT(*) as `count` FROM `submissions` WHERE `assignment_id` = ?", [req.params.id], function(err, result) {
+  assignment.addFile(req.params.id, req.files.file, function(err) {
     if (err) {
-      res.json({code: -1});
+      res.json({code: (err.code || -1)});
       err.handled = true;
       return next(err);
     }
 
-    if (result[0].count > 0) {
-      res.json({code: 1});
-    } else {
-      connection.query("SELECT `name` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, result) {
-        if (err) {
-          res.json({code: -1});
-          err.handled = true;
-          return next(err);
-        }
-
-        _.each(result, function(r) {
-          if (r.name == req.files['file'].name) {
-            res.json({code: 2});
-            return;
-          }
-        });
-
-        connection.query("INSERT INTO `files-teachers` VALUES(NULL,?,?,?,?)", [req.params.id, req.files['file'].name, req.files['file'].buffer, req.files['file'].mimetype], function(err, result) {
-          if (err) {
-            res.json({code: -1});
-            err.handled = true;
-            return next(err);
-          }
-
-          res.json({code: 0});
-        });
-      });
-    }
+    res.json({code: 0});
   });
 });
 

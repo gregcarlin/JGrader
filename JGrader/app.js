@@ -59,8 +59,8 @@ app.use(function(req, res, next) {
 
 // takes post variables success and error (in url query) and passes them to ejs for rendering
 app.use(function(req, res, next) {
-  if(req.query.error) res.locals.error = req.query.error;
-  if(req.query.success) res.locals.success = req.query.success;
+  if (req.query.error) res.locals.error = req.query.error;
+  if (req.query.success) res.locals.success = req.query.success;
   next();
 });
 
@@ -79,7 +79,9 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  if(err.handled) {
+  if (err.userMessage) return; // user error, no need to report
+
+  if (err.handled) {
     console.error(err);
     console.error(err.stack);
   } else {

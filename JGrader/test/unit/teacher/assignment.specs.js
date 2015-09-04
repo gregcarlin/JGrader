@@ -6,6 +6,20 @@ require('../../../routes/common');
 var assignment = require('../../../controllers/teacher/assignment');
 
 describe('Assignment', function() {
+  before(function(done) {
+    async.parallel([
+      function(cb) {
+        connection.query("TRUNCATE `sections`", cb);
+      },
+      function(cb) {
+        connection.query("TRUNCATE `assignments`", cb);
+      },
+      function(cb) {
+        connection.query("TRUNCATE `files-teachers`", cb);
+      }
+    ], done);
+  });
+
   describe('Create', function() {
     var teacherId = _.uniqueId();
     var sectionId;
@@ -13,12 +27,6 @@ describe('Assignment', function() {
 
     before(function(done) {
       async.series([
-        function(cb) {
-          connection.query("TRUNCATE `sections`", cb);
-        },
-        function(cb) {
-          connection.query("TRUNCATE `assignments`", cb);
-        },
         function(cb) {
           connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test Class', '12345'], function(err, result) {
             if (err) return cb(err);
@@ -43,6 +51,66 @@ describe('Assignment', function() {
       assert(assignments);
       assert.equal(assignments.length, 1);
       assert.equal(assignments[0].name, 'Test Assignment');
+    });
+  });
+
+  describe('Add and remove teacher files', function() {
+    var teacherId = _.uniqueId();
+    var sectionId;
+    var assignmentId;
+    var preFiles;
+    var postFiles;
+
+    before(function(done) {
+      async.series([
+        function(cb) {
+          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test Class', '87189'], function(err, result) {
+            if (err) return cb(err);
+            sectionId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, NULL)", [sectionId, 'Blah blah assignment'], function(err, result) {
+            if (err) return cb(err);
+            assignmentId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          assignment.addFile(assignmentId, {
+            name: 'Test_file.txt',
+            buffer: new Buffer('test contents'),
+            mimetype: 'text/plain'
+          }, cb);
+        },
+        function(cb) {
+          connection.query("SELECT * FROM `files-teachers` WHERE `assignment_id` = ?", [assignmentId], function(err, files) {
+            preFiles = files;
+            cb(err);
+          });
+        },
+        function(cb) {
+          assignment.removeFile(assignmentId, 'Test_file.txt', cb);
+        },
+        function(cb) {
+          connection.query("SELECT * FROM `files-teachers` WHERE `assignment_id` = ?", [assignmentId], function(err, files) {
+            postFiles = files;
+            cb(err);
+          });
+        }
+      ], done);
+    });
+
+    it('should add a file without issue', function() {
+      assert(preFiles);
+      assert.equal(preFiles.length, 1);
+      assert.equal(preFiles[0].name, 'Test_file.txt');
+    });
+
+    it('should remove a file without issue', function() {
+      assert(postFiles);
+      assert.equal(postFiles.length, 0);
     });
   });
 });
