@@ -310,7 +310,7 @@ router.get('/:id', function(req, res, next) {
     render('student', {
       title: name,
       name: name,
-      rows: rows
+      rows: rows,
       id: req.params.id
     }, res);
   });
