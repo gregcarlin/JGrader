@@ -1,0 +1,20 @@
+{
+  "excludeFiles": [
+    "coverage/**",
+    "public/javascripts/bootstrap.min.js",
+    "public/javascripts/ie10-viewport-bug-workaround.js",
+    "public/javascripts/dropzone.js",
+    "public/javascripts/jquery-2.1.1.min.js",
+    "public/javascripts/strftime-min.js",
+    "public/javascripts/prettify.js",
+    "public/javascripts/stupidtable.min.js",
+    "public/javascripts/teacher/jquery.datetimepicker.js"
+  ],
+  "preset": "google",
+  "disallowSpacesInsideObjectBrackets": false,
+  "requireCamelCaseOrUpperCaseIdentifiers": false,
+  "disallowMultipleLineStrings": false,
+  "validateQuoteMarks": false,
+  "disallowSpaceAfterObjectKeys": false,
+  "requireCurlyBraces": false
+}

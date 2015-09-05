@@ -40,7 +40,7 @@ describe('codeRunner', function() {
       assert(uniqueId);
     });
 
-    it('should save the given files', function () {
+    it('should save the given files', function() {
       assert.equal(files.length, savedFiles.length);
       _.each(files, function(file) {
         assert(_.contains(savedFiles, file.name));
@@ -66,7 +66,8 @@ describe('codeRunner', function() {
           fs.copy('test/data/Hello.class', 'temp/test/Hello.class', cb);
         },
         function(cb) {
-          codeRunner.execute('test', 'Hello', null, function(err, _stdout, _stderr, _overTime) {
+          codeRunner.execute('test', 'Hello', null,
+                             function(err, _stdout, _stderr, _overTime) {
             stdout = _stdout;
             stderr = _stderr;
             overTime = _overTime;

@@ -7,7 +7,7 @@ var strftime = require('strftime');
 
 var render = function(page, options, res) {
   options.page = 0;
-  switch(page) {
+  switch (page) {
     case 'notFound':
       options.title = 'Class Not Found';
       options.type = 'class';
@@ -29,7 +29,7 @@ var render = function(page, options, res) {
       break;
   }
   renderGenericStudent(page, options, res);
-}
+};
 
 // Lists all of the current sections (classes)
 router.get('/', function(req, res, next) {
@@ -52,7 +52,8 @@ var findSectionInfo = function(id, res, next, finish) {
                       WHERE \
                         `enrollment`.`section_id` = `sections`.`id` AND \
                         `sections`.`teacher_id` = `teachers`.`id` AND \
-                        `enrollment`.`student_id` = ?", [id], function(err, rows) {
+                        `enrollment`.`student_id` = ?",
+                      [id], function(err, rows) {
       if (err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         err.handled = true;
@@ -62,7 +63,7 @@ var findSectionInfo = function(id, res, next, finish) {
       finish(rows);
     });
   }
-}
+};
 
 // Asks user for class password
 router.get('/joinSection', function(req, res, next) {
@@ -78,7 +79,8 @@ router.get('/joinSection/:code', function(req, res, next) {
 router.post('/joinSection', function(req, res, next) {
   var sectionID = req.body.sectionID;
   if (isSet(sectionID)) {
-    connection.query("SELECT `id` FROM `sections` WHERE `code` = ?", [sectionID], function(err, rows) {
+    connection.query("SELECT `id` FROM `sections` \
+                      WHERE `code` = ?", [sectionID], function(err, rows) {
       if (err) {
         render('joinSection', {error: 'An unknown error has occurred.'}, res);
         err.handled = true;
@@ -88,19 +90,29 @@ router.post('/joinSection', function(req, res, next) {
       if (rows.length <= 0) {
         render('joinSection', {error: 'That is not a valid class code.'}, res);
       } else {
-        connection.query("SELECT * FROM `enrollment` WHERE `student_id` = ? AND `section_id` = ?", [req.user.id, rows[0].id], function(err, result) {
+        connection.query("SELECT * FROM `enrollment` \
+                          WHERE `student_id` = ? AND `section_id` = ?",
+                          [req.user.id, rows[0].id], function(err, result) {
           if (err) {
-            render('joinSection', {error: 'An unknown error has occurred.'}, res);
+            render('joinSection', {
+              error: 'An unknown error has occurred.'
+            }, res);
             err.handled = true;
             return next(err);
           }
 
           if (result.length > 0) {
-            render('joinSection', {error: 'You are already enrolled in that class.'}, res);
+            render('joinSection', {
+              error: 'You are already enrolled in that class.'
+            }, res);
           } else {
-            connection.query("INSERT INTO `enrollment` VALUES(?, ?)", [rows[0].id, req.user.id], function(err, result) {
+            connection.query("INSERT INTO `enrollment` \
+                              VALUES(?, ?)",
+                              [rows[0].id, req.user.id], function(err, result) {
               if (err) {
-                render('joinSection', {error: 'An unknown error has occurred.'}, res);
+                render('joinSection', {
+                  error: 'An unknown error has occurred.'
+                }, res);
                 err.handled = true;
                 return next(err);
               }
@@ -117,7 +129,12 @@ router.post('/joinSection', function(req, res, next) {
 });
 
 router.use('/:id', function(req, res, next) {
-  connection.query("SELECT `sections`.* FROM `sections` JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `sections`.`id` = ? AND `enrollment`.`student_id` = ?", [req.params.id, req.user.id], function(err, result) {
+  connection.query("SELECT `sections`.* FROM `sections` \
+                    JOIN `enrollment` \
+                      ON `sections`.`id` = `enrollment`.`section_id` \
+                    WHERE `sections`.`id` = ? \
+                      AND `enrollment`.`student_id` = ?",
+                    [req.params.id, req.user.id], function(err, result) {
     if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
@@ -143,27 +160,37 @@ router.get('/:id', function(req, res, next) {
                       `submissions`.`submitted` \
                     FROM \
                       `assignments` \
-                      LEFT JOIN `submissions` ON `assignments`.`id` = `submissions`.`assignment_id` AND `submissions`.`student_id` = ? \
-                    WHERE `assignments`.`section_id` = ?", [req.user.id, req.params.id], function(err, rows) {
+                      LEFT JOIN `submissions` \
+                        ON `assignments`.`id` = `submissions`.`assignment_id` \
+                        AND `submissions`.`student_id` = ? \
+                    WHERE `assignments`.`section_id` = ?",
+                    [req.user.id, req.params.id], function(err, rows) {
     if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
       return next(err);
     }
 
-    render('section', {name: req.section.name, rows: rows, id: req.params.id}, res);
+    render('section', {
+      name: req.section.name,
+      rows: rows,
+      id: req.params.id
+    }, res);
   });
 });
 
 // drop a class
 router.get('/:id/delete', function(req, res, next) {
-  connection.query("DELETE FROM `enrollment` WHERE `section_id` = ? and `student_id` = ? LIMIT 1; \
+  connection.query("DELETE FROM `enrollment` \
+                      WHERE `section_id` = ? AND `student_id` = ? LIMIT 1; \
                     DELETE \
                       `submissions`,`files` \
                     FROM \
                       `submissions` \
-                      JOIN `files` ON `submissions`.`id` = `files`.`submission_id` \
-                    WHERE `student_id` = ?", [req.params.id, req.user.id, req.user.id], function(err) {
+                      JOIN `files` \
+                        ON `submissions`.`id` = `files`.`submission_id` \
+                    WHERE `student_id` = ?",
+                    [req.params.id, req.user.id, req.user.id], function(err) {
     if (err) return next(err);
 
     res.redirect('/student/section');

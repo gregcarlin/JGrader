@@ -19,7 +19,7 @@ $('#assign-create').dropzone({
     $('#submit-btn').click(function(e) {
       e.preventDefault();
       e.stopPropagation();
-      if(myDropzone.files.length > 0) {
+      if (myDropzone.files.length > 0) {
         myDropzone.processQueue();
       } else {
         $('#assign-create').submit();

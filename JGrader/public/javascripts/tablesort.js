@@ -14,7 +14,7 @@ $('thead .fa-sort').each(function(index, element) {
     me.addClass(next);
 
     // clean up button from last sort
-    if(lastSort >= 0 && lastSort != index) {
+    if (lastSort >= 0 && lastSort != index) {
       var last = $(elements[lastSort]);
       last.removeClass();
       last.addClass('fa');

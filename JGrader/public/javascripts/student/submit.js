@@ -20,7 +20,7 @@ var queryParams = function() {
   }
 
   return params;
-}
+};
 
 // hide submit button before any files are added
 $('.submit-assignment').hide();
@@ -54,12 +54,13 @@ var myDropzone = new Dropzone(document.querySelector(".drag-zone"), {
 
 var responded = false;
 myDropzone.on("success", function(file, response) {
-  if(responded) return; // we already alerted the user or whatever
+  if (responded) return; // we already alerted the user or whatever
   // fuck it, we're just going to alert errors
-  switch(response.code) {
+  switch (response.code) {
     case -1: // unknown error
     default: // we didn't handle something properly
-      alert('An unknown error has occurred. Please reload the page and try again.');
+      alert('An unknown error has occurred. ' +
+            'Please reload the page and try again.');
       break;
     case 0: // all good
       window.location.href = document.URL; // reload page
@@ -68,13 +69,18 @@ myDropzone.on("success", function(file, response) {
       alert('Your code could not be compiled. Please fix it and try again.');
       break;
     case 2: // invalid name
-      alert('Some of your files have invalid names. Only alphanumeric characters and periods are allowed, and names must contain at least 6 characters. Please rename one or more of your files and try again.');
+      alert('Some of your files have invalid names. ' +
+            'Only alphanumeric characters and periods are allowed, ' +
+            'and names must contain at least 6 characters. ' +
+            'Please rename one or more of your files and try again.');
       break;
     case 3: // already submitted
-      alert('You already submitted this!. Please reload the page and try again.');
+      alert('You already submitted this!. ' +
+            'Please reload the page and try again.');
       break;
     case 4: // no java files submitted
-      alert('You must submit at least one java file. Make sure they end in .java');
+      alert('You must submit at least one java file. ' +
+            'Make sure they end in .java');
       break;
     case 5: // duplicate names
       alert('No two files can share the same name.');
@@ -90,13 +96,14 @@ myDropzone.on("addedfile", function(file) {
 
 // hide submit button when all files are removed
 myDropzone.on("removedfile", function(file) {
-  if(myDropzone.files.length <= 0) {
+  if (myDropzone.files.length <= 0) {
     $('.submit-assignment').hide();
   }
 });
 
 // update total progress bar
-myDropzone.on("totaluploadprogress", function(uploadProgress, totalBytes, totalBytesSent) {
+myDropzone.on("totaluploadprogress",
+              function(uploadProgress, totalBytes, totalBytesSent) {
   $('.prog-total .progress-bar').css('width', uploadProgress + '%');
 });
 
@@ -111,7 +118,9 @@ myDropzone.on("sending", function(file) {
 // Hide the total progress bar when nothing is uploading anymore
 myDropzone.on("queuecomplete", function(progress) {
   $('.progress').hide();
-  $('#actions').html('<div class="alert alert-danger" role="alert"">Please <a href="">reload</a> the page in order to try again.</div>');
+  $('#actions').html('<div class="alert alert-danger" role="alert"">' +
+                     'Please <a href="">reload</a> the page in order to ' +
+                     'try again.</div>');
 });
 
 document.querySelector('button[type="submit"]').onclick = function() {

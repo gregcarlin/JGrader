@@ -10,9 +10,10 @@ var section    = require('./student/section');
 
 var render = function(page, options, res) {
   options.page = -1;
-  switch(page) {
+  switch (page) {
     case 'notFound':
-      options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1) + ' Not Found';
+      options.title = options.type.charAt(0).toUpperCase() +
+                      options.type.slice(1) + ' Not Found';
       break;
     case 'settings':
       options.title = 'Settings';
@@ -24,7 +25,7 @@ var render = function(page, options, res) {
   }
   page = '../' + page;
   renderGenericStudent(page, options, res);
-}
+};
 
 // automatically authenticate student for every page in this section
 router.use(function(req, res, next) {
@@ -45,9 +46,13 @@ router.use('/section', section);
 
 // settings page
 router.get('/settings', function(req, res, next) {
-  connection.query("SELECT `fname`,`lname`,`pass_reset_hash` FROM `students` WHERE `id` = ?", [req.user.id], function(err, rows) {
+  connection.query("SELECT `fname`,`lname`,`pass_reset_hash` FROM `students` \
+                    WHERE `id` = ?", [req.user.id], function(err, rows) {
     if (err) {
-      render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
+      render('notFound', {
+        type: 'settings',
+        error: 'An unexpected error has occurred.'
+      }, res);
       err.handled = true;
       return next(err);
     }
@@ -69,16 +74,27 @@ router.post('/settings', function(req, res, next) {
       if ((isSet(oldPass) || res.locals.mustResetPass) && isSet(newPass)) {
         var handler = function(err, rows) {
           if (err) {
-            render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
+            render('notFound', {
+              type: 'settings',
+              error: 'An unexpected error has occurred.'
+            }, res);
             err.handled = true;
             return next(err);
           }
 
           if (rows.affectedRows <= 0) {
-            render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
+            render('settings', {
+              fname: fname,
+              lname: lname,
+              error: 'Incorrect password.'
+            }, res);
           } else {
             res.locals.mustResetPass = false;
-            render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
+            render('settings', {
+              fname: fname,
+              lname: lname,
+              msg: 'Changes saved.'
+            }, res);
           }
         };
 
@@ -90,21 +106,34 @@ router.post('/settings', function(req, res, next) {
                                 `pass` = ?, \
                                 `pass_reset_hash` = NULL \
                               WHERE \
-                                `id` = ?", [fname, lname, hash, req.user.id], handler);
+                                `id` = ?",
+                              [fname, lname, hash, req.user.id], handler);
           } else {
-            connection.query("SELECT `pass` FROM `students` WHERE `id` = ?", [req.user.id], function(err, rows) {
+            connection.query("SELECT `pass` FROM `students` \
+                              WHERE `id` = ?",
+                              [req.user.id], function(err, rows) {
               if (err) {
-                render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
+                render('notFound', {
+                  type: 'settings',
+                  error: 'An unexpected error has occurred.'
+                }, res);
                 err.handled = true;
                 return next(err);
               }
 
               if (rows.length <= 0) {
-                render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
+                render('notFound', {
+                  type: 'settings',
+                  error: 'An unexpected error has occurred.'
+                }, res);
               } else {
-                bcrypt.compare(oldPass.toString(), rows[0].pass.toString(), function(err, result) {
+                bcrypt.compare(oldPass.toString(), rows[0].pass.toString(),
+                               function(err, result) {
                   if (err) {
-                    render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
+                    render('notFound', {
+                      type: 'settings',
+                      error: 'An unexpected error has occurred.'
+                    }, res);
                     err.handled = true;
                     return next(err);
                   }
@@ -116,9 +145,15 @@ router.post('/settings', function(req, res, next) {
                                         `pass` = ?, \
                                         `pass_reset_hash` = NULL \
                                       WHERE \
-                                        `id` = ?", [fname, lname, hash, req.user.id], handler);
+                                        `id` = ?",
+                                      [fname, lname, hash, req.user.id],
+                                      handler);
                   } else {
-                    render('settings', {fname: fname, lname: lname, error: 'Incorrect password.'}, res);
+                    render('settings', {
+                      fname: fname,
+                      lname: lname,
+                      error: 'Incorrect password.'
+                    }, res);
                   }
                 });
               }
@@ -126,23 +161,40 @@ router.post('/settings', function(req, res, next) {
           }
         });
       } else {
-        render('settings', {fname: fname, lname: lname, error: 'All fields are required to change your password.'}, res);
+        render('settings', {
+          fname: fname,
+          lname: lname,
+          error: 'All fields are required to change your password.'
+        }, res);
       }
     } else {
-      connection.query("UPDATE `students` SET `fname` = ?, `lname` = ? WHERE `id` = ?", [fname, lname, req.user.id], function(err) {
+      connection.query("UPDATE `students` SET `fname` = ?, `lname` = ? \
+                        WHERE `id` = ?",
+                        [fname, lname, req.user.id], function(err) {
         if (err) {
-          render('notFound', {type: 'settings', error: 'An unexpected error has occurred.'}, res);
+          render('notFound', {
+            type: 'settings',
+            error: 'An unexpected error has occurred.'
+          }, res);
           err.handled = true;
           return next(err);
         }
 
-        render('settings', {fname: fname, lname: lname, msg: 'Changes saved.'}, res);
+        render('settings', {
+          fname: fname,
+          lname: lname,
+          msg: 'Changes saved.'
+        }, res);
       });
     }
   } else {
     if (!fname) fname = '';
     if (!lname) lname = '';
-    render('settings', {fname: fname, lname: lname, error: 'You must set a valid name.'}, res);
+    render('settings', {
+      fname: fname,
+      lname: lname,
+      error: 'You must set a valid name.'
+    }, res);
   }
 });
 
@@ -151,19 +203,31 @@ router.get('/feedback', function(req, res, next) {
 });
 
 router.post('/feedback', function(req, res, next) {
-  var type = req.body.type;
-  if (!type || (type != 'question' && type != 'comment' && type != 'complaint' && type != 'other')) {
+  var type = req.body.type || 'other';
+  if (!_.contains(['question', 'comment', 'complaint', 'other'], type)) {
     type = 'other';
   }
 
-  connection.query("SELECT `user`,`fname`,`lname` FROM `students` WHERE `id` = ?", [req.user.id], function(err, result) {
+  connection.query("SELECT `user`,`fname`,`lname` FROM `students` \
+                    WHERE `id` = ?", [req.user.id], function(err, result) {
     if (err) return next(err);
 
-    connection.query("INSERT INTO `feedback` VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)", [result[0].user, result[0].fname, result[0].lname, req.headers['user-agent'], type, req.body.feedback], function(err) {
+    connection.query("INSERT INTO `feedback` \
+                      VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)",
+                      [
+                        result[0].user,
+                        result[0].fname,
+                        result[0].lname,
+                        req.headers['user-agent'],
+                        type,
+                        req.body.feedback
+                      ], function(err) {
       if (err) return next(err);
 
       var html = '';
-      html += 'From: ' + result[0].fname + ' ' + result[0].lname + ' (' + result[0].user + ')<br />';
+      html += 'From: ';
+      html += result[0].fname + ' ' + result[0].lname;
+      html += ' (' + result[0].user + ')<br />';
       html += 'Type: Student<br />';
       html += 'Message:<br />';
       html += req.body.feedback;

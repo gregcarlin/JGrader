@@ -44,7 +44,8 @@ const testLoad = function(name, path) {
 
 casper.test.begin('Homepage and Failed Sign In', function(test) {
   casper.start(url, function() {
-    test.assertTitle('jGrader | A Cloud-Based Grading System for AP Computer Science');
+    var ttl = 'jGrader | A Cloud-Based Grading System for AP Computer Science';
+    test.assertTitle(ttl);
     test.assertExists('input[name="email"]');
     test.assertExists('input[name="password"]');
 
@@ -57,7 +58,8 @@ casper.test.begin('Homepage and Failed Sign In', function(test) {
   casper.then(function() {
     test.assertTitle('Sign In | jGrader');
     test.assertExists('div.alert-danger');
-    test.assertSelectorHasText('div.alert-danger', 'Incorrect email or password.');
+    test.assertSelectorHasText('div.alert-danger',
+                               'Incorrect email or password.');
   });
 
   casper.run(function() {
@@ -82,7 +84,8 @@ casper.test.begin('Teacher Sign In', function(test) {
 
 testTitle('Teacher Class List', 'teacher/section', 'Your Classes | jGrader');
 // there is no csv for section list
-testTitle('Teacher Assignment List', 'teacher/assignment', 'Your Assignments | jGrader');
+testTitle('Teacher Assignment List', 'teacher/assignment',
+          'Your Assignments | jGrader');
 testLoad('Teacher Assignment List CSV', 'teacher/assignment.csv');
 testTitle('Teacher Student List', 'teacher/student', 'Your Students | jGrader');
 testLoad('Teacher Student List CSV', 'teacher/student.csv');
@@ -92,7 +95,8 @@ casper.test.begin('Sign Out', function(test) {
   casper.start(url + 'log-out/', function() {});
 
   casper.then(function() {
-    test.assertTitle('jGrader | A Cloud-Based Grading System for AP Computer Science');
+    var ttl = 'jGrader | A Cloud-Based Grading System for AP Computer Science';
+    test.assertTitle(ttl);
   });
 
   casper.run(function() {
@@ -116,27 +120,30 @@ casper.test.begin('Student Sign In', function(test) {
 });
 
 testTitle('Student Class List', 'student/section', 'Your Classes | jGrader');
-testTitle('Student Assignment List', 'student/assignment', 'Your Assignments | jGrader');
+testTitle('Student Assignment List', 'student/assignment',
+          'Your Assignments | jGrader');
 
 const submitFiles = function(test, files) {
   casper.start(url + 'student/assignment/34?forceFallback=true', function() {
     var paths = [];
-    for (var i=0; i<files.length; i++) {
+    for (var i = 0; i < files.length; i++) {
       paths.push('./test_files/' + files[i]);
     }
     this.page.uploadFile('input[type="file"]', paths);
     this.click('input[type="submit"]');
   });
-  
+
   casper.then(function() {
     test.assertTitle('AssignmentA | jGrader');
     this.each(this.getElementsInfo('.alert-warning'), function(self, item) {
       // this is the only allowed warning
-      test.assert(item.text.indexOf('Your browser is not supported. Consider upgrading to a newer one.') > -1);
+      test.assert(item.text.indexOf(
+                  'Your browser is not supported. ' +
+                  'Consider upgrading to a newer one.') > -1);
     });
     var tabs = this.getElementsInfo('.nav-tabs li[role="presentation"]');
     test.assertEquals(tabs.length, files.length);
-    for (var i=0; i<tabs.length; i++) {
+    for (var i = 0; i < tabs.length; i++) {
       test.assertEquals(tabs[i].text, files[i]);
     }
   });

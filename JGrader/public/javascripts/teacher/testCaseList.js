@@ -3,7 +3,8 @@
 
 var confirmDelete = function(assignmentID, testID) {
   $('.modal .btn-danger').click(function() {
-    document.location = '/teacher/assignment/' + assignmentID + '/testCase/delete/' + testID;
+    document.location = '/teacher/assignment/' + assignmentID +
+                        '/testCase/delete/' + testID;
   });
 
   $('.modal').modal({}); // show modal

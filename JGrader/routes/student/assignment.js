@@ -15,7 +15,7 @@ var codeRunner = require('../../controllers/codeRunner');
 
 var render = function(page, options, res) {
   options.page = 1;
-  switch(page) {
+  switch (page) {
     case 'notFound':
       options.title = 'Assignment Not Found';
       options.type = 'assignment';
@@ -41,19 +41,31 @@ var render = function(page, options, res) {
       break;
   }
   renderGenericStudent(page, options, res);
-}
+};
 
 // The page that lists the assignments
 router.get('/', function(req, res, next) {
-  connection.query("SELECT `sections`.`name`,`teachers`.`fname`,`teachers`.`lname`,`assignments`.`name` AS `assignmentName`,`assignments`.`due`,`assignments`.`id`,`submissions`.`submitted` \
+  connection.query("SELECT `sections`.`name`,\
+                           `teachers`.`fname`,\
+                           `teachers`.`lname`,\
+                           `assignments`.`name` AS `assignmentName`,\
+                           `assignments`.`due`,\
+                           `assignments`.`id`,\
+                           `submissions`.`submitted` \
                     FROM `sections`, `teachers`,`enrollment`,`assignments` \
-                    LEFT JOIN `submissions` ON `submissions`.`assignment_id` = `assignments`.`id` AND `submissions`.`student_id` = ? \
+                    LEFT JOIN `submissions` \
+                      ON `submissions`.`assignment_id` = `assignments`.`id` \
+                      AND `submissions`.`student_id` = ? \
                     WHERE `enrollment`.`student_id` = ? \
                     AND `enrollment`.`section_id` = `assignments`.`section_id` \
                     AND `sections`.`id` = `enrollment`.`section_id` \
-                    AND `sections`.`teacher_id`=`teachers`.`id`", [req.user.id, req.user.id], function(err, rows) {
+                    AND `sections`.`teacher_id`=`teachers`.`id`",
+                    [req.user.id, req.user.id], function(err, rows) {
     if (err) {
-      render('assignmentList', {rows: [], error: 'An unexpected error has occurred.'}, res);
+      render('assignmentList', {
+        rows: [],
+        error: 'An unexpected error has occurred.'
+      }, res);
       err.handled = true;
       return next(err);
     }
@@ -64,7 +76,11 @@ router.get('/', function(req, res, next) {
 
 router.use('/:id', function(req, res, next) {
   connection.query({
-      sql: "SELECT `assignments`.*,`sections`.* FROM `assignments` JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` WHERE `assignments`.`id` = ? AND `enrollment`.`student_id` = ?",
+      sql: "SELECT `assignments`.*,`sections`.* \
+            FROM `assignments` \
+            JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+            JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
+            WHERE `assignments`.`id` = ? AND `enrollment`.`student_id` = ?",
       nestTables: true,
       values: [req.params.id, req.user.id]
     }, function(err, result) {
@@ -86,19 +102,29 @@ router.use('/:id', function(req, res, next) {
 
 // Gets the assignment information based on id
 router.get('/:id', function(req, res, next) {
-  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
+  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` \
+                    WHERE `assignment_id` = ?",
+                    [req.params.id], function(err, teacherFiles) {
     if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
       return next(err);
     }
 
-    connection.query("SELECT `files`.`name`,`files`.`contents`,`files`.`mime`,`submissions`.`grade`,`submissions`.`submitted`,`files`.`compiled`,`submissions`.`main` \
+    connection.query("SELECT `files`.`name`,\
+                             `files`.`contents`,\
+                             `files`.`mime`,\
+                             `submissions`.`grade`,\
+                             `submissions`.`submitted`,\
+                             `files`.`compiled`,\
+                             `submissions`.`main` \
                       FROM `files`, `students`, `assignments`, `submissions` \
                       WHERE `submissions`.`assignment_id` = `assignments`.`id` \
-                      AND `submissions`.`student_id` = `students`.`id` \
-                      AND `files`.`submission_id`= `submissions`.`id` \
-                      AND `students`.`id` = ? AND `assignments`.`id` = ? ORDER BY `files`.`id`", [req.user.id, req.params.id], function(err, fileData) {
+                        AND `submissions`.`student_id` = `students`.`id` \
+                        AND `files`.`submission_id`= `submissions`.`id` \
+                        AND `students`.`id` = ? AND `assignments`.`id` = ? \
+                      ORDER BY `files`.`id`",
+                      [req.user.id, req.params.id], function(err, fileData) {
       if (err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         err.handled = true;
@@ -115,19 +141,25 @@ router.get('/:id', function(req, res, next) {
         var anyCompiled = false;
         var anyMain = false;
         for (var i = 0; i < fileData.length; i++) {
-          fileData[i].display = isAscii(fileData[i].mime) ? fileData[i].contents : 'This is a binary file. Download it to view it.';
+          fileData[i].display =
+            isAscii(fileData[i].mime) ?
+              fileData[i].contents :
+              'This is a binary file. Download it to view it.';
           if (fileData[i].compiled) anyCompiled = true;
 
           fileData[i].isMain = fileData[i].main == fileData[i].name;
           if (fileData[i].isMain) anyMain = true;
 
           var lastDot = fileData[i].name.lastIndexOf('.') + 1;
-          fileData[i].extension = fileData[i].name.substring(lastDot >= fileData[i].name.length ? 0 : lastDot);
+          if (lastDot >= fileData[i].name.length) lastDot = 0;
+          fileData[i].extension = fileData[i].name.substring(lastDot);
           var imageExtensions = ['png', 'jpg', 'jpeg', 'gif'];
           if (imageExtensions.indexOf(fileData[i].extension) >= 0) {
             fileData[i].text = false;
-            fileData[i].display = '<img src="data:image/' + fileData[i].extension + ';base64,';
-            fileData[i].display += new Buffer(fileData[i].contents).toString('base64');
+            fileData[i].display = '<img src="data:image/' +
+                                  fileData[i].extension + ';base64,';
+            fileData[i].display += new Buffer(fileData[i].contents)
+                                   .toString('base64');
             fileData[i].display += '" alt="' + fileData[i].name + '">';
           } else {
             fileData[i].text = true;
@@ -136,10 +168,17 @@ router.get('/:id', function(req, res, next) {
 
         // Sends file data
         var teacherNames = [];
-        for(var i = 0; i < teacherFiles.length; i++) {
+        for (var i = 0; i < teacherFiles.length; i++) {
           teacherNames.push(teacherFiles[i].name);
         }
-        render('assignmentComplete', {title: req.assignment.name, assignment: req.assignment, fileData: fileData, anyCompiled: anyCompiled, anyMain: anyMain, teacherFiles: teacherNames}, res);
+        render('assignmentComplete', {
+          title: req.assignment.name,
+          assignment: req.assignment,
+          fileData: fileData,
+          anyCompiled: anyCompiled,
+          anyMain: anyMain,
+          teacherFiles: teacherNames
+        }, res);
       }
 
     });
@@ -156,7 +195,8 @@ router.use('/:id/submit', multer({
   },
   changeDest: function(dest, req, res) {
     var directory = './temp/' + req.user.id + '/';
-    fs.ensureDirSync(directory); // note: i tried the async version of this but i got weird errors
+    // note: i tried the async version of this but i got weird errors
+    fs.ensureDirSync(directory);
     return directory;
   }
 }));
@@ -165,7 +205,8 @@ router.post('/:id/submit', function(req, res, next) {
   submit(req, res, function(err, data) {
     if (err) {
       if (req.body.fallback) {
-        res.redirect('/student/assignment/' + req.params.id + '?error=An unknown error has occurred.');
+        res.redirect('/student/assignment/' + req.params.id +
+                     '?error=An unknown error has occurred.');
       } else {
         res.json({ code: -1 }); // unknown
       }
@@ -189,13 +230,16 @@ router.post('/:id/submit', function(req, res, next) {
         msg = 'Your code could not be compiled.';
         break;
       case 2:
-        msg = 'Some of your files have invalid names. Only alphanumeric characters and periods are allowed, and names must contain at least 6 characters.';
+        msg = 'Some of your files have invalid names. ' +
+              'Only alphanumeric characters and periods are allowed, ' +
+              'and names must contain at least 6 characters.';
         break;
       case 3:
         msg = 'You already submitted this!';
         break;
       case 4:
-        msg = 'You must submit at least one java file. Make sure they end in .java';
+        msg = 'You must submit at least one java file. ' +
+              'Make sure they end in .java';
         break;
       case 5:
         msg = 'No two files can share the same name.';
@@ -252,7 +296,7 @@ var submit = function(req, res, next) {
   // normalize file uploads into this files array
   var files = [];
   for (var key in req.files) {
-    for (var i=0; i<req.files[key].length; i++) {
+    for (var i = 0; i < req.files[key].length; i++) {
       files.push(req.files[key][i]);
     }
   }
@@ -273,23 +317,30 @@ var submit = function(req, res, next) {
   }
 
   // get attached teacher files
-  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` WHERE `assignment_id` = ?", [req.params.id], function(err, teacherFiles) {
+  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` \
+                    WHERE `assignment_id` = ?",
+                    [req.params.id], function(err, teacherFiles) {
     if (err) return next(err, -1);
 
     // now, check to see if this student already submitted this assignment
-    connection.query("SELECT `id` FROM `submissions` WHERE `student_id` = ? AND `assignment_id` = ?", [req.user.id, req.params.id], function(err, submissions) {
+    connection.query("SELECT `id` FROM `submissions` \
+                      WHERE `student_id` = ? AND `assignment_id` = ?",
+                      [req.user.id, req.params.id], function(err, submissions) {
       if (err) return next(err, -1);
       if (submissions.length > 0) return next(null, 3);
 
       var toCompile = '';
       _.each(files, function(file) {
-        file.isJava = file.path.substr(file.path.length-4).toLowerCase() === 'java';
+        file.isJava = file.path.substr(file.path.length - 4)
+                      .toLowerCase() === 'java';
         if (file.isJava) toCompile += file.path + ' ';
       });
 
       async.each(teacherFiles, function(teacherFile, cb) {
         teacherFile.path = './temp/' + req.user.id + '/' + teacherFile.name;
-        teacherFile.isJava = teacherFile.name.substr(teacherFile.name.length-4).toLowerCase() == 'java';
+        teacherFile.isJava = teacherFile.name
+                             .substr(teacherFile.name.length - 4)
+                             .toLowerCase() == 'java';
         if (teacherFile.isJava) toCompile += teacherFile.path + " ";
         teacherFile.mimetype = teacherFile.mime;
         files.push(teacherFile);
@@ -305,7 +356,10 @@ var submit = function(req, res, next) {
             if (err) return next(err, -1);
 
             // finally, make necessary changes in database
-            connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, NOW(), NULL, ?)", [req.params.id, req.user.id, main], function(err, result) {
+            connection.query("INSERT INTO `submissions` \
+                              VALUES(NULL, ?, ?, NOW(), NULL, ?)",
+                              [req.params.id, req.user.id, main],
+                              function(err, result) {
               if (err) return next(err, -1);
 
               var args = [];
@@ -317,14 +371,16 @@ var submit = function(req, res, next) {
 
                 async.map(files, function(file, cb) {
                   if (file.isJava) {
-                    fs.readFile(file.path.substr(0, file.path.length - 4) + 'class', cb);
+                    var path = file.path.substr(0, file.path.length - 4) +
+                               'class';
+                    fs.readFile(path, cb);
                   } else {
                     cb(null, null);
                   }
                 }, function(err, classResults) {
                   if (err) return next(err, -1);
 
-                  for (var i=0; i<files.length; i++) {
+                  for (var i = 0; i < files.length; i++) {
                     stmt += "(NULL,?,?,?,?,?),";
                     args.push(result.insertId);
                     args.push(files[i].name);
@@ -334,7 +390,9 @@ var submit = function(req, res, next) {
                   }
                   stmt = stmt.substr(0, stmt.length - 1); // remove last character from stmt (extraneous comma)
 
-                  connection.query("INSERT INTO `files` VALUES" + stmt, args, function(err, fileResult) {
+                  connection.query("INSERT INTO `files` \
+                                    VALUES" + stmt, args,
+                                    function(err, fileResult) {
                     if (err) return next(err);
 
                     if (!main) {
@@ -342,10 +400,17 @@ var submit = function(req, res, next) {
                     }
                     main = main.substring(0, main.length - 5);
 
-                    connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.params.id], function(err, tests) {
+                    connection.query("SELECT `id`,`input`,`output` \
+                                      FROM `test-cases` \
+                                      WHERE `assignment_id` = ?",
+                                      [req.params.id], function(err, tests) {
                       if (err) return next(err);
 
-                      codeRunner.runTests(req.user.id, main, result.insertId, tests, function(err) {
+                      codeRunner.runTests(req.user.id,
+                                          main,
+                                          result.insertId,
+                                          tests,
+                                          function(err) {
                         if (err) return next(err);
 
                         codeRunner.cleanup(req.user.id, next);
@@ -372,7 +437,8 @@ router.get('/:id/resubmit', function(req, res, next) {
   connection.query("SELECT `submissions`.`id` \
                     FROM `submissions` \
                     WHERE `submissions`.`student_id` = ? \
-                    AND `submissions`.`assignment_id` = ?", [req.user.id, req.params.id], function(err, rows) {
+                    AND `submissions`.`assignment_id` = ?",
+                    [req.user.id, req.params.id], function(err, rows) {
     if (err) {
       res.redirect('/student/assignment');
       err.handled = true;
@@ -381,7 +447,8 @@ router.get('/:id/resubmit', function(req, res, next) {
 
     if (rows.length == 0) {
       // User has not submitted so cannot resubmit
-      console.error('USER ' + req.user.id + ' IS TRYING TO RESUBMIT BUT SHOULDNT BE');
+      console.error('USER ' + req.user.id +
+                    ' IS TRYING TO RESUBMIT BUT SHOULDNT BE');
       res.redirect('/student/assignment');
     } else {
       // Means user has already submitted and is able to resubmit
@@ -389,7 +456,9 @@ router.get('/:id/resubmit', function(req, res, next) {
                         DELETE FROM `submissions` \
                             WHERE `assignment_id` = ? \
                             AND `student_id` = ?; \
-                        DELETE FROM `comments` WHERE `submission_id` = ?", [rows[0].id, req.params.id, req.user.id, rows[0].id], function(err, rows) {
+                        DELETE FROM `comments` WHERE `submission_id` = ?",
+                        [rows[0].id, req.params.id, req.user.id, rows[0].id],
+                        function(err, rows) {
         if (err) {
           res.redirect('/student/assignment/');
           err.handled = true;
@@ -403,18 +472,24 @@ router.get('/:id/resubmit', function(req, res, next) {
 });
 
 var handle = function(err, req, res, next) {
-  res.redirect('/student/assignment/' + req.params.id + '?error=Unable to set main, please reload and try again.');
+  res.redirect('/student/assignment/' + req.params.id +
+               '?error=Unable to set main, please reload and try again.');
   err.handled = true;
   next(err);
 };
 
 router.get('/:id/chooseMain/:file', function(req, res, next) {
-  connection.query("UPDATE `submissions` SET `main` = ? WHERE `assignment_id` = ? AND `student_id` = ?", [req.params.file, req.params.id, req.user.id], function(err, result) {
+  connection.query("UPDATE `submissions` SET `main` = ? \
+                    WHERE `assignment_id` = ? AND `student_id` = ?",
+                    [req.params.file, req.params.id, req.user.id],
+                    function(err, result) {
     if (err) {
       return handle(err, req, res, next);
     }
 
-    connection.query("SELECT `id` FROM `submissions` WHERE `assignment_id` = ? AND `student_id` = ?", [req.params.id, req.user.id], function(err, result) {
+    connection.query("SELECT `id` FROM `submissions` \
+                      WHERE `assignment_id` = ? AND `student_id` = ?",
+                      [req.params.id, req.user.id], function(err, result) {
       if (err) return handle(err, req, res, next);
 
       connection.query("SELECT \
@@ -424,7 +499,9 @@ router.get('/:id/chooseMain/:file', function(req, res, next) {
                           `files`.`compiled`,\
                           `submissions`.`student_id` \
                         FROM `files`,`submissions` \
-                        WHERE `files`.`submission_id` = `submissions`.`id` AND `submissions`.`id` = ?", [result[0].id], function(err, files) {
+                        WHERE `files`.`submission_id` = `submissions`.`id` \
+                        AND `submissions`.`id` = ?",
+                        [result[0].id], function(err, files) {
         if (err) return handle(err, req, res, next);
 
         codeRunner.setupDirectory(files, function(err, uniqueIds) {
@@ -433,10 +510,13 @@ router.get('/:id/chooseMain/:file', function(req, res, next) {
           var uniqueId = uniqueIds[files[0].student_id];
           var main = req.params.file.substring(0, req.params.file.length - 5);
 
-          connection.query("SELECT `id`,`input`,`output` FROM `test-cases` WHERE `assignment_id` = ?", [req.params.id], function(err, tests) {
+          connection.query("SELECT `id`,`input`,`output` FROM `test-cases` \
+                            WHERE `assignment_id` = ?",
+                            [req.params.id], function(err, tests) {
             if (err) return handle(err, req, res, next);
 
-            codeRunner.runTests(uniqueId, main, result[0].id, tests, function(err) {
+            codeRunner.runTests(uniqueId, main, result[0].id,
+                                tests, function(err) {
               if (err) return handle(err, req, res, next);
 
               codeRunner.cleanup(uniqueId, function(err) {

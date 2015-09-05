@@ -28,17 +28,21 @@ describe('Assignment', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test Class', '12345'], function(err, result) {
+          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
+                           [teacherId, 'Test Class', '12345'],
+                           function(err, result) {
             if (err) return cb(err);
             sectionId = result.insertId;
             cb();
           });
         },
         function(cb) {
-          assignment.create(teacherId, sectionId, 'Test Assignment', '', '2015/09/17 21:23', [], cb);
+          assignment.create(teacherId, sectionId, 'Test Assignment', '',
+                            '2015/09/17 21:23', [], cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `assignments` WHERE `section_id` = ?", [sectionId], function(err, _assignments) {
+          connection.query("SELECT * FROM `assignments` WHERE `section_id` = ?",
+                           [sectionId], function(err, _assignments) {
             assignments = _assignments;
             cb(err);
           });
@@ -64,14 +68,19 @@ describe('Assignment', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test Class', '87189'], function(err, result) {
+          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
+                           [teacherId, 'Test Class', '87189'],
+                           function(err, result) {
             if (err) return cb(err);
             sectionId = result.insertId;
             cb();
           });
         },
         function(cb) {
-          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, NULL)", [sectionId, 'Blah blah assignment'], function(err, result) {
+          connection.query("INSERT INTO `assignments` \
+                            VALUES(NULL, ?, ?, NULL, NULL)",
+                           [sectionId, 'Blah blah assignment'],
+                           function(err, result) {
             if (err) return cb(err);
             assignmentId = result.insertId;
             cb();
@@ -85,7 +94,9 @@ describe('Assignment', function() {
           }, cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `files-teachers` WHERE `assignment_id` = ?", [assignmentId], function(err, files) {
+          connection.query("SELECT * FROM `files-teachers` \
+                            WHERE `assignment_id` = ?",
+                           [assignmentId], function(err, files) {
             preFiles = files;
             cb(err);
           });
@@ -94,7 +105,9 @@ describe('Assignment', function() {
           assignment.removeFile(assignmentId, 'Test_file.txt', cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `files-teachers` WHERE `assignment_id` = ?", [assignmentId], function(err, files) {
+          connection.query("SELECT * FROM `files-teachers` \
+                            WHERE `assignment_id` = ?",
+                           [assignmentId], function(err, files) {
             postFiles = files;
             cb(err);
           });
@@ -123,14 +136,19 @@ describe('Assignment', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test Class', '19q3a'], function(err, result) {
+          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
+                           [teacherId, 'Test Class', '19q3a'],
+                           function(err, result) {
             if (err) return cb(err);
             sectionId = result.insertId;
             cb();
           });
         },
         function(cb) {
-          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, NULL)", [sectionId, 'Blah assignment'], function(err, result) {
+          connection.query("INSERT INTO `assignments` \
+                            VALUES(NULL, ?, ?, NULL, NULL)",
+                           [sectionId, 'Blah assignment'],
+                           function(err, result) {
             if (err) return cb(err);
             assignmentId = result.insertId;
             cb();
@@ -143,7 +161,8 @@ describe('Assignment', function() {
           assignment.setDue(assignmentId, '2015/09/17 21:23', cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `assignments` WHERE `id` = ?", [assignmentId], function(err, _assignment) {
+          connection.query("SELECT * FROM `assignments` WHERE `id` = ?",
+                           [assignmentId], function(err, _assignment) {
             assignmentData = _assignment;
             cb(err);
           });
@@ -182,21 +201,27 @@ describe('Assignment', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test Class', 'abcde'], function(err, result) {
+          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
+                           [teacherId, 'Test Class', 'abcde'],
+                           function(err, result) {
             if (err) return cb(err);
             sectionId = result.insertId;
             cb();
           });
         },
         function(cb) {
-          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, NULL)", [sectionId, 'Blah assignment'], function(err, result) {
+          connection.query("INSERT INTO `assignments` \
+                            VALUES(NULL, ?, ?, NULL, NULL)",
+                           [sectionId, 'Blah assignment'],
+                           function(err, result) {
             if (err) return cb(err);
             assignmentId = result.insertId;
             cb();
           });
         },
         function(cb) {
-          connection.query("SELECT * FROM `assignments` WHERE `id` = ?", [assignmentId], function(err, assignments) {
+          connection.query("SELECT * FROM `assignments` WHERE `id` = ?",
+                           [assignmentId], function(err, assignments) {
             preAssignment = assignments;
             cb(err);
           });
@@ -205,7 +230,8 @@ describe('Assignment', function() {
           assignment.remove(assignmentId, cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `assignments` WHERE `id` = ?", [assignmentId], function(err, assignments) {
+          connection.query("SELECT * FROM `assignments` WHERE `id` = ?",
+                           [assignmentId], function(err, assignments) {
             postAssignment = assignments;
             cb(err);
           });

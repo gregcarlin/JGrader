@@ -16,12 +16,15 @@ $('#input-expand').click(function() {
 
 var disabled = false;
 $('#execute').click(function() {
-  if(!disabled) {
+  if (!disabled) {
     $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>');
     var fileID = $('.tab-content .active').attr('id');
-    $.post(URL() + 'run/' + fileID, {stdin: $('#input-text').val()}, function(data, textStatus, jqXHR) {
-      if(data.code == 0) {
-        $('#output-text').html(data.out + '\n\n<span class="stderr">' + data.err + '</span>');
+    $.post(URL() + 'run/' + fileID, {
+      stdin: $('#input-text').val()
+    }, function(data, textStatus, jqXHR) {
+      if (data.code == 0) {
+        $('#output-text').html(
+          data.out + '\n\n<span class="stderr">' + data.err + '</span>');
       } else {
         alert('An error has occurred, please reload the page and try again.');
       }
@@ -36,15 +39,16 @@ $('#download').click(function() {
 });
 
 $('#test').click(function() {
-  if(!disabled) {
+  if (!disabled) {
     $('#output-text').html('<span class="fa fa-refresh fa-spin"></span>');
     var fileID = $('.tab-content .active').attr('id');
     $.get(URL() + 'test/' + fileID, {}, function(data, textStatus, jqXHR) {
-      switch(data.code) {
+      switch (data.code) {
         case -1:
         case 1:
         default:
-          alert('An unknown error has occurred. Please reload the page and try again.');
+          alert('An unknown error has occurred. ' +
+                'Please reload the page and try again.');
           break;
         case 2:
           alert('Error: The code is taking too long to execute.');
@@ -53,9 +57,11 @@ $('#test').click(function() {
           var output = '';
           var passes = 0;
           var fails = 0;
-          for(var i in data.results) {
-            output += 'Input: ' + data.results[i].input + ', Expected: ' + data.results[i].expected + ', Actual: ' + data.results[i].result + ' ';
-            if(data.results[i].result == data.results[i].expected) {
+          for (var i in data.results) {
+            output += 'Input: ' + data.results[i].input + ', Expected: ' +
+                   data.results[i].expected + ', Actual: ' +
+                   data.results[i].result + ' ';
+            if (data.results[i].result == data.results[i].expected) {
               passes++;
               output += '[PASS] <span class="fa fa-check';
             } else {
@@ -74,7 +80,7 @@ $('#test').click(function() {
 });
 
 $('.nav-tabs a[data-toggle="tab"]').click(function() {
-  if($(this).attr('data-canrun') == 'true') {
+  if ($(this).attr('data-canrun') == 'true') {
     $('#execute').tooltip();
     $('#execute').removeClass('disabled');
     $('#test').tooltip();
@@ -90,7 +96,8 @@ $('.nav-tabs a[data-toggle="tab"]').click(function() {
 });
 
 $(window).load(function() {
-  if($('.nav-tabs .active a[data-toggle="tab"]').attr('data-canrun') == 'false') {
+  if ($('.nav-tabs .active a[data-toggle="tab"]')
+      .attr('data-canrun') == 'false') {
     $('#execute').tooltip('destroy');
     $('#execute').addClass('disabled');
     $('#test').tooltip('destroy');

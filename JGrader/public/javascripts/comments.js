@@ -10,13 +10,19 @@ var getLineLi = function(tab, line) {
 
 var getOrigLi = function(tab, line) {
   return $($('ol.linenums li', $('.tab-pane').get(tab)).get(line));
-}
+};
 
 // open new comment dialog at a given position
 var addComment = function(tab, line) {
   var lineLi = getLineLi(tab, line);
-  if($('.comment-text', lineLi).length == 0) {
-    var commentBox = $('<div class="comment comment-text"><textarea class="form-control"></textarea><a onclick="closeComment(' + tab + ',' + line + ')" class="fa fa-times"></a><a onclick="submitComment(' + tab + ',' + line + ')" class="fa fa-arrow-right"></a></div>');
+  if ($('.comment-text', lineLi).length == 0) {
+    var commentBox =
+      $('<div class="comment comment-text">' +
+        '<textarea class="form-control"></textarea>' +
+        '<a onclick="closeComment(' + tab +
+        ',' + line + ')" class="fa fa-times"></a>' +
+        '<a onclick="submitComment(' + tab +
+        ',' + line + ')" class="fa fa-arrow-right"></a></div>');
     lineLi.append(commentBox);
   }
 };
@@ -30,18 +36,23 @@ var closeComment = function(tab, line) {
 var submitComment = function(tab, line) {
   var lineLi = getLineLi(tab, line);
   var text = $('textarea', lineLi).val();
-  if(text.trim().length <= 0) {
+  if (text.trim().length <= 0) {
     alert('You cannot post an empty comment.');
   } else {
     var innerComment = $('.comment-text', lineLi);
     innerComment.html('<span class="fa fa-spinner fa-spin"></span> Posting');
-    $.post(URL() + 'comment', {tab: tab, line: line, text: text}, function(data, textStatus, jqXHR) {
-      if(data.code == 0) {
+    $.post(URL() + 'comment', {
+      tab: tab,
+      line: line,
+      text: text
+    }, function(data, textStatus, jqXHR) {
+      if (data.code == 0) {
         innerComment.remove();
         delete data.code;
         appendComment(data);
       } else {
-        alert('There was an issue posting your comment. Please reload the page and try again.');
+        alert('There was an issue posting your comment. ' +
+              'Please reload the page and try again.');
       }
     });
   }
@@ -51,9 +62,11 @@ var submitComment = function(tab, line) {
 var appendComment = function(comment) {
   var li = getLineLi(comment.tab, comment.line);
   var date = new Date(comment.timestamp);
-  var html = '<div class="comment comment-line-' + comment.line + ' comment-tab-' + comment.tab + '" id="comment-' + comment.id + '">';
-  html += '<div class="data">'
-  html += '<div class="date">'
+  var html = '<div class="comment comment-line-' + comment.line +
+             ' comment-tab-' + comment.tab + '" id="comment-' +
+             comment.id + '">';
+  html += '<div class="data">';
+  html += '<div class="date">';
   html += date.toLocaleString();
   html += '</div>';
   html += '</div>';
@@ -65,12 +78,16 @@ var appendComment = function(comment) {
   html += '</div>';
   html += '<div class="bottom-links">';
   html += '<div class="links">';
-  html += '<a onclick="addComment(' + comment.tab + ',' + comment.line + ')">Reply</a>';
+  html += '<a onclick="addComment(' + comment.tab + ',' +
+          comment.line + ')">Reply</a>';
   html += '</div>';
-  if(comment.owns) { // if this person owns this comment, add delete and edit buttons
+  if (comment.owns) { // if this person owns this comment, add delete and edit buttons
     html += '<div class="buttons">';
-    html += '<a class="fa fa-pencil-square-o" onclick="editComment(' + comment.id + ',' + comment.tab + ',' + comment.line + ')"></a>';
-    html += '<a class="fa fa-trash-o" onclick="deleteComment(' + comment.id + ')"></a>';
+    html += '<a class="fa fa-pencil-square-o" onclick="editComment(' +
+            comment.id + ',' + comment.tab + ',' + comment.line +
+            ')"></a>';
+    html += '<a class="fa fa-trash-o" onclick="deleteComment(' +
+            comment.id + ')"></a>';
     html += '</div>';
   }
   html += '</div>';
@@ -87,7 +104,7 @@ var appendComment = function(comment) {
     lio.css('background-color', '');
   });
   li.append(div);
-}
+};
 
 // finds the tab and line encoded into a div created in appendComment
 var getTabLine = function(div) {
@@ -106,14 +123,16 @@ var editComment = function(id, tab, line) {
   html += '<div>';
   html += '<a onclick="cancelEditComment(' + id + ')" class="fa fa-times">';
   html += '</a>';
-  html += '<a onclick="submitEditComment(' + id + ')" class="fa fa-arrow-right">';
+  html += '<a onclick="submitEditComment(' + id +
+          ')" class="fa fa-arrow-right">';
   html += '</a>';
   html += '</div>';
   html += '</div>'; // close .edit div
   var commentBox = $(html);
   var comment = $('#comment-' + id);
   comment.addClass('comment-text-edit');
-  comment.append(commentBox); // add new html to end of old html (old html is hidden via magic css)
+  // add new html to end of old html (old html is hidden via magic css)
+  comment.append(commentBox);
 };
 
 var cancelEditComment = function(id) {
@@ -125,8 +144,10 @@ var submitEditComment = function(id) {
   $('#comment-' + id).append('<span class="fa fa-spinner fa-spin"></span>');
   var text = $('#comment-' + id + ' .edit textarea').val();
   $('#comment-' + id + ' .edit').remove(); // remove text area and stuff
-  $.post(URL() + 'comment/' + id + '/edit', {text: text}, function(data, textStatus, jqXHR) {
-    if(data.code != 0) {
+  $.post(URL() + 'comment/' + id + '/edit', {
+    text: text
+  }, function(data, textStatus, jqXHR) {
+    if (data.code != 0) {
       alert('An error has occurred. Please reload the page.');
     } else {
       $('#comment-' + id + ' .fa-spinner').remove();
@@ -138,8 +159,9 @@ var submitEditComment = function(id) {
 
 var deleteComment = function(id) {
   $('#comment-' + id).html('<span class="fa fa-spinner fa-spin"></span>');
-  $.post(URL() + 'comment/' + id + '/delete', '', function(data, textStatus, jqXHR) {
-    if(data.code == -1) {
+  $.post(URL() + 'comment/' + id + '/delete', '',
+         function(data, textStatus, jqXHR) {
+    if (data.code == -1) {
       alert('An error has occurred. Please reload the page.');
     } else {
       $('#comment-' + id).remove();
@@ -153,18 +175,19 @@ $(document).ready(function() {
 
   $('.tab-pane').each(function(tab, elem) {
     $('ol.linenums li', elem).each(function(index, element) {
-      $(element).prepend('<a onclick="addComment(' + tab + ','  + index  + ')" class="fa fa-comment-o"></a>');
+      $(element).prepend('<a onclick="addComment(' + tab + ','  + index  +
+                         ')" class="fa fa-comment-o"></a>');
       $('ol.comments', elem).append('<li></li>');
     });
   });
 
   // retrieve and display comments
   $.get(URL() + 'comment/', {}, function(data, textStatus, jqXHR) {
-    if(data.code != 0) {
+    if (data.code != 0) {
       var lio = getLineLi(0,0);
       lio.append('<div class="comment">Error retrieving comments</div>');
     } else {
-      for(i in data.comments) {
+      for (var i in data.comments) {
         appendComment(data.comments[i]);
       }
     }
