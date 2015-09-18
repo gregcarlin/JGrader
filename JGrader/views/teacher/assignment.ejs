@@ -20,7 +20,13 @@
 </div>
 <dl class="description">
   <dt>Due:</dt>
-    <dd><%= strftime('%b %d %Y, %l:%M %p', new Date(assignment.due)) %></dd>
+    <dd>
+      <span class="edit" data-key="updatedue" data-convert-to-edit="makeEditable" data-convert-to-read="makeReadable">
+        <span><%= strftime('%b %o, %Y %k:%M', new Date(assignment.due)) %></span>
+        <input type="text" class="form-control" id="due" />
+      </span>
+      <span class="fa fa-pencil-square-o" data-toggle="tooltip" data-placement="right" title="Edit"></span>
+    </dd>
   <dt>Description:</dt>
     <dd>
       <span class="edit" data-key="updatedesc" data-default="No Description">
