@@ -5,6 +5,8 @@ require('../common');
 var strftime = require('strftime');
 var router = express.Router();
 
+var section = require('../../controllers/teacher/section');
+
 var render = function(page, options, res) {
   options.page = 0;
   switch (page) {
@@ -85,10 +87,8 @@ router.post('/create', function(req, res, next) {
     }, res);
   }
 
-  connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, LEFT(UUID(), 5));\
-                    SELECT LAST_INSERT_ID()",
-                    [req.user.id, name], function(err, rows) {
-    if (err || rows.length <= 0) {
+  section.create(req.user.id, name, function(err, sectionId) {
+    if (err) {
       render('sectionCreate', {
         error: ('An unknown error has occurred. ' +
                 'Please try again later.'),
@@ -98,7 +98,7 @@ router.post('/create', function(req, res, next) {
       return next(err);
     }
 
-    res.redirect('/teacher/section/' + rows[1][0]["LAST_INSERT_ID()"]); // redirect teacher to page of newly created section
+    res.redirect('/teacher/section/' + sectionId); // redirect teacher to page of newly created section
   });
 });
 
@@ -166,8 +166,7 @@ router.get('/:id', function(req, res, next) {
 
 // POST request to update name of section
 router.post('/:id/updatename/:name', function(req, res) {
-  connection.query("UPDATE `sections` SET `name` = ? WHERE `id` = ?",
-                   [req.params.name, req.params.id], function(err, rows) {
+  section.setName(req.params.id, req.params.name, function(err) {
     if (err) {
       res.json({code: -1}); // unknown error
       err.handled = true;
@@ -180,8 +179,7 @@ router.post('/:id/updatename/:name', function(req, res) {
 
 // request for deleting a section
 router.get('/:id/delete', function(req, res, next) {
-  connection.query('DELETE FROM `sections` WHERE `id` = ? LIMIT 1',
-                   [req.params.id], function(err, rows) {
+  section.remove(req.params.id, function(err) {
     if (err) {
       render('notFound', {
         error: 'Unable to delete class. Please go back and try again.'
@@ -190,26 +188,7 @@ router.get('/:id/delete', function(req, res, next) {
       return next(err);
     }
 
-    connection.query("DELETE FROM `enrollment` WHERE `section_id` = ?;\
-                      DELETE `assignments`,`submissions`,`files` \
-                        FROM `assignments` \
-                        LEFT JOIN `submissions` \
-                          ON `submissions`.`assignment_id` = \
-                             `assignments`.`id` \
-                        LEFT JOIN `files` \
-                          ON `files`.`submission_id` = `submissions`.`id` \
-                        WHERE `assignments`.`section_id` = ?",
-                      [req.params.id, req.params.id], function(err) {
-      if (err) {
-        render('notFound', {
-          error: 'Unable to delete class. Please go back and try again.'
-        }, res);
-        err.handled = true;
-        return next(err);
-      }
-
-      res.redirect('/teacher/section');
-    });
+    res.redirect('/teacher/section');
   });
 });
 
