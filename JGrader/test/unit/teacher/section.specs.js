@@ -82,7 +82,7 @@ describe('Section', function() {
           connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
                            [_.uniqueId(), 'Test Class', 'uniq2'],
                            function(err, result) {
-            sectionId = result.lastInsertId;
+            sectionId = result.insertId;
             cb(err);
           });
         },
@@ -99,6 +99,8 @@ describe('Section', function() {
     });
 
     it('should remove the section', function() {
+      assert(sectionId >= 0);
+      assert.equal(sections.length, 0);
     });
   });
 });
