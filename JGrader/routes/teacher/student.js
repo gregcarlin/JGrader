@@ -6,6 +6,8 @@ var router = express.Router();
 var strftime = require('strftime');
 var _ = require('lodash');
 
+var student = require('../../controllers/teacher/student');
+
 var render = function(page, options, res) {
   options.page = 2;
   switch (page) {
@@ -134,78 +136,21 @@ router.post('/invite', function(req, res, next) {
     }
 
     if (req.body.emails && req.body.section) {
-      connection.query("SELECT `fname`,`lname` FROM `teachers` \
-                        WHERE `id` = ?", [req.user.id], function(err, result) {
-        if (err || !result || result.length <= 0) {
+      student.invite(req.body.section, req.user.id, req.body.emails, function(err, sent) {
+        if (err) {
           render('studentInvite', {
-            error: 'An unknown error has occurred.',
+            error: err.userMessage || 'An unknown error has occurred.',
             sections: rows
           }, res);
           err.handled = true;
           return next(err);
         }
 
-        connection.query("SELECT `id`,`name`,`code` FROM `sections` \
-                          WHERE `teacher_id` = ?",
-                          [req.user.id], function(err, mySections) {
-          if (err) {
-            render('studentInvite', {
-              error: 'An unknown error has occurred.',
-              sections: rows
-            }, res);
-            err.handled = true;
-            return next(err);
-          }
-
-          var links = '';
-          for (var i in req.body.section) {
-            for (var j = 0; j < mySections.length; j++) {
-              if (mySections[j].id == req.body.section[i]) {
-                links += '<a href="http://jgrader.com/';
-                links += 'student/section/joinSection/';
-                links += mySections[j].code + '">';
-                links += mySections[j].name + '</a><br />';
-                break;
-              }
-            }
-          }
-          if (links.length <= 2) {
-            render('studentInvite', {
-              error: ('No invitations were sent because no valid ' +
-                      'sections were selected.'),
-              sections: rows
-            }, res);
-          } else {
-            var emails = req.body.emails.split(/[ ;(\r\n|\n|\r)]/);
-            var sent = '';
-            _.each(emails, function(email) {
-              if (email.indexOf('@') > 0) { // @ can't be first character (or last but we don't bother checking for that)
-                sent += email + ', ';
-                var html = 'Your teacher, ' + result[0].fname + ' ' +
-                           result[0].lname +
-                           ' has invited you to join his or her class ' +
-                           'on jGrader, the tool for collecting computer ' +
-                           'science assignments in the cloud. ';
-                html += 'In order to accept these invitations, ' +
-                        'please click the link or links below.<br />';
-                html += links;
-                var mailOptions = {
-                  to: email,
-                  subject: result[0].fname + ' ' + result[0].lname +
-                           ' has invited you to jGrader',
-                  html: html
-                };
-                transporter.sendMail(mailOptions, function(err, info) {}); // hope it works
-              }
-            });
-            sent = sent.substring(0, sent.length - 2);
-            render('studentInvite', {
-              success: 'Invitations have been sent to the following ' +
-                       'addresses: ' + sent,
-              sections: rows
-            }, res);
-          }
-        });
+        render('studentInvite', {
+          success: 'Invitations have been sent to the following ' +
+                    'addresses: ' + sent,
+          sections: rows
+        }, res);
       });
     } else {
       render('studentInvite', {

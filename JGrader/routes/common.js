@@ -197,5 +197,16 @@ transporter = {
     mailgun.messages().send(options, callback);
   }
 };
+if (process.env.MODE == 'TEST') {
+  transporter = {
+    sent: [],
+    sendMail: function(options, callback) {
+      options.from = options.from || 'no-reply@jgrader.com';
+      options.to = options.to || 'contact@jgrader.com';
+      this.sent.push(options);
+      callback();
+    }
+  };
+}
 
 // modules.exports not required because everything needed is global
