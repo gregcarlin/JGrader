@@ -8,6 +8,7 @@ var JSZip = require('jszip');
 
 var comments = require('../../controllers/comments');
 var codeRunner = require('../../controllers/codeRunner');
+var submission = require('../../controllers/teacher/submission');
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -169,8 +170,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 router.post('/:id/updategrade', function(req, res, next) {
-  connection.query("UPDATE `submissions` SET `grade` = NULL WHERE `id` = ?",
-                   [req.params.id], function(err) {
+  submission.removeGrade(req.params.id, function(err) {
     if (err) {
       res.json({code: -1});
       err.handled = true;
@@ -182,14 +182,9 @@ router.post('/:id/updategrade', function(req, res, next) {
 });
 
 router.post('/:id/updategrade/:grade', function(req, res, next) {
-  if (isNaN(req.params.grade)) {
-    return res.json({code: 1}); // invalid input
-  }
-
-  connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?",
-                   [req.params.grade, req.params.id], function(err) {
+  submission.setGrade(req.params.id, req.params.grade, function(err) {
     if (err) {
-      res.json({code: -1}); // unknown error
+      res.json({code: (err.code || -1)}); // -1 = unknown error
       err.handled = true;
       return next(err);
     }

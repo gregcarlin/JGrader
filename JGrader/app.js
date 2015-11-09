@@ -88,10 +88,9 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
   if (err.userMessage) return; // user error, no need to report
 
-  if (err.handled) {
-    console.error(err);
-    console.error(err.stack);
-  } else {
+  console.error(err);
+  console.error(err.stack);
+  if (!err.handled) {
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
