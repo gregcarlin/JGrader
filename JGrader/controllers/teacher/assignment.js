@@ -5,6 +5,16 @@ var _ = require('lodash');
 
 require('../../routes/common');
 
+module.exports.list = function(teacherId, callback) {
+  connection.query(queries.teacher.assignment.LIST,
+                   [teacherId], callback);
+};
+
+module.exports.listSections = function(teacherId, callback) {
+  connection.query(queries.teacher.assignment.LIST_SECTIONS,
+                   [teacherId], callback);
+};
+
 module.exports.create = function(teacherId, sectionId, name, desc,
                                  due, files, next) {
   // verify that teacher owns this section
@@ -40,6 +50,23 @@ module.exports.create = function(teacherId, sectionId, name, desc,
       query = query.substring(0, query.length - 1);
       connection.query(query, params, next);
     });
+  });
+};
+
+module.exports.exportOne = function(assignmentId, callback) {
+  connection.query(queries.teacher.assignment.CSV_INFO,
+                   [assignmentId], function(err, rows) {
+    if (err) return callback(err);
+
+    var output = 'Student,Submitted,Grade,Late\n';
+    _.each(rows, function(row) {
+      output += row.fname + ' ' + row.lname + ',' +
+                (row.submitted ? 'Yes' : 'No') + ',' +
+                (row.grade ? row.grade : 'None') + ',' +
+                (row.submitted ? (row.submitted > row.due ? 'Yes' : 'No') :
+                 (row.due > Date.now() ? 'Yes' : 'Not Yet')) + '\n';
+    });
+    callback(null, output);
   });
 };
 

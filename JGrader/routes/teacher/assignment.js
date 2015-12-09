@@ -69,8 +69,7 @@ var render = function(page, options, res) {
 
 // page that lists assignments
 router.get('/', function(req, res, next) {
-  connection.query(queries.teacher.assignment.LIST,
-                   [req.user.id], function(err, result) {
+  assignment.list(req.user.id, function(err, assignments) {
     if (err) {
       render('assignmentList', {
         rows: [],
@@ -80,14 +79,12 @@ router.get('/', function(req, res, next) {
       return next(err);
     }
 
-    render('assignmentList', {rows: result}, res);
+    render('assignmentList', {rows: assignments}, res);
   });
 });
 
 var assignmentCreate = function(req, res, next) {
-  connection.query("SELECT `id`,`name` FROM `sections` \
-                    WHERE `teacher_id` = ? ORDER BY `name` ASC",
-                    [req.user.id], function(err, rows) {
+  assignment.listSections(req.user.id, function(err, rows) {
     if (err) {
       render('assignmentCreate', {
         error: 'An unexpected error has occurred.',
@@ -137,10 +134,8 @@ router.post('/create', function(req, res, next) {
   var desc = req.body.desc;
   var due  = req.body.due;
   var secs = req.body.section;
-  if (!name || name.length <= 0 || !due || due.length <= 0) {
-    connection.query("SELECT `id`,`name` FROM `sections` \
-                      WHERE `teacher_id` = ? ORDER BY `name` ASC",
-                      [req.user.id], function(err, rows) {
+  if (!name || !due) {
+    assignment.listSections(req.user.id, function(err, rows) {
       if (err) return next(err);
 
       render('assignmentCreate', {
@@ -151,10 +146,8 @@ router.post('/create', function(req, res, next) {
         due: due
       }, res);
     });
-  } else if (!secs || secs.length <= 0) {
-    connection.query("SELECT `id`,`name` FROM `sections` \
-                      WHERE `teacher_id` = ? ORDER BY `name` ASC",
-                      [req.user.id], function(err, rows) {
+  } else if (!secs) {
+    assignment.listSections(req.user.id, function(err, rows) {
       if (err) return next(err);
 
       render('assignmentCreate', {
@@ -189,9 +182,7 @@ router.post('/create', function(req, res, next) {
 
 router.use('/:id', function(req, res, next) {
   connection.query({
-    sql: "SELECT * FROM `assignments` \
-          JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
-          WHERE `assignments`.`id` = ? AND `sections`.`teacher_id` = ?",
+    sql: queries.teacher.assignment.SECTIONS,
     nestTables: true,
     values: [req.params.id, req.user.id]
   }, function(err, result) {
@@ -211,22 +202,13 @@ router.use('/:id', function(req, res, next) {
 });
 
 router.get('/:id.csv', function(req, res, next) {
-  connection.query(queries.teacher.assignment.CSV_INFO,
-                   [req.params.id], function(err, rows) {
+  assignment.exportOne(req.params.id, function(err, output) {
     if (err) return next(err);
 
     res.setHeader('Content-Disposition', 'attachment; filename=assignment_' +
                   req.params.id + '.csv');
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Description', 'File Transfer');
-    var output = 'Student,Submitted,Grade,Late\n';
-    _.each(rows, function(row) {
-      output += row.fname + ' ' + row.lname + ',' +
-                (row.submitted ? 'Yes' : 'No') + ',' +
-                (row.grade ? row.grade : 'None') + ',' +
-                (row.submitted ? (row.submitted > row.due ? 'Yes' : 'No') :
-                 (row.due > Date.now() ? 'Yes' : 'Not Yet')) + '\n';
-    });
     res.send(output);
   });
 });

@@ -20,10 +20,12 @@ describe('Assignment', function() {
     ], done);
   });
 
-  describe('Create', function() {
+  describe('Create and List and List Sections', function() {
     var teacherId = _.uniqueId();
     var sectionId;
     var assignments;
+    var listed;
+    var listedSections;
 
     before(function(done) {
       async.series([
@@ -46,6 +48,18 @@ describe('Assignment', function() {
             assignments = _assignments;
             cb(err);
           });
+        },
+        function(cb) {
+          assignment.list(teacherId, function(err, results) {
+            listed = results;
+            cb(err);
+          });
+        },
+        function(cb) {
+          assignment.listSections(teacherId, function(err, results) {
+            listedSections = results;
+            cb(err);
+          });
         }
       ], done);
     });
@@ -55,6 +69,18 @@ describe('Assignment', function() {
       assert(assignments);
       assert.equal(assignments.length, 1);
       assert.equal(assignments[0].name, 'Test Assignment');
+    });
+
+    it('should list the created assignment', function() {
+      assert(listed)
+      assert.equal(listed.length, 1);
+      assert.equal(listed[0].aname, 'Test Assignment');
+    });
+
+    it('should list the section', function() {
+      assert(listedSections);
+      assert.equal(listedSections.length, 1);
+      assert.equal(listedSections[0].name, 'Test Class');
     });
   });
 
