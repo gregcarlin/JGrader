@@ -3,6 +3,7 @@
 
 express = require('express');
 creds   = require('./credentials');
+queries = require('../queries/queries');
 // router must be required separately otherwise routers will interfere with each other
 
 async = require('async');
@@ -13,13 +14,14 @@ var mailgun = require('mailgun-js')({
 });
 
 mysql      = require('mysql');
+var db = process.env.DB_MODE === 'local';
 connection = mysql.createPool({
   connectionLimit    : 10,
-  host               : process.env.SQL_HOST || creds.mysql_host,
-  port               : process.env.SQL_PORT || creds.mysql_port,
+  host               : process.env.SQL_HOST || (db ? '127.0.0.1' : creds.mysql_host),
+  port               : process.env.SQL_PORT || (db ? 3306 : creds.mysql_port),
   database           : process.env.SQL_DB || creds.mysql_db,
-  user               : process.env.SQL_USER || creds.mysql_user,
-  password           : process.env.SQL_PASS || creds.mysql_pass,
+  user               : process.env.SQL_USER || (db ? 'root' : creds.mysql_user),
+  password           : process.env.SQL_PASS || (db ? '' : creds.mysql_pass),
   multipleStatements : true
 });
 
