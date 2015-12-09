@@ -36,12 +36,7 @@ var render = function(page, options, res) {
 
 router.use('/:id', function(req, res, next) {
   connection.query({
-      sql: "SELECT * FROM `submissions` \
-            JOIN `assignments` \
-              ON `submissions`.`assignment_id` = `assignments`.`id` \
-            JOIN `sections` \
-              ON `assignments`.`section_id` = `sections`.`id` \
-            WHERE `submissions`.`id` = ? AND `sections`.`teacher_id` = ?",
+      sql: queries.teacher.submission.JOINS,
       nestTables: true,
       values: [req.params.id, req.user.id]
     }, function(err, result) {
@@ -194,17 +189,7 @@ router.post('/:id/updategrade/:grade', function(req, res, next) {
 });
 
 router.post('/:id/run/:fileIndex', function(req, res, next) {
-  connection.query("SELECT \
-                      `files`.`id`,\
-                      `files`.`name`,\
-                      `files`.`contents`,\
-                      `files`.`compiled`,\
-                      `submissions`.`student_id` \
-                    FROM `submissions`,`files` \
-                    WHERE \
-                      `submissions`.`id` = ? AND \
-                      `files`.`submission_id` = `submissions`.`id` \
-                    ORDER BY `files`.`id`",
+  connection.query(queries.teacher.submission.FILE,
                     [req.params.id], function(err, rows) {
     if (err) {
       res.json({ code: -1 }); // unknown
@@ -260,19 +245,7 @@ router.post('/:id/run/:fileIndex', function(req, res, next) {
 });
 
 router.get('/:id/test/:fileIndex', function(req, res, next) {
-  connection.query("SELECT \
-                      `files`.`id`,\
-                      `files`.`name`,\
-                      `files`.`compiled`,\
-                      `submissions`.`student_id` \
-                    FROM `submissions`,`assignments`,`sections`,`files` \
-                    WHERE \
-                      `submissions`.`assignment_id` = `assignments`.`id` AND \
-                      `assignments`.`section_id` = `sections`.`id` AND \
-                      `submissions`.`id` = ? AND \
-                      `sections`.`teacher_id` = ? AND \
-                      `files`.`submission_id` = `submissions`.`id` \
-                    ORDER BY `files`.`id`",
+  connection.query(queries.teacher.submission.FILE_EXTENDED,
                     [req.params.id, req.user.id], function(err, files) {
     if (err) {
       res.json({code: -1});
@@ -351,15 +324,7 @@ router.get('/:id/test/:fileIndex', function(req, res, next) {
 });
 
 router.get('/:id/download', function(req, res, next) {
-  connection.query("SELECT \
-                      `files`.`id`,\
-                      `files`.`name`,\
-                      `files`.`contents` \
-                    FROM `submissions`,`files` \
-                    WHERE \
-                      `submissions`.`id` = ? AND \
-                      `files`.`submission_id` = `submissions`.`id` \
-                    ORDER BY `files`.`id`",
+  connection.query(queries.teacher.submission.file,
                     [req.params.id], function(err, rows) {
     if (err) return next(err);
 
@@ -382,15 +347,7 @@ router.get('/:id/download', function(req, res, next) {
 });
 
 router.get('/:id/download/:fileIndex', function(req, res, next) {
-  connection.query("SELECT \
-                      `files`.`id`,\
-                      `files`.`name`,\
-                      `files`.`contents` \
-                    FROM `submissions`,`files` \
-                    WHERE \
-                      `submissions`.`id` = ? AND \
-                      `files`.`submission_id` = `submissions`.`id` \
-                    ORDER BY `files`.`id`",
+  connection.query(queries.teacher.submission.file,
                     [req.params.id], function(err, rows) {
     if (err) return next(err);
 

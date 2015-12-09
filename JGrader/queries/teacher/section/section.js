@@ -1,5 +1,5 @@
 module.exports = {
+  DELETE: 'delete',
   LIST: 'list',
-  CSV_INFO: 'csv_info',
   INFO: 'info'
 };

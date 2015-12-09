@@ -25,15 +25,7 @@ module.exports.remove = function(sectionId, callback) {
                    [sectionId], function(err, rows) {
     if (err) return callback(err);
 
-    connection.query("DELETE FROM `enrollment` WHERE `section_id` = ?;\
-                      DELETE `assignments`,`submissions`,`files` \
-                        FROM `assignments` \
-                        LEFT JOIN `submissions` \
-                          ON `submissions`.`assignment_id` = \
-                             `assignments`.`id` \
-                        LEFT JOIN `files` \
-                          ON `files`.`submission_id` = `submissions`.`id` \
-                        WHERE `assignments`.`section_id` = ?",
-                      [sectionId, sectionId], callback);
+    connection.query(queries.teacher.section.DELETE,
+                     [sectionId, sectionId], callback);
   });
 };

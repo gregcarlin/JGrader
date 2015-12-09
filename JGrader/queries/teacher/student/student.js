@@ -1,5 +1,6 @@
 module.exports = {
   LIST: 'list',
+  INFO: 'info',
   CSV_INFO: 'csv_info',
-  INFO: 'info'
+  SECTIONS: 'sections'
 };

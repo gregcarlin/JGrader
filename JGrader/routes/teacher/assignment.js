@@ -211,25 +211,8 @@ router.use('/:id', function(req, res, next) {
 });
 
 router.get('/:id.csv', function(req, res, next) {
-  connection.query("SELECT \
-                      `students`.`fname`,\
-                      `students`.`lname`,\
-                      `submissions`.`grade`,\
-                      `submissions`.`submitted`,\
-                      `assignments`.`due` \
-                    FROM \
-                      `students` \
-                      JOIN `enrollment` \
-                        ON `enrollment`.`student_id` = `students`.`id` \
-                      JOIN `sections` \
-                        ON `sections`.`id` = `enrollment`.`section_id` \
-                      JOIN `assignments` \
-                        ON `assignments`.`section_id` = `sections`.`id` \
-                      LEFT JOIN `submissions` \
-                        ON `submissions`.`assignment_id` = `assignments`.`id` \
-                        AND `submissions`.`student_id` = `students`.`id` \
-                      WHERE `assignments`.`id` = ?",
-                      [req.params.id], function(err, rows) {
+  connection.query(queries.teacher.assignment.CSV_INFO,
+                   [req.params.id], function(err, rows) {
     if (err) return next(err);
 
     res.setHeader('Content-Disposition', 'attachment; filename=assignment_' +
@@ -249,37 +232,7 @@ router.get('/:id.csv', function(req, res, next) {
 });
 
 router.get('/:id', function(req, res, next) {
-  connection.query("SELECT \
-                      `students`.`id`,\
-                      `students`.`fname`,\
-                      `students`.`lname`,\
-                      `submissions`.`id` AS `subID`,\
-                      `submissions`.`submitted`,\
-                      `submissions`.`grade`,\
-                      `submissions`.`main`,\
-                      `failed-tests`.`count` AS `failed_tests`,\
-                      `passed-tests`.`count` AS `passed_tests` \
-                    FROM `enrollment`,`students` \
-                    LEFT JOIN \
-                      `submissions` \
-                      ON `submissions`.`student_id` = `students`.`id` \
-                        AND `submissions`.`assignment_id` = ? \
-                    LEFT JOIN \
-                      (SELECT `submission_id`,COUNT(*) AS `count` \
-                        FROM `test-case-results` \
-                        WHERE `pass` = 0 \
-                        GROUP BY `submission_id`) AS `failed-tests` \
-                      ON `failed-tests`.`submission_id` = `submissions`.`id` \
-                    LEFT JOIN \
-                      (SELECT `submission_id`,COUNT(*) AS `count` \
-                        FROM `test-case-results` \
-                        WHERE `pass` = 1 \
-                        GROUP BY `submission_id`) AS `passed-tests` \
-                      ON `passed-tests`.`submission_id` = `submissions`.`id` \
-                    WHERE \
-                      `enrollment`.`student_id` = `students`.`id` AND \
-                      `enrollment`.`section_id` = ? \
-                    ORDER BY `students`.`lname`,`students`.`fname`",
+  connection.query(queries.teacher.assignment.INFO,
                     [req.params.id, req.section.id], function(err, results) {
     if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
