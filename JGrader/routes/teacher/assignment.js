@@ -7,6 +7,7 @@ var strftime = require('strftime');
 var multer = require('multer');
 var async = require('async');
 var _ = require('lodash');
+var errorCode = require('../../util/util').errorCode;
 
 var codeRunner = require('../../controllers/codeRunner');
 var assignment = require('../../controllers/teacher/assignment');
@@ -162,11 +163,11 @@ router.post('/create', function(req, res, next) {
     async.each(secs, function(sec, cb) {
       assignment.create(req.user.id, sec, name, desc, due, req.files, cb);
     }, function(err) {
-      if (err && !err.userMessage) return next(err);
+      if (err && !(err.jgCode && err.jgCode < 300)) return next(err);
 
       if (err) {
         render('assignmentCreate', {
-          error: err.userMessage,
+          error: errorCode(err.jgCode),
           name: name,
           desc: desc,
           due: due
@@ -257,13 +258,8 @@ router.get('/:id', function(req, res, next) {
 router.get('/:id/remove/:file', function(req, res, next) {
   assignment.removeFile(req.params.id, req.params.file, function(err) {
     if (err) {
-      if (!err.userMessage) {
-        err.userMessage = req.params.file +
-                          ' could not be removed. ' +
-                          'Please reload the page and try again.';
-      }
       res.redirect('/teacher/assignment/' + req.params.id + '?error=' +
-                   err.userMessage);
+                   (err.jgCode ? errorCode(jgCode) : errorCode(351, req.params.file)));
       err.handled = true;
       return next(err);
     }

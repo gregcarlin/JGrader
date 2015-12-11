@@ -32,7 +32,7 @@ module.exports.create = function(teacherId, sectionId, name, desc,
     connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, ?, ?)",
                      [sectionId, name, desc, due], function(err, rows) {
       if (err) {
-        err.userMessage = 'Invalid due date.';
+        err.jgCode = 2;
         return next(err);
       }
 
@@ -115,8 +115,7 @@ module.exports.removeFile = function(assignmentId, file, callback) {
 
     if (result[0].count > 0) {
       var err = new Error();
-      err.userMessage = 'You cannot remove files after students have ' +
-                        'already submitted code.';
+      err.jgCode = 51;
       return callback(err);
     } else {
       connection.query("DELETE FROM `files-teachers` \

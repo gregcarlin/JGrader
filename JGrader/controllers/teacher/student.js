@@ -31,7 +31,7 @@ module.exports.invite = function(sectionIds, teacherId, emails, callback) {
       }
       if (links.length <= 2) {
         var err = new Error();
-        err.userMessage = 'No invitations were sent because no valid sections were selected.';
+        err.jgCode = 3;
         return callback(err);
       }
 

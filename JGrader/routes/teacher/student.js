@@ -5,6 +5,7 @@ require('../common');
 var router = express.Router();
 var strftime = require('strftime');
 var _ = require('lodash');
+var errorCode = require('../../util/util').errorCode;
 
 var student = require('../../controllers/teacher/student');
 
@@ -75,29 +76,29 @@ router.post('/invite', function(req, res, next) {
       return next(err);
     }
 
-    if (req.body.emails && req.body.section) {
-      student.invite(req.body.section, req.user.id, req.body.emails, function(err, sent) {
-        if (err) {
-          render('studentInvite', {
-            error: err.userMessage || 'An unknown error has occurred.',
-            sections: rows
-          }, res);
-          err.handled = true;
-          return next(err);
-        }
-
-        render('studentInvite', {
-          success: 'Invitations have been sent to the following ' +
-                    'addresses: ' + sent,
-          sections: rows
-        }, res);
-      });
-    } else {
+    if (!req.body.emails) {
       render('studentInvite', {
         error: 'No emails were specified so no invitations were sent.',
         sections: rows
       }, res);
     }
+
+    student.invite(req.body.section, req.user.id, req.body.emails, function(err, sent) {
+      if (err) {
+        render('studentInvite', {
+          error: errorCode(err.jgCode || 300),
+          sections: rows
+        }, res);
+        err.handled = true;
+        return next(err);
+      }
+
+      render('studentInvite', {
+        success: 'Invitations have been sent to the following ' +
+                  'addresses: ' + sent,
+        sections: rows
+      }, res);
+    });
   });
 });
 

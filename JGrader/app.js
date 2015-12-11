@@ -86,7 +86,7 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  if (err.userMessage) return; // user error, no need to report
+  if (err.jgCode && err.jgCode < 300) return; // user error, no need to report
 
   console.error(err);
   console.error(err.stack);
