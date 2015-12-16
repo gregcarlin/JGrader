@@ -107,12 +107,11 @@ var postComment = function(req, res, next, type) {
         return res.json({code: 2}); // invalid permissions (i think this is the right code)
       }
 
-      var now = Date.now();
       connection.query("INSERT INTO `comments` \
                         VALUES(NULL, ?, ?, ?, '" + type + "', ?, \
-                          FROM_UNIXTIME(?), ?)",
+                          CURRENT_TIMESTAMP(), ?)",
                         [req.params.id, req.body.tab, req.body.line,
-                         req.user.id, now, req.body.text],
+                         req.user.id, req.body.text],
                         function(err, result) {
         if (err) {
           res.json({ code: -1 });
@@ -134,7 +133,7 @@ var postComment = function(req, res, next, type) {
             id: result.insertId,
             tab: req.body.tab,
             line: req.body.line,
-            timestamp: now,
+            timestamp: Date.now(),
             message: req.body.text,
             name: (user[0].fname + ' ' + user[0].lname),
             owns: true
