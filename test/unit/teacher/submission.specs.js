@@ -21,7 +21,7 @@ describe('Submission', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          connection.query('INSERT INTO `submissions` VALUES(NULL, ?, ?, NULL, NULL, NULL)', [1, 1], function(err, result) {
+          connection.query('INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), NULL, NULL)', [1, 1], function(err, result) {
             if (err) return cb(err);
 
             submissionId = result.insertId;

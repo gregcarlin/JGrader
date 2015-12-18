@@ -104,7 +104,7 @@ describe('Assignment', function() {
         },
         function(cb) {
           connection.query("INSERT INTO `assignments` \
-                            VALUES(NULL, ?, ?, NULL, NULL)",
+                            VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())",
                            [sectionId, 'Blah blah assignment'],
                            function(err, result) {
             if (err) return cb(err);
@@ -172,7 +172,7 @@ describe('Assignment', function() {
         },
         function(cb) {
           connection.query("INSERT INTO `assignments` \
-                            VALUES(NULL, ?, ?, NULL, NULL)",
+                            VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())",
                            [sectionId, 'Blah assignment'],
                            function(err, result) {
             if (err) return cb(err);
@@ -237,7 +237,7 @@ describe('Assignment', function() {
         },
         function(cb) {
           connection.query("INSERT INTO `assignments` \
-                            VALUES(NULL, ?, ?, NULL, NULL)",
+                            VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())",
                            [sectionId, 'Blah assignment'],
                            function(err, result) {
             if (err) return cb(err);
