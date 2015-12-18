@@ -37,3 +37,4 @@ bin
 temp
 uploads
 
+.DS_Store
