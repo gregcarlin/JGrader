@@ -81,6 +81,7 @@ describe('codeRunner', function() {
     });
 
     it('should run without issue', function() {
+      if (stderr) console.log(stderr);
       assert(!stderr);
       assert(!overTime);
     });
