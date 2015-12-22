@@ -351,7 +351,7 @@ var submit = function(req, res, next) {
         if (!toCompile) return next(null, 4); // must have at least one java file
 
         // compile the java files
-        exec("javac " + toCompile, function(err, stdout, stderr) {
+        codeRunner.compile(toCompile, function(err, stdout, stderr) {
           findMain(err, files, function(err, main) {
             if (err) return next(err, -1);
 

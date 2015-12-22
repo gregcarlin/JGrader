@@ -52,7 +52,9 @@ describe('codeRunner', function() {
     });
   });
 
-  describe('execute', function() {
+  describe('compile and execute', function() {
+    var compStderr;
+    var exists;
     var stdout;
     var stderr;
     var overTime;
@@ -63,7 +65,19 @@ describe('codeRunner', function() {
           fs.ensureDir('temp/test/', cb);
         },
         function(cb) {
-          fs.copy('test/data/Hello.class', 'temp/test/Hello.class', cb);
+          fs.copy('test/data/Hello.java', 'temp/test/Hello.java', cb);
+        },
+        function(cb) {
+          codeRunner.compile('temp/test/Hello.java', function(err, _stdout, _stderr) {
+            compStderr = _stderr;
+            cb(err);
+          });
+        },
+        function(cb) {
+          fs.access('temp/test/Hello.class', function(err) {
+            exists = !err;
+            cb(err);
+          });
         },
         function(cb) {
           codeRunner.execute('test', 'Hello', null,
@@ -78,6 +92,12 @@ describe('codeRunner', function() {
           fs.remove('temp/test/', cb);
         }
       ], done);
+    });
+
+    it('should compile without issue', function() {
+      if (compStderr) console.log(compStderr);
+      assert(!compStderr);
+      assert(exists);
     });
 
     it('should run without issue', function() {

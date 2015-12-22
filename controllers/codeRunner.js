@@ -39,6 +39,10 @@ var setupDirectory = module.exports.setupDirectory = function(files, callback) {
   });
 };
 
+module.exports.compile = function(toCompile, callback) {
+  exec('javac ' + toCompile, callback);
+};
+
 var execute =
     module.exports.execute =
     function(uniqueId, toExecute, input, callback) {
