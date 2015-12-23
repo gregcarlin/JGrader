@@ -8,7 +8,7 @@ hooks:
     - location: aws_scripts/stop.sh
       timeout: 600
   AfterInstall:
-    - location: aws_scripts/forever-install.sh
+    - location: aws_scripts/install-dependencies.sh
       timeout: 180
   ApplicationStart:
     - location: aws_scripts/start.sh
