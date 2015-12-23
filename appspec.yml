@@ -3,9 +3,3 @@ os: linux
 files:
   - source: /
     destination: /home/ec2-user/jGrader/
-hooks:
-  AfterInstall:
-    - location: aws_scripts/install-dependencies.sh
-      timeout: 180
-  ApplicationStart:
-    - location: aws_scripts/start.sh
