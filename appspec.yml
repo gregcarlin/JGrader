@@ -6,5 +6,9 @@ files:
 hooks:
   ApplicationStop:
     - location: aws_scripts/stop.sh
+  BeforeInstall:
+    - location: aws_scripts/remove-old.sh
+  AfterInstall:
+    - location: aws_scripts/add-dependencies.sh
   ApplicationStart:
     - location: aws_scripts/start.sh
