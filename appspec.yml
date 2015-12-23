@@ -4,9 +4,6 @@ files:
   - source: /
     destination: /home/ec2-user/jGrader/
 hooks:
-  ApplicationStop:
-    - location: aws_scripts/stop.sh
-      timeout: 600
   AfterInstall:
     - location: aws_scripts/install-dependencies.sh
       timeout: 180
