@@ -3,3 +3,8 @@ os: linux
 files:
   - source: /
     destination: /home/ec2-user/jGrader/
+hooks:
+  ApplicationStop:
+    - location: aws_scripts/stop.sh
+  ApplicationStart:
+    - location: aws_scripts/start.sh
