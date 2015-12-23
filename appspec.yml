@@ -2,4 +2,13 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /var/www/html/
+    destination: /home/ec2-user/jGrader/
+hooks:
+  ApplicationStop:
+    - location: aws_scripts/stop.sh
+      timeout: 600
+  AfterInstall:
+    - location: aws_scripts/forever-install.sh
+      timeout: 180
+  ApplicationStart:
+    - location: aws_scripts/start.sh
