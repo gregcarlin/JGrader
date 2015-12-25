@@ -3,12 +3,21 @@ os: linux
 files:
   - source: /
     destination: /home/ec2-user/jGrader/
+permissions:
+- object: /
+   pattern: "**"
+   owner: ec2-user
+   group: ec2-user
 hooks:
   ApplicationStop:
     - location: aws_scripts/stop.sh
+      runas: ec2-user
   BeforeInstall:
     - location: aws_scripts/remove-old.sh
+      runas: ec2-user
   AfterInstall:
     - location: aws_scripts/add-dependencies.sh
+      runas: ec2-user
   ApplicationStart:
     - location: aws_scripts/start.sh
+      runas: ec2-user
