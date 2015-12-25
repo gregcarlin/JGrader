@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /home/ec2-user/jGrader/
-npm start
+/usr/local/bin/npm start

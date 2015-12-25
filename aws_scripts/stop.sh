@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /home/ec2-user/jGrader/
-npm stop
+/usr/local/bin/npm stop
