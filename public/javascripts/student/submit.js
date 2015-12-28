@@ -58,6 +58,7 @@ myDropzone.on("success", function(file, response) {
   // fuck it, we're just going to alert errors
   switch (response.code) {
     case -1: // unknown error
+    case 301: // unknown error
     default: // we didn't handle something properly
       alert('An unknown error has occurred. ' +
             'Please reload the page and try again.');
@@ -65,24 +66,24 @@ myDropzone.on("success", function(file, response) {
     case 0: // all good
       window.location.href = document.URL; // reload page
       break;
-    case 1: // code can't compile
+    case 4: // code can't compile
       alert('Your code could not be compiled. Please fix it and try again.');
       break;
-    case 2: // invalid name
+    case 5: // invalid name
       alert('Some of your files have invalid names. ' +
             'Only alphanumeric characters and periods are allowed, ' +
             'and names must contain at least 6 characters. ' +
             'Please rename one or more of your files and try again.');
       break;
-    case 3: // already submitted
+    case 6: // already submitted
       alert('You already submitted this!. ' +
             'Please reload the page and try again.');
       break;
-    case 4: // no java files submitted
+    case 7: // no java files submitted
       alert('You must submit at least one java file. ' +
             'Make sure they end in .java');
       break;
-    case 5: // duplicate names
+    case 8: // duplicate names
       alert('No two files can share the same name.');
       break;
   }

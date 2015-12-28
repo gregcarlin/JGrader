@@ -1,0 +1,2 @@
+This is a perfectly valid text file.
+And this is a separate line.

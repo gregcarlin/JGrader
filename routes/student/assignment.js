@@ -13,6 +13,7 @@ var fs = require('fs-extra');
 var assignment = require('../../controllers/student/assignment');
 var comments = require('../../controllers/comments');
 var codeRunner = require('../../controllers/codeRunner');
+var errorCode = require('../../util/util').errorCode;
 
 var render = function(page, options, res) {
   options.page = 1;
@@ -118,236 +119,24 @@ router.use('/:id/submit', multer({
 }));
 
 router.post('/:id/submit', function(req, res, next) {
-  submit(req, res, function(err, data) {
+  assignment.submit(req.params.id, req.user.id, req.files, function(err) {
     if (err) {
       if (req.body.fallback) {
-        res.redirect('/student/assignment/' + req.params.id +
-                     '?error=An unknown error has occurred.');
+        res.redirect('/student/assignment/' + req.params.id + '?error=' + errorCode(err.jgCode || 301));
       } else {
-        res.json({ code: -1 }); // unknown
+        res.json({ code: err.jgCode });
       }
       err.handled = true;
       return next(err);
     }
 
-    data = data || 0;
-    if (!req.body.fallback) {
-      return res.json({ code: data });
-    } else if (data === 0) {
+    if (req.body.fallback) {
       return res.redirect('/student/assignment/' + req.params.id);
+    } else {
+      return res.json({ code: 0 });
     }
-
-    var msg = '';
-    switch (data) {
-      case -1:
-        msg = 'An unknown error has occurred.';
-        break;
-      case 1:
-        msg = 'Your code could not be compiled.';
-        break;
-      case 2:
-        msg = 'Some of your files have invalid names. ' +
-              'Only alphanumeric characters and periods are allowed, ' +
-              'and names must contain at least 6 characters.';
-        break;
-      case 3:
-        msg = 'You already submitted this!';
-        break;
-      case 4:
-        msg = 'You must submit at least one java file. ' +
-              'Make sure they end in .java';
-        break;
-      case 5:
-        msg = 'No two files can share the same name.';
-        break;
-    }
-    res.redirect('/student/assignment/' + req.params.id + '?error=' + msg);
   });
 });
-
-var findMain = function(err, files, callback) {
-  if (err) { // compilation error, treat all files as non-java files
-    _.each(files, function(file) {
-      file.isJava = false;
-    });
-    callback(null, null);
-  } else if (files.length == 1) { // only 1 file was submitted, so we mark it as containing the main
-    callback(null, files[0].name);
-  } else { // we must search for the main
-    async.map(files, function(file, cb) {
-      if (!file.isJava) return cb();
-
-      fs.readFile(file.path, function(err, data) {
-        if (err) return cb(err);
-
-        data = data.toString();
-        if (data.indexOf('main') >= 0) {
-          cb(null, file.name);
-        } else {
-          cb();
-        }
-      });
-    }, function(err, results) {
-      if (err) return callback(err);
-
-      var main = null;
-      for (var i = 0; i < results.length; i++) {
-        if (results[i]) {
-          if (main) { // multiple mains found
-            main = null;
-            break;
-          } else {
-            main = results[i];
-          }
-        }
-      }
-      callback(null, main);
-    });
-  }
-};
-
-// Submits the file into the mysql database
-var submit = function(req, res, next) {
-
-  // normalize file uploads into this files array
-  var files = [];
-  for (var key in req.files) {
-    for (var i = 0; i < req.files[key].length; i++) {
-      files.push(req.files[key][i]);
-    }
-  }
-
-  if (_.isEmpty(files)) return next(null, 1); // no files submitted
-
-  // first, check all the file names for legality
-  for (var i = 0; i < files.length; i++) {
-    if (!/^[a-zA-Z0-9.]+$/.test(files[i].name) || files[i].name.length < 6) { // if the name contains anything besides alphanumerical characters and periods or is too short (less than 6 chars)
-      return next(null, 2); // invalid name
-    }
-    for (var j = 0; j < files.length; j++) {
-      if (i == j) continue;
-      if (files[i].name == files[j].name) {
-        return next(null, 5); // duplicate names
-      }
-    }
-  }
-
-  // get attached teacher files
-  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` \
-                    WHERE `assignment_id` = ?",
-                    [req.params.id], function(err, teacherFiles) {
-    if (err) return next(err, -1);
-
-    // now, check to see if this student already submitted this assignment
-    connection.query("SELECT `id` FROM `submissions` \
-                      WHERE `student_id` = ? AND `assignment_id` = ?",
-                      [req.user.id, req.params.id], function(err, submissions) {
-      if (err) return next(err, -1);
-      if (submissions.length > 0) return next(null, 3);
-
-      var toCompile = '';
-      _.each(files, function(file) {
-        file.isJava = file.path.substr(file.path.length - 4)
-                      .toLowerCase() === 'java';
-        if (file.isJava) toCompile += file.path + ' ';
-      });
-
-      async.each(teacherFiles, function(teacherFile, cb) {
-        teacherFile.path = './temp/' + req.user.id + '/' + teacherFile.name;
-        teacherFile.isJava = teacherFile.name
-                             .substr(teacherFile.name.length - 4)
-                             .toLowerCase() == 'java';
-        if (teacherFile.isJava) toCompile += teacherFile.path + " ";
-        teacherFile.mimetype = teacherFile.mime;
-        files.push(teacherFile);
-        fs.writeFile(teacherFile.path, teacherFile.contents, cb);
-      }, function(err) {
-        if (err) return next(err);
-
-        if (!toCompile) return next(null, 4); // must have at least one java file
-
-        // compile the java files
-        codeRunner.compile(toCompile, function(err, stdout, stderr) {
-          findMain(err, files, function(err, main) {
-            if (err) return next(err, -1);
-
-            // finally, make necessary changes in database
-            connection.query("INSERT INTO `submissions` \
-                              VALUES(NULL, ?, ?, NOW(), NULL, ?)",
-                              [req.params.id, req.user.id, main],
-                              function(err, result) {
-              if (err) return next(err, -1);
-
-              var args = [];
-              var stmt = '';
-              async.map(files, function(file, cb) {
-                fs.readFile(file.path, cb);
-              }, function(err, javaResults) {
-                if (err) return next(err, -1);
-
-                async.map(files, function(file, cb) {
-                  if (file.isJava) {
-                    var path = file.path.substr(0, file.path.length - 4) +
-                               'class';
-                    fs.readFile(path, cb);
-                  } else {
-                    cb(null, null);
-                  }
-                }, function(err, classResults) {
-                  if (err) return next(err, -1);
-
-                  for (var i = 0; i < files.length; i++) {
-                    stmt += "(NULL,?,?,?,?,?),";
-                    args.push(result.insertId);
-                    args.push(files[i].name);
-                    args.push(javaResults[i]);
-                    args.push(classResults[i]);
-                    args.push(files[i].mimetype);
-                  }
-                  stmt = stmt.substr(0, stmt.length - 1); // remove last character from stmt (extraneous comma)
-
-                  connection.query("INSERT INTO `files` \
-                                    VALUES" + stmt, args,
-                                    function(err, fileResult) {
-                    if (err) return next(err);
-
-                    if (!main) {
-                      return codeRunner.cleanup(req.user.id, next);
-                    }
-                    main = main.substring(0, main.length - 5);
-
-                    connection.query("SELECT `id`,`input`,`output` \
-                                      FROM `test-cases` \
-                                      WHERE `assignment_id` = ?",
-                                      [req.params.id], function(err, tests) {
-                      if (err) return next(err);
-
-                      codeRunner.runTests(req.user.id,
-                                          main,
-                                          result.insertId,
-                                          tests,
-                                          function(err) {
-                        if (err) return next(err);
-
-                        codeRunner.cleanup(req.user.id, next);
-                      });
-                    });
-                  });
-                });
-              });
-
-            });
-
-          });
-        });
-
-      });
-
-    });
-
-  });
-
-};
 
 router.get('/:id/resubmit', function(req, res, next) {
   connection.query("SELECT `submissions`.`id` \
@@ -387,64 +176,16 @@ router.get('/:id/resubmit', function(req, res, next) {
   });
 });
 
-var handle = function(err, req, res, next) {
-  res.redirect('/student/assignment/' + req.params.id +
-               '?error=Unable to set main, please reload and try again.');
-  err.handled = true;
-  next(err);
-};
-
 router.get('/:id/chooseMain/:file', function(req, res, next) {
-  connection.query("UPDATE `submissions` SET `main` = ? \
-                    WHERE `assignment_id` = ? AND `student_id` = ?",
-                    [req.params.file, req.params.id, req.user.id],
-                    function(err, result) {
+  assignment.chooseMain(req.params.id, req.user.id, req.params.file, function(err) {
     if (err) {
-      return handle(err, req, res, next);
+      res.redirect('/student/assignment/' + req.params.id +
+                  '?error=' + errorCode(err.jgCode || 400));
+      err.handled = true;
+      return next(err);
     }
 
-    connection.query("SELECT `id` FROM `submissions` \
-                      WHERE `assignment_id` = ? AND `student_id` = ?",
-                      [req.params.id, req.user.id], function(err, result) {
-      if (err) return handle(err, req, res, next);
-
-      connection.query("SELECT \
-                          `files`.`id`,\
-                          `files`.`name`,\
-                          `files`.`contents`,\
-                          `files`.`compiled`,\
-                          `submissions`.`student_id` \
-                        FROM `files`,`submissions` \
-                        WHERE `files`.`submission_id` = `submissions`.`id` \
-                        AND `submissions`.`id` = ?",
-                        [result[0].id], function(err, files) {
-        if (err) return handle(err, req, res, next);
-
-        codeRunner.setupDirectory(files, function(err, uniqueIds) {
-          if (err) return handle(err, req, res, next);
-
-          var uniqueId = uniqueIds[files[0].student_id];
-          var main = req.params.file.substring(0, req.params.file.length - 5);
-
-          connection.query("SELECT `id`,`input`,`output` FROM `test-cases` \
-                            WHERE `assignment_id` = ?",
-                            [req.params.id], function(err, tests) {
-            if (err) return handle(err, req, res, next);
-
-            codeRunner.runTests(uniqueId, main, result[0].id,
-                                tests, function(err) {
-              if (err) return handle(err, req, res, next);
-
-              codeRunner.cleanup(uniqueId, function(err) {
-                if (err) return handle(err, req, res, next);
-
-                res.redirect('/student/assignment/' + req.params.id);
-              });
-            });
-          });
-        });
-      });
-    });
+    res.redirect('/student/assignment/' + req.params.id);
   });
 });
 
