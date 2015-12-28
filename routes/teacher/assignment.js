@@ -84,7 +84,9 @@ router.get('/', function(req, res, next) {
   });
 });
 
-var assignmentCreate = function(req, res, next) {
+
+// page for creating a new assignment
+router.get('/create/:preselect?', function(req, res, next) {
   assignment.listSections(req.user.id, function(err, rows) {
     if (err) {
       render('assignmentCreate', {
@@ -108,13 +110,7 @@ var assignmentCreate = function(req, res, next) {
       }, res);
     }
   });
-};
-
-// page for creating a new assignment
-router.get('/create', assignmentCreate);
-
-// same as above but one section is already checked
-router.get('/create/:preselect', assignmentCreate);
+});
 
 router.use('/create', multer({
   inMemory: true,

@@ -5,4 +5,5 @@ require('../routes/common');
 describe('Unit tests', function() {
   require('./unit/codeRunner.specs');
   require('./unit/teacher.specs');
+  require('./unit/student.specs');
 });

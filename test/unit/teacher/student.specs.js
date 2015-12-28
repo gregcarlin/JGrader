@@ -24,7 +24,7 @@ describe('Student', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          var hash = bcrypt.hash('password', 10, function(err, hash) {
+          bcrypt.hash('password', 10, function(err, hash) {
             if (err) return cb(err);
 
             connection.query("INSERT INTO `teachers` VALUES(NULL, ?, ?, ?, ?, NULL)", ['hi@test.com', hash, 'Hi', 'Test'], function(err, result) {
