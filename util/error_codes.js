@@ -12,6 +12,9 @@ var table = {
   6: 'You already submitted this!',
   7: 'You must submit at least one java file. Make sure they end in .java',
   8: 'No two files can share the same name.',
+  9: 'You must enter a class code.',
+  10: 'That is not a valid class code.',
+  11: 'You are already enrolled in that class.',
   50: 'Invalid state.',
   51: 'You cannot remove files after students have already submitted code.',
 
