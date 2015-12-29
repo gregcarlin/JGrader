@@ -17,6 +17,7 @@ describe('Submission', function() {
     var submissionId;
     var withGrade;
     var withoutGrade;
+    var invalidErr;
 
     before(function(done) {
       async.series([
@@ -30,6 +31,12 @@ describe('Submission', function() {
         },
         function(cb) {
           submission.setGrade(submissionId, 66, cb);
+        },
+        function(cb) {
+          submission.setGrade(submissionId, 'hi', function(err) {
+            invalidErr = err;
+            cb();
+          });
         },
         function(cb) {
           connection.query('SELECT * FROM `submissions` WHERE `id` = ?', [submissionId], function(err, result) {
@@ -56,6 +63,11 @@ describe('Submission', function() {
     it('should set to something', function() {
       assert.equal(withGrade.length, 1);
       assert.equal(withGrade[0].grade, 66);
+    });
+
+    it('should not allow non-numerical values', function() {
+      assert(invalidErr);
+      assert.equal(invalidErr.jgCode, 1);
     });
 
     it('should set to nothing', function() {

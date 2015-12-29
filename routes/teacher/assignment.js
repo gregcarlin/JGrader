@@ -290,7 +290,7 @@ router.post('/:id/add', function(req, res, next) {
 router.post('/:id/updatedesc/:desc', function(req, res, next) {
   assignment.setDescription(req.params.id, req.params.desc, function(err) {
     if (err) {
-      res.json({code: (err.code || -1)});
+      res.json({code: (err.jgCode || 300)});
       err.handled = true;
       return next(err);
     }

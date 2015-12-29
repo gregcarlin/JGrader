@@ -179,7 +179,7 @@ router.post('/:id/updategrade', function(req, res, next) {
 router.post('/:id/updategrade/:grade', function(req, res, next) {
   submission.setGrade(req.params.id, req.params.grade, function(err) {
     if (err) {
-      res.json({code: (err.code || -1)}); // -1 = unknown error
+      res.json({code: (err.jgCode || 300)}); // 300 = unknown error
       err.handled = true;
       return next(err);
     }

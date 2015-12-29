@@ -17,6 +17,7 @@ var table = {
   11: 'You are already enrolled in that class.',
   50: 'Invalid state.',
   51: 'You cannot remove files after students have already submitted code.',
+  52: 'You cannot add files after students have already submitted code.',
 
   // 300-599 = operation error (neither user nor programmer is at fault, eg. db connection timeout)
   300: 'An error has occurred, please reload the page and try again.',

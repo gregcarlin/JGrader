@@ -282,12 +282,31 @@ describe('Assignment', function() {
     var afterMain;
 
     before(function(done) {
+      this.timeout(10000);
       async.series([
         function(cb) {
           connection.query("TRUNCATE `submissions`", cb);
         },
         function(cb) {
           connection.query("TRUNCATE `files`", cb);
+        },
+        function(cb) {
+          connection.query("TRUNCATE `files-teachers`", cb);
+        },
+        function(cb) {
+          fs.readFile('test/data/lenna.png', function(err, data) {
+            if (err) return cb(err);
+
+            connection.query("INSERT INTO `files-teachers` VALUES(NULL, ?, ?, ?, ?)", [assignmentId, 'lenna.png', data, 'image/png'], cb);
+          });
+        },
+        function(cb) {
+          fs.ensureDir('temp/' + studentId + '/', cb);
+        },
+        function(cb) {
+          async.each(['DependA.java', 'DependB.java', 'files.json'], function(name, callback) {
+            fs.copy('test/data/' + name, 'temp/' + studentId + '/' + name, callback);
+          }, cb);
         },
         function(cb) {
           assignment.submit(assignmentId, studentId, {
@@ -297,7 +316,7 @@ describe('Assignment', function() {
               name: 'DependA.java',
               encoding: '7bit',
               mimetype: 'application/octet-stream',
-              path: 'test/data/DependA.java',
+              path: 'temp/' + studentId + '/DependA.java',
               extension: 'java',
               size: 225,
               truncated: false,
@@ -309,7 +328,7 @@ describe('Assignment', function() {
               name: 'DependB.java',
               encoding: '7bit',
               mimetype: 'application/octet-stream',
-              path: 'test/data/DependB.java',
+              path: 'temp/' + studentId + '/DependB.java',
               extension: 'java',
               size: 146,
               truncated: false,
@@ -321,7 +340,7 @@ describe('Assignment', function() {
               name: 'files.json',
               encoding: '7bit',
               mimetype: 'application/json',
-              path: 'test/data/files.json',
+              path: 'temp/' + studentId + '/files.json',
               extension: 'json',
               size: 166,
               truncated: false,
@@ -337,7 +356,7 @@ describe('Assignment', function() {
               name: 'Hello.java',
               encoding: '7bit',
               mimetype: 'application/octet-stream',
-              path: 'test/data/Hello.java',
+              path: 'temp/' + studentId + '/Hello.java',
               extension: 'java',
               size: 118,
               truncated: false,
@@ -363,12 +382,6 @@ describe('Assignment', function() {
           });
         },
         function(cb) {
-          fs.unlink('test/data/DependA.class', cb);
-        },
-        function(cb) {
-          fs.unlink('test/data/DependB.class', cb);
-        },
-        function(cb) {
           assignment.chooseMain(assignmentId, studentId, 'DependA.java', cb);
         },
         function(cb) {
@@ -388,13 +401,15 @@ describe('Assignment', function() {
 
     it('should upload the files', function() {
       assert(files);
-      assert.equal(files.length, 3);
+      assert.equal(files.length, 4);
       assert.equal(files[0].name, 'DependA.java');
       assert(files[0].compiled);
       assert.equal(files[1].name, 'DependB.java');
       assert(files[1].compiled);
       assert.equal(files[2].name, 'files.json');
       assert(!files[2].compiled);
+      assert.equal(files[3].name, 'lenna.png');
+      assert(!files[3].compiled);
     });
 
     it('should not allow overriding submissions', function() {

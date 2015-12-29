@@ -4,6 +4,7 @@
 var _ = require('lodash');
 
 require('../../routes/common');
+var jgError = require('../../util/util').errorCode.jgError;
 
 module.exports.list = function(teacherId, callback) {
   connection.query(queries.teacher.assignment.LIST,
@@ -82,28 +83,26 @@ module.exports.addFile = function(assignmentId, file, callback) {
     if (err) return callback(err);
 
     if (result[0].count > 0) {
-      var err = new Error();
-      err.code = 1;
-      callback(err);
-    } else {
-      connection.query("SELECT `name` FROM `files-teachers` \
-                        WHERE `assignment_id` = ?",
-                       [assignmentId], function(err, result) {
-        if (err) return callback(err);
-
-        _.each(result, function(r) {
-          if (r.name == file.name) {
-            var err = new Error();
-            err.code = 2;
-            return callback(err);
-          }
-        });
-
-        connection.query("INSERT INTO `files-teachers` VALUES(NULL,?,?,?,?)",
-                          [assignmentId, file.name, file.buffer, file.mimetype],
-                          callback);
-      });
+      return callback(jgError(52));
     }
+
+    connection.query("SELECT `name` FROM `files-teachers` \
+                      WHERE `assignment_id` = ?",
+                      [assignmentId], function(err, result) {
+      if (err) return callback(err);
+
+      _.each(result, function(r) {
+        if (r.name == file.name) {
+          var err = new Error();
+          err.code = 2;
+          return callback(err);
+        }
+      });
+
+      connection.query("INSERT INTO `files-teachers` VALUES(NULL,?,?,?,?)",
+                        [assignmentId, file.name, file.buffer, file.mimetype],
+                        callback);
+    });
   });
 };
 
@@ -114,22 +113,18 @@ module.exports.removeFile = function(assignmentId, file, callback) {
     if (err) return callback(err);
 
     if (result[0].count > 0) {
-      var err = new Error();
-      err.jgCode = 51;
-      return callback(err);
-    } else {
-      connection.query("DELETE FROM `files-teachers` \
-                        WHERE `assignment_id` = ? AND `name` = ?",
-                        [assignmentId, file], callback);
+      return callback(jgError(51));
     }
+
+    connection.query("DELETE FROM `files-teachers` \
+                      WHERE `assignment_id` = ? AND `name` = ?",
+                      [assignmentId, file], callback);
   });
 };
 
 module.exports.setDescription = function(assignmentId, description, callback) {
   if (description.startsWith('<em>')) {
-    var err = new Error();
-    err.code = 1; // invalid input
-    return callback(err);
+    return callback(jgError(1)); // invalid input
   }
 
   connection.query("UPDATE `assignments` \
