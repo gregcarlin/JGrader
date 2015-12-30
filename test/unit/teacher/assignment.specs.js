@@ -103,6 +103,9 @@ describe('Assignment', function() {
     before(function(done) {
       async.series([
         function(cb) {
+          connection.query("TRUNCATE `submissions`", cb);
+        },
+        function(cb) {
           connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
                            [teacherId, 'Test Class', '87189'],
                            function(err, result) {

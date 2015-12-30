@@ -12,6 +12,7 @@ describe('Assignment', function() {
   var studentId = _.uniqueId();
   var sectionId;
   var assignmentId;
+  var submissionId;
 
   before(function(done) {
     async.series([
@@ -132,18 +133,72 @@ describe('Assignment', function() {
     var data;
 
     before(function(done) {
-      assignment.get(assignmentId, studentId, function(err, _data) {
-        data = _data;
-        done(err);
-      });
+      async.series([
+        function(cb) {
+          connection.query("TRUNCATE `files-teachers`", cb);
+        },
+        function(cb) {
+          connection.query("TRUNCATE `submissions`", cb);
+        },
+        function(cb) {
+          connection.query("TRUNCATE `files`", cb);
+        },
+        function(cb) {
+          connection.query("INSERT INTO `files-teachers` VALUES(NULL, ?, ?, ?, ?)",
+                           [assignmentId, 'another.txt', 'yoyo ma', 'text/plain'], cb);
+        },
+        function(cb) {
+          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), ?, NULL)",
+                           [assignmentId, studentId, 74], function(err, result) {
+            if (err) return cb(err);
+
+            submissionId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          connection.query("INSERT INTO `files` VALUES(NULL, ?, ?, ?, ?, ?),(NULL, ?, ?, ?, ?, ?)",
+                           [submissionId, 'test.txt', 'contents here', null, 'text/plain',
+                            submissionId, 'another.txt', 'yoyo ma', null, 'text/plain'], cb);
+        },
+        function(cb) {
+          assignment.get(assignmentId, studentId, function(err, _data) {
+            data = _data;
+            cb(err);
+          });
+        }
+      ], done);
     });
 
-    it('should return the correct data', function() {
-      // TODO actually add files to check data for
+    it('should return data', function() {
+      assert(data);
+    });
+
+    it('should return the correct file data', function() {
+      assert(data.fileData);
+      assert.equal(data.fileData.length, 2);
+      assert.equal(data.fileData[0].name, 'test.txt');
+      assert.equal(data.fileData[0].contents, 'contents here');
+      assert.equal(data.fileData[0].grade, 74);
+      assert.equal(data.fileData[1].name, 'another.txt');
+      assert.equal(data.fileData[1].contents, 'yoyo ma');
+      assert.equal(data.fileData[1].grade, 74);
+    });
+
+    it('should return the correct teacher file data', function() {
+      assert(data.teacherFiles);
+      assert.equal(data.teacherFiles.length, 1);
+      assert.equal(data.teacherFiles[0], 'another.txt');
+    });
+
+    it('should return correct other data', function() {
+      assert(!data.anyCompiled);
+      assert(!data.anyMain);
     });
   });
 
   describe('Submission failures', function() {
+    var assignment2Id;
     var nothing;
     var badName1;
     var badName2;
@@ -153,13 +208,30 @@ describe('Assignment', function() {
     before(function(done) {
       async.parallel([
         function(cb) {
-          assignment.submit(assignmentId, studentId, {}, function(err) {
+          connection.query("TRUNCATE `submissions`", cb);
+        },
+        function(cb) {
+          connection.query("TRUNCATE `files`", cb);
+        },
+        function(cb) {
+          connection.query("TRUNCATE `files-teachers`", cb);
+        },
+        function(cb) {
+          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())", [sectionId, 'okay'], function(err, result) {
+            if (err) return cb(err);
+
+            assignment2Id = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          assignment.submit(assignment2Id, studentId, {}, function(err) {
             nothing = err;
             cb();
           });
         },
         function(cb) {
-          assignment.submit(assignmentId, studentId, {
+          assignment.submit(assignment2Id, studentId, {
             'file[0]': [{
               fieldname: 'file[0]',
               originalname: 'bad#name.txt',
@@ -178,7 +250,7 @@ describe('Assignment', function() {
           });
         },
         function(cb) {
-          assignment.submit(assignmentId, studentId, {
+          assignment.submit(assignment2Id, studentId, {
             'file[0]': [{
               fieldname: 'file[0]',
               originalname: 's.txt',
@@ -197,7 +269,7 @@ describe('Assignment', function() {
           });
         },
         function(cb) {
-          assignment.submit(assignmentId, studentId, {
+          assignment.submit(assignment2Id, studentId, {
             'file[0]': [{
               fieldname: 'file[0]',
               originalname: 'valid.txt',
@@ -216,7 +288,7 @@ describe('Assignment', function() {
           });
         },
         function(cb) {
-          assignment.submit(assignmentId, studentId, {
+          assignment.submit(assignment2Id, studentId, {
             'file[0]': [{
               fieldname: 'file[0]',
               originalname: 'valid.txt',

@@ -245,7 +245,6 @@ describe('codeRunner', function() {
     var overTime;
 
     before(function(done) {
-      this.timeout(12000); // code is allowed to run for 10 seconds
       async.series([
         function(cb) {
           fs.ensureDir('temp/test/', cb);
@@ -294,6 +293,158 @@ describe('codeRunner', function() {
 
     it('should return the correct answer', function() {
       assert.equal(stdout, '21\n');
+    });
+  });
+
+  describe('Running tests', function() {
+    var sectionId = _.uniqueId();
+    var assignmentId;
+    var studentAId = _.uniqueId();
+    var studentBId = _.uniqueId();
+    var submissionAId;
+    var submissionBId;
+    var inputJava;
+    var wrongJava;
+    var inputCompiled;
+    var wrongCompiled;
+    var preResultsA;
+    var preResultsB;
+    var postResultsA;
+    var postResultsB;
+
+    before(function(done) {
+      this.timeout(5000);
+      async.series([
+        function(cb) {
+          connection.query("TRUNCATE `test-cases`", cb);
+        },
+        function(cb) {
+          connection.query("TRUNCATE `test-case-results`", cb);
+        },
+        function(cb) {
+          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())", [sectionId, 'Test'], function(err, result) {
+            if (err) return cb(err);
+
+            assignmentId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), NULL, ?)",
+                           [assignmentId, studentAId, 'Input.java'], function(err, result) {
+            if (err) return cb(err);
+
+            submissionAId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), NULL, ?)",
+                           [assignmentId, studentBId, 'WrongInput.java'], function(err, result) {
+            if (err) return cb(err);
+
+            submissionBId = result.insertId;
+            cb();
+          });
+        },
+        function(cb) {
+          fs.readFile('test/data/Input.java', function(err, _inputJava) {
+            inputJava = _inputJava;
+            cb(err);
+          });
+        },
+        function(cb) {
+          fs.readFile('test/data/WrongInput.java', function(err, _wrongJava) {
+            wrongJava = _wrongJava;
+            cb(err);
+          });
+        },
+        function(cb) {
+          codeRunner.compile('test/data/Input.java test/data/WrongInput.java', cb);
+        },
+        function(cb) {
+          fs.readFile('test/data/Input.class', function(err, _inputCompiled) {
+            inputCompiled = _inputCompiled;
+            cb(err);
+          });
+        },
+        function(cb) {
+          fs.readFile('test/data/WrongInput.class', function(err, _wrongCompiled) {
+            wrongCompiled = _wrongCompiled;
+            cb(err);
+          });
+        },
+        function(cb) {
+          connection.query("INSERT INTO `files` VALUES(NULL, ?, ?, ?, ?, ?),(NULL, ?, ?, ?, ?, ?)",
+                           [submissionAId, 'Input.java', inputJava, inputCompiled, 'application/octet-stream',
+                            submissionBId, 'WrongInput.java', wrongJava, wrongCompiled, 'application/octet-stream'], cb);
+        },
+        function(cb) {
+          connection.query("INSERT INTO `test-cases` VALUES(NULL, ?, ?, ?),(NULL, ?, ?, ?),(NULL, ?, ?, ?)",
+                           [assignmentId, 0, 0, assignmentId, 2, 6, assignmentId, 7, 21], cb);
+        },
+        function(cb) {
+          connection.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionAId], function(err, results) {
+            preResultsA = results;
+            cb(err);
+          });
+        },
+        function(cb) {
+          connection.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionBId], function(err, results) {
+            preResultsB = results;
+            cb(err);
+          });
+        },
+        function(cb) {
+          codeRunner.runTestsForAssignment(assignmentId, cb);
+        },
+        function(cb) {
+          fs.unlink('test/data/Input.class', cb);
+        },
+        function(cb) {
+          fs.unlink('test/data/WrongInput.class', cb);
+        },
+        function(cb) {
+          connection.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionAId], function(err, results) {
+            postResultsA = results;
+            cb(err);
+          });
+        },
+        function(cb) {
+          connection.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionBId], function(err, results) {
+            postResultsB = results;
+            cb(err);
+          });
+        }
+      ], done);
+    });
+
+    it('should run the test cases against all submissions for the assignment', function() {
+      assert(preResultsA);
+      assert.equal(preResultsA.length, 0);
+      assert(preResultsB);
+      assert.equal(preResultsB.length, 0);
+
+      assert(postResultsA);
+      assert(postResultsB);
+    });
+
+    it('should correctly identify good and bad code', function() {
+      assert.equal(postResultsA.length, 3);
+      assert.equal(postResultsA[0].result, 0);
+      assert(postResultsA[0].pass);
+      assert.equal(postResultsA[1].result, 6);
+      assert(postResultsA[1].pass);
+      assert.equal(postResultsA[2].result, 21);
+      assert(postResultsA[2].pass);
+
+      assert.equal(postResultsB.length, 3);
+      assert.equal(postResultsB[0].result, 0);
+      assert(postResultsB[0].pass);
+      assert.equal(postResultsB[1].result, 8);
+      assert(!postResultsB[1].pass);
+      assert.equal(postResultsB[2].result, 28);
+      assert(!postResultsB[2].pass);
     });
   });
 });

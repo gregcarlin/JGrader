@@ -58,11 +58,11 @@ module.exports.get = function(assignmentId, studentId, callback) {
                              `submissions`.`submitted`,\
                              `files`.`compiled`,\
                              `submissions`.`main` \
-                      FROM `files`, `students`, `assignments`, `submissions` \
+                      FROM `files`, `assignments`, `submissions` \
                       WHERE `submissions`.`assignment_id` = `assignments`.`id` \
-                        AND `submissions`.`student_id` = `students`.`id` \
+                        AND `submissions`.`student_id` = ? \
                         AND `files`.`submission_id`= `submissions`.`id` \
-                        AND `students`.`id` = ? AND `assignments`.`id` = ? \
+                        AND `assignments`.`id` = ? \
                       ORDER BY `files`.`id`",
                       [studentId, assignmentId], function(err, fileData) {
       if (err) return callback(err);
