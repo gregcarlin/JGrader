@@ -109,13 +109,34 @@ describe('Section', function() {
     var sectionId2;
     var enrolled;
     var enrolledDropped;
+    var noCodeErr;
+    var invalidCodeErr;
+    var dupErr;
 
     before(function(done) {
       async.series([
         function(cb) {
+          section.enroll(studentId2, '', function(err) {
+            noCodeErr = err;
+            cb();
+          });
+        },
+        function(cb) {
+          section.enroll(studentId2, 'lolol', function(err) {
+            invalidCodeErr = err;
+            cb();
+          });
+        },
+        function(cb) {
           section.enroll(studentId2, 'yoyoy', function(err, _sectionId2) {
             sectionId2 = _sectionId2;
             cb(err);
+          });
+        },
+        function(cb) {
+          section.enroll(studentId2, 'yoyoy', function(err) {
+            dupErr = err;
+            cb();
           });
         },
         function(cb) {
@@ -140,11 +161,26 @@ describe('Section', function() {
       assert.equal(sectionId2, sectionId);
     });
 
+    it('should not allow missing section codes', function() {
+      assert(noCodeErr);
+      assert.equal(noCodeErr.jgCode, 9);
+    });
+
+    it('should not allow invalid section codes', function() {
+      assert(invalidCodeErr);
+      assert.equal(invalidCodeErr.jgCode, 10);
+    });
+
     it('should enroll the student', function() {
       assert(enrolled);
       assert.equal(enrolled.length, 1);
       assert.equal(enrolled[0].section_id, sectionId2);
       assert.equal(enrolled[0].student_id, studentId2);
+    });
+
+    it('should not allow duplicate enrollments', function() {
+      assert(dupErr);
+      assert.equal(dupErr.jgCode, 11);
     });
 
     it('should then drop the student', function() {

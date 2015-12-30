@@ -4,6 +4,8 @@ var assert = require('assert');
 var _ = require('lodash');
 
 describe('codeRunner', function() {
+  this.timeout(4000);
+
   describe('setupDirectory and cleanup', function() {
     var files = require('../data/files');
     var uniqueId;
@@ -119,7 +121,7 @@ describe('codeRunner', function() {
     var overTime;
 
     before(function(done) {
-      this.timeout(12000); // code is allowed to run for 10 seconds
+      this.timeout(15000); // code is allowed to run for 10 seconds
       async.series([
         function(cb) {
           fs.ensureDir('temp/test/', cb);
@@ -313,7 +315,7 @@ describe('codeRunner', function() {
     var postResultsB;
 
     before(function(done) {
-      this.timeout(5000);
+      this.timeout(8000);
       async.series([
         function(cb) {
           connection.query("TRUNCATE `test-cases`", cb);
