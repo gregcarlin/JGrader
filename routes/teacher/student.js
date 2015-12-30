@@ -5,7 +5,7 @@ require('../common');
 var router = express.Router();
 var strftime = require('strftime');
 var _ = require('lodash');
-var errorCode = require('../../util/util').errorCode;
+var errorCode = require('../../util/errorCode');
 
 var student = require('../../controllers/teacher/student');
 

@@ -4,7 +4,7 @@
 var _ = require('lodash');
 
 require('../../routes/common');
-var jgError = require('../../util/util').errorCode.jgError;
+var jgError = require('../../util/errorCode').jgError;
 
 module.exports.list = function(teacherId, callback) {
   connection.query(queries.teacher.assignment.LIST,

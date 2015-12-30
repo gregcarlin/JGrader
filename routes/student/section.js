@@ -6,7 +6,7 @@ var router = express.Router();
 var strftime = require('strftime');
 
 var section = require('../../controllers/student/section');
-var errorCode = require('../../util/util').errorCode;
+var errorCode = require('../../util/errorCode');
 
 var render = function(page, options, res) {
   options.page = 0;

@@ -2,7 +2,7 @@
 // Copyright (c) 2015 JGrader. All rights reserved.
 
 require('../../routes/common');
-var jgError = require('../../util/util').errorCode.jgError;
+var jgError = require('../../util/errorCode').jgError;
 
 module.exports.list = function(studentId, callback) {
   connection.query("SELECT \

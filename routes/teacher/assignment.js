@@ -7,7 +7,7 @@ var strftime = require('strftime');
 var multer = require('multer');
 var async = require('async');
 var _ = require('lodash');
-var errorCode = require('../../util/util').errorCode;
+var errorCode = require('../../util/errorCode');
 
 var codeRunner = require('../../controllers/codeRunner');
 var assignment = require('../../controllers/teacher/assignment');

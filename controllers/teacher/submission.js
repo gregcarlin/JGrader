@@ -1,7 +1,7 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-var jgError = require('../../util/util').errorCode.jgError;
+var jgError = require('../../util/errorCode').jgError;
 
 module.exports.removeGrade = function(submissionId, callback) {
   connection.query("UPDATE `submissions` SET `grade` = NULL WHERE `id` = ?",

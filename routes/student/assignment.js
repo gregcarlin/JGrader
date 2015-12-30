@@ -13,7 +13,7 @@ var fs = require('fs-extra');
 var assignment = require('../../controllers/student/assignment');
 var comments = require('../../controllers/comments');
 var codeRunner = require('../../controllers/codeRunner');
-var errorCode = require('../../util/util').errorCode;
+var errorCode = require('../../util/errorCode');
 
 var render = function(page, options, res) {
   options.page = 1;

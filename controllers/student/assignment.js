@@ -7,7 +7,7 @@ var _ = require('lodash');
 var fs = require('fs-extra');
 
 var codeRunner = require('../../controllers/codeRunner');
-var jgError = require('../../util/util').errorCode.jgError;
+var jgError = require('../../util/errorCode').jgError;
 
 module.exports.list = function(studentId, callback) {
   connection.query("SELECT `sections`.`name`,\
