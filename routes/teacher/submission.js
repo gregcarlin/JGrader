@@ -1,11 +1,12 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('../common');
-var router = express.Router();
 var strftime = require('strftime');
 var JSZip = require('jszip');
 
+require('../common');
+var router = express.Router();
+var db = require('../../controllers/db');
 var comments = require('../../controllers/comments');
 var codeRunner = require('../../controllers/codeRunner');
 var submission = require('../../controllers/teacher/submission');
@@ -35,26 +36,26 @@ var render = function(page, options, res) {
 };
 
 router.use('/:id', function(req, res, next) {
-  connection.query({
-      sql: queries.teacher.submission.JOINS,
-      nestTables: true,
-      values: [req.params.id, req.user.id]
-    }, function(err, result) {
-      if (err) {
-        render('notFound', {error: 'An unexpected error has occurred.'}, res);
-        err.handled = true;
-        return next(err);
-      }
+  db.query({
+    sql: queries.teacher.submission.JOINS,
+    nestTables: true,
+    values: [req.params.id, req.user.id]
+  }, function(err, result) {
+    if (err) {
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
+      err.handled = true;
+      return next(err);
+    }
 
-      if (result.length <= 0) {
-        render('notFound', {}, res);
-      } else {
-        req.submission = result[0].submissions;
-        req.assignment = result[0].assignments;
-        req.section = result[0].sections;
-        next();
-      }
-    });
+    if (result.length <= 0) {
+      render('notFound', {}, res);
+    } else {
+      req.submission = result[0].submissions;
+      req.assignment = result[0].assignments;
+      req.section = result[0].sections;
+      next();
+    }
+  });
 });
 
 var handle = function(err, req, student, res, next) {
@@ -76,23 +77,23 @@ var handle = function(err, req, student, res, next) {
 };
 
 router.get('/:id', function(req, res, next) {
-  connection.query("SELECT `id`,`fname`,`lname` FROM `students` WHERE `id` = ?",
-                   [req.submission.student_id], function(err, students) {
+  db.query("SELECT `id`,`fname`,`lname` FROM `students` WHERE `id` = ?",
+            [req.submission.student_id], function(err, students) {
     if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
       return next(err);
     }
 
-    connection.query("SELECT `id`,`name`,`contents`,`compiled`,`mime` \
-                      FROM `files` \
-                      WHERE `submission_id` = ? ORDER BY `id`",
-                      [req.params.id], function(err, fileData) {
+    db.query("SELECT `id`,`name`,`contents`,`compiled`,`mime` \
+              FROM `files` \
+              WHERE `submission_id` = ? ORDER BY `id`",
+              [req.params.id], function(err, fileData) {
       if (err) return handle(err, req, students[0], res, next);
 
-      connection.query("SELECT `name` FROM `files-teachers` \
-                        WHERE `assignment_id` = ?",
-                        [req.assignment.id], function(err, teacherFiles) {
+      db.query("SELECT `name` FROM `files-teachers` \
+                WHERE `assignment_id` = ?",
+                [req.assignment.id], function(err, teacherFiles) {
         if (err) return handle(err, req, students[0], res, next);
 
         var anyCompiled = false;
@@ -122,15 +123,15 @@ router.get('/:id', function(req, res, next) {
         for (var i = 0; i < teacherFiles.length; i++) {
           teacherNames.push(teacherFiles[i].name);
         }
-        connection.query("SELECT \
-                            `submissions`.`id` \
-                          FROM \
-                            `submissions` \
-                            JOIN `students` \
-                              ON `submissions`.`student_id` = `students`.`id` \
-                          WHERE `submissions`.`assignment_id` = ? \
-                          ORDER BY `students`.`lname`,`students`.`fname`",
-                          [req.assignment.id], function(err, others) {
+        db.query("SELECT \
+                    `submissions`.`id` \
+                  FROM \
+                    `submissions` \
+                    JOIN `students` \
+                      ON `submissions`.`student_id` = `students`.`id` \
+                  WHERE `submissions`.`assignment_id` = ? \
+                  ORDER BY `students`.`lname`,`students`.`fname`",
+                  [req.assignment.id], function(err, others) {
           if (err) return handle(err, req, students[0], res, next);
 
           var previous = -1;
@@ -189,8 +190,8 @@ router.post('/:id/updategrade/:grade', function(req, res, next) {
 });
 
 router.post('/:id/run/:fileIndex', function(req, res, next) {
-  connection.query(queries.teacher.submission.FILE,
-                    [req.params.id], function(err, rows) {
+  db.query(queries.teacher.submission.FILE,
+           [req.params.id], function(err, rows) {
     if (err) {
       res.json({ code: -1 }); // unknown
       err.handled = true;
@@ -245,17 +246,17 @@ router.post('/:id/run/:fileIndex', function(req, res, next) {
 });
 
 router.get('/:id/test/:fileIndex', function(req, res, next) {
-  connection.query(queries.teacher.submission.FILE_EXTENDED,
-                    [req.params.id, req.user.id], function(err, files) {
+  db.query(queries.teacher.submission.FILE_EXTENDED,
+           [req.params.id, req.user.id], function(err, files) {
     if (err) {
       res.json({code: -1});
       err.handled = true;
       return next(err);
     }
 
-    connection.query("SELECT `id`,`input`,`output` FROM `test-cases` \
-                      WHERE `assignment_id` = ?",
-                     [req.assignment.id], function(err, tests) {
+    db.query("SELECT `id`,`input`,`output` FROM `test-cases` \
+              WHERE `assignment_id` = ?",
+              [req.assignment.id], function(err, tests) {
       if (err) {
         res.json({code: -1});
         err.handled = true;
@@ -324,8 +325,8 @@ router.get('/:id/test/:fileIndex', function(req, res, next) {
 });
 
 router.get('/:id/download', function(req, res, next) {
-  connection.query(queries.teacher.submission.file,
-                    [req.params.id], function(err, rows) {
+  db.query(queries.teacher.submission.file,
+           [req.params.id], function(err, rows) {
     if (err) return next(err);
 
     if (rows.length <= 0) {
@@ -347,8 +348,7 @@ router.get('/:id/download', function(req, res, next) {
 });
 
 router.get('/:id/download/:fileIndex', function(req, res, next) {
-  connection.query(queries.teacher.submission.file,
-                    [req.params.id], function(err, rows) {
+  db.query(queries.teacher.submission.file, [req.params.id], function(err, rows) {
     if (err) return next(err);
 
     if (rows.length <= 0) {

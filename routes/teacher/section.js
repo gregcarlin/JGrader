@@ -1,10 +1,11 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('../common');
 var strftime = require('strftime');
-var router = express.Router();
 
+require('../common');
+var router = express.Router();
+var db = require('../../controllers/db');
 var section = require('../../controllers/teacher/section');
 
 var render = function(page, options, res) {
@@ -40,8 +41,7 @@ var render = function(page, options, res) {
 
 // page for listing sections
 router.get('/', function(req, res, next) {
-  connection.query(queries.teacher.section.LIST,
-                   [req.user.id], function(err, rows) {
+  db.query(queries.teacher.section.LIST, [req.user.id], function(err, rows) {
     if (err) {
       render('sectionList', {
         rows: [],
@@ -86,9 +86,9 @@ router.post('/create', function(req, res, next) {
 });
 
 router.use('/:id', function(req, res, next) {
-  connection.query("SELECT * FROM `sections` \
-                    WHERE `id` = ? AND `teacher_id` = ?",
-                    [req.params.id, req.user.id], function(err, result) {
+  db.query("SELECT * FROM `sections` \
+            WHERE `id` = ? AND `teacher_id` = ?",
+            [req.params.id, req.user.id], function(err, result) {
     if (err) {
       render('notFound', {error: 'An unknown error has occurred.'}, res);
       err.handled = true;
@@ -106,8 +106,7 @@ router.use('/:id', function(req, res, next) {
 
 // page providing info on a specific section
 router.get('/:id', function(req, res, next) {
-  connection.query(queries.teacher.section.INFO,
-                    [req.params.id, req.params.id], function(err, results) {
+  db.query(queries.teacher.section.INFO, [req.params.id, req.params.id], function(err, results) {
     if (err) {
       render('notFound', {error: 'Error getting section'}, res);
       err.handled = true;

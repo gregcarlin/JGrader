@@ -1,70 +1,70 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('../../routes/common');
-
 var _ = require('lodash');
 var fs = require('fs-extra');
 
-var codeRunner = require('../../controllers/codeRunner');
+require('../../routes/common');
+var db = require('../db');
+var codeRunner = require('../codeRunner');
 var jgError = require('../../util/errorCode').jgError;
 
 module.exports.list = function(studentId, callback) {
-  connection.query("SELECT `sections`.`name`,\
-                           `teachers`.`fname`,\
-                           `teachers`.`lname`,\
-                           `assignments`.`name` AS `assignmentName`,\
-                           `assignments`.`due`,\
-                           `assignments`.`id`,\
-                           `submissions`.`submitted` \
-                    FROM `sections`, `teachers`,`enrollment`,`assignments` \
-                    LEFT JOIN `submissions` \
-                      ON `submissions`.`assignment_id` = `assignments`.`id` \
-                      AND `submissions`.`student_id` = ? \
-                    WHERE `enrollment`.`student_id` = ? \
-                    AND `enrollment`.`section_id` = `assignments`.`section_id` \
-                    AND `sections`.`id` = `enrollment`.`section_id` \
-                    AND `sections`.`teacher_id`=`teachers`.`id`",
-                    [studentId, studentId], callback);
+  db.query("SELECT `sections`.`name`,\
+                    `teachers`.`fname`,\
+                    `teachers`.`lname`,\
+                    `assignments`.`name` AS `assignmentName`,\
+                    `assignments`.`due`,\
+                    `assignments`.`id`,\
+                    `submissions`.`submitted` \
+            FROM `sections`, `teachers`,`enrollment`,`assignments` \
+            LEFT JOIN `submissions` \
+              ON `submissions`.`assignment_id` = `assignments`.`id` \
+              AND `submissions`.`student_id` = ? \
+            WHERE `enrollment`.`student_id` = ? \
+            AND `enrollment`.`section_id` = `assignments`.`section_id` \
+            AND `sections`.`id` = `enrollment`.`section_id` \
+            AND `sections`.`teacher_id`=`teachers`.`id`",
+            [studentId, studentId], callback);
 };
 
 module.exports.verify = function(assignmentId, studentId, callback) {
-  connection.query({
-      sql: "SELECT `assignments`.*,`sections`.* \
-            FROM `assignments` \
-            JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
-            JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
-            WHERE `assignments`.`id` = ? AND `enrollment`.`student_id` = ?",
-      nestTables: true,
-      values: [assignmentId, studentId]
-    }, function(err, result) {
-      if (err) return callback(err);
-      if (result.length <= 0) return callback(null, null, null);
+  db.query({
+    sql: "SELECT `assignments`.*,`sections`.* \
+          FROM `assignments` \
+          JOIN `sections` ON `assignments`.`section_id` = `sections`.`id` \
+          JOIN `enrollment` ON `sections`.`id` = `enrollment`.`section_id` \
+          WHERE `assignments`.`id` = ? AND `enrollment`.`student_id` = ?",
+    nestTables: true,
+    values: [assignmentId, studentId]
+  }, function(err, result) {
+    if (err) return callback(err);
+    if (result.length <= 0) return callback(null, null, null);
 
-      callback(null, result[0].assignments, result[0].sections);
+    callback(null, result[0].assignments, result[0].sections);
   });
 };
 
 module.exports.get = function(assignmentId, studentId, callback) {
-  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` \
-                    WHERE `assignment_id` = ?",
-                    [assignmentId], function(err, teacherFiles) {
+  db.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` \
+            WHERE `assignment_id` = ?",
+            [assignmentId], function(err, teacherFiles) {
     if (err) return callback(err);
 
-    connection.query("SELECT `files`.`name`,\
-                             `files`.`contents`,\
-                             `files`.`mime`,\
-                             `submissions`.`grade`,\
-                             `submissions`.`submitted`,\
-                             `files`.`compiled`,\
-                             `submissions`.`main` \
-                      FROM `files`, `assignments`, `submissions` \
-                      WHERE `submissions`.`assignment_id` = `assignments`.`id` \
-                        AND `submissions`.`student_id` = ? \
-                        AND `files`.`submission_id`= `submissions`.`id` \
-                        AND `assignments`.`id` = ? \
-                      ORDER BY `files`.`id`",
-                      [studentId, assignmentId], function(err, fileData) {
+    db.query("SELECT `files`.`name`,\
+                     `files`.`contents`,\
+                     `files`.`mime`,\
+                     `submissions`.`grade`,\
+                     `submissions`.`submitted`,\
+                     `files`.`compiled`,\
+                     `submissions`.`main` \
+              FROM `files`, `assignments`, `submissions` \
+              WHERE `submissions`.`assignment_id` = `assignments`.`id` \
+                AND `submissions`.`student_id` = ? \
+                AND `files`.`submission_id`= `submissions`.`id` \
+                AND `assignments`.`id` = ? \
+              ORDER BY `files`.`id`",
+              [studentId, assignmentId], function(err, fileData) {
       if (err) return callback(err);
 
       var anyCompiled = false;
@@ -181,15 +181,15 @@ module.exports.submit = function(assignmentId, studentId, _files, callback) {
   }
 
   // get attached teacher files
-  connection.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` \
-                    WHERE `assignment_id` = ?",
-                    [assignmentId], function(err, teacherFiles) {
+  db.query("SELECT `name`,`contents`,`mime` FROM `files-teachers` \
+            WHERE `assignment_id` = ?",
+            [assignmentId], function(err, teacherFiles) {
     if (err) return callback(err);
 
     // now, check to see if this student already submitted this assignment
-    connection.query("SELECT `id` FROM `submissions` \
-                      WHERE `student_id` = ? AND `assignment_id` = ?",
-                      [studentId, assignmentId], function(err, submissions) {
+    db.query("SELECT `id` FROM `submissions` \
+              WHERE `student_id` = ? AND `assignment_id` = ?",
+              [studentId, assignmentId], function(err, submissions) {
       if (err) return callback(err);
       if (submissions.length > 0) return callback(jgError(6));
 
@@ -220,10 +220,10 @@ module.exports.submit = function(assignmentId, studentId, _files, callback) {
             if (err) return callback(err);
 
             // finally, make necessary changes in database
-            connection.query("INSERT INTO `submissions` \
-                              VALUES(NULL, ?, ?, NOW(), NULL, ?)",
-                              [assignmentId, studentId, main],
-                              function(err, result) {
+            db.query("INSERT INTO `submissions` \
+                      VALUES(NULL, ?, ?, NOW(), NULL, ?)",
+                      [assignmentId, studentId, main],
+                      function(err, result) {
               if (err) return callback(err);
 
               var args = [];
@@ -254,9 +254,9 @@ module.exports.submit = function(assignmentId, studentId, _files, callback) {
                   }
                   stmt = stmt.substr(0, stmt.length - 1); // remove last character from stmt (extraneous comma)
 
-                  connection.query("INSERT INTO `files` \
-                                    VALUES" + stmt, args,
-                                    function(err, fileResult) {
+                  db.query("INSERT INTO `files` \
+                            VALUES" + stmt, args,
+                            function(err, fileResult) {
                     if (err) return callback(err);
 
                     if (!main) {
@@ -264,10 +264,10 @@ module.exports.submit = function(assignmentId, studentId, _files, callback) {
                     }
                     main = main.substring(0, main.length - 5);
 
-                    connection.query("SELECT `id`,`input`,`output` \
-                                      FROM `test-cases` \
-                                      WHERE `assignment_id` = ?",
-                                      [assignmentId], function(err, tests) {
+                    db.query("SELECT `id`,`input`,`output` \
+                              FROM `test-cases` \
+                              WHERE `assignment_id` = ?",
+                              [assignmentId], function(err, tests) {
                       if (err) return callback(err);
 
                       codeRunner.runTests(studentId,
@@ -298,29 +298,29 @@ module.exports.submit = function(assignmentId, studentId, _files, callback) {
 };
 
 module.exports.chooseMain = function(assignmentId, studentId, fileName, callback) {
-  connection.query("UPDATE `submissions` SET `main` = ? \
-                    WHERE `assignment_id` = ? AND `student_id` = ?",
-                    [fileName, assignmentId, studentId],
-                    function(err, result) {
+  db.query("UPDATE `submissions` SET `main` = ? \
+            WHERE `assignment_id` = ? AND `student_id` = ?",
+            [fileName, assignmentId, studentId],
+            function(err, result) {
     if (err) {
       return callback(err);
     }
 
-    connection.query("SELECT `id` FROM `submissions` \
-                      WHERE `assignment_id` = ? AND `student_id` = ?",
-                      [assignmentId, studentId], function(err, result) {
+    db.query("SELECT `id` FROM `submissions` \
+              WHERE `assignment_id` = ? AND `student_id` = ?",
+              [assignmentId, studentId], function(err, result) {
       if (err) return callback(err);
 
-      connection.query("SELECT \
-                          `files`.`id`,\
-                          `files`.`name`,\
-                          `files`.`contents`,\
-                          `files`.`compiled`,\
-                          `submissions`.`student_id` \
-                        FROM `files`,`submissions` \
-                        WHERE `files`.`submission_id` = `submissions`.`id` \
-                        AND `submissions`.`id` = ?",
-                        [result[0].id], function(err, files) {
+      db.query("SELECT \
+                  `files`.`id`,\
+                  `files`.`name`,\
+                  `files`.`contents`,\
+                  `files`.`compiled`,\
+                  `submissions`.`student_id` \
+                FROM `files`,`submissions` \
+                WHERE `files`.`submission_id` = `submissions`.`id` \
+                AND `submissions`.`id` = ?",
+                [result[0].id], function(err, files) {
         if (err) return callback(err);
 
         codeRunner.setupDirectory(files, function(err, uniqueIds) {
@@ -329,9 +329,9 @@ module.exports.chooseMain = function(assignmentId, studentId, fileName, callback
           var uniqueId = uniqueIds[files[0].student_id];
           var main = fileName.substring(0, fileName.length - 5);
 
-          connection.query("SELECT `id`,`input`,`output` FROM `test-cases` \
-                            WHERE `assignment_id` = ?",
-                            [assignmentId], function(err, tests) {
+          db.query("SELECT `id`,`input`,`output` FROM `test-cases` \
+                    WHERE `assignment_id` = ?",
+                    [assignmentId], function(err, tests) {
             if (err) return callback(err);
 
             codeRunner.runTests(uniqueId, main, result[0].id,

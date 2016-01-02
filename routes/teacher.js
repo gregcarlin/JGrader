@@ -1,12 +1,13 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('./common');
-var router = express.Router();
 var strftime = require('strftime');
 var bcrypt = require('bcrypt');
 var _ = require('lodash');
 
+require('./common');
+var router = express.Router();
+var db = require('../controllers/db');
 var section    = require('./teacher/section');
 var assignment = require('./teacher/assignment');
 var submission = require('./teacher/submission');
@@ -48,29 +49,29 @@ router.get('/', function(req, res) {
 router.use('/section', section);
 
 router.get('/assignment.csv', function(req, res, next) {
-  connection.query("SELECT \
-                      `assignments`.`name`,\
-                      `sections`.`name` AS `sname`,\
-                      `students`.`fname`,\
-                      `students`.`lname`,\
-                      `submissions`.`grade` \
-                    FROM \
-                      `assignments` \
-                      JOIN `sections` \
-                        ON `assignments`.`section_id` = `sections`.`id` \
-                      JOIN `enrollment` \
-                        ON `enrollment`.`section_id` = `sections`.`id` \
-                      JOIN `students` \
-                        ON `students`.`id` = `enrollment`.`student_id` \
-                      LEFT JOIN `submissions` \
-                        ON `submissions`.`assignment_id` = `assignments`.`id` \
-                        AND `submissions`.`student_id` = `students`.`id` \
-                    WHERE `sections`.`teacher_id` = ? \
-                    ORDER BY \
-                      `assignments`.`name`,\
-                      `sections`.`name`,\
-                      `students`.`lname`,\
-                      `students`.`fname`", [req.user.id], function(err, rows) {
+  db.query("SELECT \
+              `assignments`.`name`,\
+              `sections`.`name` AS `sname`,\
+              `students`.`fname`,\
+              `students`.`lname`,\
+              `submissions`.`grade` \
+            FROM \
+              `assignments` \
+              JOIN `sections` \
+                ON `assignments`.`section_id` = `sections`.`id` \
+              JOIN `enrollment` \
+                ON `enrollment`.`section_id` = `sections`.`id` \
+              JOIN `students` \
+                ON `students`.`id` = `enrollment`.`student_id` \
+              LEFT JOIN `submissions` \
+                ON `submissions`.`assignment_id` = `assignments`.`id` \
+                AND `submissions`.`student_id` = `students`.`id` \
+            WHERE `sections`.`teacher_id` = ? \
+            ORDER BY \
+              `assignments`.`name`,\
+              `sections`.`name`,\
+              `students`.`lname`,\
+              `students`.`fname`", [req.user.id], function(err, rows) {
     res.setHeader('Content-Disposition',
                   'attachment; filename=assignments.csv');
     res.setHeader('Content-Type', 'text/csv');
@@ -88,31 +89,31 @@ router.use('/assignment', assignment);
 router.use('/submission', submission);
 
 router.get('/student.csv', function(req, res, next) {
-  connection.query("SELECT \
-                      `assignments`.`name`,\
-                      `sections`.`name` AS `sname`,\
-                      `students`.`fname`,\
-                      `students`.`lname`,\
-                      `submissions`.`id`,\
-                      `submissions`.`grade` \
-                    FROM \
-                      `assignments` \
-                      JOIN `sections` \
-                        ON `assignments`.`section_id` = `sections`.`id` \
-                      JOIN `enrollment` \
-                        ON `enrollment`.`section_id` = `sections`.`id` \
-                      JOIN `students` \
-                        ON `students`.`id` = `enrollment`.`student_id` \
-                      LEFT JOIN `submissions` \
-                        ON `submissions`.`assignment_id` = `assignments`.`id` \
-                        AND `submissions`.`student_id` = `students`.`id` \
-                    WHERE `sections`.`teacher_id` = ? \
-                    ORDER BY \
-                      `students`.`lname`,\
-                      `students`.`fname`,\
-                      `sections`.`name`,\
-                      `assignments`.`name`",
-                    [req.user.id], function(err, rows) {
+  db.query("SELECT \
+              `assignments`.`name`,\
+              `sections`.`name` AS `sname`,\
+              `students`.`fname`,\
+              `students`.`lname`,\
+              `submissions`.`id`,\
+              `submissions`.`grade` \
+            FROM \
+              `assignments` \
+              JOIN `sections` \
+                ON `assignments`.`section_id` = `sections`.`id` \
+              JOIN `enrollment` \
+                ON `enrollment`.`section_id` = `sections`.`id` \
+              JOIN `students` \
+                ON `students`.`id` = `enrollment`.`student_id` \
+              LEFT JOIN `submissions` \
+                ON `submissions`.`assignment_id` = `assignments`.`id` \
+                AND `submissions`.`student_id` = `students`.`id` \
+            WHERE `sections`.`teacher_id` = ? \
+            ORDER BY \
+              `students`.`lname`,\
+              `students`.`fname`,\
+              `sections`.`name`,\
+              `assignments`.`name`",
+            [req.user.id], function(err, rows) {
     res.setHeader('Content-Disposition', 'attachment; filename=students.csv');
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Descrption', 'File Transfer');
@@ -129,9 +130,9 @@ router.use('/student', student);
 
 // settings page
 router.get('/settings', function(req, res, next) {
-  connection.query("SELECT `fname`,`lname`,`pass_reset_hash` \
-                    FROM `teachers` WHERE `id` = ?",
-                    [req.user.id], function(err, rows) {
+  db.query("SELECT `fname`,`lname`,`pass_reset_hash` \
+            FROM `teachers` WHERE `id` = ?",
+            [req.user.id], function(err, rows) {
     if (err) {
       render('notFound', {
         type: 'settings',
@@ -181,18 +182,18 @@ router.post('/settings', function(req, res, next) {
 
         bcrypt.hash(newPass, 10, function(err, hash) {
           if (res.locals.mustResetPass) {
-            connection.query("UPDATE `teachers` \
-                                SET `fname` = ?, \
-                                `lname` = ?, \
-                                `pass` = ?, \
-                                `pass_reset_hash` = NULL \
-                              WHERE \
-                                `id` = ?",
-                              [fname, lname, hash, req.user.id], handler);
+            db.query("UPDATE `teachers` \
+                        SET `fname` = ?, \
+                        `lname` = ?, \
+                        `pass` = ?, \
+                        `pass_reset_hash` = NULL \
+                      WHERE \
+                        `id` = ?",
+                      [fname, lname, hash, req.user.id], handler);
           } else {
-            connection.query("SELECT `pass` FROM `teachers` \
-                              WHERE `id` = ?",
-                              [req.user.id], function(err, rows) {
+            db.query("SELECT `pass` FROM `teachers` \
+                      WHERE `id` = ?",
+                      [req.user.id], function(err, rows) {
               if (err) {
                 render('notFound', {
                   type: 'settings',
@@ -220,15 +221,15 @@ router.post('/settings', function(req, res, next) {
                   }
 
                   if (result) {
-                    connection.query("UPDATE `teachers` \
-                                        SET `fname` = ?, \
-                                        `lname` = ?, \
-                                        `pass` = ?, \
-                                        `pass_reset_hash` = NULL \
-                                      WHERE \
-                                        `id` = ?",
-                                      [fname, lname, hash, req.user.id],
-                                      handler);
+                    db.query("UPDATE `teachers` \
+                                SET `fname` = ?, \
+                                `lname` = ?, \
+                                `pass` = ?, \
+                                `pass_reset_hash` = NULL \
+                              WHERE \
+                                `id` = ?",
+                              [fname, lname, hash, req.user.id],
+                              handler);
                   } else {
                     render('settings', {
                       fname: fname,
@@ -249,10 +250,10 @@ router.post('/settings', function(req, res, next) {
         }, res);
       }
     } else {
-      connection.query("UPDATE `teachers` \
-                        SET `fname` = ?, `lname` = ? \
-                        WHERE `id` = ?",
-                        [fname, lname, req.user.id], function(err) {
+      db.query("UPDATE `teachers` \
+                SET `fname` = ?, `lname` = ? \
+                WHERE `id` = ?",
+                [fname, lname, req.user.id], function(err) {
         if (err) {
           render('notFound', {
             type: 'settings',
@@ -290,20 +291,20 @@ router.post('/feedback', function(req, res, next) {
     type = 'other';
   }
 
-  connection.query("SELECT `user`,`fname`,`lname` FROM `teachers` \
-                    WHERE `id` = ?", [req.user.id], function(err, result) {
+  db.query("SELECT `user`,`fname`,`lname` FROM `teachers` \
+            WHERE `id` = ?", [req.user.id], function(err, result) {
     if (err) return next(err);
 
-    connection.query("INSERT INTO `feedback` \
-                      VALUES(NULL, ?, ?, ?, 'teacher', ?, ?, ?)",
-                      [
-                        result[0].user,
-                        result[0].fname,
-                        result[0].lname,
-                        req.headers['user-agent'],
-                        type,
-                        req.body.feedback
-                      ], function(err) {
+    db.query("INSERT INTO `feedback` \
+              VALUES(NULL, ?, ?, ?, 'teacher', ?, ?, ?)",
+              [
+                result[0].user,
+                result[0].fname,
+                result[0].lname,
+                req.headers['user-agent'],
+                type,
+                req.body.feedback
+              ], function(err) {
       if (err) return next(err);
 
       var html = '';

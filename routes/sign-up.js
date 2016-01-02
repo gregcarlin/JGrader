@@ -1,9 +1,11 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
+var bcrypt = require('bcrypt');
+
 require('./common');
 var router = express.Router();
-var bcrypt = require('bcrypt');
+var db = require('../controllers/db');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -12,8 +14,8 @@ router.get('/', function(req, res) {
 
 // checks if a user exists in a given database. calls finish() iff user doesn't exist.
 var exists = function(user, db, req, res, next, finish) {
-  connection.query("SELECT `id` FROM `" + db + "` \
-                    WHERE `user` = ?", [user.email], function(err, rows) {
+  db.query("SELECT `id` FROM `" + db + "` \
+            WHERE `user` = ?", [user.email], function(err, rows) {
     if (err) {
       res.render('sign-up', {
         error: 'An unknown error has occurred. Please try again later.',
@@ -61,10 +63,10 @@ router.post('/', function(req, res, next) {
               return next(err);
             }
 
-            connection.query("INSERT INTO `" + user.role + "s` \
-                              VALUES(NULL, ?, ?, ?, ?, NULL)",
-                              [user.email, hash, user.fname, user.lname],
-                              function(err, rows) {
+            db.query("INSERT INTO `" + user.role + "s` \
+                      VALUES(NULL, ?, ?, ?, ?, NULL)",
+                      [user.email, hash, user.fname, user.lname],
+                      function(err, rows) {
               if (err) {
                 res.render('sign-up', {
                   error: ('An unknown error has occurred. ' +
@@ -76,9 +78,9 @@ router.post('/', function(req, res, next) {
                 return next(err);
               }
 
-              connection.query("SELECT `id` FROM `" + user.role + "s` \
-                                WHERE `user` = ?",
-                                [user.email], function(err, rows) {
+              db.query("SELECT `id` FROM `" + user.role + "s` \
+                        WHERE `user` = ?",
+                        [user.email], function(err, rows) {
                 if (err || rows.length <= 0) {
                   res.render('sign-up', {
                     error: ('An unknown error has occurred. ' +

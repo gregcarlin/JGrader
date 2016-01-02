@@ -2,14 +2,14 @@ var async = require('async');
 var _ = require('lodash');
 var assert = require('assert');
 
-require('../../../routes/common');
+var db = require('../../../controllers/db');
 var section = require('../../../controllers/teacher/section');
 
 describe('Section', function() {
   before(function(done) {
     async.parallel([
       function(cb) {
-        connection.query("TRUNCATE `sections`", cb);
+        db.query("TRUNCATE `sections`", cb);
       }
     ], done);
   });
@@ -24,7 +24,7 @@ describe('Section', function() {
           section.create(teacherId, 'Test Section', cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `sections`", function(err, result) {
+          db.query("SELECT * FROM `sections`", function(err, result) {
             sections = result;
             cb(err);
           });
@@ -45,9 +45,9 @@ describe('Section', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
-                           [_.uniqueId(), 'Test Class', 'uniq1'],
-                           function(err, result) {
+          db.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
+                    [_.uniqueId(), 'Test Class', 'uniq1'],
+                    function(err, result) {
             sectionId = result.insertId;
             cb(err);
           });
@@ -56,8 +56,8 @@ describe('Section', function() {
           section.setName(sectionId, 'New Name', cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `sections` WHERE `id` = ?",
-                           [sectionId], function(err, results) {
+          db.query("SELECT * FROM `sections` WHERE `id` = ?",
+                    [sectionId], function(err, results) {
             sections = results;
             cb(err);
           });
@@ -79,9 +79,9 @@ describe('Section', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
-                           [_.uniqueId(), 'Test Class', 'uniq2'],
-                           function(err, result) {
+          db.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
+                    [_.uniqueId(), 'Test Class', 'uniq2'],
+                    function(err, result) {
             sectionId = result.insertId;
             cb(err);
           });
@@ -90,7 +90,7 @@ describe('Section', function() {
           section.remove(sectionId, cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `sections` WHERE `id` = ?", [sectionId], function(err, results) {
+          db.query("SELECT * FROM `sections` WHERE `id` = ?", [sectionId], function(err, results) {
             sections = results;
             cb(err);
           });

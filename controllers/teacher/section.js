@@ -2,11 +2,12 @@
 // Copyright (c) 2015 JGrader. All rights reserved.
 
 require('../../routes/common');
+var db = require('../db');
 
 module.exports.create = function(teacherId, name, callback) {
-  connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, LEFT(UUID(), 5));\
-                    SELECT LAST_INSERT_ID()",
-                    [teacherId, name], function(err, rows) {
+  db.query("INSERT INTO `sections` VALUES(NULL, ?, ?, LEFT(UUID(), 5));\
+            SELECT LAST_INSERT_ID()",
+            [teacherId, name], function(err, rows) {
     if (err) {
       return err;
     }
@@ -16,16 +17,15 @@ module.exports.create = function(teacherId, name, callback) {
 };
 
 module.exports.setName = function(sectionId, name, callback) {
-  connection.query("UPDATE `sections` SET `name` = ? WHERE `id` = ?",
-                   [name, sectionId], callback);
+  db.query("UPDATE `sections` SET `name` = ? WHERE `id` = ?",
+            [name, sectionId], callback);
 };
 
 module.exports.remove = function(sectionId, callback) {
-  connection.query('DELETE FROM `sections` WHERE `id` = ? LIMIT 1',
-                   [sectionId], function(err, rows) {
+  db.query('DELETE FROM `sections` WHERE `id` = ? LIMIT 1',
+            [sectionId], function(err, rows) {
     if (err) return callback(err);
 
-    connection.query(queries.teacher.section.DELETE,
-                     [sectionId, sectionId], callback);
+    db.query(queries.teacher.section.DELETE, [sectionId, sectionId], callback);
   });
 };

@@ -4,7 +4,7 @@ var assert = require('assert');
 var bcrypt = require('bcrypt');
 var fs = require('fs-extra');
 
-require('../../../routes/common');
+var db = require('../../../controllers/db');
 var assignment = require('../../../controllers/student/assignment');
 
 describe('Assignment', function() {
@@ -17,24 +17,24 @@ describe('Assignment', function() {
   before(function(done) {
     async.series([
       function(cb) {
-        connection.query("TRUNCATE `teachers`", cb);
+        db.query("TRUNCATE `teachers`", cb);
       },
       function(cb) {
-        connection.query("TRUNCATE `sections`", cb);
+        db.query("TRUNCATE `sections`", cb);
       },
       function(cb) {
-        connection.query("TRUNCATE `enrollment`", cb);
+        db.query("TRUNCATE `enrollment`", cb);
       },
       function(cb) {
-        connection.query("TRUNCATE `assignments`", cb);
+        db.query("TRUNCATE `assignments`", cb);
       },
       function(cb) {
         bcrypt.hash('password', 10, function(err, hash) {
           if (err) return cb(err);
 
-          connection.query("INSERT INTO `teachers` VALUES(NULL, ?, ?, ?, ?, NULL)",
-                          ['test@me.com', hash, 'Senor', 'Lewick'],
-                          function(err, result) {
+          db.query("INSERT INTO `teachers` VALUES(NULL, ?, ?, ?, ?, NULL)",
+                    ['test@me.com', hash, 'Senor', 'Lewick'],
+                    function(err, result) {
             if (err) return cb(err);
 
             teacherId = result.insertId;
@@ -43,22 +43,22 @@ describe('Assignment', function() {
         });
       },
       function(cb) {
-        connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
-                         [teacherId, 'Test Class', 'penis'],
-                         function(err, result) {
+        db.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)",
+                  [teacherId, 'Test Class', 'penis'],
+                  function(err, result) {
           if (err) return cb(err);
           sectionId = result.insertId;
           cb();
         });
       },
       function(cb) {
-        connection.query("INSERT INTO `enrollment` VALUES(?, ?)",
-                         [sectionId, studentId], cb);
+        db.query("INSERT INTO `enrollment` VALUES(?, ?)",
+                  [sectionId, studentId], cb);
       },
       function(cb) {
-        connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())",
-                         [sectionId, 'Test Assignment'],
-                         function(err, result) {
+        db.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())",
+               [sectionId, 'Test Assignment'],
+               function(err, result) {
           if (err) return cb(err);
           assignmentId = result.insertId;
           cb();
@@ -135,21 +135,21 @@ describe('Assignment', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          connection.query("TRUNCATE `files-teachers`", cb);
+          db.query("TRUNCATE `files-teachers`", cb);
         },
         function(cb) {
-          connection.query("TRUNCATE `submissions`", cb);
+          db.query("TRUNCATE `submissions`", cb);
         },
         function(cb) {
-          connection.query("TRUNCATE `files`", cb);
+          db.query("TRUNCATE `files`", cb);
         },
         function(cb) {
-          connection.query("INSERT INTO `files-teachers` VALUES(NULL, ?, ?, ?, ?)",
+          db.query("INSERT INTO `files-teachers` VALUES(NULL, ?, ?, ?, ?)",
                            [assignmentId, 'another.txt', 'yoyo ma', 'text/plain'], cb);
         },
         function(cb) {
-          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), ?, NULL)",
-                           [assignmentId, studentId, 74], function(err, result) {
+          db.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), ?, NULL)",
+                    [assignmentId, studentId, 74], function(err, result) {
             if (err) return cb(err);
 
             submissionId = result.insertId;
@@ -157,9 +157,9 @@ describe('Assignment', function() {
           });
         },
         function(cb) {
-          connection.query("INSERT INTO `files` VALUES(NULL, ?, ?, ?, ?, ?),(NULL, ?, ?, ?, ?, ?)",
-                           [submissionId, 'test.txt', 'contents here', null, 'text/plain',
-                            submissionId, 'another.txt', 'yoyo ma', null, 'text/plain'], cb);
+          db.query("INSERT INTO `files` VALUES(NULL, ?, ?, ?, ?, ?),(NULL, ?, ?, ?, ?, ?)",
+                    [submissionId, 'test.txt', 'contents here', null, 'text/plain',
+                     submissionId, 'another.txt', 'yoyo ma', null, 'text/plain'], cb);
         },
         function(cb) {
           assignment.get(assignmentId, studentId, function(err, _data) {
@@ -208,16 +208,16 @@ describe('Assignment', function() {
     before(function(done) {
       async.parallel([
         function(cb) {
-          connection.query("TRUNCATE `submissions`", cb);
+          db.query("TRUNCATE `submissions`", cb);
         },
         function(cb) {
-          connection.query("TRUNCATE `files`", cb);
+          db.query("TRUNCATE `files`", cb);
         },
         function(cb) {
-          connection.query("TRUNCATE `files-teachers`", cb);
+          db.query("TRUNCATE `files-teachers`", cb);
         },
         function(cb) {
-          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())", [sectionId, 'okay'], function(err, result) {
+          db.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())", [sectionId, 'okay'], function(err, result) {
             if (err) return cb(err);
 
             assignment2Id = result.insertId;
@@ -357,19 +357,19 @@ describe('Assignment', function() {
       this.timeout(10000);
       async.series([
         function(cb) {
-          connection.query("TRUNCATE `submissions`", cb);
+          db.query("TRUNCATE `submissions`", cb);
         },
         function(cb) {
-          connection.query("TRUNCATE `files`", cb);
+          db.query("TRUNCATE `files`", cb);
         },
         function(cb) {
-          connection.query("TRUNCATE `files-teachers`", cb);
+          db.query("TRUNCATE `files-teachers`", cb);
         },
         function(cb) {
           fs.readFile('test/data/lenna.png', function(err, data) {
             if (err) return cb(err);
 
-            connection.query("INSERT INTO `files-teachers` VALUES(NULL, ?, ?, ?, ?)", [assignmentId, 'lenna.png', data, 'image/png'], cb);
+            db.query("INSERT INTO `files-teachers` VALUES(NULL, ?, ?, ?, ?)", [assignmentId, 'lenna.png', data, 'image/png'], cb);
           });
         },
         function(cb) {
@@ -440,15 +440,15 @@ describe('Assignment', function() {
           });
         },
         function(cb) {
-          connection.query("SELECT * FROM `submissions` WHERE `assignment_id` = ? AND `student_id` = ?",
-                           [assignmentId, studentId],
-                           function(err, _submissions) {
+          db.query("SELECT * FROM `submissions` WHERE `assignment_id` = ? AND `student_id` = ?",
+                    [assignmentId, studentId],
+                    function(err, _submissions) {
             submissions = _submissions;
             cb(err);
           });
         },
         function(cb) {
-          connection.query("SELECT * FROM `files` WHERE `submission_id` = ?", [submissions[0].id], function(err, _files) {
+          db.query("SELECT * FROM `files` WHERE `submission_id` = ?", [submissions[0].id], function(err, _files) {
             files = _files;
             cb(err);
           });
@@ -457,7 +457,7 @@ describe('Assignment', function() {
           assignment.chooseMain(assignmentId, studentId, 'DependA.java', cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `submissions` WHERE `id` = ?", [submissions[0].id], function(err, _submissions) {
+          db.query("SELECT * FROM `submissions` WHERE `id` = ?", [submissions[0].id], function(err, _submissions) {
             afterMain = _submissions;
             cb(err);
           });

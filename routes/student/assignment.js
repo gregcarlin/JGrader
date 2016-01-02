@@ -1,8 +1,6 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('../common');
-var router = express.Router();
 var multer = require('multer');
 var strftime = require('strftime');
 var _ = require('lodash');
@@ -10,6 +8,9 @@ var async = require('async');
 var exec = require('child_process').exec;
 var fs = require('fs-extra');
 
+require('../common');
+var router = express.Router();
+var db = require('../../controllers/db');
 var assignment = require('../../controllers/student/assignment');
 var comments = require('../../controllers/comments');
 var codeRunner = require('../../controllers/codeRunner');
@@ -139,11 +140,11 @@ router.post('/:id/submit', function(req, res, next) {
 });
 
 router.get('/:id/resubmit', function(req, res, next) {
-  connection.query("SELECT `submissions`.`id` \
-                    FROM `submissions` \
-                    WHERE `submissions`.`student_id` = ? \
-                    AND `submissions`.`assignment_id` = ?",
-                    [req.user.id, req.params.id], function(err, rows) {
+  db.query("SELECT `submissions`.`id` \
+            FROM `submissions` \
+            WHERE `submissions`.`student_id` = ? \
+            AND `submissions`.`assignment_id` = ?",
+            [req.user.id, req.params.id], function(err, rows) {
     if (err) {
       res.redirect('/student/assignment');
       err.handled = true;
@@ -157,13 +158,13 @@ router.get('/:id/resubmit', function(req, res, next) {
       res.redirect('/student/assignment');
     } else {
       // Means user has already submitted and is able to resubmit
-      connection.query("DELETE FROM `files` WHERE `submission_id` = ?; \
-                        DELETE FROM `submissions` \
-                            WHERE `assignment_id` = ? \
-                            AND `student_id` = ?; \
-                        DELETE FROM `comments` WHERE `submission_id` = ?",
-                        [rows[0].id, req.params.id, req.user.id, rows[0].id],
-                        function(err, rows) {
+      db.query("DELETE FROM `files` WHERE `submission_id` = ?; \
+                DELETE FROM `submissions` \
+                    WHERE `assignment_id` = ? \
+                    AND `student_id` = ?; \
+                DELETE FROM `comments` WHERE `submission_id` = ?",
+                [rows[0].id, req.params.id, req.user.id, rows[0].id],
+                function(err, rows) {
         if (err) {
           res.redirect('/student/assignment/');
           err.handled = true;

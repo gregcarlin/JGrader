@@ -3,6 +3,8 @@ var async = require('async');
 var exec = require('child_process').exec; // for running bash commands
 var fs = require('fs-extra');
 
+var db = require('./db');
+
 var setupDirectory = module.exports.setupDirectory = function(files, callback) {
   var grouped = _.groupBy(files, 'student_id');
   var studentIds = _.keys(grouped);
@@ -79,8 +81,8 @@ var cleanup = module.exports.cleanup = function(uniqueId, callback) {
 var runTests =
     module.exports.runTests =
     function(uniqueId, main, submissionId, tests, callback) {
-  connection.query("DELETE FROM `test-case-results` WHERE `submission_id` = ?",
-                   [submissionId], function(err) {
+  db.query("DELETE FROM `test-case-results` WHERE `submission_id` = ?",
+            [submissionId], function(err) {
     if (err) return callback(err);
 
     async.eachSeries(tests, function(test, testCb) {
@@ -94,32 +96,32 @@ var runTests =
           stdout = stdout.substring(0, stdout.length - 1);
           match = stdout === test.output;
         }
-        connection.query("INSERT INTO `test-case-results` \
-                          VALUES(NULL, ?, ?, ?, ?)",
-                          [submissionId, test.id, stdout, match], testCb);
+        db.query("INSERT INTO `test-case-results` \
+                  VALUES(NULL, ?, ?, ?, ?)",
+                  [submissionId, test.id, stdout, match], testCb);
       });
     }, callback);
   });
 };
 
 module.exports.runTestsForAssignment = function(assignmentId, callback) {
-  connection.query("SELECT \
-                      `files`.`name`,\
-                      `files`.`contents`,\
-                      `files`.`compiled`,\
-                      `files`.`mime`,\
-                      `submissions`.`student_id`,\
-                      `submissions`.`main`,\
-                      `submissions`.`id` AS `subId` \
-                    FROM `submissions`,`files` \
-                    WHERE `submissions`.`id` = `files`.`submission_id` \
-                    AND `submissions`.`assignment_id` = ?",
-                    [assignmentId], function(err, files) {
+  db.query("SELECT \
+              `files`.`name`,\
+              `files`.`contents`,\
+              `files`.`compiled`,\
+              `files`.`mime`,\
+              `submissions`.`student_id`,\
+              `submissions`.`main`,\
+              `submissions`.`id` AS `subId` \
+            FROM `submissions`,`files` \
+            WHERE `submissions`.`id` = `files`.`submission_id` \
+            AND `submissions`.`assignment_id` = ?",
+            [assignmentId], function(err, files) {
     if (err) return callback(err);
 
-    connection.query("SELECT `id`,`input`,`output` FROM `test-cases` \
-                      WHERE `assignment_id` = ?",
-                      [assignmentId], function(err, tests) {
+    db.query("SELECT `id`,`input`,`output` FROM `test-cases` \
+              WHERE `assignment_id` = ?",
+              [assignmentId], function(err, tests) {
       if (err) return callback(err);
 
       setupDirectory(files, function(err, uniqueIds) {

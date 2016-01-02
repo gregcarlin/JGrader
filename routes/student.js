@@ -1,10 +1,11 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('./common');
-var router = express.Router();
 var bcrypt = require('bcrypt');
 
+require('./common');
+var router = express.Router();
+var db = require('../controllers/db');
 var assignment = require('./student/assignment');
 var section    = require('./student/section');
 
@@ -46,8 +47,8 @@ router.use('/section', section);
 
 // settings page
 router.get('/settings', function(req, res, next) {
-  connection.query("SELECT `fname`,`lname`,`pass_reset_hash` FROM `students` \
-                    WHERE `id` = ?", [req.user.id], function(err, rows) {
+  db.query("SELECT `fname`,`lname`,`pass_reset_hash` FROM `students` \
+            WHERE `id` = ?", [req.user.id], function(err, rows) {
     if (err) {
       render('notFound', {
         type: 'settings',
@@ -100,18 +101,18 @@ router.post('/settings', function(req, res, next) {
 
         bcrypt.hash(newPass, 10, function(err, hash) {
           if (res.locals.mustResetPass) {
-            connection.query("UPDATE `students` \
-                                SET `fname` = ?, \
-                                `lname` = ?, \
-                                `pass` = ?, \
-                                `pass_reset_hash` = NULL \
-                              WHERE \
-                                `id` = ?",
-                              [fname, lname, hash, req.user.id], handler);
+            db.query("UPDATE `students` \
+                        SET `fname` = ?, \
+                        `lname` = ?, \
+                        `pass` = ?, \
+                        `pass_reset_hash` = NULL \
+                      WHERE \
+                        `id` = ?",
+                      [fname, lname, hash, req.user.id], handler);
           } else {
-            connection.query("SELECT `pass` FROM `students` \
-                              WHERE `id` = ?",
-                              [req.user.id], function(err, rows) {
+            db.query("SELECT `pass` FROM `students` \
+                      WHERE `id` = ?",
+                      [req.user.id], function(err, rows) {
               if (err) {
                 render('notFound', {
                   type: 'settings',
@@ -139,15 +140,15 @@ router.post('/settings', function(req, res, next) {
                   }
 
                   if (result) {
-                    connection.query("UPDATE `students` \
-                                        SET `fname` = ?, \
-                                        `lname` = ?, \
-                                        `pass` = ?, \
-                                        `pass_reset_hash` = NULL \
-                                      WHERE \
-                                        `id` = ?",
-                                      [fname, lname, hash, req.user.id],
-                                      handler);
+                    db.query("UPDATE `students` \
+                                SET `fname` = ?, \
+                                `lname` = ?, \
+                                `pass` = ?, \
+                                `pass_reset_hash` = NULL \
+                              WHERE \
+                                `id` = ?",
+                              [fname, lname, hash, req.user.id],
+                              handler);
                   } else {
                     render('settings', {
                       fname: fname,
@@ -168,9 +169,9 @@ router.post('/settings', function(req, res, next) {
         }, res);
       }
     } else {
-      connection.query("UPDATE `students` SET `fname` = ?, `lname` = ? \
-                        WHERE `id` = ?",
-                        [fname, lname, req.user.id], function(err) {
+      db.query("UPDATE `students` SET `fname` = ?, `lname` = ? \
+                WHERE `id` = ?",
+                [fname, lname, req.user.id], function(err) {
         if (err) {
           render('notFound', {
             type: 'settings',
@@ -208,20 +209,20 @@ router.post('/feedback', function(req, res, next) {
     type = 'other';
   }
 
-  connection.query("SELECT `user`,`fname`,`lname` FROM `students` \
-                    WHERE `id` = ?", [req.user.id], function(err, result) {
+  db.query("SELECT `user`,`fname`,`lname` FROM `students` \
+            WHERE `id` = ?", [req.user.id], function(err, result) {
     if (err) return next(err);
 
-    connection.query("INSERT INTO `feedback` \
-                      VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)",
-                      [
-                        result[0].user,
-                        result[0].fname,
-                        result[0].lname,
-                        req.headers['user-agent'],
-                        type,
-                        req.body.feedback
-                      ], function(err) {
+    db.query("INSERT INTO `feedback` \
+              VALUES(NULL, ?, ?, ?, 'student', ?, ?, ?)",
+              [
+                result[0].user,
+                result[0].fname,
+                result[0].lname,
+                req.headers['user-agent'],
+                type,
+                req.body.feedback
+              ], function(err) {
       if (err) return next(err);
 
       var html = '';

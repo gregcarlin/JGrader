@@ -1,11 +1,13 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('./common');
-var router = express.Router();
 var crypto = require('crypto');
 var strftime = require('strftime');
 var exec = require('child_process').exec;
+
+require('./common');
+var router = express.Router();
+var db = require('../controllers/db');
 
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, db, finish) {
@@ -34,12 +36,12 @@ router.get('/log-out', function(req, res) {
   var hash = req.cookies.hash;
   res.clearCookie('hash');
   // TODO only delete from where we need to?
-  connection.query("DELETE FROM `sessions-teachers` \
-                    WHERE `hash` = ?", [hash]);
-  connection.query("DELETE FROM `sessions-students` \
-                    WHERE `hash` = ?", [hash]);
-  connection.query("DELETE FROM `sessions-assistants` \
-                    WHERE `hash` = ?", [hash]);
+  db.query("DELETE FROM `sessions-teachers` \
+            WHERE `hash` = ?", [hash]);
+  db.query("DELETE FROM `sessions-students` \
+            WHERE `hash` = ?", [hash]);
+  db.query("DELETE FROM `sessions-assistants` \
+            WHERE `hash` = ?", [hash]);
   res.redirect('/');
 });
 
@@ -50,9 +52,9 @@ router.get('/forgot', function(req, res) {
 // calls finish(err, db) when done, err is null if there is no err, found is the database name if found, null if not found
 var findEmail = function(email, finish) {
   var find = function(db, cb) {
-    connection.query("SELECT `id` \
-                      FROM `" + db + "` \
-                      WHERE `user` = ?", [email], function(err, rows) {
+    db.query("SELECT `id` \
+              FROM `" + db + "` \
+              WHERE `user` = ?", [email], function(err, rows) {
       if (err) {
         finish(err, null);
       } else if (rows.length >= 1) {
@@ -88,9 +90,9 @@ router.post('/forgot', function(req, res, next) {
       } else {
         var hash = crypto.randomBytes(20).toString('hex');
         var url = 'http://jgrader.com/forgot/' + db + '/' + hash;
-        connection.query("UPDATE `" + db + "` \
-                          SET `pass_reset_hash` = ? \
-                          WHERE `id` = ?", [hash, id], function(err, result) {
+        db.query("UPDATE `" + db + "` \
+                  SET `pass_reset_hash` = ? \
+                  WHERE `id` = ?", [hash, id], function(err, result) {
           if (err) {
             res.render('forgot', {error: 'An unknown error has occurred.'});
             err.handled = true;
@@ -124,8 +126,8 @@ router.post('/forgot', function(req, res, next) {
 });
 
 router.get('/forgot/:db/:hash', function(req, res, next) {
-  connection.query("SELECT `id` FROM ?? WHERE `pass_reset_hash` = ?",
-                    [req.params.db, req.params.hash], function(err, rows) {
+  db.query("SELECT `id` FROM ?? WHERE `pass_reset_hash` = ?",
+            [req.params.db, req.params.hash], function(err, rows) {
     if (err) {
       res.render('forgot', {error: 'An unknown error has occurred.'});
       // err might be caused by an incorrect database
@@ -161,9 +163,9 @@ router.get('/privacy', function(req, res) {
 });
 
 router.get('/blog.rss', function(req, res, next) {
-  connection.query("SELECT `id`,`timestamp`,`title`,`author`,`contents` \
-                    FROM `blog` \
-                    ORDER BY `timestamp` DESC", [], function(err, rows) {
+  db.query("SELECT `id`,`timestamp`,`title`,`author`,`contents` \
+            FROM `blog` \
+            ORDER BY `timestamp` DESC", [], function(err, rows) {
     if (err) {
       res.send('An unknown error has occurred.');
       err.handled = true;
@@ -203,9 +205,9 @@ router.get('/blog.rss', function(req, res, next) {
 });
 
 router.get('/blog', function(req, res, next) {
-  connection.query("SELECT `timestamp`,`title`,`author`,`contents` \
-                    FROM `blog` \
-                    ORDER BY `timestamp` DESC", [], function(err, rows) {
+  db.query("SELECT `timestamp`,`title`,`author`,`contents` \
+            FROM `blog` \
+            ORDER BY `timestamp` DESC", [], function(err, rows) {
     if (err) {
       res.render('blog', {
         error: 'An unknown error has occurred.',

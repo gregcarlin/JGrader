@@ -1,7 +1,9 @@
-var codeRunner = require('../../controllers/codeRunner');
 var fs = require('fs-extra');
 var assert = require('assert');
 var _ = require('lodash');
+
+var db = require('../../controllers/db');
+var codeRunner = require('../../controllers/codeRunner');
 
 describe('codeRunner', function() {
   this.timeout(4000);
@@ -318,13 +320,13 @@ describe('codeRunner', function() {
       this.timeout(8000);
       async.series([
         function(cb) {
-          connection.query("TRUNCATE `test-cases`", cb);
+          db.query("TRUNCATE `test-cases`", cb);
         },
         function(cb) {
-          connection.query("TRUNCATE `test-case-results`", cb);
+          db.query("TRUNCATE `test-case-results`", cb);
         },
         function(cb) {
-          connection.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())", [sectionId, 'Test'], function(err, result) {
+          db.query("INSERT INTO `assignments` VALUES(NULL, ?, ?, NULL, CURRENT_TIMESTAMP())", [sectionId, 'Test'], function(err, result) {
             if (err) return cb(err);
 
             assignmentId = result.insertId;
@@ -332,8 +334,8 @@ describe('codeRunner', function() {
           });
         },
         function(cb) {
-          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), NULL, ?)",
-                           [assignmentId, studentAId, 'Input.java'], function(err, result) {
+          db.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), NULL, ?)",
+                    [assignmentId, studentAId, 'Input.java'], function(err, result) {
             if (err) return cb(err);
 
             submissionAId = result.insertId;
@@ -341,8 +343,8 @@ describe('codeRunner', function() {
           });
         },
         function(cb) {
-          connection.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), NULL, ?)",
-                           [assignmentId, studentBId, 'WrongInput.java'], function(err, result) {
+          db.query("INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), NULL, ?)",
+                    [assignmentId, studentBId, 'WrongInput.java'], function(err, result) {
             if (err) return cb(err);
 
             submissionBId = result.insertId;
@@ -377,22 +379,22 @@ describe('codeRunner', function() {
           });
         },
         function(cb) {
-          connection.query("INSERT INTO `files` VALUES(NULL, ?, ?, ?, ?, ?),(NULL, ?, ?, ?, ?, ?)",
-                           [submissionAId, 'Input.java', inputJava, inputCompiled, 'application/octet-stream',
-                            submissionBId, 'WrongInput.java', wrongJava, wrongCompiled, 'application/octet-stream'], cb);
+          db.query("INSERT INTO `files` VALUES(NULL, ?, ?, ?, ?, ?),(NULL, ?, ?, ?, ?, ?)",
+                    [submissionAId, 'Input.java', inputJava, inputCompiled, 'application/octet-stream',
+                     submissionBId, 'WrongInput.java', wrongJava, wrongCompiled, 'application/octet-stream'], cb);
         },
         function(cb) {
-          connection.query("INSERT INTO `test-cases` VALUES(NULL, ?, ?, ?),(NULL, ?, ?, ?),(NULL, ?, ?, ?)",
-                           [assignmentId, 0, 0, assignmentId, 2, 6, assignmentId, 7, 21], cb);
+          db.query("INSERT INTO `test-cases` VALUES(NULL, ?, ?, ?),(NULL, ?, ?, ?),(NULL, ?, ?, ?)",
+                    [assignmentId, 0, 0, assignmentId, 2, 6, assignmentId, 7, 21], cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionAId], function(err, results) {
+          db.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionAId], function(err, results) {
             preResultsA = results;
             cb(err);
           });
         },
         function(cb) {
-          connection.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionBId], function(err, results) {
+          db.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionBId], function(err, results) {
             preResultsB = results;
             cb(err);
           });
@@ -407,13 +409,13 @@ describe('codeRunner', function() {
           fs.unlink('test/data/WrongInput.class', cb);
         },
         function(cb) {
-          connection.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionAId], function(err, results) {
+          db.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionAId], function(err, results) {
             postResultsA = results;
             cb(err);
           });
         },
         function(cb) {
-          connection.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionBId], function(err, results) {
+          db.query("SELECT * FROM `test-case-results` WHERE `submission_id` = ?", [submissionBId], function(err, results) {
             postResultsB = results;
             cb(err);
           });

@@ -1,9 +1,11 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
+var bcrypt = require('bcrypt');
+
 require('./common');
 var router = express.Router();
-var bcrypt = require('bcrypt');
+var db = require('../controllers/db');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -12,8 +14,8 @@ router.get('/', function(req, res) {
 
 // attempts to login to website with given database, calls finish() iff login information is incorrect
 var login = function(db, email, pass, req, res, next, finish) {
-  connection.query("SELECT * FROM `" + db + "s` \
-                    WHERE `user` = ?", [email], function(err, rows) {
+  db.query("SELECT * FROM `" + db + "s` \
+            WHERE `user` = ?", [email], function(err, rows) {
     if (err) {
       res.render('sign-in', {
         error: 'An unknown error has occurred. Please try again later.',

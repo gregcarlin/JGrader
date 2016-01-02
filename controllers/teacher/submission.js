@@ -1,11 +1,12 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
+var db = require('../db');
 var jgError = require('../../util/errorCode').jgError;
 
 module.exports.removeGrade = function(submissionId, callback) {
-  connection.query("UPDATE `submissions` SET `grade` = NULL WHERE `id` = ?",
-                   [submissionId], callback);
+  db.query("UPDATE `submissions` SET `grade` = NULL WHERE `id` = ?",
+            [submissionId], callback);
 };
 
 module.exports.setGrade = function(submissionId, grade, callback) {
@@ -13,6 +14,6 @@ module.exports.setGrade = function(submissionId, grade, callback) {
     return callback(jgError(1)); // invalid input
   }
 
-  connection.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?",
-                   [grade, submissionId], callback);
+  db.query("UPDATE `submissions` SET `grade` = ? WHERE `id` = ?",
+            [grade, submissionId], callback);
 };

@@ -2,17 +2,17 @@ var async = require('async');
 var assert = require('assert');
 var bcrypt = require('bcrypt');
 
-require('../../../routes/common');
+var db = require('../../../controllers/db');
 var student = require('../../../controllers/teacher/student');
 
 describe('Student', function() {
   before(function(done) {
     async.parallel([
       function(cb) {
-        connection.query("TRUNCATE `sections`", cb);
+        db.query("TRUNCATE `sections`", cb);
       },
       function(cb) {
-        connection.query("TRUNCATE `teachers`", cb);
+        db.query("TRUNCATE `teachers`", cb);
       }
     ], done);
   });
@@ -27,7 +27,7 @@ describe('Student', function() {
           bcrypt.hash('password', 10, function(err, hash) {
             if (err) return cb(err);
 
-            connection.query("INSERT INTO `teachers` VALUES(NULL, ?, ?, ?, ?, NULL)", ['hi@test.com', hash, 'Hi', 'Test'], function(err, result) {
+            db.query("INSERT INTO `teachers` VALUES(NULL, ?, ?, ?, ?, NULL)", ['hi@test.com', hash, 'Hi', 'Test'], function(err, result) {
               if (err) return cb(err);
 
               teacherId = result.insertId;
@@ -36,7 +36,7 @@ describe('Student', function() {
           });
         },
         function(cb) {
-          connection.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test', 'uniq3'], function(err, result) {
+          db.query("INSERT INTO `sections` VALUES(NULL, ?, ?, ?)", [teacherId, 'Test', 'uniq3'], function(err, result) {
             sectionId = result.insertId;
             cb(err);
           });

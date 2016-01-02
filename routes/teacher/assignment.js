@@ -1,14 +1,15 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('../common');
-var router = express.Router();
 var strftime = require('strftime');
 var multer = require('multer');
 var async = require('async');
 var _ = require('lodash');
-var errorCode = require('../../util/errorCode');
 
+require('../common');
+var router = express.Router();
+var db = require('../../controllers/db');
+var errorCode = require('../../util/errorCode');
 var codeRunner = require('../../controllers/codeRunner');
 var assignment = require('../../controllers/teacher/assignment');
 
@@ -178,7 +179,7 @@ router.post('/create', function(req, res, next) {
 });
 
 router.use('/:id', function(req, res, next) {
-  connection.query({
+  db.query({
     sql: queries.teacher.assignment.SECTIONS,
     nestTables: true,
     values: [req.params.id, req.user.id]
@@ -211,8 +212,7 @@ router.get('/:id.csv', function(req, res, next) {
 });
 
 router.get('/:id', function(req, res, next) {
-  connection.query(queries.teacher.assignment.INFO,
-                    [req.params.id, req.section.id], function(err, results) {
+  db.query(queries.teacher.assignment.INFO, [req.params.id, req.section.id], function(err, results) {
     if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
@@ -223,9 +223,9 @@ router.get('/:id', function(req, res, next) {
       result.failed_tests = result.failed_tests || 0;
     });
 
-    connection.query("SELECT `name` FROM `files-teachers` \
-                      WHERE `assignment_id` = ?",
-                      [req.params.id], function(err, files) {
+    db.query("SELECT `name` FROM `files-teachers` \
+              WHERE `assignment_id` = ?",
+              [req.params.id], function(err, files) {
       if (err) {
         render('notFound', {error: 'An unexpected error has occurred.'}, res);
         err.handled = true;
@@ -301,8 +301,8 @@ router.post('/:id/updatedesc/:desc', function(req, res, next) {
 
 // update description to nothing
 router.post('/:id/updatedesc', function(req, res, next) {
-  connection.query("UPDATE `assignments` SET `description` = NULL \
-                    WHERE `id` = ?", [req.params.id], function(err, rows) {
+  db.query("UPDATE `assignments` SET `description` = NULL \
+            WHERE `id` = ?", [req.params.id], function(err, rows) {
     if (err) {
       res.json({code: -1}); // unknown error
       err.handled = true;
@@ -340,10 +340,10 @@ router.get('/:id/delete', function(req, res, next) {
 });
 
 router.get('/:id/testCase', function(req, res, next) {
-  connection.query('SELECT `name`,`id` \
-                    FROM `assignments` \
-                    WHERE `id` = ?',
-                    [req.params.id], function(err, assignment) {
+  db.query('SELECT `name`,`id` \
+            FROM `assignments` \
+            WHERE `id` = ?',
+            [req.params.id], function(err, assignment) {
     if (err) {
       render('notFound', {
         error: ('The server was unable to retrieve the test case information.' +
@@ -353,10 +353,10 @@ router.get('/:id/testCase', function(req, res, next) {
       return next(err);
     }
 
-    connection.query('SELECT `id`,`input`,`output` \
-                      FROM `test-cases` \
-                      WHERE `assignment_id` = ?',
-                      [req.params.id], function(err, testCases) {
+    db.query('SELECT `id`,`input`,`output` \
+              FROM `test-cases` \
+              WHERE `assignment_id` = ?',
+              [req.params.id], function(err, testCases) {
       if (err) {
         render('notFound', {
           error: ('The server was unable to retrieve the test case' +
@@ -375,10 +375,10 @@ router.get('/:id/testCase', function(req, res, next) {
 });
 
 router.get('/:id/testCase/delete/:testID', function(req, res, next) {
-  connection.query('DELETE FROM `test-cases` \
-                    WHERE `assignment_id` = ? AND `id` = ? LIMIT 1',
-                    [req.params.id, req.params.testID],
-                    function(err, assignment) {
+  db.query('DELETE FROM `test-cases` \
+            WHERE `assignment_id` = ? AND `id` = ? LIMIT 1',
+            [req.params.id, req.params.testID],
+            function(err, assignment) {
     if (err) {
       render('notFound', {
         error: ('The server was unable to delete the test case. ' +
@@ -422,8 +422,8 @@ router.post('/:id/caseCreate', function(req, res, next) {
     }
     if (params.length > 0) {
       string = string.substr(0, string.length - 1);
-      connection.query('INSERT INTO `test-cases` VALUES ' + string, params,
-                       function(err, rows) {
+      db.query('INSERT INTO `test-cases` VALUES ' + string, params,
+                function(err, rows) {
         if (err) {
           render('notFound', {
             error: ('The server was unable to create the test case. ' +

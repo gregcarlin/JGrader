@@ -1,14 +1,14 @@
 var async = require('async');
 var assert = require('assert');
 
-require('../../../routes/common');
+var db = require('../../../controllers/db');
 var submission = require('../../../controllers/teacher/submission');
 
 describe('Submission', function() {
   before(function(done) {
     async.series([
       function(cb) {
-        connection.query('TRUNCATE `submissions`', cb);
+        db.query('TRUNCATE `submissions`', cb);
       }
     ], done);
   });
@@ -22,7 +22,7 @@ describe('Submission', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          connection.query('INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), NULL, NULL)', [1, 1], function(err, result) {
+          db.query('INSERT INTO `submissions` VALUES(NULL, ?, ?, CURRENT_TIMESTAMP(), NULL, NULL)', [1, 1], function(err, result) {
             if (err) return cb(err);
 
             submissionId = result.insertId;
@@ -39,7 +39,7 @@ describe('Submission', function() {
           });
         },
         function(cb) {
-          connection.query('SELECT * FROM `submissions` WHERE `id` = ?', [submissionId], function(err, result) {
+          db.query('SELECT * FROM `submissions` WHERE `id` = ?', [submissionId], function(err, result) {
             withGrade = result;
             cb(err);
           });
@@ -48,7 +48,7 @@ describe('Submission', function() {
           submission.removeGrade(submissionId, cb);
         },
         function(cb) {
-          connection.query('SELECT * FROM `submissions` WHERE `id` = ?', [submissionId], function(err, result) {
+          db.query('SELECT * FROM `submissions` WHERE `id` = ?', [submissionId], function(err, result) {
             withoutGrade = result;
             cb(err);
           });

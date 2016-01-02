@@ -4,17 +4,18 @@
 var async = require('async');
 
 require('../../routes/common');
+var db = require('../db');
 
 module.exports.invite = function(sectionIds, teacherId, emails, callback) {
-  connection.query("SELECT `fname`,`lname` FROM `teachers` \
-                    WHERE `id` = ?", [teacherId], function(err, result) {
+  db.query("SELECT `fname`,`lname` FROM `teachers` \
+            WHERE `id` = ?", [teacherId], function(err, result) {
     if (err || !result || result.length <= 0) {
       return callback(err || new Error());
     }
 
-    connection.query("SELECT `id`,`name`,`code` FROM `sections` \
-                      WHERE `teacher_id` = ?",
-                      [teacherId], function(err, mySections) {
+    db.query("SELECT `id`,`name`,`code` FROM `sections` \
+              WHERE `teacher_id` = ?",
+              [teacherId], function(err, mySections) {
       if (err) return callback(err);
 
       var links = '';

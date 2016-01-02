@@ -2,33 +2,17 @@
 // Copyright (c) 2015 JGrader. All rights reserved.
 
 express = require('express');
-creds   = require('./credentials');
+creds   = require('../util/credentials');
 queries = require('../queries/queries');
 // router must be required separately otherwise routers will interfere with each other
+
+var db = require('../controllers/db');
 
 async = require('async');
 var crypto = require('crypto');
 var mailgun = require('mailgun-js')({
   apiKey: creds.mailgun_key,
   domain: 'jgrader.com'
-});
-
-mysql      = require('mysql');
-var db = process.env.DB_MODE === 'local';
-connection = mysql.createPool({
-  connectionLimit    : 10,
-  host               : process.env.SQL_HOST || (db ? '127.0.0.1' : creds.mysql_host),
-  port               : process.env.SQL_PORT || (db ? 3306 : creds.mysql_port),
-  database           : process.env.SQL_DB || creds.mysql_db,
-  user               : process.env.SQL_USER || (db ? 'root' : creds.mysql_user),
-  password           : process.env.SQL_PASS || (db ? '' : creds.mysql_pass),
-  multipleStatements : true
-});
-
-process.on('SIGINT', function() { // on ^C
-  connection.end(function(err) { // close mysql connection
-    process.exit(); // also do normal exit stuff
-  });
 });
 
 var renderGeneric = function(page, vars, group, res) {
@@ -51,10 +35,10 @@ renderGenericStudent = function(page, vars, res) {
 };
 
 // convert a hash to a user id. calls finish(id) when done. id is null if log in fails (due to error or incorrect data).
-logIn = function(hash, db, finish) {
+logIn = function(hash, dbName, finish) {
   if (hash) {
-    connection.query("SELECT `id` FROM `sessions-" + db + "` \
-                      WHERE `hash` = ?", [hash], function(err, rows) {
+    db.query("SELECT `id` FROM `sessions-" + dbName + "` \
+              WHERE `hash` = ?", [hash], function(err, rows) {
       if (err || rows.length <= 0) {
         finish(null);
       } else {
@@ -68,11 +52,11 @@ logIn = function(hash, db, finish) {
 
 // attempt to authenticate user. calls finish(id, mustResetPass) if id is found, otherwise redirects user to sign in page.
 // mustResetPass is a flag to indicate whether or not a message should be displayed asking the user to reset his or her password.
-var authenticate = function(hash, req, res, next, db, finish) {
-  logIn(hash, db, function(id) {
+var authenticate = function(hash, req, res, next, dbName, finish) {
+  logIn(hash, dbName, function(id) {
     if (id) {
-      connection.query("SELECT `pass_reset_hash` FROM `" + db + "` \
-                        WHERE `id` = ?", [id], function(err, rows) {
+      db.query("SELECT `pass_reset_hash` FROM `" + dbName + "` \
+                WHERE `id` = ?", [id], function(err, rows) {
         if (err) {
           res.redirect('/sign-in?' +
                       'error=' +
@@ -112,10 +96,10 @@ authTA = function(hash, req, res, next, finish) {
 };
 
 // retrieves the first and last names of a user
-var getInfo = function(id, db, finish) {
-  connection.query("SELECT `fname`,`lname` \
-                    FROM `" + db + "` \
-                    WHERE `id` = ?", [id], function(err, rows) {
+var getInfo = function(id, dbName, finish) {
+  db.query("SELECT `fname`,`lname` \
+            FROM `" + dbName + "` \
+            WHERE `id` = ?", [id], function(err, rows) {
     if (err) {
       finish(null, null);
     } else {
@@ -176,8 +160,8 @@ if (typeof String.prototype.startsWith != 'function') {
 signIn = function(dbType, userID, res, finish) {
   var hash = crypto.randomBytes(20).toString('hex'); // http://stackoverflow.com/a/14869745/720889
   res.cookie('hash', hash);
-  var db = 'sessions-' + dbType;
-  connection.query('INSERT INTO ?? VALUES(?, ?)', [db, userID, hash], finish);
+  var dbName = 'sessions-' + dbType;
+  db.query('INSERT INTO ?? VALUES(?, ?)', [dbName, userID, hash], finish);
 };
 
 var plainMimePrefixes = ['text'];

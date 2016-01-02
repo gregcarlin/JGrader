@@ -1,10 +1,10 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('../common');
-var router = express.Router();
 var strftime = require('strftime');
 
+require('../common');
+var router = express.Router();
 var section = require('../../controllers/student/section');
 var errorCode = require('../../util/errorCode');
 

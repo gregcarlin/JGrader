@@ -1,12 +1,13 @@
 // Created by Brian Singer and Greg Carlin in 2015.
 // Copyright (c) 2015 JGrader. All rights reserved.
 
-require('../common');
-var router = express.Router();
 var strftime = require('strftime');
 var _ = require('lodash');
-var errorCode = require('../../util/errorCode');
 
+require('../common');
+var router = express.Router();
+var db = require('../../controllers/db');
+var errorCode = require('../../util/errorCode');
 var student = require('../../controllers/teacher/student');
 
 var render = function(page, options, res) {
@@ -41,9 +42,7 @@ var render = function(page, options, res) {
 };
 
 router.get('/', function(req, res, next) {
-  connection.query(queries.teacher.student.LIST,
-                    [req.user.id, req.user.id, req.user.id],
-                    function(err, rows) {
+  db.query(queries.teacher.student.LIST, [req.user.id, req.user.id, req.user.id], function(err, rows) {
     if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
@@ -55,8 +54,8 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/invite', function(req, res, next) {
-  connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? \
-                    ORDER BY `name` ASC", [req.user.id], function(err, rows) {
+  db.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? \
+            ORDER BY `name` ASC", [req.user.id], function(err, rows) {
     if (err) {
       render('studentInvite', {error: 'An unknown error has occurred.'}, res);
       err.handled = true;
@@ -68,8 +67,8 @@ router.get('/invite', function(req, res, next) {
 });
 
 router.post('/invite', function(req, res, next) {
-  connection.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? \
-                    ORDER BY `name` ASC", [req.user.id], function(err, rows) {
+  db.query("SELECT `id`,`name` FROM `sections` WHERE `teacher_id` = ? \
+            ORDER BY `name` ASC", [req.user.id], function(err, rows) {
     if (err) {
       render('studentInvite', {error: 'An unknown error has occurred.'}, res);
       err.handled = true;
@@ -103,33 +102,32 @@ router.post('/invite', function(req, res, next) {
 });
 
 router.use('/:id', function(req, res, next) {
-  connection.query({
-      sql: queries.teacher.student.SECTIONS,
-      nestTables: true,
-      values: [req.params.id, req.user.id]
-    }, function(err, result) {
-      if (err) {
-        render('notFound', {error: 'An unexpected error has occurred.'}, res);
-        err.handled = true;
-        return next(err);
-      }
+  db.query({
+    sql: queries.teacher.student.SECTIONS,
+    nestTables: true,
+    values: [req.params.id, req.user.id]
+  }, function(err, result) {
+    if (err) {
+      render('notFound', {error: 'An unexpected error has occurred.'}, res);
+      err.handled = true;
+      return next(err);
+    }
 
-      if (result.length <= 0) {
-        render('notFound', {}, res);
-      } else {
-        req.student = result[0].students;
-        req.sections = [];
-        _.each(result, function(r) {
-          req.sections[i] = r.sections;
-        });
-        next();
-      }
-    });
+    if (result.length <= 0) {
+      render('notFound', {}, res);
+    } else {
+      req.student = result[0].students;
+      req.sections = [];
+      _.each(result, function(r) {
+        req.sections[i] = r.sections;
+      });
+      next();
+    }
+  });
 });
 
 router.get('/:id.csv', function(req, res, next) {
-  connection.query(queries.teacher.student.CSV_INFO,
-                    [req.params.id, req.user.id], function(err, rows) {
+  db.query(queries.teacher.student.CSV_INFO, [req.params.id, req.user.id], function(err, rows) {
     if (err) return next(err);
 
     res.setHeader('Content-Disposition', 'attachment; filename=student_' +
@@ -146,8 +144,7 @@ router.get('/:id.csv', function(req, res, next) {
 });
 
 router.get('/:id', function(req, res, next) {
-  connection.query(queries.teacher.student.INFO,
-                    [req.params.id, req.user.id], function(err, rows) {
+  db.query(queries.teacher.student.INFO, [req.params.id, req.user.id], function(err, rows) {
     if (err) {
       render('notFound', {error: 'An unexpected error has occurred.'}, res);
       err.handled = true;
@@ -165,10 +162,10 @@ router.get('/:id', function(req, res, next) {
 });
 
 router.get('/:id/:section/delete', function(req, res, next) {
-  connection.query("DELETE FROM `enrollment` \
-                    WHERE `student_id` = ? AND `section_id` = ? LIMIT 1",
-                    [req.params.id, req.params.section],
-                    function(err, result) {
+  db.query("DELETE FROM `enrollment` \
+            WHERE `student_id` = ? AND `section_id` = ? LIMIT 1",
+            [req.params.id, req.params.section],
+            function(err, result) {
     if (err) {
       render('notFound', {
         error: 'Unable to remove student. Please go back and try again.'
