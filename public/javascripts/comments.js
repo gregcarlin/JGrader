@@ -161,7 +161,7 @@ var deleteComment = function(id) {
   $('#comment-' + id).html('<span class="fa fa-spinner fa-spin"></span>');
   $.post(URL() + 'comment/' + id + '/delete', '',
          function(data, textStatus, jqXHR) {
-    if (data.code == -1) {
+    if (data.code != 0) {
       alert('An error has occurred. Please reload the page.');
     } else {
       $('#comment-' + id).remove();

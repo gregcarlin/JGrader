@@ -15,6 +15,8 @@ var table = {
   9: 'You must enter a class code.',
   10: 'That is not a valid class code.',
   11: 'You are already enrolled in that class.',
+  12: 'Certain required data is missing.',
+  13: 'You do not have permission to do that.',
   50: 'Invalid state.',
   51: 'You cannot remove files after students have already submitted code.',
   52: 'You cannot add files after students have already submitted code.',
@@ -24,7 +26,8 @@ var table = {
   301: 'An unknown error has occurred.',
   350: 'File could not be removed, please reload the page and try again.',
   351: '%s could not be removed, please reload the page and try again.',
-  400: 'Unable to set main, please reload and try again.'
+  400: 'Unable to set main, please reload and try again.',
+  451: 'Your comment was posted, but you must reload the page to see it.'
 
   // 600-999 = programmer/system errors
 };

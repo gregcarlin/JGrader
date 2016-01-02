@@ -12,7 +12,7 @@ require('../common');
 var router = express.Router();
 var db = require('../../controllers/db');
 var assignment = require('../../controllers/student/assignment');
-var comments = require('../../controllers/comments');
+var comments = require('../comments');
 var codeRunner = require('../../controllers/codeRunner');
 var errorCode = require('../../util/errorCode');
 

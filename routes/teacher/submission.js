@@ -7,7 +7,7 @@ var JSZip = require('jszip');
 require('../common');
 var router = express.Router();
 var db = require('../../controllers/db');
-var comments = require('../../controllers/comments');
+var comments = require('../comments');
 var codeRunner = require('../../controllers/codeRunner');
 var submission = require('../../controllers/teacher/submission');
 
