@@ -27,29 +27,4 @@ renderGenericStudent = function(page, vars, res) {
   renderGeneric('student/' + page, vars, 'student', res);
 };
 
-// retrieves the first and last names of a user
-/*var getInfo = function(id, dbName, finish) {
-  db.query("SELECT `fname`,`lname` \
-            FROM `" + dbName + "` \
-            WHERE `id` = ?", [id], function(err, rows) {
-    if (err) {
-      finish(null, null);
-    } else {
-      finish(rows[0].fname, rows[0].lname);
-    }
-  });
-};
-
-getInfoTeacher = function(id, finish) {
-  getInfo(id, 'teachers', finish);
-};
-
-getInfoStudent = function(id, finish) {
-  getInfo(id, 'students', finish);
-};
-
-getInfoTA = function(id, finish) {
-  getInfo(id, 'assistants', finish);
-};*/
-
 // modules.exports not required because everything needed is global
