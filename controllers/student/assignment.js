@@ -3,11 +3,13 @@
 
 var _ = require('lodash');
 var fs = require('fs-extra');
+var async = require('async');
 
 require('../../routes/common');
 var db = require('../db');
 var codeRunner = require('../codeRunner');
 var jgError = require('../../util/errorCode').jgError;
+var isAscii = require('../../util/general').isAscii;
 
 module.exports.list = function(studentId, callback) {
   db.query("SELECT `sections`.`name`,\

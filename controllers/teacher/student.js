@@ -5,6 +5,7 @@ var async = require('async');
 
 require('../../routes/common');
 var db = require('../db');
+var emailer = require('../../util/email');
 
 module.exports.invite = function(sectionIds, teacherId, emails, callback) {
   db.query("SELECT `fname`,`lname` FROM `teachers` \
@@ -53,7 +54,7 @@ module.exports.invite = function(sectionIds, teacherId, emails, callback) {
                       ' has invited you to jGrader',
             html: html
           };
-          transporter.sendMail(mailOptions, function(err, info) {
+          emailer.sendMail(mailOptions, function(err, info) {
             cb(err, email);
           });
         } else {

@@ -109,7 +109,7 @@
     <% 
       if(typeof js != 'undefined') {
         for(i in js) { 
-          if(!js[i].startsWith('http')) js[i] = '/javascripts/' + js[i] + '.js';
+          if(js[i].slice(0, 4) != 'http') js[i] = '/javascripts/' + js[i] + '.js';
     %>
           <script type="text/javascript" src="<%= js[i] %>"></script>
     <%

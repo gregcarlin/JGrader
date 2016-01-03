@@ -6,6 +6,8 @@ var bcrypt = require('bcrypt');
 require('./common');
 var router = express.Router();
 var db = require('../controllers/db');
+var auth = require('../util/auth');
+var email = require('../util/email');
 var assignment = require('./student/assignment');
 var section    = require('./student/section');
 
@@ -30,7 +32,7 @@ var render = function(page, options, res) {
 
 // automatically authenticate student for every page in this section
 router.use(function(req, res, next) {
-  authStudent(req.cookies.hash, req, res, next, function(id, mustResetPass) {
+  auth.authStudent(req.cookies.hash, req, res, next, function(id, mustResetPass) {
     req.user = {id: id};
     res.locals.mustResetPass = mustResetPass; // variable is accessible in ejs
     next();
@@ -68,11 +70,11 @@ router.post('/settings', function(req, res, next) {
   // Takes in the users name and last name
   var fname = req.body.fname;
   var lname = req.body.lname;
-  if (isSet(fname) && isSet(lname)) {
+  if (fname && lname) {
     var oldPass = req.body.oldpass;
     var newPass = req.body.newpass;
-    if (isSet(oldPass) || isSet(newPass)) {
-      if ((isSet(oldPass) || res.locals.mustResetPass) && isSet(newPass)) {
+    if (oldPass || newPass) {
+      if ((oldPass || res.locals.mustResetPass) && newPass) {
         var handler = function(err, rows) {
           if (err) {
             render('notFound', {
@@ -237,7 +239,7 @@ router.post('/feedback', function(req, res, next) {
         'h:Reply-To': result[0].user,
         html: html
       };
-      transporter.sendMail(mailOptions, function(err, info) {
+      email.sendMail(mailOptions, function(err, info) {
         render('feedback', {success: 'Thank you for your feedback!'}, res);
       });
     });

@@ -6,6 +6,7 @@ var bcrypt = require('bcrypt');
 require('./common');
 var router = express.Router();
 var db = require('../controllers/db');
+var auth = require('../util/auth');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -13,8 +14,8 @@ router.get('/', function(req, res) {
 });
 
 // attempts to login to website with given database, calls finish() iff login information is incorrect
-var login = function(db, email, pass, req, res, next, finish) {
-  db.query("SELECT * FROM `" + db + "s` \
+var login = function(dbName, email, pass, req, res, next, finish) {
+  db.query("SELECT * FROM `" + dbName + "s` \
             WHERE `user` = ?", [email], function(err, rows) {
     if (err) {
       res.render('sign-in', {
@@ -38,7 +39,7 @@ var login = function(db, email, pass, req, res, next, finish) {
             return next(err);
           }
 
-          signIn(db + 's', rows[0].id, res, function(err, rows) {
+          auth.signIn(dbName + 's', rows[0].id, res, function(err, rows) {
             if (err) {
               res.render('sign-in', {
                 error: 'An unknown error has occurred. Please try again later.',
@@ -48,7 +49,7 @@ var login = function(db, email, pass, req, res, next, finish) {
               return next(err);
             }
 
-            res.redirect(req.body.redirect ? req.body.redirect : ('/' + db)); // successful login
+            res.redirect(req.body.redirect ? req.body.redirect : ('/' + dbName)); // successful login
           });
         } else {
           finish(); // incorrect pass

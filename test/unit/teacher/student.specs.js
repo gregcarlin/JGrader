@@ -2,6 +2,7 @@ var async = require('async');
 var assert = require('assert');
 var bcrypt = require('bcrypt');
 
+var email = require('../../../util/email');
 var db = require('../../../controllers/db');
 var student = require('../../../controllers/teacher/student');
 
@@ -49,8 +50,8 @@ describe('Student', function() {
 
     it('should send out invitations', function() {
       assert(sectionId >= 0);
-      assert.equal(transporter.sent.length, 1);
-      assert.equal(transporter.sent[0].to, 'test@test.test');
+      assert.equal(email.sent.length, 1);
+      assert.equal(email.sent[0].to, 'test@test.test');
     });
   });
 });

@@ -8,6 +8,8 @@ var _ = require('lodash');
 require('./common');
 var router = express.Router();
 var db = require('../controllers/db');
+var auth = require('../util/auth');
+var email = require('../util/email');
 var section    = require('./teacher/section');
 var assignment = require('./teacher/assignment');
 var submission = require('./teacher/submission');
@@ -34,7 +36,7 @@ var render = function(page, options, res) {
 
 // automatically authenticate teacher for every page in this section
 router.use(function(req, res, next) {
-  authTeacher(req.cookies.hash, req, res, next, function(id, mustResetPass) {
+  auth.authTeacher(req.cookies.hash, req, res, next, function(id, mustResetPass) {
     req.user = {id: id};
     res.locals.mustResetPass = mustResetPass; // variable is accessible in ejs
     next();
@@ -149,11 +151,11 @@ router.get('/settings', function(req, res, next) {
 router.post('/settings', function(req, res, next) {
   var fname = req.body.fname;
   var lname = req.body.lname;
-  if (isSet(fname) && isSet(lname)) {
+  if (fname && lname) {
     var oldPass = req.body.oldpass;
     var newPass = req.body.newpass;
-    if (isSet(oldPass) || isSet(newPass)) {
-      if ((isSet(oldPass) || res.locals.mustResetPass) && isSet(newPass)) {
+    if (oldPass || newPass) {
+      if ((oldPass || res.locals.mustResetPass) && newPass) {
         var handler = function(err, rows) {
           if (err) {
             render('notFound', {
@@ -319,7 +321,7 @@ router.post('/feedback', function(req, res, next) {
         'h:Reply-To': result[0].user,
         html: html
       };
-      transporter.sendMail(mailOptions, function(err, info) {
+      email.sendMail(mailOptions, function(err, info) {
         render('feedback', {success: 'Thank you for your feedback!'}, res);
       });
     });

@@ -1,3 +1,4 @@
+var async = require('async');
 var fs = require('fs-extra');
 var assert = require('assert');
 var _ = require('lodash');

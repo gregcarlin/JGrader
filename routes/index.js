@@ -8,12 +8,14 @@ var exec = require('child_process').exec;
 require('./common');
 var router = express.Router();
 var db = require('../controllers/db');
+var auth = require('../util/auth');
+var email = require('../util/email');
 
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
-var tryRedirect = function(hash, res, db, finish) {
-  logIn(hash, db + 's', function(id) {
+var tryRedirect = function(hash, res, dbName, finish) {
+  auth.logIn(hash, dbName + 's', function(id) {
     if (id) {
-      res.redirect('/' + db);
+      res.redirect('/' + dbName);
     } else {
       finish();
     }
@@ -51,14 +53,14 @@ router.get('/forgot', function(req, res) {
 
 // calls finish(err, db) when done, err is null if there is no err, found is the database name if found, null if not found
 var findEmail = function(email, finish) {
-  var find = function(db, cb) {
+  var find = function(dbName, cb) {
     db.query("SELECT `id` \
-              FROM `" + db + "` \
+              FROM `" + dbName + "` \
               WHERE `user` = ?", [email], function(err, rows) {
       if (err) {
         finish(err, null);
       } else if (rows.length >= 1) {
-        finish(null, db, rows[0].id);
+        finish(null, dbName, rows[0].id);
       } else {
         cb();
       }
@@ -78,19 +80,19 @@ router.post('/forgot', function(req, res, next) {
   if (!req.body.email) {
     res.render('forgot', {error: 'All fields are required.'});
   } else {
-    findEmail(req.body.email, function(err, db, id) {
+    findEmail(req.body.email, function(err, dbName, id) {
       if (err) {
         res.render('forgot', {error: 'An unknown error has occurred.'});
         err.handled = true;
         return next(err);
       }
 
-      if (!db || !id) {
+      if (!dbName || !id) {
         res.render('forgot', {error: 'No account with that address exists.'});
       } else {
         var hash = crypto.randomBytes(20).toString('hex');
-        var url = 'http://jgrader.com/forgot/' + db + '/' + hash;
-        db.query("UPDATE `" + db + "` \
+        var url = 'http://jgrader.com/forgot/' + dbName + '/' + hash;
+        db.query("UPDATE `" + dbName + "` \
                   SET `pass_reset_hash` = ? \
                   WHERE `id` = ?", [hash, id], function(err, result) {
           if (err) {
@@ -108,7 +110,7 @@ router.post('/forgot', function(req, res, next) {
                    'If you did not want to reset your password, ' +
                    'you can safely ignore this message.')
           };
-          transporter.sendMail(mailOptions, function(err, info) {
+          email.sendMail(mailOptions, function(err, info) {
             if (err) {
               res.render('forgot', {error: 'Unable to send email.'});
               err.handled = true;
@@ -140,7 +142,7 @@ router.get('/forgot/:db/:hash', function(req, res, next) {
         error: 'Your account could not be found. Please try again.'
       });
     } else {
-      signIn(req.params.db, rows[0].id, res, function(err, result) {
+      auth.signIn(req.params.db, rows[0].id, res, function(err, result) {
         if (err) {
           res.render('forgot', {error: 'An unknown error has occurred.'});
           err.handled = true;

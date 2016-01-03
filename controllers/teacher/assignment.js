@@ -6,6 +6,7 @@ var _ = require('lodash');
 require('../../routes/common');
 var db = require('../db');
 var jgError = require('../../util/errorCode').jgError;
+var stringStartsWith = require('../../util/general').stringStartsWith;
 
 module.exports.list = function(teacherId, callback) {
   db.query(queries.teacher.assignment.LIST, [teacherId], callback);
@@ -121,7 +122,7 @@ module.exports.removeFile = function(assignmentId, file, callback) {
 };
 
 module.exports.setDescription = function(assignmentId, description, callback) {
-  if (description.startsWith('<em>')) {
+  if (stringStartsWith(description, '<em>')) {
     return callback(jgError(1)); // invalid input
   }
 

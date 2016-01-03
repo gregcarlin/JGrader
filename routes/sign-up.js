@@ -6,6 +6,7 @@ var bcrypt = require('bcrypt');
 require('./common');
 var router = express.Router();
 var db = require('../controllers/db');
+var auth = require('../util/auth');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -13,8 +14,8 @@ router.get('/', function(req, res) {
 });
 
 // checks if a user exists in a given database. calls finish() iff user doesn't exist.
-var exists = function(user, db, req, res, next, finish) {
-  db.query("SELECT `id` FROM `" + db + "` \
+var exists = function(user, dbName, req, res, next, finish) {
+  db.query("SELECT `id` FROM `" + dbName + "` \
             WHERE `user` = ?", [user.email], function(err, rows) {
     if (err) {
       res.render('sign-up', {
@@ -92,7 +93,7 @@ router.post('/', function(req, res, next) {
                   return next(err);
                 }
 
-                signIn(user.role + 's', rows[0].id, res, function(err, rows) {
+                auth.signIn(user.role + 's', rows[0].id, res, function(err, rows) {
                   if (err) {
                     res.render('sign-up', {
                       error: ('An unknown error has occurred. ' +
@@ -123,4 +124,3 @@ router.post('/', function(req, res, next) {
 });
 
 module.exports = router;
-
