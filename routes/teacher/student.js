@@ -9,6 +9,7 @@ var router = express.Router();
 var db = require('../../controllers/db');
 var errorCode = require('../../util/errorCode');
 var student = require('../../controllers/teacher/student');
+var queries = require('../../queries/queries');
 
 var render = function(page, options, res) {
   options.page = 2;

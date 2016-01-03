@@ -7,6 +7,7 @@ require('../common');
 var router = express.Router();
 var db = require('../../controllers/db');
 var section = require('../../controllers/teacher/section');
+var queries = require('../../queries/queries');
 
 var render = function(page, options, res) {
   options.page = 0;

@@ -10,6 +10,7 @@ var router = express.Router();
 var db = require('../controllers/db');
 var auth = require('../util/auth');
 var email = require('../util/email');
+var creds = require('../util/credentials');
 
 // if hash is set to a valid user in the given db they are redirected to that section, otherwise finish is called.
 var tryRedirect = function(hash, res, dbName, finish) {

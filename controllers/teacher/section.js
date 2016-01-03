@@ -3,6 +3,7 @@
 
 require('../../routes/common');
 var db = require('../db');
+var queries = require('../../queries/queries');
 
 module.exports.create = function(teacherId, name, callback) {
   db.query("INSERT INTO `sections` VALUES(NULL, ?, ?, LEFT(UUID(), 5));\

@@ -11,6 +11,7 @@ var comments = require('../comments');
 var codeRunner = require('../../controllers/codeRunner');
 var submission = require('../../controllers/teacher/submission');
 var isAscii = require('../../util/general').isAscii;
+var queries = require('../../queries/queries');
 
 var render = function(page, options, res) {
   options.page = 1;

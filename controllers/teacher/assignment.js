@@ -7,6 +7,7 @@ require('../../routes/common');
 var db = require('../db');
 var jgError = require('../../util/errorCode').jgError;
 var stringStartsWith = require('../../util/general').stringStartsWith;
+var queries = require('../../queries/queries');
 
 module.exports.list = function(teacherId, callback) {
   db.query(queries.teacher.assignment.LIST, [teacherId], callback);

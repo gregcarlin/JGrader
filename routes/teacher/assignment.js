@@ -12,6 +12,7 @@ var db = require('../../controllers/db');
 var errorCode = require('../../util/errorCode');
 var codeRunner = require('../../controllers/codeRunner');
 var assignment = require('../../controllers/teacher/assignment');
+var queries = require('../../queries/queries');
 
 var render = function(page, options, res) {
   options.page = 1;

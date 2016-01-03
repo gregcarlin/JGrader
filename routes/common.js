@@ -2,11 +2,7 @@
 // Copyright (c) 2015 JGrader. All rights reserved.
 
 express = require('express');
-creds   = require('../util/credentials');
-queries = require('../queries/queries');
 // router must be required separately otherwise routers will interfere with each other
-
-//var db = require('../controllers/db');
 
 var renderGeneric = function(page, vars, group, res) {
   express().render(page + '.ejs', vars, function(err, html) {

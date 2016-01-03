@@ -1,3 +1,4 @@
+var creds = require('./credentials');
 var mailgun = require('mailgun-js')({
   apiKey: creds.mailgun_key,
   domain: 'jgrader.com'
