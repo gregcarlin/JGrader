@@ -50,8 +50,8 @@ describe('Student', function() {
 
     it('should send out invitations', function() {
       assert(sectionId >= 0);
-      assert.equal(email.sent.length, 1);
-      assert.equal(email.sent[0].to, 'test@test.test');
+      assert.equal(email.sent.length, 2);
+      assert.equal(email.sent[1].to, 'test@test.test');
     });
   });
 });
