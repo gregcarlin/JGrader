@@ -3,6 +3,7 @@
 
 var strftime = require('strftime');
 var JSZip = require('jszip');
+var async = require('async');
 
 require('../common');
 var router = express.Router();
