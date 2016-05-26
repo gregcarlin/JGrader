@@ -351,7 +351,7 @@ router.get('/:id/download', function(req, res, next) {
 });
 
 router.get('/:id/download/:fileIndex', function(req, res, next) {
-  db.query(queries.teacher.submission.file, [req.params.id], function(err, rows) {
+  db.query(queries.teacher.submission.FILE, [req.params.id], function(err, rows) {
     if (err) return next(err);
 
     if (rows.length <= 0) {
