@@ -5,6 +5,7 @@ var strftime = require('strftime');
 var multer = require('multer');
 var async = require('async');
 var _ = require('lodash');
+var fs = require('fs-extra');
 
 require('../common');
 var router = express.Router();
