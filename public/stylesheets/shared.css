@@ -15,7 +15,6 @@ body {
 }
 .navbar {
   height: 55px;
-  min-width: 1237px;
   box-shadow: 0 0 100px 5px #000;
 }
 .navbar-inverse {

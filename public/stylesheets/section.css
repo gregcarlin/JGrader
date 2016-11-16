@@ -34,6 +34,7 @@ body {
 }
 .navbar-right {
   width: 30%;
+  min-width: 390px;
 }
 .navbar-right:last-child {
   margin-right: 0 !important;
