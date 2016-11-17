@@ -816,12 +816,8 @@ span.teacher-file {
 }
 
 /* just for sign in/up pages */
-.sign-form {
-  position: relative;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
+.sign-form.container {
+  padding-top: 0;
 }
 .sign-form a {
   color: #FFF;

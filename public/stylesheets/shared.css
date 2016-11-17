@@ -83,7 +83,7 @@ body {
 .form input[type="submit"], .form .btn[type="submit"] {
   padding: 2px 8px;
 }
-.form .button, .form .btn {
+.button, .btn {
   font-size: 30px !important;
   border-radius: 8px !important;
   background-color: #BCDAFF;
@@ -98,7 +98,7 @@ body {
   padding-left: 20% !important;
   padding-right: 20% !important;
 }
-.form .button:hover, .form .btn:hover, .form .button:focus, .form .btn:focus {
+.button:hover, .form .btn:hover, .button:focus, .form .btn:focus {
   background-color: #A1BADA;
   cursor: pointer;
   text-decoration: none;

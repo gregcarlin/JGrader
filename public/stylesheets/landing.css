@@ -99,15 +99,26 @@ a:hover {
   width: 100%;
 }
 #home .table-wrapper > * {
-  vertical-align: middle;
   text-align: center;
 }
-#home .left .table-wrapper > span {
-  display: table-cell;
-  font-size: 225px;
+#home .left .lead-wrapper {
+  text-align: center;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+#home .left .lead-wrapper > span {
+  display: block;
   font-weight: 100;
 }
-#home .left .table-wrapper > span > span {
+#home .left .lead-wrapper > span#lead {
+  font-size: 225px;
+}
+#home .left .lead-wrapper > span#follow {
+  font-size: 28px;
+  margin-left: -40px;
+}
+#home .left .lead-wrapper > span > span {
   font-weight: 500;
   font-style: italic;
 }
@@ -200,6 +211,11 @@ a:hover {
   width: 100%;
   text-align: center;
 }
+
+#clincher a {
+  margin-top: 20px;
+}
+
 @media (max-width: 1237px) {
   body {
     min-width: 0;
