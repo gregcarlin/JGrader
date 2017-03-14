@@ -35,3 +35,4 @@ temp
 uploads
 
 .DS_Store
+credentials.js
