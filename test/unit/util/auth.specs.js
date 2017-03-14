@@ -42,6 +42,35 @@ describe('Auth', function() {
     });
   });
 
+  /*describe('Authenticate', function() {
+    var req = {
+      originalUrl: 'http://google.com'
+    };
+    var sentTo = [];
+    var res = {
+      redirect: function(str) {
+        sentTo.push(str);
+      }
+    };
+    describe('Auth teacher', function() {
+      before(function(done) {
+        async.series([
+          function(cb) {
+            auth.authTeacher('nothing', req, res, cb, function(id, mustResetPass) {
+            });
+          },
+          function(cb) {
+            db.query
+          }
+        ], done);
+      });
+
+    });
+
+    describe('Auth student', function() {
+    });
+  });*/
+
   describe('Sign in', function() {
     var hash;
     var sessions;
