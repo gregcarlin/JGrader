@@ -36,3 +36,4 @@ uploads
 
 .DS_Store
 credentials.js
+.travis.yml
