@@ -1,0 +1,105 @@
+/* Created by Brian Singer and Greg Carlin in 2015.
+ Copyright (c) 2015 JGrader. All rights reserved. */
+
+/* This stylesheet is shared among all sections and landing page */
+
+@import url(http://fonts.googleapis.com/css?family=Lato:100,300,400,700,100italic,300italic,400italic);
+
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+  font-family: 'Lato', sans-serif;
+  background-color: #000;
+}
+.navbar {
+  height: 55px;
+  box-shadow: 0 0 100px 5px #000;
+}
+.navbar-inverse {
+  background-color: #FAFAFA;
+  font-weight: 300;
+}
+.navbar-inverse .navbar-brand {
+  font-size: 35px;
+  color: #727272;
+  margin-left: 30px;
+}
+.navbar-right {
+  display: table !important;
+  table-layout: fixed !important;
+  position: absolute !important;
+  right: 0;
+}
+.navbar-right > * {
+  display: table-cell !important;
+  text-align: center;
+}
+.navbar-right a:hover, .navbar-right a:focus {
+  color: #EEE !important;
+}
+
+/* links in.navbar bar */
+#link-home {
+  background-color: #97C3FA;
+}
+#link-home:hover, #link-home:focus {
+  background-color: #8fb9ed;
+}
+#link-learn {
+  background-color: #FFA1A1;
+}
+#link-learn:hover, #link-learn:focus {
+  background-color: #f49a9a;
+}
+#link-sign-in {
+  background-color: #A8F59F;
+}
+#link-sign-in:hover, #link-sign-in:focus {
+  background-color: #a3ed9a;
+}
+
+/* used in sign in/up forms */
+.form h2 {
+  font-size: 50px;
+  font-weight: 300;
+}
+.form input:not([type="checkbox"]):not([type="radio"]), .form textarea {
+  width: 100%;
+  border-radius: 3px;
+  height: 50px;
+  border: none;
+  padding-left: 15px;
+  padding-right: 15px;
+  box-sizing: border-box;
+  font-family: 'Lato', sans-serif;
+  font-size: 16px;
+}
+.form textarea {
+  height: 100px;
+  resize: vertical;
+}
+.form input[type="submit"], .form .btn[type="submit"] {
+  padding: 2px 8px;
+}
+.button, .btn {
+  font-size: 30px !important;
+  border-radius: 8px !important;
+  background-color: #BCDAFF;
+  border-style: none;
+  display: inline-block;
+  font-weight: 300;
+  color: #000;
+  padding: 14px 8px;
+  margin-bottom: 30px;
+  box-sizing: content-box !important;
+  width: auto;
+  padding-left: 20% !important;
+  padding-right: 20% !important;
+}
+.button:hover, .form .btn:hover, .button:focus, .form .btn:focus {
+  background-color: #A1BADA;
+  cursor: pointer;
+  text-decoration: none;
+}

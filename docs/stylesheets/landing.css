@@ -1,0 +1,263 @@
+/* Created by Brian Singer and Greg Carlin in 2015.
+ Copyright (c) 2015 JGrader. All rights reserved. */
+
+/* used for landing page (index.ejs) only */
+
+/* global stuff */
+body {
+  color: #FFF;
+  min-width: 1237px;
+}
+a {
+  text-decoration: none;
+}
+em {
+  font-style: italic;
+}
+a {
+  color: #FFA1A1; 
+}
+a:hover {
+  text-decoration: underline;
+}
+.page-container {
+  margin-top: 55px;
+  height: calc(100% - 75px);
+}
+
+/* setting up columns */
+.column {
+  display: inline-block;
+}
+.left {
+  width: 70%;
+  min-width: 742px;
+}
+.right {
+  width: 30%;
+  float: right;
+  min-width: 337px;
+}
+
+/* styling the.navbar bar */
+.navbar {
+  vertical-align: middle;
+  line-height: 55px;
+  position: fixed;
+  width: 100%;
+  top: 0;
+}
+
+.navbar .left {
+  position: absolute;
+}
+.navbar .left a {
+  position: relative;
+  top: -1px;
+}
+.navbar .left a:hover {
+  text-decoration: none;
+}
+.navbar .right {
+  font-size: 30px;
+  text-align: center;
+}
+.navbar .right a {
+  color: #FFF;
+}
+.navbar .right a:hover {
+  text-decoration: none;
+}
+
+/* general 'page' stuff */
+.page {
+  width: 100%;
+  height: 102.75%;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+.page .column {
+  height: 100%;
+}
+
+/* stuff for home 'page' */
+#home {
+  background: url('/images/home.jpg') no-repeat center center;
+  background-size: cover;
+}
+#home .table-wrapper {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+#home .table-wrapper > * {
+  text-align: center;
+}
+#home .left .lead-wrapper {
+  text-align: center;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+#home .left .lead-wrapper > span {
+  display: block;
+  font-weight: 100;
+}
+#home .left .lead-wrapper > span#lead {
+  font-size: 225px;
+}
+#home .left .lead-wrapper > span#follow {
+  font-size: 28px;
+  margin-left: -40px;
+}
+#home .left .lead-wrapper > span > span {
+  font-weight: 500;
+  font-style: italic;
+}
+#home .right {
+  background-color: rgba(1,1,1,0.5);
+}
+#home .right .button {
+  width: auto;
+}
+#home .right .table-wrapper li {
+  display: table-row;
+}
+#home .right .table-wrapper li div {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 26px;
+}
+#home .right label {
+  display: block;
+  text-align: left;
+  width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#home .right label:first-child {
+  margin-bottom: 10%;
+}
+#home .right input {
+  margin-top: 18px;
+}
+
+/* stuff for learn 'page' */
+#learn {
+  background: linear-gradient(#FF8989, #484A6C);
+  font-weight: 300;
+  font-size: 20px;
+  padding: 38px;
+  box-sizing: border-box;
+  text-align: justify;
+  height: auto;
+  min-height: 100%;
+}
+#learn h2 {
+  font-size: 95px;
+  margin-bottom: 40px;
+  font-weight: 100;
+}
+#learn h2 span {
+  font-size: 125px;
+  font-weight: 100;
+}
+#learn h3 {
+  font-weight: 300;
+  font-size: 45px;
+}
+#learn .col-right h3 {
+  text-align: right;
+}
+#learn .info-body iframe {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+#learn .info-body .col {
+  width: 45%;
+  margin-top: 20px;
+  line-height: 1.33;
+}
+#learn .info-body .row:first-child .col {
+  margin-top: 0;
+}
+#learn .row {
+  display: inline-block;
+}
+#learn .col-left {
+  float: left;
+}
+#learn .col-right {
+  float: right;
+}
+#learn .info-body .row-mid > div {
+  width: 33%;
+}
+#learn .col-mid {
+  display: inline-block;
+  text-align: center;
+}
+#learn .row-full {
+  margin-top: 5px;
+  width: 100%;
+  text-align: center;
+}
+
+#clincher a {
+  margin-top: 20px;
+}
+
+@media (max-width: 1237px) {
+  body {
+    min-width: 0;
+  }
+  .page {
+    height: auto;
+  }
+  .column {
+    width: 100%;
+    display: block;
+    float: none;
+  }
+  .navbar {
+    min-width: 0;
+  }
+  .navbar .left {
+    display: block;
+  }
+  .navbar .right {
+    margin-top: 55px;
+  }
+  #home .left {
+    height: 400px;
+  }
+  #home ul.table-wrapper {
+    padding-top: 10px;
+  }
+  #home ul.table-wrapper li:nth-child(3) div {
+    position: relative;
+    top: -10px;
+  }
+  .row .col {
+    width: 100% !important;
+    margin-top: 20px !important;
+  }
+  .row .col h3 {
+    text-align: center !important;
+  }
+  .row .col-mid {
+    display: none !important;
+  }
+  #learn h2 {
+    text-align: center;
+  }
+}
+@media (max-width: 833px) {
+  #home .left {
+    min-width: 0;
+  }
+  #home .left .table-wrapper > span {
+    font-size: 25vw;
+  }
+}
