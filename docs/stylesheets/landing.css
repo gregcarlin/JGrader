@@ -82,7 +82,7 @@ a:hover {
 
 /* stuff for home 'page' */
 #home {
-  background: url('/images/home.jpg') no-repeat center center;
+  background: url('../images/home.jpg') no-repeat center center;
   background-size: cover;
 }
 #home .table-wrapper {
@@ -93,24 +93,24 @@ a:hover {
 #home .table-wrapper > * {
   text-align: center;
 }
-#home .left .lead-wrapper {
+#home .lead-wrapper {
   text-align: center;
   position: relative;
   top: 50%;
   transform: translateY(-50%);
 }
-#home .left .lead-wrapper > span {
+#home .lead-wrapper > span {
   display: block;
   font-weight: 100;
 }
-#home .left .lead-wrapper > span#lead {
+#home .lead-wrapper > span#lead {
   font-size: 225px;
 }
-#home .left .lead-wrapper > span#follow {
+#home .lead-wrapper > span#follow {
   font-size: 28px;
   margin-left: -40px;
 }
-#home .left .lead-wrapper > span > span {
+#home .lead-wrapper > span > span {
   font-weight: 500;
   font-style: italic;
 }
@@ -260,4 +260,12 @@ a:hover {
   #home .left .table-wrapper > span {
     font-size: 25vw;
   }
+}
+
+.alert {
+  text-align: center;
+  background-color: #faebcc;
+  color: #000;
+  padding: 10px;
+  font-size: 20px;
 }
